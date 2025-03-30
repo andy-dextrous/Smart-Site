@@ -1,16 +1,12 @@
+/* Tailwind Core */
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-/* Custom Theming */
+/* Custom Theme */
 @import "./theme.css";
 
-/* Components */
+/* Tailwind Layers */
 @import "./base.css";
-@import "./typography.css";
-@import "./ui.css";
-
-/* Utility Classes */
-@utility container {
-  @apply mx-auto;
-}
+@import "./components.css";
+@import "./utilities.css";

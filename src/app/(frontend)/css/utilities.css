@@ -1,0 +1,4 @@
+/* Utility Classes */
+@utility container {
+  @apply mx-auto;
+}

@@ -1,0 +1,5 @@
+@layer components {
+  .stop-scroll {
+    @apply overflow-hidden;
+  }
+}
