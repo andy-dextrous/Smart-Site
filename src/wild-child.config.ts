@@ -1,7 +1,6 @@
-const url =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : process.env.NEXT_PUBLIC_URL
+import { getServerSideURL } from "./utilities/getURL"
+
+const url = getServerSideURL()
 
 const wildChildConfig = {
   name: "Wild Child Official",
@@ -9,15 +8,9 @@ const wildChildConfig = {
   frontendUrl: url,
   logo: url + "/assets/logos/logo.svg",
   withColorTheme: false,
-  settings: {
-    i18n: {
-      active: false,
-      prefixDefaultLocale: false,
-      defaultLocale: "en",
-      locales: ["en", "es"],
-      localeCookie: "NEXT_LOCALE",
-    },
-  },
+  smoothScroll: false,
+  i18n: false,
+  withSearch: false,
 }
 
 export default wildChildConfig

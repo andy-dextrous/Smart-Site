@@ -1,7 +1,8 @@
 import React from "react"
-import "./css/globals.css"
 import { Inter } from "next/font/google"
 import Providers from "@/providers"
+
+import "./css/globals.css"
 
 const inter = Inter({
   variable: "--font-inter",

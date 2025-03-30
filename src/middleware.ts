@@ -4,9 +4,7 @@ import i18nConfig from "@/i18n"
 import wildChildConfig from "@/wild-child.config"
 
 export function middleware(request: NextRequest) {
-  return wildChildConfig.settings.i18n.active
-    ? i18nRouter(request, i18nConfig)
-    : NextResponse.next()
+  return wildChildConfig.i18n ? i18nRouter(request, i18nConfig) : NextResponse.next()
 }
 
 export const config = {

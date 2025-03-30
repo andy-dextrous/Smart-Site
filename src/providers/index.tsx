@@ -1,17 +1,15 @@
-import { ThemeProvider } from "next-themes"
-import wildChildConfig from "@/wild-child.config"
+import { ThemeProvider } from "@/providers/theme"
+import GSAPProvider from "./gsap"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return wildChildConfig.withColorTheme ? (
+  return (
     <ThemeProvider
       attribute="class"
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <GSAPProvider>{children}</GSAPProvider>
     </ThemeProvider>
-  ) : (
-    children
   )
 }

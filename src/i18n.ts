@@ -1,7 +1,9 @@
-import wildChildConfig from "@/wild-child.config"
-
 const i18nConfig = {
-  ...wildChildConfig.settings.i18n,
+  active: false,
+  prefixDefaultLocale: false,
+  defaultLocale: "en",
+  locales: ["en", "es"],
+  localeCookie: "NEXT_LOCALE",
 }
 
 export default i18nConfig
