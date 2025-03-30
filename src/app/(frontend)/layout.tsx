@@ -1,7 +1,7 @@
 import React from "react"
 import "./css/globals.css"
-import { ThemeProvider } from "@/providers/theme"
 import { Inter } from "next/font/google"
+import Providers from "@/providers"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,16 +17,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
 
   return (
-    <html lang="en" className={`${inter.variable} font-sans`}>
+    <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <main>{children}</main>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   )

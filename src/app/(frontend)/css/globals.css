@@ -5,14 +5,12 @@
 /* Custom Theming */
 @import "./theme.css";
 
-/* Shadcn */
-@import "./shadcn.css";
-
-/* Global Typography */
+/* Components */
+@import "./base.css";
 @import "./typography.css";
+@import "./ui.css";
 
-/* Global Container */
+/* Utility Classes */
 @utility container {
-  margin-inline: auto;
-  padding-inline: 2rem;
+  @apply mx-auto;
 }

@@ -8,6 +8,7 @@ const wildChildConfig = {
   description: "Wild Child Official App Starter",
   frontendUrl: url,
   logo: url + "/assets/logos/logo.svg",
+  withColorTheme: false,
   settings: {
     i18n: {
       active: false,

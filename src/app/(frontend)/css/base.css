@@ -1,0 +1,13 @@
+@layer components {
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  section {
+    @apply bg-background relative w-full px-[var(--section-padding-x)] py-[var(--section-padding-y)];
+  }
+
+  .stop-scroll {
+    @apply overflow-hidden;
+  }
+}
