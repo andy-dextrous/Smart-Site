@@ -6,8 +6,11 @@ import { fileURLToPath } from "url"
 import path from "path"
 import sharp from "sharp"
 
+// Collections
 import { Users } from "@/payload/collections/users"
 import { Media } from "@/payload/collections/media"
+import { Pages } from "@/payload/collections/pages"
+import { Posts } from "@/payload/collections/posts"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,7 +22,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, Pages, Posts],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {

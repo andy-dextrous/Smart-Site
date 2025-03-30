@@ -41,7 +41,7 @@
   }
 
   p {
-    @apply text-body font-sans leading-normal tracking-normal text-gray-950;
+    @apply font-sans text-base leading-normal tracking-normal text-gray-950;
   }
 
   a {

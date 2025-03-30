@@ -1,3 +1,8 @@
+const url =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : process.env.NEXT_PUBLIC_URL
+
 const wildChildConfig = {
   name: "Wild Child Official",
   description: "Wild Child Official App Starter",
@@ -16,8 +21,3 @@ const wildChildConfig = {
 }
 
 export default wildChildConfig
-
-const url =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : process.env.NEXT_PUBLIC_URL
