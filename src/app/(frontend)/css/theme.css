@@ -6,9 +6,9 @@
   */
 
   /* Site Spacing */
-  --section-padding-x: clamp(1rem, 4vw, theme(spacing[16]));
-  --section-padding-y: clamp(theme(spacing[16]), 10vw, theme(spacing[36]));
-  --column-padding-x: clamp(theme(spacing[8]), 5vw, theme(spacing[24]));
+  --section-padding-x: clamp(1rem, 4vw, 4rem);
+  --section-padding-y: clamp(1rem, 10vw, 4rem);
+  --column-padding-x: clamp(1rem, 5vw, 4rem);
   --content-width: clamp(95vw, 95vw, 1368px);
   --nav-height: clamp(50px, 10vh, 108px);
   --logo-height: clamp(45px, 10vw, 60px);

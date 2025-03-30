@@ -1,10 +1,14 @@
 @layer components {
+  * {
+    @apply border-border;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
   }
 
   section {
-    @apply bg-background relative w-full px-[var(--section-padding-x)] py-[var(--section-padding-y)];
+    @apply relative w-full px-[var(--section-padding-x)] py-[var(--section-padding-y)];
   }
 
   .stop-scroll {
