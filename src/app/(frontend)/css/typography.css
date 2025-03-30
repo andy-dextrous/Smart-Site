@@ -1,3 +1,18 @@
+/* Typography */
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Inter", sans-serif;
+
+  --text-h1: clamp(2rem, 5vw, 4rem);
+  --text-h2: clamp(1.5rem, 5vw, 3rem);
+  --text-h3: clamp(1.25rem, 5vw, 2.5rem);
+  --text-h4: clamp(1rem, 5vw, 2rem);
+  --text-h5: clamp(0.875rem, 5vw, 1.75rem);
+  --text-h6: clamp(0.75rem, 5vw, 1.5rem);
+  --text-body: clamp(0.875rem, 5vw, 1rem);
+}
+
 @layer base {
   h1 {
     @apply font-heading text-h1 leading-tight font-bold tracking-tight text-gray-950;
@@ -28,7 +43,7 @@
   }
 
   a {
-    @apply text-primary text-body font-sans leading-normal font-semibold tracking-normal;
+    @apply text-primary-foreground text-body font-sans leading-normal font-semibold tracking-normal;
   }
 
   ul {
