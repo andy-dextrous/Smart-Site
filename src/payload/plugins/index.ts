@@ -5,7 +5,7 @@ import { redirectsPlugin } from "@payloadcms/plugin-redirects"
 import { seoPlugin } from "@payloadcms/plugin-seo"
 import { searchPlugin } from "@payloadcms/plugin-search"
 import { Plugin } from "payload"
-import { revalidateRedirects } from "@/hooks/revalidateRedirects"
+import { revalidateRedirects } from "@/payload/hooks/revalidateRedirects"
 import { GenerateTitle, GenerateURL } from "@payloadcms/plugin-seo/types"
 import {
   FixedToolbarFeature,
@@ -16,7 +16,7 @@ import {
 import { searchFields } from "@/payload/search/fieldOverrides"
 import { beforeSyncWithSearch } from "@/payload/search/beforeSync"
 
-import { Page, Post } from "@/payload-types"
+import { Page, Post } from "@/payload/payload-types"
 import { getServerSideURL } from "@/utilities/getURL"
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {

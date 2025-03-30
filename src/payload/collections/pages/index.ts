@@ -2,7 +2,7 @@ import type { CollectionConfig } from "payload"
 
 export const Pages: CollectionConfig = {
   slug: "pages",
-  auth: true,
+  // auth: true,
   fields: [
     {
       name: "title",

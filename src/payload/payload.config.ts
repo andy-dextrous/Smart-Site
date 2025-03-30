@@ -11,6 +11,8 @@ import { Users } from "@/payload/collections/users"
 import { Media } from "@/payload/collections/media"
 import { Pages } from "@/payload/collections/pages"
 import { Posts } from "@/payload/collections/posts"
+import { Categories } from "@/payload/collections/categories"
+import { plugins } from "./plugins"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Pages, Posts],
+  collections: [Users, Media, Pages, Posts, Categories],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {
@@ -34,4 +36,5 @@ export default buildConfig({
     },
   }),
   sharp,
+  plugins,
 })
