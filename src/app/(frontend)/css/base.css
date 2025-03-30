@@ -34,6 +34,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -87,53 +88,5 @@
 
   section {
     @apply relative w-full px-(--section-padding-x) py-(--section-padding-y);
-  }
-
-  h1 {
-    @apply font-heading text-h1 leading-tight font-bold tracking-tight text-gray-950;
-  }
-
-  h2 {
-    @apply font-heading text-h2 leading-tight font-semibold tracking-tight text-gray-950;
-  }
-
-  h3 {
-    @apply font-heading text-h3 leading-tight font-semibold tracking-tight text-gray-950;
-  }
-
-  h4 {
-    @apply font-heading text-h4 leading-tight font-semibold tracking-tight text-gray-950;
-  }
-
-  h5 {
-    @apply font-heading text-h5 leading-tight font-semibold tracking-tight text-gray-950;
-  }
-
-  h6 {
-    @apply font-heading text-h6 leading-tight font-semibold tracking-tight text-gray-950;
-  }
-
-  p {
-    @apply text-body font-sans leading-normal tracking-normal text-gray-950;
-  }
-
-  a {
-    @apply text-primary text-body font-sans leading-normal font-semibold tracking-normal;
-  }
-
-  ul {
-    @apply text-body font-sans leading-normal tracking-normal text-gray-950;
-  }
-
-  ol {
-    @apply text-body font-sans leading-normal tracking-normal text-gray-950;
-  }
-
-  li {
-    @apply text-body font-sans leading-normal tracking-normal text-gray-950;
-  }
-
-  blockquote {
-    @apply text-body font-sans leading-normal tracking-normal text-gray-950;
   }
 }
