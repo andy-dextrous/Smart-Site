@@ -1,3 +1,7 @@
+/*
+  Tailwind Theme Config (same as tailwind.config.ts) in V3
+*/
+
 @theme {
   /* Custom Dimensions */
   --section-padding-x: clamp(1rem, 4vw, 4rem);

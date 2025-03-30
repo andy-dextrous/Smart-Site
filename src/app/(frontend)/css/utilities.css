@@ -1,4 +1,15 @@
 /* Utility Classes */
+
 @utility container {
   @apply mx-auto;
+}
+
+@utility stop-scroll {
+  overflow: hidden;
+}
+
+@utility scrollbar-hidden {
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

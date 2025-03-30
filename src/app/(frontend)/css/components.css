@@ -1,5 +1,6 @@
+/*
+  Components (for components that are too complex for utilities)
+*/
+
 @layer components {
-  .stop-scroll {
-    @apply overflow-hidden;
-  }
 }
