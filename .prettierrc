@@ -1,0 +1,12 @@
+{
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "semi": false,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 90,
+  "bracketSpacing": true,
+  "tailwindFunctions": ["tv"],
+  "plugins": ["prettier-plugin-tailwindcss"]
+}

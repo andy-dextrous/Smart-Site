@@ -1,0 +1,51 @@
+{
+  "name": "wild-child-official",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --turbo",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev --turbo",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@gsap/shockingly": "^3.12.7",
+    "@payloadcms/db-postgres": "^3.31.0",
+    "@payloadcms/db-vercel-postgres": "^3.31.0",
+    "@payloadcms/next": "^3.31.0",
+    "@payloadcms/richtext-lexical": "^3.31.0",
+    "@tailwindcss/postcss": "^4.0.17",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "graphql": "^16.10.0",
+    "gsap": "npm:@gsap/shockingly@^3.12.7",
+    "lucide-react": "^0.485.0",
+    "next": "15.2.4",
+    "next-i18n-router": "^5.5.1",
+    "payload": "^3.31.0",
+    "postcss": "^8.5.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "^0.33.5",
+    "tailwind-merge": "^3.0.2",
+    "tailwind-variants": "^1.0.0",
+    "tailwindcss": "^4.0.17",
+    "tw-animate-css": "^1.2.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "typescript": "^5"
+  }
+}
