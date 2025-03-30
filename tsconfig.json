@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@payload-config": ["./src/payload/payload.config.ts"]
+      "@payload-config": ["./src/payload/payload.config.ts"],
+      "@wild-child-config": ["./src/wild-child.config.ts"]
     },
     "target": "ES2022"
   },
