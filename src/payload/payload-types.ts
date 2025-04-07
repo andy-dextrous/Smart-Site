@@ -65,6 +65,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
     pages: PageAuthOperations;
+    posts: PostAuthOperations;
   };
   blocks: {};
   collections: {
@@ -108,6 +109,9 @@ export interface Config {
       })
     | (Page & {
         collection: 'pages';
+      })
+    | (Post & {
+        collection: 'posts';
       });
   jobs: {
     tasks: unknown;
@@ -133,6 +137,24 @@ export interface UserAuthOperations {
   };
 }
 export interface PageAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PostAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -245,6 +267,14 @@ export interface Post {
   } | null;
   updatedAt: string;
   createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -566,6 +596,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'pages';
         value: number | Page;
+      }
+    | {
+        relationTo: 'posts';
+        value: number | Post;
       };
   updatedAt: string;
   createdAt: string;
@@ -584,6 +618,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'pages';
         value: number | Page;
+      }
+    | {
+        relationTo: 'posts';
+        value: number | Post;
       };
   key?: string | null;
   value?:
@@ -670,6 +708,13 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   updatedAt?: T;
   createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -4,18 +4,22 @@ export const Pages: CollectionConfig = {
   slug: "pages",
   auth: true,
   admin: {
-    components: {
-      views: {
-        edit: {
-          default: {
-            Component: "@/payload/components/custom-edit",
-          },
-        },
-        list: {
-          Component: "@/payload/components/custom-list",
-        },
-      },
-    },
+    // components: {
+    //   views: {
+    //     edit: {
+    //       default: {
+    //         meta: {
+    //           title: "My Dashboard",
+    //           description: "The best dashboard in the world",
+    //         },
+    //         Component: "@/payload/components/custom-edit",
+    //       },
+    //     },
+    //     list: {
+    //       Component: "@/payload/components/custom-list",
+    //     },
+    //   },
+    // },
   },
   fields: [
     {

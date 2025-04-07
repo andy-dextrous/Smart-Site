@@ -2,7 +2,7 @@ import type { CollectionConfig } from "payload"
 
 export const Posts: CollectionConfig = {
   slug: "posts",
-  // auth: true,
+  auth: true,
   fields: [
     {
       name: "title",
