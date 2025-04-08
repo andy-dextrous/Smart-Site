@@ -4,6 +4,6 @@ import { Pages } from "@/payload/collections/pages"
 import { Posts } from "@/payload/collections/posts"
 import { Categories } from "@/payload/collections/categories"
 
-const collections = [Users, Media, Pages, Posts, Categories]
+const collections = [Media, Pages, Posts, Categories, Users]
 
 export default collections
