@@ -3,7 +3,8 @@ import collections from "@/payload/collections"
 import globals from "@/payload/globals"
 import { plugins } from "@/payload/plugins"
 import { getServerSideURL } from "@/utilities/getURL"
-import { vercelPostgresAdapter } from "@payloadcms/db-vercel-postgres"
+// import { vercelPostgresAdapter } from "@payloadcms/db-vercel-postgres"
+import { mongooseAdapter } from "@payloadcms/db-mongodb"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import path from "path"
 import { buildConfig, PayloadRequest } from "payload"
@@ -16,10 +17,13 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin,
   editor: lexicalEditor(),
-  db: vercelPostgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL!,
-    },
+  // db: vercelPostgresAdapter({
+  //   pool: {
+  //     connectionString: process.env.POSTGRES_URL!,
+  //   },
+  // }),
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI || "",
   }),
   collections,
   cors: [getServerSideURL()].filter(Boolean),

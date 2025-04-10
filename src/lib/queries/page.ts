@@ -2,21 +2,40 @@ import configPromise from "@payload-config"
 import { getPayload } from "payload"
 import { cache } from "react"
 
-const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
+export const queryPageBySlug = cache(
+  async ({ slug, draft }: { slug: string; draft: boolean }) => {
+    const payload = await getPayload({ config: configPromise })
+
+    const result = await payload.find({
+      collection: "pages",
+      draft,
+      limit: 1,
+      pagination: false,
+      overrideAccess: draft,
+      where: {
+        slug: {
+          equals: slug,
+        },
+      },
+    })
+
+    return result.docs?.[0] || null
+  }
+)
+
+export const queryAllPages = cache(async () => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: "pages",
-    limit: 1,
+    draft: false,
+    limit: 1000,
+    overrideAccess: false,
     pagination: false,
-    where: {
-      slug: {
-        equals: slug,
-      },
+    select: {
+      slug: true,
     },
   })
 
-  return result.docs?.[0] || null
+  return result.docs || []
 })
-
-export default queryPageBySlug
