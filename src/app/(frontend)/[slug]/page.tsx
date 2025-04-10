@@ -33,12 +33,8 @@ export default async function Page({ params: paramsPromise }: Args) {
   return (
     <Fragment>
       <PayloadRedirects disableNotFound url={url} />
-
       {draft && <LivePreviewListener />}
-
       <RenderBlocks blocks={layout} />
-
-      <pre>{JSON.stringify(page || "no page", null, 2)}</pre>
     </Fragment>
   )
 }

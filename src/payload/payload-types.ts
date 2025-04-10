@@ -148,7 +148,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   title: string;
-  layout: MediaBlock[];
+  layout: (MediaBlock | HeroPrimaryBlock)[];
   meta?: {
     title?: string | null;
     /**
@@ -265,6 +265,31 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroPrimaryBlock".
+ */
+export interface HeroPrimaryBlock {
+  heading: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero-primary';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -790,6 +815,7 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         mediaBlock?: T | MediaBlockSelect<T>;
+        'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
       };
   meta?:
     | T
@@ -811,6 +837,16 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroPrimaryBlock_select".
+ */
+export interface HeroPrimaryBlockSelect<T extends boolean = true> {
+  heading?: T;
+  content?: T;
   id?: T;
   blockName?: T;
 }

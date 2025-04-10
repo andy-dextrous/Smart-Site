@@ -1,6 +1,9 @@
 import React, { Fragment } from "react"
+import { HeroPrimaryBlock } from "@/components/sections/hero-primary/Component"
 
-const blockComponents: Record<string, React.ComponentType<any>> = {}
+const blockComponents: Record<string, React.ComponentType<any>> = {
+  "hero-primary": HeroPrimaryBlock,
+}
 
 export const RenderBlocks: React.FC<{
   blocks: any[]
@@ -20,7 +23,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className="my-16" key={index}>
+                <div key={index}>
                   <Block {...block} disableInnerContainer />
                 </div>
               )
