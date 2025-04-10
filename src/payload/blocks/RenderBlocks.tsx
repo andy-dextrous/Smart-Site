@@ -1,9 +1,5 @@
 import React, { Fragment } from "react"
-import { HeroPrimaryBlock } from "@/components/sections/hero-primary/Component"
-
-const blockComponents: Record<string, React.ComponentType<any>> = {
-  "hero-primary": HeroPrimaryBlock,
-}
+import { blockComponents } from "@/components/sections/config"
 
 export const RenderBlocks: React.FC<{
   blocks: any[]
