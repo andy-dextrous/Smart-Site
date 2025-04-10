@@ -24,6 +24,10 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   return (
     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
+      <head>
+        <link href="/favicon.ico" rel="icon" sizes="32x32" />
+        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+      </head>
       <body>
         <Providers>
           <AdminBar

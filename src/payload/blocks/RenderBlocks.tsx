@@ -1,5 +1,5 @@
 import React, { Fragment } from "react"
-import { blockComponents } from "@/components/sections/config"
+import { mapping } from "@/components/sections/config"
 
 export const RenderBlocks: React.FC<{
   blocks: any[]
@@ -14,8 +14,8 @@ export const RenderBlocks: React.FC<{
         {blocks.map((block, index) => {
           const { blockType } = block
 
-          if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType]
+          if (blockType && blockType in mapping) {
+            const Block = mapping[blockType]
 
             if (Block) {
               return (
