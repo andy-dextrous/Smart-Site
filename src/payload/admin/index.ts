@@ -1,7 +1,7 @@
 import path from "path"
 import { fileURLToPath } from "url"
-import { Users } from "../collections/users"
-import components from "../components"
+import { Users } from "@/payload/collections/users"
+import components from "@/payload/components/config"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -12,8 +12,8 @@ const admin = {
     baseDir: path.resolve(dirname),
   },
   autoLogin: {
-    email: "andrew@wildcreative.com.au",
-    password: "K@fe3xpress",
+    email: process.env.PAYLOAD_ADMIN_EMAIL,
+    password: process.env.PAYLOAD_ADMIN_PASSWORD,
     prefillOnly: false,
   },
   components,

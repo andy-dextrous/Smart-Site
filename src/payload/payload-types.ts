@@ -63,8 +63,6 @@ export type SupportedTimezones =
 
 export interface Config {
   auth: {
-    pages: PageAuthOperations;
-    posts: PostAuthOperations;
     users: UserAuthOperations;
   };
   blocks: {};
@@ -111,55 +109,18 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
-  user:
-    | (Page & {
-        collection: 'pages';
-      })
-    | (Post & {
-        collection: 'posts';
-      })
-    | (User & {
-        collection: 'users';
-      });
+  user: User & {
+    collection: 'users';
+  };
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
-  };
-}
-export interface PageAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PostAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
   };
 }
 export interface UserAuthOperations {
@@ -768,19 +729,10 @@ export interface PayloadLockedDocument {
         value: number | PayloadJob;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'pages';
-        value: number | Page;
-      }
-    | {
-        relationTo: 'posts';
-        value: number | Post;
-      }
-    | {
-        relationTo: 'users';
-        value: number | User;
-      };
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -790,19 +742,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user:
-    | {
-        relationTo: 'pages';
-        value: number | Page;
-      }
-    | {
-        relationTo: 'posts';
-        value: number | Post;
-      }
-    | {
-        relationTo: 'users';
-        value: number | User;
-      };
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -1365,6 +1308,28 @@ export interface FooterSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?:
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: number | Post;
+        } | null);
+    global?: string | null;
+    user?: (number | null) | User;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

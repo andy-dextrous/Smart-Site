@@ -57,20 +57,20 @@ export const Pages: CollectionConfig<"pages"> = {
     {
       type: "tabs",
       tabs: [
-        {
-          fields: [
-            {
-              name: "layout",
-              type: "blocks",
-              blocks: [],
-              required: true,
-              admin: {
-                initCollapsed: true,
-              },
-            },
-          ],
-          label: "Content",
-        },
+        // {
+        //   fields: [
+        //     {
+        //       name: "layout",
+        //       type: "blocks",
+        //       blocks: [],
+        //       required: true,
+        //       admin: {
+        //         initCollapsed: true,
+        //       },
+        //     },
+        //   ],
+        //   label: "Content",
+        // },
         {
           name: "meta",
           label: "SEO",

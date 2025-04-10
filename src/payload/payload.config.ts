@@ -1,32 +1,43 @@
-// storage-adapter-import-placeholder
+import admin from "@/payload/admin"
+import collections from "@/payload/collections"
+import globals from "@/payload/globals"
+import { plugins } from "@/payload/plugins"
+import { getServerSideURL } from "@/utilities/getURL"
 import { vercelPostgresAdapter } from "@payloadcms/db-vercel-postgres"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
-import { buildConfig } from "payload"
-import { fileURLToPath } from "url"
-import collections from "./collections"
-import { plugins } from "./plugins"
-import admin from "./admin"
 import path from "path"
+import { buildConfig, PayloadRequest } from "payload"
 import sharp from "sharp"
-import globals from "./globals"
+import { fileURLToPath } from "url"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin,
-  collections,
   editor: lexicalEditor(),
+  db: vercelPostgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL!,
+    },
+  }),
+  collections,
+  cors: [getServerSideURL()].filter(Boolean),
+  globals,
+  plugins,
   secret: process.env.PAYLOAD_SECRET || "",
+  sharp,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  db: vercelPostgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || "",
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        if (req.user) return true
+        const authHeader = req.headers.get("authorization")
+        return authHeader === `Bearer ${process.env.CRON_SECRET}`
+      },
     },
-  }),
-  sharp,
-  plugins,
-  globals,
+    tasks: [],
+  },
 })
