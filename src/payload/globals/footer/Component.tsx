@@ -6,7 +6,7 @@ import type { Footer } from "@/payload/payload-types"
 
 // import { ThemeSelector } from "@/providers/Theme/ThemeSelector"
 // import { CMSLink } from '@/components/Link'
-import { Logo } from "@/payload/components/Logo"
+import { Logo } from "@/payload/components/logo"
 
 export async function Footer() {
   const footerData: Footer = await getCachedGlobal("footer", 1)()
