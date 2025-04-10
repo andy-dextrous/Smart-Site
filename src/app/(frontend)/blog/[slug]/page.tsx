@@ -10,7 +10,7 @@ import RichText from "@/payload/components/rich-text"
 
 import type { Post } from "@/payload/payload-types"
 
-import { PostHero } from "@/components/post-hero"
+import { PostHero } from "@/components/posts/post-hero"
 import { generateMeta } from "@/utilities/generateMeta"
 import { LivePreviewListener } from "@/payload/components/live-preview-listener"
 
