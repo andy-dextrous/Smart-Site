@@ -1,25 +1,52 @@
 import type { CollectionConfig } from "payload"
 
-export const Pages: CollectionConfig = {
+import { authenticated } from "@/payload/access/authenticated"
+import { authenticatedOrPublished } from "@/payload/access/authenticatedOrPublished"
+import { slugField } from "@/payload/fields/slug"
+import { populatePublishedAt } from "@/payload/hooks/populatePublishedAt"
+import { generatePreviewPath } from "@/utilities/generatePreviewPath"
+import { revalidateDelete, revalidatePage } from "./hooks/revalidatePage"
+
+import {
+  MetaDescriptionField,
+  MetaImageField,
+  MetaTitleField,
+  OverviewField,
+  PreviewField,
+} from "@payloadcms/plugin-seo/fields"
+
+export const Pages: CollectionConfig<"pages"> = {
   slug: "pages",
-  auth: true,
+  access: {
+    create: authenticated,
+    delete: authenticated,
+    read: authenticatedOrPublished,
+    update: authenticated,
+  },
+  defaultPopulate: {
+    title: true,
+    slug: true,
+  },
   admin: {
-    // components: {
-    //   views: {
-    //     edit: {
-    //       default: {
-    //         meta: {
-    //           title: "My Dashboard",
-    //           description: "The best dashboard in the world",
-    //         },
-    //         Component: "@/payload/components/custom-edit",
-    //       },
-    //     },
-    //     list: {
-    //       Component: "@/payload/components/custom-list",
-    //     },
-    //   },
-    // },
+    defaultColumns: ["title", "slug", "updatedAt"],
+    livePreview: {
+      url: ({ data, req }) => {
+        const path = generatePreviewPath({
+          slug: typeof data?.slug === "string" ? data.slug : "",
+          collection: "pages",
+          req,
+        })
+
+        return path
+      },
+    },
+    preview: (data, { req }) =>
+      generatePreviewPath({
+        slug: typeof data?.slug === "string" ? data.slug : "",
+        collection: "pages",
+        req,
+      }),
+    useAsTitle: "title",
   },
   fields: [
     {
@@ -28,13 +55,72 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      name: "slug",
-      type: "text",
-      required: true,
+      type: "tabs",
+      tabs: [
+        {
+          fields: [
+            {
+              name: "layout",
+              type: "blocks",
+              blocks: [],
+              required: true,
+              admin: {
+                initCollapsed: true,
+              },
+            },
+          ],
+          label: "Content",
+        },
+        {
+          name: "meta",
+          label: "SEO",
+          fields: [
+            OverviewField({
+              titlePath: "meta.title",
+              descriptionPath: "meta.description",
+              imagePath: "meta.image",
+            }),
+            MetaTitleField({
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              relationTo: "media",
+            }),
+
+            MetaDescriptionField({}),
+            PreviewField({
+              // if the `generateUrl` function is configured
+              hasGenerateFn: true,
+
+              // field paths to match the target field for data
+              titlePath: "meta.title",
+              descriptionPath: "meta.description",
+            }),
+          ],
+        },
+      ],
     },
     {
-      name: "content",
-      type: "richText",
+      name: "publishedAt",
+      type: "date",
+      admin: {
+        position: "sidebar",
+      },
     },
+    ...slugField(),
   ],
+  hooks: {
+    afterChange: [revalidatePage],
+    beforeChange: [populatePublishedAt],
+    afterDelete: [revalidateDelete],
+  },
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 100, // We set this interval for optimal live preview
+      },
+      schedulePublish: true,
+    },
+    maxPerDoc: 50,
+  },
 }
