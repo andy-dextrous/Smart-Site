@@ -6,12 +6,19 @@ import { Pagination } from "@/payload/components/pagination"
 import configPromise from "@payload-config"
 import { getPayload } from "payload"
 import React from "react"
-import { notFound } from "next/navigation"
 
 export const dynamic = "force-static"
 export const revalidate = 600
 
+type Args = {
+  params: Promise<{
+    "blog-url"?: string
+  }>
+}
+
 export default async function Page() {
+  // const { "blog-url": blogUrl } = await paramsPromise
+
   const payload = await getPayload({ config: configPromise })
 
   const posts = await payload.find({

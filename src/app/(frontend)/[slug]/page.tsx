@@ -1,4 +1,4 @@
-import { queryAllPages, queryPageBySlug } from "@/lib/queries/page"
+import { getAllPages, getPageBySlug } from "@/lib/queries/page"
 import { RenderBlocks } from "@/payload/blocks/RenderBlocks"
 import { LivePreviewListener } from "@/payload/components/live-preview-listener"
 import { PayloadRedirects } from "@/payload/components/payload-redirects"
@@ -19,7 +19,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const url = "/" + slug
   const { isEnabled: draft } = await draftMode()
 
-  const page: RequiredDataFromCollectionSlug<"pages"> | null = await queryPageBySlug({
+  const page: RequiredDataFromCollectionSlug<"pages"> | null = await getPageBySlug({
     slug,
     draft,
   })
@@ -44,7 +44,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 /*******************************************************/
 
 export async function generateStaticParams() {
-  const pages = await queryAllPages()
+  const pages = await getAllPages()
 
   if (!pages) {
     return []
@@ -70,7 +70,7 @@ export async function generateMetadata({
 }: Args): Promise<Metadata> {
   const { slug = "home" } = await paramsPromise
   const { isEnabled: draft } = await draftMode()
-  const page = await queryPageBySlug({
+  const page = await getPageBySlug({
     slug,
     draft,
   })

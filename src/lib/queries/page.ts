@@ -2,7 +2,11 @@ import configPromise from "@payload-config"
 import { getPayload } from "payload"
 import { cache } from "react"
 
-export const queryPageBySlug = cache(
+/*******************************************************/
+/* Get Page By Slug
+/*******************************************************/
+
+export const getPageBySlug = cache(
   async ({ slug, draft }: { slug: string; draft: boolean }) => {
     const payload = await getPayload({ config: configPromise })
 
@@ -23,7 +27,11 @@ export const queryPageBySlug = cache(
   }
 )
 
-export const queryAllPages = cache(async () => {
+/*******************************************************/
+/* Get All Pages
+/*******************************************************/
+
+export const getAllPages = cache(async () => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
