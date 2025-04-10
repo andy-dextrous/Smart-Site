@@ -8,6 +8,7 @@ import { plugins } from "./plugins"
 import admin from "./admin"
 import path from "path"
 import sharp from "sharp"
+import globals from "./globals"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,4 +28,5 @@ export default buildConfig({
   }),
   sharp,
   plugins,
+  globals,
 })

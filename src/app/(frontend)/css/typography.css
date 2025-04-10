@@ -2,6 +2,8 @@
   Typography 
 */
 
+/* https://www.fluid-type-scale.com/ */
+
 @theme {
   --font-sans: "Inter", sans-serif;
   --font-heading: "Inter", sans-serif;

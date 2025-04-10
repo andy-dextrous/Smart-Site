@@ -24,6 +24,8 @@ import { SlugComponent as SlugComponent_2f7cb6d15a7be4cbd9d669ac9f96d997 } from 
 import { FixedToolbarFeatureClient as FixedToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
+import { RowLabel as RowLabel_ac590f04e7b67b0cd330fd91c828079e } from '@/payload/globals/header/row-label'
+import { RowLabel as RowLabel_d4fd277a286d50f536848872bd9d5784 } from '@/payload/globals/footer/RowLabel'
 import { default as default_c7c2d5047a39da2f1752f9f22e2a540e } from '@/payload/components/nav'
 import { default as default_028bbc9304c58089546f43bc764739be } from '@/payload/components/logout'
 
@@ -54,6 +56,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#FixedToolbarFeatureClient": FixedToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
+  "@/payload/globals/header/row-label#RowLabel": RowLabel_ac590f04e7b67b0cd330fd91c828079e,
+  "@/payload/globals/footer/RowLabel#RowLabel": RowLabel_d4fd277a286d50f536848872bd9d5784,
   "@/payload/components/nav#default": default_c7c2d5047a39da2f1752f9f22e2a540e,
   "@/payload/components/logout#default": default_028bbc9304c58089546f43bc764739be
 }
