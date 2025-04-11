@@ -1,4 +1,4 @@
-import { MediaBlock } from "@/payload/blocks/media-block/Component"
+import { MediaBlock } from "@/payload/blocks/media/Component"
 import {
   DefaultNodeTypes,
   SerializedBlockNode,

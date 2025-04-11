@@ -8,6 +8,8 @@ import type { TextImageBlock as TextImageBlockProps } from "@/payload/payload-ty
 export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
   const { heading, content, image, imagePosition, buttons } = props
 
+  console.log(buttons)
+
   return (
     <section>
       <div className="container flex gap-8">
@@ -24,7 +26,7 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
           {buttons && (
             <div className="flex gap-4">
               {buttons.map((button: any) => (
-                <CMSLink {...button.link} key={button.label} appearance="default" />
+                <CMSLink {...button.link} key={button.id} appearance="default" />
               ))}
             </div>
           )}

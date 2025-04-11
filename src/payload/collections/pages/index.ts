@@ -6,7 +6,8 @@ import { slugField } from "@/payload/fields/slug"
 import { populatePublishedAt } from "@/payload/hooks/populatePublishedAt"
 import { generatePreviewPath } from "@/utilities/generatePreviewPath"
 import { revalidateDelete, revalidatePage } from "./hooks/revalidatePage"
-import { MediaBlock } from "@/payload/blocks/media-block/config"
+import { MediaBlock } from "@/payload/blocks/media/config"
+import { FormBlock } from "@/payload/blocks/form/config"
 
 import {
   MetaDescriptionField,
@@ -65,7 +66,7 @@ export const Pages: CollectionConfig<"pages"> = {
             {
               name: "layout",
               type: "blocks",
-              blocks: [MediaBlock, ...sectionBlocks],
+              blocks: [MediaBlock, FormBlock, ...sectionBlocks],
               required: true,
               admin: {
                 initCollapsed: true,

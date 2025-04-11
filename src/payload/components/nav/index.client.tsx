@@ -30,8 +30,6 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
   return (
     <Fragment>
       {groups.map(({ entities, label }, key) => {
-        console.log(entities)
-
         return (
           <NavGroup
             isOpen={navPreferences?.groups?.[label]?.open}

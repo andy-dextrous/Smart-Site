@@ -30,8 +30,6 @@ export const Card: React.FC<{
   const sanitizedDescription = description?.replace(/\s/g, " ") // replace non-breaking space with white space
   const href = `/${relationTo}/${slug}`
 
-  console.log(relationTo)
-
   return (
     <article
       className={cn(
