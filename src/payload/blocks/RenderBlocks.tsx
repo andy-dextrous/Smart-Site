@@ -1,7 +1,8 @@
 import React, { Fragment } from "react"
-import { mapping } from "@/components/sections/config"
 import { FormBlock } from "@/payload/blocks/form/component"
 import { MediaBlock } from "@/payload/blocks/media/Component"
+import { HeroPrimaryComponent } from "@/components/sections/hero-primary/Component"
+import { TextImageComponent } from "@/components/sections/text-image/Component"
 
 export const RenderBlocks: React.FC<{
   blocks: any[]
@@ -13,7 +14,8 @@ export const RenderBlocks: React.FC<{
   const blocksMap: Record<string, React.ComponentType<any>> = {
     formBlock: FormBlock,
     mediaBlock: MediaBlock,
-    ...mapping,
+    "hero-primary": HeroPrimaryComponent,
+    "text-image": TextImageComponent,
   }
 
   if (hasBlocks) {

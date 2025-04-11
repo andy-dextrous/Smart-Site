@@ -2,7 +2,7 @@ import RichText from "@/payload/components/rich-text"
 import type { HeroPrimaryBlock as HeroPrimaryBlockProps } from "@/payload/payload-types"
 import React from "react"
 
-export const HeroPrimaryBlock: React.FC<HeroPrimaryBlockProps> = ({
+export const HeroPrimaryComponent: React.FC<HeroPrimaryBlockProps> = ({
   heading,
   content,
 }) => {

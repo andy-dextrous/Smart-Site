@@ -1,28 +1,30 @@
-import { Button } from "@/components/ui/button"
-import { Media } from "@/payload/components/media"
 import RichText from "@/payload/components/rich-text"
 import { cn } from "@/utilities/ui"
 import { CMSLink } from "@/payload/components/cms-link"
-import type { TextImageBlock as TextImageBlockProps } from "@/payload/payload-types"
+import Image from "next/image"
+import type {
+  Media,
+  TextImageBlock as TextImageBlockProps,
+} from "@/payload/payload-types"
 
 export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
-  const { heading, content, image, imagePosition, buttons } = props
-
-  console.log(buttons)
+  const { heading, content, image: imageProp, imagePosition, buttons } = props
+  const image = imageProp as Media
 
   return (
     <section>
-      <div className="container flex gap-8">
-        <div
-          className={cn(
-            "flex flex-1 flex-col items-start gap-4",
-            imagePosition === "right" && "order-2"
-          )}
-        >
+      <div
+        className={cn(
+          "container flex gap-8",
+          imagePosition === "right" && "flex-row-reverse"
+        )}
+      >
+        <div className="flex flex-1 flex-col items-start gap-4">
           <h2 className="text-2xl font-bold">{heading}</h2>
           <div className="prose max-w-none">
             <RichText data={content} />
           </div>
+
           {buttons && (
             <div className="flex gap-4">
               {buttons.map((button: any) => (
@@ -31,13 +33,11 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
             </div>
           )}
         </div>
-        <div
-          className={cn(
-            "flex flex-1 flex-col items-start gap-4",
-            imagePosition === "right" && "order-2"
-          )}
-        >
-          <Media resource={image} />
+        <div className="flex flex-1 flex-col items-start gap-4">
+          <div className="relative h-full max-h-[400px] min-h-[400px] w-full">
+            {/* <Media resource={image} /> */}
+            <Image src={image.url!} alt={image.alt!} fill className="object-cover" />
+          </div>
         </div>
       </div>
     </section>

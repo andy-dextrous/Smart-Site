@@ -6,8 +6,7 @@ import { slugField } from "@/payload/fields/slug"
 import { populatePublishedAt } from "@/payload/hooks/populatePublishedAt"
 import { generatePreviewPath } from "@/utilities/generatePreviewPath"
 import { revalidateDelete, revalidatePage } from "./hooks/revalidatePage"
-import { MediaBlock } from "@/payload/blocks/media/config"
-import { FormBlock } from "@/payload/blocks/form/config"
+import { blocks } from "@/payload/blocks/config"
 
 import {
   MetaDescriptionField,
@@ -16,7 +15,6 @@ import {
   OverviewField,
   PreviewField,
 } from "@payloadcms/plugin-seo/fields"
-import { sectionBlocks } from "@/components/sections/config"
 
 export const Pages: CollectionConfig<"pages"> = {
   slug: "pages",
@@ -66,7 +64,7 @@ export const Pages: CollectionConfig<"pages"> = {
             {
               name: "layout",
               type: "blocks",
-              blocks: [MediaBlock, FormBlock, ...sectionBlocks],
+              blocks,
               required: true,
               admin: {
                 initCollapsed: true,
