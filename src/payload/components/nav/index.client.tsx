@@ -69,7 +69,7 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
                   <LinkElement
                     className={[
                       `${baseClass}__link px-6 py-2 hover:bg-(--color-base-850) hover:no-underline`,
-                      activeCollection && `active bg-(--color-base-850)`,
+                      activeCollection && `active bg-(--color-base-80)`,
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -80,21 +80,21 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
                   >
                     {activeCollection && (
                       <div
-                        className={`${baseClass}__link-indicator bg-(--wild-child-indigo)`}
+                        className={`${baseClass}__link-indicator bg-(--wild-child-indigo-light)`}
                       />
                     )}
                     {Icon && (
                       <Icon
                         className={[
                           `${baseClass}__icon mr-4`,
-                          activeCollection && "text-(--wild-child-indigo)",
+                          activeCollection && "text-(--wild-child-indigo-light)",
                         ].join(" ")}
                       />
                     )}
                     <span
                       className={[
                         `${baseClass}__link-label text-[14px]`,
-                        activeCollection && "text-(--wild-child-indigo)",
+                        activeCollection && "text-(--wild-child-indigo-light)",
                       ]
                         .filter(Boolean)
                         .join(" ")}
