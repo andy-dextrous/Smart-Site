@@ -1,13 +1,14 @@
 import admin from "@/payload/admin"
 import collections from "@/payload/collections"
+import db from "@/payload/db/config"
 import globals from "@/payload/globals"
+import jobs from "@/payload/jobs/config"
+import { email } from "@/payload/email/config"
 import { plugins } from "@/payload/plugins"
 import { getServerSideURL } from "@/utilities/getURL"
-// import { vercelPostgresAdapter } from "@payloadcms/db-vercel-postgres"
-import { mongooseAdapter } from "@payloadcms/db-mongodb"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import path from "path"
-import { buildConfig, PayloadRequest } from "payload"
+import { buildConfig } from "payload"
 import sharp from "sharp"
 import { fileURLToPath } from "url"
 
@@ -17,14 +18,8 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin,
   editor: lexicalEditor(),
-  // db: vercelPostgresAdapter({
-  //   pool: {
-  //     connectionString: process.env.POSTGRES_URL!,
-  //   },
-  // }),
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || "",
-  }),
+  db,
+  email,
   collections,
   cors: [getServerSideURL()].filter(Boolean),
   globals,
@@ -34,14 +29,5 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  jobs: {
-    access: {
-      run: ({ req }: { req: PayloadRequest }): boolean => {
-        if (req.user) return true
-        const authHeader = req.headers.get("authorization")
-        return authHeader === `Bearer ${process.env.CRON_SECRET}`
-      },
-    },
-    tasks: [],
-  },
+  jobs,
 })

@@ -1,8 +1,8 @@
 import React, { Fragment } from "react"
 import { FormBlock } from "@/payload/blocks/form/component"
 import { MediaBlock } from "@/payload/blocks/media/Component"
-import { HeroPrimaryComponent } from "@/components/sections/hero-primary/Component"
-import { TextImageComponent } from "@/components/sections/text-image/Component"
+import { CodeBlock } from "./code/Component"
+import { RelatedPosts } from "./related-posts/Component"
 
 export const RenderBlocks: React.FC<{
   blocks: any[]
@@ -14,8 +14,8 @@ export const RenderBlocks: React.FC<{
   const blocksMap: Record<string, React.ComponentType<any>> = {
     formBlock: FormBlock,
     mediaBlock: MediaBlock,
-    "hero-primary": HeroPrimaryComponent,
-    "text-image": TextImageComponent,
+    codeBlock: CodeBlock,
+    relatedPostsBlock: RelatedPosts,
   }
 
   if (hasBlocks) {

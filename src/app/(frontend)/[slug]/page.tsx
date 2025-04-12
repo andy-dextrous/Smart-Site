@@ -1,5 +1,5 @@
+import { RenderSections } from "@/components/sections/RenderSections"
 import { getAllPages, getPageBySlug } from "@/lib/queries/page"
-import { RenderBlocks } from "@/payload/blocks/RenderBlocks"
 import { LivePreviewListener } from "@/payload/components/live-preview-listener"
 import { PayloadRedirects } from "@/payload/components/payload-redirects"
 import { generateMeta } from "@/utilities/generateMeta"
@@ -15,9 +15,9 @@ type Args = {
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
+  const { isEnabled: draft } = await draftMode()
   const { slug = "home" } = await paramsPromise
   const url = "/" + slug
-  const { isEnabled: draft } = await draftMode()
 
   const page: RequiredDataFromCollectionSlug<"pages"> | null = await getPageBySlug({
     slug,
@@ -34,7 +34,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     <Fragment>
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderBlocks blocks={layout} />
+      <RenderSections sections={layout} />
     </Fragment>
   )
 }
