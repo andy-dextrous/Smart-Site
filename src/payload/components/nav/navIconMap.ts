@@ -1,12 +1,11 @@
 import { Link, List, LucideProps } from "lucide-react"
 import { CollectionSlug, GlobalSlug } from "payload"
 import { ExoticComponent } from "react"
-import { FaFileAlt, FaSearch, FaUserAlt } from "react-icons/fa"
+import { FaFileAlt, FaSearch, FaUserAlt, FaWpforms } from "react-icons/fa"
 import { IoIosDocument } from "react-icons/io"
-import { IoDocumentsSharp } from "react-icons/io5"
 import { IconType } from "react-icons/lib"
-import { MdOutlinePermMedia } from "react-icons/md"
-import { FaWpforms } from "react-icons/fa"
+import { MdBorderBottom, MdOutlinePermMedia, MdBorderTop } from "react-icons/md"
+import { IoMenu, IoSettings, IoDocumentsSharp } from "react-icons/io5"
 
 export const navIconMap: Partial<
   Record<CollectionSlug | GlobalSlug, ExoticComponent<LucideProps> | IconType>
@@ -20,6 +19,10 @@ export const navIconMap: Partial<
   forms: FaWpforms,
   "form-submissions": FaFileAlt,
   search: FaSearch,
+  menus: IoMenu,
+  settings: IoSettings,
+  header: MdBorderTop,
+  footer: MdBorderBottom,
 }
 
 export const getNavIcon = (slug: string) =>

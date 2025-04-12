@@ -21,17 +21,5 @@ export const Menus: CollectionConfig = {
       type: "text",
       required: true,
     },
-    {
-      name: "items",
-      type: "array",
-      required: true,
-      fields: [
-        {
-          name: "label",
-          type: "text",
-          required: true,
-        },
-      ],
-    },
   ],
 }

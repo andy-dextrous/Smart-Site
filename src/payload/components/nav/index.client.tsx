@@ -1,7 +1,7 @@
 "use client"
 
 import { getTranslation } from "@payloadcms/translations"
-import { NavGroup, useConfig, useTranslation } from "@payloadcms/ui"
+import { useConfig, useTranslation } from "@payloadcms/ui"
 import { baseClass } from "./index"
 import { EntityType, formatAdminURL, NavGroupType } from "@payloadcms/ui/shared"
 import { usePathname } from "next/navigation"
@@ -16,6 +16,16 @@ type Props = {
   navPreferences: NavPreferences | null
 }
 
+/*******************************************************/
+/*  Items to omit from the nav
+/*******************************************************/
+
+const omittedEntities = ["search"]
+
+/*******************************************************/
+/*  Items to omit from the nav
+/*******************************************************/
+
 export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
   const pathname = usePathname()
 
@@ -29,55 +39,72 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
 
   return (
     <Fragment>
-      {groups.map(({ entities, label }, key) => {
+      {groups.map(({ entities }, key) => {
         return (
-          <NavGroup
-            isOpen={navPreferences?.groups?.[label]?.open}
-            key={key}
-            label={label}
-          >
-            {entities.map(({ slug, type, label }, i) => {
-              let href: string
-              let id: string
+          <div key={key} className="flex w-full flex-col gap-2 pt-8">
+            {entities
+              .filter(({ slug }) => !omittedEntities.includes(slug))
+              .map(({ slug, type, label }, i) => {
+                let href: string
+                let id: string
 
-              if (type === EntityType.collection) {
-                href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
-                id = `nav-${slug}`
-              } else {
-                href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
-                id = `nav-global-${slug}`
-              }
+                if (type === EntityType.collection) {
+                  href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+                  id = `nav-${slug}`
+                } else {
+                  href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
+                  id = `nav-global-${slug}`
+                }
 
-              const Link = LinkWithDefault
+                const Link = LinkWithDefault
 
-              const LinkElement = Link || "a"
-              const activeCollection =
-                pathname.startsWith(href) &&
-                ["/", undefined].includes(pathname[href.length])
+                const LinkElement = Link || "a"
+                const activeCollection =
+                  pathname.startsWith(href) &&
+                  ["/", undefined].includes(pathname[href.length])
 
-              const Icon = getNavIcon(slug)
+                const Icon = getNavIcon(slug)
 
-              return (
-                <LinkElement
-                  className={[`${baseClass}__link py-2`, activeCollection && `active`]
-                    .filter(Boolean)
-                    .join(" ")}
-                  href={href}
-                  id={id}
-                  key={i}
-                  prefetch={false}
-                >
-                  {activeCollection && (
-                    <div className={`${baseClass}__link-indicator bg-red-500`} />
-                  )}
-                  {Icon && <Icon className={`${baseClass}__icon mr-4`} />}
-                  <span className={`${baseClass}__link-label`}>
-                    {getTranslation(label, i18n)}
-                  </span>
-                </LinkElement>
-              )
-            })}
-          </NavGroup>
+                return (
+                  <LinkElement
+                    className={[
+                      `${baseClass}__link px-6 py-2 hover:bg-(--color-base-850) hover:no-underline`,
+                      activeCollection && `active bg-(--color-base-850)`,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    href={href}
+                    id={id}
+                    key={i}
+                    prefetch={false}
+                  >
+                    {activeCollection && (
+                      <div
+                        className={`${baseClass}__link-indicator bg-(--wild-child-indigo)`}
+                      />
+                    )}
+                    {Icon && (
+                      <Icon
+                        className={[
+                          `${baseClass}__icon mr-4`,
+                          activeCollection && "text-(--wild-child-indigo)",
+                        ].join(" ")}
+                      />
+                    )}
+                    <span
+                      className={[
+                        `${baseClass}__link-label text-[14px]`,
+                        activeCollection && "text-(--wild-child-indigo)",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
+                      {getTranslation(label, i18n)}
+                    </span>
+                  </LinkElement>
+                )
+              })}
+          </div>
         )
       })}
     </Fragment>

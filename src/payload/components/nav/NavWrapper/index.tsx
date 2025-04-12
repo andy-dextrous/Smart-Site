@@ -1,11 +1,12 @@
-'use client'
-import { useNav } from '@payloadcms/ui'
-import React from 'react'
+"use client"
+
+import { useNav } from "@payloadcms/ui"
+import React from "react"
 
 export const NavWrapper: React.FC<{
   baseClass?: string
   children: React.ReactNode
-}> = (props) => {
+}> = props => {
   const { baseClass, children } = props
 
   const { hydrated, navOpen, navRef, shouldAnimate } = useNav()
@@ -19,10 +20,10 @@ export const NavWrapper: React.FC<{
         hydrated && `${baseClass}--nav-hydrated`,
       ]
         .filter(Boolean)
-        .join(' ')}
+        .join(" ")}
       inert={!navOpen ? true : undefined}
     >
-      <div className={`${baseClass}__scroll`} ref={navRef}>
+      <div className={`${baseClass}__scroll px-0`} ref={navRef}>
         {children}
       </div>
     </aside>
