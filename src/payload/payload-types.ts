@@ -103,10 +103,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    settings: Setting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    settings: SettingsSelect<false> | SettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -1436,6 +1438,45 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: string;
+  general?: {
+    siteName?: string | null;
+    siteDescription?: string | null;
+  };
+  social?: {
+    facebook?: string | null;
+    instagram?: string | null;
+    twitter?: string | null;
+    linkedin?: string | null;
+    youtube?: string | null;
+  };
+  locations?: {
+    locations?:
+      | {
+          street?: string | null;
+          city?: string | null;
+          zip?: string | null;
+          country?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  integrations?: {
+    googleAnalytics?: string | null;
+    googleTagManager?: string | null;
+    beforeBody?: string | null;
+    afterBody?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1475,6 +1516,53 @@ export interface FooterSelect<T extends boolean = true> {
               label?: T;
             };
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  general?:
+    | T
+    | {
+        siteName?: T;
+        siteDescription?: T;
+      };
+  social?:
+    | T
+    | {
+        facebook?: T;
+        instagram?: T;
+        twitter?: T;
+        linkedin?: T;
+        youtube?: T;
+      };
+  locations?:
+    | T
+    | {
+        locations?:
+          | T
+          | {
+              street?: T;
+              city?: T;
+              zip?: T;
+              country?: T;
+              phone?: T;
+              email?: T;
+              id?: T;
+            };
+      };
+  integrations?:
+    | T
+    | {
+        googleAnalytics?: T;
+        googleTagManager?: T;
+        beforeBody?: T;
+        afterBody?: T;
       };
   updatedAt?: T;
   createdAt?: T;
