@@ -10,6 +10,9 @@ import {
 export const TextImage: Block = {
   slug: "text-image",
   interfaceName: "TextImageBlock",
+  admin: {
+    group: "Content Sections",
+  },
   fields: [
     {
       name: "heading",

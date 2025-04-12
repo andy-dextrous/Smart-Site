@@ -8,6 +8,9 @@ import {
 
 export const HeroPrimary: Block = {
   slug: "hero-primary",
+  admin: {
+    group: "Hero Sections",
+  },
   fields: [
     {
       name: "heading",

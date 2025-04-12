@@ -6,7 +6,7 @@ import { slugField } from "@/payload/fields/slug"
 import { populatePublishedAt } from "@/payload/hooks/populatePublishedAt"
 import { generatePreviewPath } from "@/utilities/generatePreviewPath"
 import { revalidateDelete, revalidatePage } from "./hooks/revalidatePage"
-import { blocks } from "@/payload/blocks/config"
+import { sectionBlocks } from "@/components/sections/config"
 
 import {
   MetaDescriptionField,
@@ -87,10 +87,10 @@ export const Pages: CollectionConfig<"pages"> = {
           label: "Content",
           fields: [
             {
-              name: "layout",
+              name: "sections",
               label: "Sections",
               type: "blocks",
-              blocks,
+              blocks: sectionBlocks,
               required: true,
               admin: {
                 initCollapsed: false,

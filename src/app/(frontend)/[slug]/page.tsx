@@ -28,13 +28,13 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { layout = [] } = page
+  const { sections = [] } = page
 
   return (
     <Fragment>
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderSections sections={layout} />
+      <RenderSections sections={sections} />
     </Fragment>
   )
 }
