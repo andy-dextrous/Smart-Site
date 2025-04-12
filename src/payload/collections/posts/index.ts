@@ -68,16 +68,46 @@ export const Posts: CollectionConfig<"posts"> = {
       type: "text",
       required: true,
     },
+
+    {
+      name: "relatedPosts",
+      type: "relationship",
+      admin: {
+        position: "sidebar",
+      },
+      filterOptions: ({ id }) => {
+        return {
+          id: {
+            not_in: [id],
+          },
+        }
+      },
+      hasMany: true,
+      relationTo: "posts",
+    },
+    {
+      name: "categories",
+      type: "relationship",
+      admin: {
+        position: "sidebar",
+      },
+      hasMany: true,
+      relationTo: "categories",
+    },
+    {
+      name: "heroImage",
+      label: "Featured Image",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        position: "sidebar",
+      },
+    },
     {
       type: "tabs",
       tabs: [
         {
           fields: [
-            {
-              name: "heroImage",
-              type: "upload",
-              relationTo: "media",
-            },
             {
               name: "content",
               type: "richText",
@@ -97,36 +127,6 @@ export const Posts: CollectionConfig<"posts"> = {
             },
           ],
           label: "Content",
-        },
-        {
-          fields: [
-            {
-              name: "relatedPosts",
-              type: "relationship",
-              admin: {
-                position: "sidebar",
-              },
-              filterOptions: ({ id }) => {
-                return {
-                  id: {
-                    not_in: [id],
-                  },
-                }
-              },
-              hasMany: true,
-              relationTo: "posts",
-            },
-            {
-              name: "categories",
-              type: "relationship",
-              admin: {
-                position: "sidebar",
-              },
-              hasMany: true,
-              relationTo: "categories",
-            },
-          ],
-          label: "Meta",
         },
         {
           name: "meta",

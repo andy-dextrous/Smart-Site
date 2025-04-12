@@ -56,6 +56,31 @@ export const Pages: CollectionConfig<"pages"> = {
       required: true,
     },
     {
+      name: "publishedAt",
+      type: "date",
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
+      name: "categories",
+      type: "relationship",
+      admin: {
+        position: "sidebar",
+      },
+      hasMany: true,
+      relationTo: "categories",
+    },
+    {
+      name: "heroImage",
+      label: "Featured Image",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
       type: "tabs",
       tabs: [
         {
@@ -63,11 +88,12 @@ export const Pages: CollectionConfig<"pages"> = {
           fields: [
             {
               name: "layout",
+              label: "Sections",
               type: "blocks",
               blocks,
               required: true,
               admin: {
-                initCollapsed: true,
+                initCollapsed: false,
               },
             },
           ],
@@ -101,13 +127,7 @@ export const Pages: CollectionConfig<"pages"> = {
         },
       ],
     },
-    {
-      name: "publishedAt",
-      type: "date",
-      admin: {
-        position: "sidebar",
-      },
-    },
+
     ...slugField(),
   ],
   hooks: {

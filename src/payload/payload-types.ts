@@ -150,6 +150,9 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   title: string;
+  publishedAt?: string | null;
+  categories?: (string | Category)[] | null;
+  heroImage?: (string | null) | Media;
   layout: (MediaBlock | FormBlock | HeroPrimaryBlock | TextImageBlock)[];
   meta?: {
     title?: string | null;
@@ -159,7 +162,6 @@ export interface Page {
     image?: (string | null) | Media;
     description?: string | null;
   };
-  publishedAt?: string | null;
   slug?: string | null;
   slugLock?: boolean | null;
   updatedAt: string;
@@ -168,13 +170,24 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock".
+ * via the `definition` "categories".
  */
-export interface MediaBlock {
-  media: string | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
+export interface Category {
+  id: string;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -267,6 +280,16 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock".
+ */
+export interface MediaBlock {
+  media: string | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -547,6 +570,8 @@ export interface TextImageBlock {
 export interface Post {
   id: string;
   title: string;
+  relatedPosts?: (string | Post)[] | null;
+  categories?: (string | Category)[] | null;
   heroImage?: (string | null) | Media;
   content: {
     root: {
@@ -563,8 +588,6 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -589,32 +612,24 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  nickname?: string | null;
   name?: string | null;
+  lastName?: string | null;
+  avatar?: (string | null) | Media;
+  bio?: string | null;
+  socialLinks?:
+    | {
+        platform?:
+          | ('twitter' | 'facebook' | 'instagram' | 'linkedin' | 'youtube' | 'twitch' | 'tiktok' | 'github' | 'website')
+          | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -886,6 +901,9 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  publishedAt?: T;
+  categories?: T;
+  heroImage?: T;
   layout?:
     | T
     | {
@@ -901,7 +919,6 @@ export interface PagesSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
-  publishedAt?: T;
   slug?: T;
   slugLock?: T;
   updatedAt?: T;
@@ -970,10 +987,10 @@ export interface TextImageBlockSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  heroImage?: T;
-  content?: T;
   relatedPosts?: T;
   categories?: T;
+  heroImage?: T;
+  content?: T;
   meta?:
     | T
     | {
@@ -1113,7 +1130,18 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  nickname?: T;
   name?: T;
+  lastName?: T;
+  avatar?: T;
+  bio?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;

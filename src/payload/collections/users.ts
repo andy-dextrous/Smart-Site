@@ -18,8 +18,64 @@ export const Users: CollectionConfig = {
   auth: true,
   fields: [
     {
-      name: "name",
-      type: "text",
+      type: "row",
+      fields: [
+        {
+          name: "nickname",
+          type: "text",
+          label: "Nickname",
+        },
+        {
+          name: "name",
+          label: "First Name",
+          type: "text",
+        },
+        {
+          name: "lastName",
+          label: "Last Name",
+          type: "text",
+        },
+      ],
+    },
+    {
+      name: "avatar",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
+      name: "bio",
+      type: "textarea",
+      label: "Bio",
+      maxLength: 500,
+    },
+    {
+      type: "array",
+      name: "socialLinks",
+      label: "Social Links",
+      fields: [
+        {
+          name: "platform",
+          type: "select",
+          options: [
+            "twitter",
+            "facebook",
+            "instagram",
+            "linkedin",
+            "youtube",
+            "twitch",
+            "tiktok",
+            "github",
+            "website",
+          ],
+        },
+        {
+          name: "url",
+          type: "text",
+        },
+      ],
     },
   ],
   timestamps: true,

@@ -29,39 +29,43 @@ export const Settings: GlobalConfig = {
         },
         {
           name: "social",
-          label: "Social",
+          label: "Socials",
           fields: [
             {
-              name: "facebook",
-              label: "Facebook",
-              type: "text",
-            },
-            {
-              name: "instagram",
-              label: "Instagram",
-              type: "text",
-            },
-            {
-              name: "twitter",
-              label: "X (Twitter)",
-              type: "text",
-            },
-            {
-              name: "linkedin",
-              label: "LinkedIn",
-              type: "text",
-            },
-            {
-              name: "youtube",
-              label: "YouTube",
-              type: "text",
+              type: "row",
+              fields: [
+                {
+                  name: "facebook",
+                  label: "Facebook",
+                  type: "text",
+                },
+                {
+                  name: "instagram",
+                  label: "Instagram",
+                  type: "text",
+                },
+                {
+                  name: "twitter",
+                  label: "X (Twitter)",
+                  type: "text",
+                },
+                {
+                  name: "linkedin",
+                  label: "LinkedIn",
+                  type: "text",
+                },
+                {
+                  name: "youtube",
+                  label: "YouTube",
+                  type: "text",
+                },
+              ],
             },
           ],
         },
         {
           name: "locations",
           label: "Locations",
-
           fields: [
             {
               name: "locations",
@@ -101,14 +105,19 @@ export const Settings: GlobalConfig = {
           label: "Integrations",
           fields: [
             {
-              name: "googleAnalytics",
-              label: "Google Analytics ID",
-              type: "text",
-            },
-            {
-              name: "googleTagManager",
-              label: "Google Tag Manager ID",
-              type: "text",
+              type: "row",
+              fields: [
+                {
+                  name: "googleAnalytics",
+                  label: "Google Analytics ID",
+                  type: "text",
+                },
+                {
+                  name: "googleTagManager",
+                  label: "Google Tag Manager ID",
+                  type: "text",
+                },
+              ],
             },
             {
               name: "head",
