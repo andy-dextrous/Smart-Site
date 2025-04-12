@@ -1469,8 +1469,8 @@ export interface Setting {
   integrations?: {
     googleAnalytics?: string | null;
     googleTagManager?: string | null;
-    beforeBody?: string | null;
-    afterBody?: string | null;
+    head?: string | null;
+    bodyEnd?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1561,8 +1561,8 @@ export interface SettingsSelect<T extends boolean = true> {
     | {
         googleAnalytics?: T;
         googleTagManager?: T;
-        beforeBody?: T;
-        afterBody?: T;
+        head?: T;
+        bodyEnd?: T;
       };
   updatedAt?: T;
   createdAt?: T;

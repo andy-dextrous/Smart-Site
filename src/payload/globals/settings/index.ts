@@ -111,16 +111,16 @@ export const Settings: GlobalConfig = {
               type: "text",
             },
             {
-              name: "beforeBody",
-              label: "Code Before Body",
+              name: "head",
+              label: "<Head> Code",
               type: "code",
               admin: {
                 language: "html",
               },
             },
             {
-              name: "afterBody",
-              label: "Code After Body",
+              name: "bodyEnd",
+              label: "<Body End> Code",
               type: "code",
               admin: {
                 language: "html",

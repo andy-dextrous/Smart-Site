@@ -1,15 +1,15 @@
-import React from "react"
-import { Inter } from "next/font/google"
 import Providers from "@/providers"
+import { Inter } from "next/font/google"
+import React from "react"
 
-import "./css/globals.css"
-import { AdminBar } from "@/payload/components/admin-bar"
-import { draftMode } from "next/headers"
-import { Header } from "@/payload/globals/header/component"
-import { Footer } from "@/payload/globals/footer/Component"
-import { GoogleTagManager } from "@next/third-parties/google"
-import { GoogleAnalytics } from "@next/third-parties/google"
 import { getSettings } from "@/lib/queries/globals"
+import { AdminBar } from "@/payload/components/admin-bar"
+import { Footer } from "@/payload/globals/footer/Component"
+import { Header } from "@/payload/globals/header/component"
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
+import parse from "html-react-parser"
+import { draftMode } from "next/headers"
+import "./css/globals.css"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,15 +32,15 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   const gtmId = integrations?.googleTagManager
   const gaId = integrations?.googleAnalytics
-  const beforeBody = integrations?.beforeBody
-  const afterBody = integrations?.afterBody
+  const head = integrations?.head
+  const bodyEnd = integrations?.bodyEnd
 
   return (
     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
       <head>
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
-        {/* {beforeBody && <script>{beforeBody}</script>} */}
+        {head && parse(head)}
       </head>
       <body>
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
@@ -55,7 +55,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           <main>{children}</main>
           <Footer />
 
-          {/* {afterBody && <script>{afterBody}</script>} */}
+          {bodyEnd && parse(bodyEnd)}
         </Providers>
       </body>
     </html>
