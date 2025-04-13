@@ -11,11 +11,14 @@ const admin = {
   importMap: {
     baseDir: path.resolve(dirname),
   },
-  autoLogin: {
-    email: process.env.PAYLOAD_ADMIN_EMAIL,
-    password: process.env.PAYLOAD_ADMIN_PASSWORD,
-    prefillOnly: false,
-  },
+  autoLogin:
+    process.env.NODE_ENV === "development"
+      ? {
+          email: process.env.PAYLOAD_ADMIN_EMAIL!,
+          password: process.env.PAYLOAD_ADMIN_PASSWORD!,
+          prefillOnly: false,
+        }
+      : undefined,
   components,
   meta: {
     title: "Admin | Wild Child",
