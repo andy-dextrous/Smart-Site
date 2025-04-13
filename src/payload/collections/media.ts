@@ -1,11 +1,5 @@
-import type { CollectionConfig } from "payload"
-
-import {
-  FixedToolbarFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from "@payloadcms/richtext-lexical"
 import path from "path"
+import type { CollectionConfig } from "payload"
 import { fileURLToPath } from "url"
 
 import { anyone } from "@/payload/access/anyone"
@@ -26,16 +20,11 @@ export const Media: CollectionConfig = {
     {
       name: "alt",
       type: "text",
-      //required: true,
+      required: true,
     },
     {
       name: "caption",
-      type: "richText",
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
-        },
-      }),
+      type: "textarea",
     },
   ],
   upload: {

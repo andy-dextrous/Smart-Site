@@ -5,9 +5,12 @@ import components from "@/payload/components/config"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const theme = "dark" as const
 
 const admin = {
   user: Users.slug,
+  suppressHydrationWarning: true,
+  theme,
   importMap: {
     baseDir: path.resolve(dirname),
   },

@@ -29,7 +29,16 @@ export const Pages: CollectionConfig<"pages"> = {
     slug: true,
   },
   admin: {
-    defaultColumns: ["title", "slug", "updatedAt"],
+    defaultColumns: [
+      "title",
+      "featuredImage",
+      "slug",
+      "updatedAt",
+      "id",
+      "categories",
+      "status",
+    ],
+    hideAPIURL: process.env.NODE_ENV === "production",
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({

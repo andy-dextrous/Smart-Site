@@ -165,22 +165,8 @@ export interface MediaBlock {
  */
 export interface Media {
   id: string;
-  alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  alt: string;
+  caption?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -645,6 +631,7 @@ export interface User {
   nickname?: string | null;
   name?: string | null;
   lastName?: string | null;
+  role: 'admin' | 'editor';
   avatar?: (string | null) | Media;
   bio?: string | null;
   socialLinks?:
@@ -1177,6 +1164,7 @@ export interface UsersSelect<T extends boolean = true> {
   nickname?: T;
   name?: T;
   lastName?: T;
+  role?: T;
   avatar?: T;
   bio?: T;
   socialLinks?:
