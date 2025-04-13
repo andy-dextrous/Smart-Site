@@ -4,7 +4,7 @@ import { CollectionArchive } from "@/payload/components/collection-archive"
 import configPromise from "@payload-config"
 import { getPayload } from "payload"
 import React from "react"
-import { Search } from "@/payload/search/component"
+import { Search } from "@/payload/search/components"
 import { CardPostData } from "@/payload/components/card"
 
 type Args = {
