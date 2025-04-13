@@ -2,3 +2,7 @@
   width: 16px;
   height: 16px;
 }
+
+.nav__controls {
+  padding-inline: calc(var(--spacing) * 6);
+}

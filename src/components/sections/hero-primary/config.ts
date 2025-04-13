@@ -16,6 +16,7 @@ export const HeroPrimary: Block = {
       name: "heading",
       type: "text",
       required: true,
+      // localized: true,
     },
     {
       name: "content",
