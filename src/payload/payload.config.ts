@@ -11,23 +11,25 @@ import path from "path"
 import { buildConfig } from "payload"
 import sharp from "sharp"
 import { fileURLToPath } from "url"
+import { blocks } from "@/payload/blocks/config"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin,
-  editor: lexicalEditor(),
-  db,
-  email,
+  blocks,
   collections,
   cors: [getServerSideURL()].filter(Boolean),
+  db,
+  editor: lexicalEditor(),
+  email,
   globals,
   plugins,
+  jobs,
   secret: process.env.PAYLOAD_SECRET || "",
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  jobs,
 })

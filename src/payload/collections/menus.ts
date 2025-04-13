@@ -2,7 +2,6 @@ import type { CollectionConfig } from "payload"
 
 import { anyone } from "@/payload/access/anyone"
 import { authenticated } from "@/payload/access/authenticated"
-import { slugField } from "@/payload/fields/slug"
 
 export const Menus: CollectionConfig = {
   slug: "menus",
@@ -20,6 +19,40 @@ export const Menus: CollectionConfig = {
       name: "title",
       type: "text",
       required: true,
+    },
+    {
+      name: "items",
+      type: "array",
+      required: true,
+      fields: [
+        {
+          name: "label",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "url",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "subItems",
+          type: "array",
+          required: false,
+          fields: [
+            {
+              name: "label",
+              type: "text",
+              required: true,
+            },
+            {
+              name: "url",
+              type: "text",
+              required: true,
+            },
+          ],
+        },
+      ],
     },
   ],
 }

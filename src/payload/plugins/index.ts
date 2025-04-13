@@ -54,10 +54,7 @@ export const plugins: Plugin[] = [
       },
     },
   }),
-  nestedDocsPlugin({
-    collections: ["categories"],
-    generateURL: docs => docs.reduce((url, doc) => `${url}/${doc.slug}`, ""),
-  }),
+
   seoPlugin({
     generateTitle,
     generateURL,
@@ -102,9 +99,15 @@ export const plugins: Plugin[] = [
     },
   }),
   vercelBlobStorage({
+    cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year
     collections: {
       media: true,
     },
     token: process.env.BLOB_READ_WRITE_TOKEN,
+  }),
+  nestedDocsPlugin({
+    collections: ["pages", "categories"],
+    generateLabel: (_, doc) => doc.title as string,
+    generateURL: docs => docs.reduce((url, doc) => `${url}/${doc.slug as string}`, ""),
   }),
 ]

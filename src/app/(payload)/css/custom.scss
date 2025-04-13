@@ -1,3 +1,7 @@
+/*
+ Customised to use Wild Child theme
+*/
+
 :root {
   --color-base-0: #ffffff;
   --color-base-50: #f8f8f9;
@@ -20,6 +24,12 @@
   --color-base-900: #18181a;
   --color-base-950: #060607;
   --color-base-1000: #0b0b0b;
+
+  --nav-width: 240px;
+
+  // .document-fields__sidebar-wrap {
+  //   width: 400px;
+  // }
 }
 
 :root {
