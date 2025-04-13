@@ -15,7 +15,7 @@ export const home = ({
     title: "Home",
     slug: "home",
     _status: "published",
-    layout: [
+    sections: [
       {
         blockType: "hero-primary",
         heading: "Payload Website Template",
@@ -72,10 +72,6 @@ export const home = ({
             version: 1,
           },
         },
-      },
-      {
-        blockType: "mediaBlock",
-        media: heroImage.id,
       },
     ],
     meta: {

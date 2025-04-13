@@ -6,7 +6,7 @@ export const homeStatic: Omit<Page, "updatedAt" | "id" | "createdAt"> &
   title: "Home",
   slug: "home",
   _status: "published",
-  layout: [
+  sections: [
     {
       blockType: "hero-primary",
       heading: "Payload Website Template",
