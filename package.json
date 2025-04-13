@@ -45,6 +45,7 @@
     "@tailwindcss/postcss": "^4.0.17",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cross-env": "^7.0.3",
     "graphql": "^16.10.0",
     "gsap": "npm:@gsap/shockingly@^3.12.7",
     "html-react-parser": "^5.2.3",
