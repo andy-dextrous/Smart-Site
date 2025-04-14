@@ -9,10 +9,10 @@ const dirname = path.dirname(filename)
 const admin = {
   user: Users.slug,
   suppressHydrationWarning: true,
-  theme: "dark" as const,
   importMap: {
     baseDir: path.resolve(dirname),
   },
+  theme: "dark" as const,
   autoLogin:
     process.env.NODE_ENV === "development"
       ? {

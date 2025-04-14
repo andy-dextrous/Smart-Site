@@ -26,13 +26,43 @@
   --color-base-1000: #0b0b0b;
 
   --nav-width: 240px;
-
-  // .document-fields__sidebar-wrap {
-  //   width: 400px;
-  // }
 }
 
 :root {
   --wild-child-indigo: #495ae1;
   --wild-child-indigo-light: #8190ff;
+}
+
+// Light theme overrides
+
+[data-theme="light"] {
+  .nav {
+    background-color: var(--color-base-850);
+
+    &__link {
+      color: var(--color-base-0);
+
+      &:hover {
+        background-color: var(--color-base-800);
+      }
+    }
+
+    &-toggler .hamburger {
+      background-color: var(--color-base-850);
+      border-color: var(--color-base-800);
+
+      & svg path {
+        stroke: var(--color-base-0) !important;
+      }
+    }
+  }
+
+  .document-fields__sidebar-wrap,
+  .doc-controls {
+    background-color: var(--color-base-50);
+  }
+
+  .icon--logout {
+    color: var(--color-base-0);
+  }
 }

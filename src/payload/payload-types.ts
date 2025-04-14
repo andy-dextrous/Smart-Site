@@ -481,11 +481,13 @@ export interface Page {
   sections: (HeroPrimaryBlock | TextImageBlock)[];
   meta?: {
     title?: string | null;
-    description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (string | null) | Media;
+    description?: string | null;
+    noIndex?: boolean | null;
+    canonicalUrl?: string | null;
   };
   slug?: string | null;
   slugLock?: boolean | null;
@@ -556,11 +558,11 @@ export interface Post {
   };
   meta?: {
     title?: string | null;
-    description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (string | null) | Media;
+    description?: string | null;
   };
   publishedAt?: string | null;
   authors?: (string | User)[] | null;
@@ -1048,8 +1050,10 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
-        description?: T;
         image?: T;
+        description?: T;
+        noIndex?: T;
+        canonicalUrl?: T;
       };
   slug?: T;
   slugLock?: T;
@@ -1116,8 +1120,8 @@ export interface PostsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
-        description?: T;
         image?: T;
+        description?: T;
       };
   publishedAt?: T;
   authors?: T;

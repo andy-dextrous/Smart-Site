@@ -58,6 +58,7 @@ export const plugins: Plugin[] = [
   seoPlugin({
     generateTitle,
     generateURL,
+    generateImage: ({ doc }) => doc?.meta?.image || doc?.featuredImage,
   }),
   formBuilderPlugin({
     fields: {

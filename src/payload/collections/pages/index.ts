@@ -15,6 +15,7 @@ import {
   OverviewField,
   PreviewField,
 } from "@payloadcms/plugin-seo/fields"
+// import { assignTemplate } from "./hooks/assignTemplate"
 
 export const Pages: CollectionConfig<"pages"> = {
   slug: "pages",
@@ -123,16 +124,23 @@ export const Pages: CollectionConfig<"pages"> = {
             MetaImageField({
               relationTo: "media",
             }),
-
             MetaDescriptionField({}),
             PreviewField({
-              // if the `generateUrl` function is configured
               hasGenerateFn: true,
-
-              // field paths to match the target field for data
               titlePath: "meta.title",
               descriptionPath: "meta.description",
             }),
+            {
+              name: "noIndex",
+              label: "No Index Page",
+              type: "checkbox",
+              defaultValue: false,
+            },
+            {
+              name: "canonicalUrl",
+              label: "Canonical URL",
+              type: "text",
+            },
           ],
         },
       ],
@@ -144,6 +152,7 @@ export const Pages: CollectionConfig<"pages"> = {
     afterChange: [revalidatePage],
     beforeChange: [populatePublishedAt],
     afterDelete: [revalidateDelete],
+    // afterOperation: [assignTemplate],
   },
   versions: {
     drafts: {
