@@ -6,7 +6,9 @@ export const Settings: GlobalConfig = {
   access: {
     read: () => true,
   },
-
+  admin: {
+    hideAPIURL: process.env.NODE_ENV === "production",
+  },
   fields: [
     {
       type: "tabs",

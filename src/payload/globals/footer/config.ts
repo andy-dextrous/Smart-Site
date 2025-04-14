@@ -8,6 +8,9 @@ export const Footer: GlobalConfig = {
   access: {
     read: () => true,
   },
+  admin: {
+    hideAPIURL: process.env.NODE_ENV === "production",
+  },
   fields: [
     {
       name: "navItems",

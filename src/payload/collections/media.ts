@@ -16,6 +16,9 @@ export const Media: CollectionConfig = {
     read: anyone,
     update: authenticated,
   },
+  admin: {
+    hideAPIURL: process.env.NODE_ENV === "production",
+  },
   fields: [
     {
       name: "alt",

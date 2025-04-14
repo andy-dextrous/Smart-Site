@@ -14,6 +14,7 @@ export const Categories: CollectionConfig = {
   },
   admin: {
     useAsTitle: "title",
+    hideAPIURL: process.env.NODE_ENV === "production",
   },
   fields: [
     {
