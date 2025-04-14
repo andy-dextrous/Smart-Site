@@ -5,6 +5,7 @@ import { PayloadRedirects } from "@/payload/components/payload-redirects"
 import { generateMeta } from "@/utilities/generateMeta"
 import { Metadata } from "next"
 import { draftMode } from "next/headers"
+import { redirect } from "next/navigation"
 import { type RequiredDataFromCollectionSlug } from "payload"
 import { Fragment } from "react"
 
@@ -16,11 +17,16 @@ type Args = {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const { slug = "home" } = await paramsPromise
+  const { slug = "" } = await paramsPromise
   const url = "/" + slug
 
+  // "home" designates the home page by default
+  if (slug === "home") {
+    redirect("/")
+  }
+
   const page: RequiredDataFromCollectionSlug<"pages"> | null = await getPageBySlug({
-    slug,
+    slug: slug === "" ? "home" : slug,
     draft,
   })
 
@@ -32,7 +38,8 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   return (
     <Fragment>
-      <PayloadRedirects disableNotFound url={url} />
+      {/* Only use PayloadRedirects for non-home pages to prevent loops */}
+      {slug !== "home" && <PayloadRedirects disableNotFound url={url} />}
       {draft && <LivePreviewListener />}
       <RenderSections sections={sections} />
     </Fragment>
