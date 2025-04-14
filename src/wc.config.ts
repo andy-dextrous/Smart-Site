@@ -1,18 +1,3 @@
-const wildChildConfig: WildChildConfig = {
-  themeToggle: false,
-  gsap: false,
-  smoothScroll: false,
-  i18n: false,
-  // i18n:{
-  //   prefixDefaultLocale: false,
-  //   defaultLocale: "en",
-  //   locales: ["en", "es"],
-  //   localeCookie: "NEXT_LOCALE",
-  // }
-}
-
-export default wildChildConfig
-
 interface WildChildConfig {
   themeToggle: boolean
   gsap: boolean
@@ -21,8 +6,17 @@ interface WildChildConfig {
 }
 
 interface i18nConfig {
-  prefixDefaultLocale: boolean
-  defaultLocale: string
-  locales: string[]
-  localeCookie: string
+  prefixDefaultLocale: boolean // example: false
+  defaultLocale: string // example: "en"
+  locales: string[] // example: ["en", "es"]
+  localeCookie: string // example: "NEXT_LOCALE"
 }
+
+const wildChildConfig: WildChildConfig = {
+  themeToggle: false,
+  gsap: false,
+  smoothScroll: false, // depends on gsap as prerequisite
+  i18n: false,
+}
+
+export default wildChildConfig

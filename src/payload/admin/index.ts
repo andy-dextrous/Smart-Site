@@ -5,12 +5,11 @@ import components from "@/payload/components/config"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const theme = "dark" as const
 
 const admin = {
   user: Users.slug,
   suppressHydrationWarning: true,
-  theme,
+  theme: "dark" as const,
   importMap: {
     baseDir: path.resolve(dirname),
   },
@@ -25,7 +24,7 @@ const admin = {
   components,
   meta: {
     title: "Admin | Wild Child",
-    description: "The best admin panel in the world",
+    description: "Advanced admin panel for high-performance websites",
     icons: [
       {
         rel: "icon",

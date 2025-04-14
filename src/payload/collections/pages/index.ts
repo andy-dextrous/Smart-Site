@@ -81,7 +81,7 @@ export const Pages: CollectionConfig<"pages"> = {
       relationTo: "categories",
     },
     {
-      name: "heroImage",
+      name: "featuredImage",
       label: "Featured Image",
       type: "upload",
       relationTo: "media",
