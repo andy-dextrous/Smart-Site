@@ -40,6 +40,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       <head>
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link href="https://www.googletagmanager.com" rel="preconnect" />
+        <link href="https://www.google-analytics.com" rel="preconnect" />
         {head && parse(head)}
       </head>
 

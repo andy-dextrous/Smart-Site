@@ -19,6 +19,14 @@ export const Media: CollectionConfig = {
   admin: {
     hideAPIURL: process.env.NODE_ENV === "production",
   },
+  defaultPopulate: {
+    alt: true,
+    filename: true,
+    height: true,
+    mimeType: true,
+    url: true,
+    width: true,
+  },
   fields: [
     {
       name: "alt",

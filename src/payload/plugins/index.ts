@@ -58,6 +58,8 @@ export const plugins: Plugin[] = [
   seoPlugin({
     generateTitle,
     generateURL,
+    collections: ["pages", "posts"],
+    uploadsCollection: "media",
   }),
   formBuilderPlugin({
     fields: {

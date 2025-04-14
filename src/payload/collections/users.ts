@@ -14,7 +14,7 @@ export const Users: CollectionConfig = {
   },
   admin: {
     defaultColumns: ["username", "name", "lastName", "email", "role"],
-    useAsTitle: "username",
+    useAsTitle: "email",
     hideAPIURL: process.env.NODE_ENV === "production",
   },
   auth: {
