@@ -13,19 +13,23 @@ export const Users: CollectionConfig = {
     update: isAdminOrSelf,
   },
   admin: {
-    defaultColumns: ["name", "email", "role"],
-    useAsTitle: "name",
+    defaultColumns: ["username", "name", "lastName", "email", "role"],
+    useAsTitle: "username",
   },
-  auth: true,
+  auth: {
+    tokenExpiration: 604800000, // 7 days
+    // verify: true, // Require email verification before being allowed to authenticate
+    maxLoginAttempts: 5,
+    lockTime: 600 * 1000, // 10 minutes
+    loginWithUsername: {
+      allowEmailLogin: true,
+      requireEmail: true,
+    },
+  },
   fields: [
     {
       type: "row",
       fields: [
-        {
-          name: "nickname",
-          type: "text",
-          label: "Nickname",
-        },
         {
           name: "name",
           label: "First Name",
