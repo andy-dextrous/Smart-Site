@@ -4,8 +4,14 @@ import { ExoticComponent } from "react"
 import { FaFileAlt, FaSearch, FaUserAlt, FaWpforms } from "react-icons/fa"
 import { IoIosDocument } from "react-icons/io"
 import { IconType } from "react-icons/lib"
-import { MdBorderBottom, MdOutlinePermMedia, MdBorderTop } from "react-icons/md"
+import {
+  MdBorderBottom,
+  MdOutlinePermMedia,
+  MdBorderTop,
+  MdBusinessCenter,
+} from "react-icons/md"
 import { IoMenu, IoSettings, IoDocumentsSharp } from "react-icons/io5"
+import { RiTeamFill } from "react-icons/ri"
 
 export const navIconMap: Partial<
   Record<CollectionSlug | GlobalSlug, ExoticComponent<LucideProps> | IconType>
@@ -23,6 +29,8 @@ export const navIconMap: Partial<
   settings: IoSettings,
   header: MdBorderTop,
   footer: MdBorderBottom,
+  team: RiTeamFill,
+  services: MdBusinessCenter,
 }
 
 export const getNavIcon = (slug: string) =>

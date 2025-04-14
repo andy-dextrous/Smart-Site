@@ -16,27 +16,26 @@ export const Categories: CollectionConfig = {
     useAsTitle: "title",
     hideAPIURL: process.env.NODE_ENV === "production",
   },
-
   fields: [
     {
       name: "title",
+      label: "Category Name",
       type: "text",
       required: true,
     },
     {
       name: "description",
+      label: "Category Description",
       type: "textarea",
-      label: "Description",
-      required: true,
     },
     {
       name: "posts",
       type: "join",
       collection: "posts",
       defaultLimit: 0,
-      label: "Posts",
+      label: "Posts in Category",
       maxDepth: 2,
-      on: "category",
+      on: "categories",
     },
     ...slugField(),
   ],
