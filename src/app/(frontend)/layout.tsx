@@ -20,8 +20,8 @@ export async function generateMetadata() {
   const settings = await getSettings()
 
   return {
-    description: settings.general?.siteDescription || "",
-    title: settings.general?.siteName || "",
+    description: settings.general?.siteDescription || "Wild Child",
+    title: settings.general?.siteName || "Wild Child",
   }
 }
 
@@ -42,6 +42,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
         {head && parse(head)}
       </head>
+
       <body>
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}

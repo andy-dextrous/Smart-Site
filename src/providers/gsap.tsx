@@ -8,7 +8,7 @@ import { SplitText } from "gsap/SplitText"
 import { CustomEase } from "gsap/CustomEase"
 import gsap from "gsap"
 import { createContext, useRef } from "react"
-import wildChildConfig from "@/wild-child.config"
+import wildChildConfig from "@/wc.config"
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, useGSAP, SplitText, CustomEase)

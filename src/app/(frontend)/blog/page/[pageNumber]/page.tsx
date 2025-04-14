@@ -7,6 +7,7 @@ import configPromise from "@payload-config"
 import { getPayload } from "payload"
 import React from "react"
 import { notFound } from "next/navigation"
+import { getSettings } from "@/lib/queries/globals"
 
 export const revalidate = 600
 
@@ -64,8 +65,11 @@ export async function generateMetadata({
   params: paramsPromise,
 }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
+
+  const settings = await getSettings()
+
   return {
-    title: `Payload Website Template Posts Page ${pageNumber || ""}`,
+    title: `Posts Page ${pageNumber || ""} | ${settings?.general?.siteName || "Wild Child"}`,
   }
 }
 
