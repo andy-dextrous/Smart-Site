@@ -1,7 +1,7 @@
 ---
-description: Describes how Tailwind is setup, how to use it and how to extend it. Use whenever building new html with styling
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Tailwind Configuration
