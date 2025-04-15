@@ -31,6 +31,7 @@ alwaysApply: true
   - If you need more details about what I want, ask directly. Do not assume.
   - Before creating a new file or adding functionality, confirm it doesn’t already exist in the repo.
   - Do not attempt to commit to Git.
+  - Do not write your own SVGs. Lucide Icons and React Icons are installed. If you want an icon, import it from one of these libraries.
 
 
 ## Style choices
