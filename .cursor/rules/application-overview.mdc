@@ -35,5 +35,6 @@ This repo contains two primary modules:
 - It has both lucide-icons and react-icons installed
 - usehooks-ts is installed for many useful front end utilities
 - shadcn is set up with minimal components. If you need to create a component that has components best imported from a library (modals, selects, navigation menus etc), instead of writing your own, see if shadcn has what you need
+- swiper js react is used for ALL sliders
 - use [package.json](mdc:package.json) to identify what is available for use.
 

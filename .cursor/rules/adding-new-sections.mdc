@@ -92,10 +92,12 @@ export const NewSectionComponent: React.FC<NewSectionBlock> = props => {
 
 ## Rules For Making Sections
 
-1. Confirm with the user what they would like added as fields before making them. 
+1. Confirm with the user what they would like added as fields before making them. If a chat starts with a screenshot/photo, try to undertand it first before asking for more information.
 2. If a photo of the section is provided, try to infer as many fields from it as possible and also try to infer the design of the section to the best of your ability. Map the design to your component's JSX using the design system implemented in the Tailwind folder `src/(frontend)/css`.
 3. DO NOT create readme files or any kind of markdown/documentation for anything you do.
-4. DO NOT create types or interfaces yourself - Payload will do this. If it hasn't yet, be patient, it will work. Ignore type errors caused by missing type files. ONLY create the two files mentioned below. NEVER create your own types for the Payload Props. These must come from payload. DO NOT FIX LINT ERRORS.
+4. DO NOT create types or interfaces yourself - Payload will do this. If it hasn't yet, be patient, it will work. Ignore type errors caused by missing type files. ONLY create the two files mentioned below. NEVER create your own types for the Payload Props. These must come from payload. DO NOT FIX LINT ERRORS. If there are errors, try running this command in the terminal `npm run generate:types` to fix the errors..
 5. When naming a section, use architectural/layout names that describe the style of layout it is. DO NOT name it after the content that is in an example. The idea is to create REUSABLE layouts. Keep names as generic as possible. ie, instead of service-card-grid - just call it card-grid.
 6. DO NOT add GSAP code unless asked to. Don't assume each section should have animation.
+7. Strictly follow the tailwin rules for handling typography. The design system in tailwind pre-handles MANY styles for spacing and typography. Don't add typography classes for styles that are established by the design system.
+8. Always look at `src/payload/collections/config.ts` to see what post types are in this repo. You want to use this knowledge to make decisions about whether to use a relationship/join field or not. 
 
