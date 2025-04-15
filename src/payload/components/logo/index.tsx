@@ -14,8 +14,8 @@ export const Icon = () => {
       style={{
         position: "relative",
         width: "120px",
-        height: "36px",
-        marginRight: "20px",
+        height: "28px",
+        marginRight: "14px",
       }}
     >
       <Image src="/assets/admin/logos/logo.svg" alt="" fill />

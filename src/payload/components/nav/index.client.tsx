@@ -69,7 +69,7 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
                   <LinkElement
                     className={[
                       `${baseClass}__link px-6 py-2 hover:bg-(--color-base-850) hover:no-underline`,
-                      activeCollection && `active bg-(--color-base-80)`,
+                      activeCollection && `active`,
                     ]
                       .filter(Boolean)
                       .join(" ")}

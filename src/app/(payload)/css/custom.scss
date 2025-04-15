@@ -13,7 +13,11 @@
   }
 
   .template-default {
-    background-color: var(--color-base-900);
+    background: linear-gradient(90deg, #18181a 0%, #1c1c1f 100%);
+
+    .template-default__wrap {
+      background: transparent;
+    }
   }
 
   .btn--style-primary,
@@ -119,7 +123,10 @@
 
     &__link {
       margin-bottom: base(0.25);
-      border-radius: 999px;
+
+      &.active {
+        background-color: var(--color-base-850);
+      }
 
       &-label {
         font-size: base(0.75);
@@ -179,10 +186,23 @@
     min-width: 160px;
     height: auto;
     min-height: 50px;
+
+    span {
+      overflow: visible;
+    }
   }
 
-  .app-header__account {
-    text-decoration: none;
+  #field-breadcrumbs {
+    display: none;
+  }
+
+  .app-header {
+    // margin-bottom: 3rem !important;
+    // border-bottom: 1px solid var(--color-base-800);
+
+    &__account {
+      text-decoration: none;
+    }
   }
 
   // Light theme overrides
