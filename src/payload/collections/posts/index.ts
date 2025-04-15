@@ -1,7 +1,6 @@
 import type { CollectionConfig } from "payload"
 
 import {
-  BlocksFeature,
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
@@ -77,7 +76,6 @@ export const Posts: CollectionConfig<"posts"> = {
       type: "text",
       required: true,
     },
-
     {
       name: "relatedPosts",
       type: "relationship",
@@ -132,7 +130,6 @@ export const Posts: CollectionConfig<"posts"> = {
                 },
               }),
               label: false,
-              required: true,
             },
           ],
           label: "Content",

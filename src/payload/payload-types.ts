@@ -541,7 +541,7 @@ export interface Post {
   relatedPosts?: (string | Post)[] | null;
   categories?: (string | Category)[] | null;
   heroImage?: (string | null) | Media;
-  content: {
+  content?: {
     root: {
       type: string;
       children: {
@@ -555,7 +555,7 @@ export interface Post {
       version: number;
     };
     [k: string]: unknown;
-  };
+  } | null;
   meta?: {
     title?: string | null;
     /**
