@@ -29,6 +29,25 @@ const getPagesSitemap = unstable_cache(
       },
     })
 
+    // Fetch services
+    const services = await payload.find({
+      collection: "services",
+      overrideAccess: false,
+      draft: false,
+      depth: 0,
+      limit: 1000,
+      pagination: false,
+      where: {
+        _status: {
+          equals: "published",
+        },
+      },
+      select: {
+        slug: true,
+        updatedAt: true,
+      },
+    })
+
     const dateFallback = new Date().toISOString()
 
     const defaultSitemap = [
@@ -42,7 +61,7 @@ const getPagesSitemap = unstable_cache(
       },
     ]
 
-    const sitemap = results.docs
+    const pagesSitemap = results.docs
       ? results.docs
           .filter(page => Boolean(page?.slug))
           .map(page => {
@@ -53,7 +72,19 @@ const getPagesSitemap = unstable_cache(
           })
       : []
 
-    return [...defaultSitemap, ...sitemap]
+    // Create sitemap entries for services
+    const servicesSitemap = services.docs
+      ? services.docs
+          .filter(service => Boolean(service?.slug))
+          .map(service => {
+            return {
+              loc: `${SITE_URL}/services/${service?.slug}`,
+              lastmod: service.updatedAt || dateFallback,
+            }
+          })
+      : []
+
+    return [...defaultSitemap, ...pagesSitemap, ...servicesSitemap]
   },
   ["pages-sitemap"],
   {
