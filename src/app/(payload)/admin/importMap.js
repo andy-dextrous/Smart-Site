@@ -36,6 +36,7 @@ import { Avatar as Avatar_014e5f13595d810e4dc17352983e2089 } from '@/payload/com
 import { default as default_c7c2d5047a39da2f1752f9f22e2a540e } from '@/payload/components/nav'
 import { Icon as Icon_73c8b1b47ab18015d1d46e312e7d06d3 } from '@/payload/components/logo'
 import { Logo as Logo_73c8b1b47ab18015d1d46e312e7d06d3 } from '@/payload/components/logo'
+import { default as default_b46347482c6693a8d69ca1369dfb3703 } from '@/payload/components/actions'
 import { BeforeLogin as BeforeLogin_edfad33263b17e575bf8c1981714ad0e } from '@/payload/components/before-login'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { Dashboard as Dashboard_df6665dda542bab642580b3cc47846ca } from '@/payload/components/dashboard'
@@ -79,6 +80,7 @@ export const importMap = {
   "@/payload/components/nav#default": default_c7c2d5047a39da2f1752f9f22e2a540e,
   "@/payload/components/logo#Icon": Icon_73c8b1b47ab18015d1d46e312e7d06d3,
   "@/payload/components/logo#Logo": Logo_73c8b1b47ab18015d1d46e312e7d06d3,
+  "@/payload/components/actions#default": default_b46347482c6693a8d69ca1369dfb3703,
   "@/payload/components/before-login#BeforeLogin": BeforeLogin_edfad33263b17e575bf8c1981714ad0e,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "@/payload/components/dashboard#Dashboard": Dashboard_df6665dda542bab642580b3cc47846ca

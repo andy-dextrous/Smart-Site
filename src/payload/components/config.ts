@@ -1,5 +1,6 @@
 const components = {
   Nav: "@/payload/components/nav",
+  actions: ["@/payload/components/actions"],
   views: {
     dashboard: {
       Component: "@/payload/components/dashboard#Dashboard",
