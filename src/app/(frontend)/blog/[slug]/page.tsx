@@ -6,6 +6,7 @@ import { PostHero } from "@/components/posts/post-hero"
 import { getPostBySlug, getPosts } from "@/lib/queries/post"
 import { LivePreviewListener } from "@/payload/components/live-preview-listener"
 import { generateMeta } from "@/utilities/generateMeta"
+import { Fragment } from "react"
 
 type Args = {
   params: Promise<{
@@ -22,12 +23,14 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects url={url} />
 
   return (
-    <article className="pt-16 pb-16">
+    <Fragment>
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <PostHero post={post} />
-      <PostBody post={post} />
-    </article>
+      <article className="pt-16 pb-16">
+        <PostHero post={post} />
+        <PostBody post={post} />
+      </article>
+    </Fragment>
   )
 }
 

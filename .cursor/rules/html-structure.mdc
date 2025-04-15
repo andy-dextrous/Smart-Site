@@ -1,0 +1,13 @@
+---
+description: This shows how the website's html should be laid out
+globs: 
+alwaysApply: false
+---
+
+# Website HTML Layout
+
+- This website is built using standard, best-practices for accessible html.
+- Inside the [layout.tsx](mdc:src/app/(frontend)/layout.tsx) component you will find a <header />, <main /> and <footer />. These comprise the core content blocks.
+- Inside the <main /> we add <section /> tags that break up the main into its structure.
+- <section /> tags can have a <div className="container"> or not. Section tags and containers typically get all of their styling from [base.css](mdc:src/app/(frontend)/css/base.css) and [utilities.css](mdc:src/app/(frontend)/css/utilities.css). You should NOT need to add tailwind classes to section or containers for things like padding, width etc. The spacing elements are accounted for and should be uniform as per the design system.
+- Some get modified though so don't change anything that you're not asked to.
