@@ -6,11 +6,18 @@
     --app-header-height: calc(var(--base) * 5);
   }
 
+  @media (max-width: 1200px) {
+    .upload__dropzoneContent__buttons {
+      flex-direction: column;
+    }
+  }
+
   .template-default {
     background-color: var(--color-base-900);
   }
 
   .btn--style-primary,
+  .popup-button,
   .btn--icon-style-without-border:not(
       .status__action,
       .lock-button,
@@ -19,8 +26,7 @@
       .upload__createNewToggler,
       .upload__listToggler,
       .btn--style-secondary
-    ),
-  .popup-button {
+    ) {
     --bg-color: var(--wild-child-indigo);
     --color: var(--color-base-0);
     --hover-color: var(--color-base-0);
@@ -168,11 +174,11 @@
     margin-left: base(0.6);
   }
 
-  .step-nav {
-    &__home {
-      width: auto;
-      height: auto;
-    }
+  .step-nav__home {
+    width: 100%;
+    min-width: 160px;
+    height: auto;
+    min-height: 50px;
   }
 
   .app-header__account {
