@@ -26,7 +26,7 @@ const buttonVariants = cva(
         outline:
           "border border-border bg-background hover:bg-card hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        icon: "h-10 w-10 p-0 bg-(--color-base-850) color-(--theme-elevation-800) border-none",
+        icon: "h-10 w-10 p-0 bg-(--color-base-850) hover:bg-(--color-base-800) color-(--theme-elevation-800) border-none",
       },
     },
   }

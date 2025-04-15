@@ -3,7 +3,7 @@ import { HiOutlineExternalLink } from "react-icons/hi"
 import Link from "next/link"
 
 export default async function ViewPage(props: any) {
-  const { payload, docID, collectionSlug, viewType } = props
+  // const { payload, docID, collectionSlug, viewType } = props
 
   // const { docs } = await payload.find({
   //   collection: collectionSlug,

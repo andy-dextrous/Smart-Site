@@ -41,7 +41,7 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
     <Fragment>
       {groups.map(({ entities }, key) => {
         return (
-          <div key={key} className="flex w-full flex-col gap-2 pt-8">
+          <div key={key} className="flex w-full flex-col gap-2">
             {entities
               .filter(({ slug }) => !omittedEntities.includes(slug))
               .map(({ slug, type, label }, i) => {

@@ -12,6 +12,8 @@
     display: inline-flex;
     gap: 4px;
     align-items: center;
+    max-width: unset;
+    width: fit-content;
 
     &__greeting,
     &__chevron {
@@ -24,7 +26,7 @@
     }
 
     &:hover {
-      border: 1px solid var(--theme-elevation-700);
+      background-color: var(--theme-elevation-100);
     }
   }
 
