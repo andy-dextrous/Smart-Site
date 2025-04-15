@@ -711,6 +711,8 @@ export interface Team {
   createdAt: string;
 }
 /**
+ * Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services".
  */

@@ -1,0 +1,8 @@
+@layer payload-default {
+  .dashboard {
+    &__label {
+      text-transform: uppercase;
+      letter-spacing: 0.75;
+    }
+  }
+}

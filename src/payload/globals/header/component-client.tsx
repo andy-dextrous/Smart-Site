@@ -1,31 +1,21 @@
 "use client"
 
-// import { useHeaderTheme } from "@/payload/providers/HeaderTheme"
 import Link from "next/link"
-
-import React, { useEffect, useState } from "react"
-
+import React, { useState } from "react"
 import type { Header } from "@/payload/payload-types"
-
-import { Logo } from "@/payload/components/logo"
 import { HeaderNav } from "@/payload/globals/header/nav"
+import Image from "next/image"
 
 interface HeaderClientProps {
   data: Header
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
-  /* Storing the value in a useState to avoid hydration errors */
-  const [theme, setTheme] = useState<string | null>(null)
-
   return (
-    <header
-      className="relative z-20 container"
-      {...(theme ? { "data-theme": theme } : {})}
-    >
+    <header className="relative z-20 container">
       <div className="flex justify-between py-8">
         <Link href="/">
-          <Logo loading="eager" priority="high" className="invert dark:invert-0" />
+          <Image src="/assets/logos/logo.svg" alt="Logo" width={200} height={50} />
         </Link>
         <HeaderNav data={data} />
       </div>

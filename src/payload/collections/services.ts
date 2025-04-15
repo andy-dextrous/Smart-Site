@@ -10,6 +10,10 @@ import { CollectionConfig } from "payload"
 
 export const Services: CollectionConfig = {
   slug: "services",
+  admin: {
+    description:
+      "Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.",
+  },
   fields: [
     {
       name: "title",
