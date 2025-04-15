@@ -1,0 +1,15 @@
+---
+description: Describes how Tailwind is setup, how to use it and how to extend it. Use whenever building new html with styling
+globs: 
+alwaysApply: false
+---
+
+# Tailwind Configuration
+
+- This website used Tailwind v4. This means that all config is handled inside css files. 
+- All tailwind code is located inside src/app/(frontend)/css
+- globals.css is the entrypoint
+- Since this is a website, not an app, we use a strict design system that is built into theme.css
+- base.css is used to define the base styles of elements
+- typography.css is used to set all typography styling site-wide. Always write typography that is congruent with teh design system. You won't need to add classes to headings, text, links etc - they will all be inherited from teh design system at the element level. Only use new classes for color changes etc - things that are unique to the current section.
+

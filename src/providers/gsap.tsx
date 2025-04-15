@@ -1,16 +1,17 @@
 "use client"
 
+import canUseDOM from "@/utilities/canUseDOM"
+import wildChildConfig from "@/wc.config"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
+import { CustomEase } from "gsap/CustomEase"
 import { ScrollSmoother } from "gsap/dist/ScrollSmoother"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
-import { useGSAP } from "@gsap/react"
-import { usePathname } from "next/navigation"
 import { SplitText } from "gsap/SplitText"
-import { CustomEase } from "gsap/CustomEase"
-import gsap from "gsap"
+import { usePathname } from "next/navigation"
 import { createContext, useRef } from "react"
-import wildChildConfig from "@/wc.config"
 
-if (typeof window !== "undefined") {
+if (canUseDOM) {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, useGSAP, SplitText, CustomEase)
 }
 
@@ -54,3 +55,5 @@ const GSAPProvider = ({ children }: { children: React.ReactNode }) => {
 }
 
 export default GSAPProvider
+export * from "@gsap/react"
+export * from "gsap"
