@@ -127,6 +127,7 @@
 
       &.active {
         background-color: var(--color-base-850);
+        border-left: 2px solid var(--wild-child-indigo-light);
       }
 
       &-label {
