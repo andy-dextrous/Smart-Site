@@ -87,7 +87,7 @@ export const NavClient: FC<Props> = ({ groups, navPreferences }) => {
                       <Icon
                         className={[
                           `${baseClass}__icon mr-4`,
-                          activeCollection && "text-(--wild-child-indigo)",
+                          activeCollection && "text-(--wild-child-indigo-light)",
                         ].join(" ")}
                       />
                     )}
