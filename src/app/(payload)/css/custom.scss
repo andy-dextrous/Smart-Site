@@ -242,4 +242,12 @@
       color: var(--color-base-0);
     }
   }
+
+  .confirmation-modal__controls {
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+    }
+  }
 }

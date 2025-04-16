@@ -15,6 +15,7 @@ import {
   OverviewField,
   PreviewField,
 } from "@payloadcms/plugin-seo/fields"
+import { lockSlugAfterPublish } from "./hooks/lockSlug"
 // import { assignTemplate } from "./hooks/assignTemplate"
 
 export const Pages: CollectionConfig<"pages"> = {
@@ -152,7 +153,7 @@ export const Pages: CollectionConfig<"pages"> = {
     afterChange: [revalidatePage],
     beforeChange: [populatePublishedAt],
     afterDelete: [revalidateDelete],
-    // afterOperation: [assignTemplate],
+    beforeOperation: [lockSlugAfterPublish],
   },
   versions: {
     drafts: {

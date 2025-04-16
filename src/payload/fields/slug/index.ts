@@ -1,5 +1,4 @@
 import type { CheckboxField, TextField } from "payload"
-
 import { formatSlugHook } from "./format-slug"
 
 type Overrides = {
@@ -15,7 +14,7 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
   const checkBoxField: CheckboxField = {
     name: "slugLock",
     type: "checkbox",
-    defaultValue: true,
+    defaultValue: false,
     admin: {
       hidden: true,
       position: "sidebar",
@@ -31,7 +30,6 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
     label: "Slug",
     ...(slugOverrides || {}),
     hooks: {
-      // Kept this in for hook or API based updates
       beforeValidate: [formatSlugHook(fieldToUse)],
     },
     admin: {

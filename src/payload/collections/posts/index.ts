@@ -22,6 +22,7 @@ import {
   PreviewField,
 } from "@payloadcms/plugin-seo/fields"
 import { slugField } from "@/payload/fields/slug"
+import { lockSlugAfterPublish } from "./hooks/lockSlug"
 
 export const Posts: CollectionConfig<"posts"> = {
   slug: "posts",
@@ -153,7 +154,6 @@ export const Posts: CollectionConfig<"posts"> = {
             MetaDescriptionField({}),
             PreviewField({
               hasGenerateFn: true,
-
               titlePath: "meta.title",
               descriptionPath: "meta.description",
             }),
@@ -220,6 +220,7 @@ export const Posts: CollectionConfig<"posts"> = {
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],
+    beforeOperation: [lockSlugAfterPublish],
   },
   versions: {
     drafts: {
