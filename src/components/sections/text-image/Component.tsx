@@ -31,17 +31,13 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
               {buttons.map((button: any) => {
                 const appearance = button.link.appearance || "default"
 
-                // Wrap in Button component when button styling is needed
-                if (appearance !== "inline") {
-                  return (
-                    <Button key={button.id} variant={appearance} asChild>
-                      <CMSLink {...button.link} />
+                return (
+                  <CMSLink {...button.link}>
+                    <Button key={button.id} variant={appearance}>
+                      {button.link.label}
                     </Button>
-                  )
-                }
-
-                // Just return the link for inline appearance
-                return <CMSLink key={button.id} {...button.link} />
+                  </CMSLink>
+                )
               })}
             </div>
           )}
