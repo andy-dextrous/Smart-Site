@@ -36,6 +36,7 @@ This is the official Wild Child website/app starter, built using Next JS, Tailwi
 
 7. `npm run dev` will start the new website
 8. Create a new user
+9. Production - after setting up the site as a Vercel project, go to project settings and turn on functions -> Fluid Compute. It will improve front end performance.
 
 ## Building the site
 

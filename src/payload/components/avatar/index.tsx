@@ -20,7 +20,7 @@ export const Avatar: FC<ServerProps> = props => {
           alt={user?.username || "User avatar"}
           width={46}
           height={46}
-          className="rounded-full border-2 border-(--color-base-750)"
+          className="rounded-full border-2 border-(--color-base-750) hover:border-2 hover:border-(--color-base-700)"
         />
       ) : (
         <DefaultAccountIcon active={false} />
