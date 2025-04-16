@@ -8,7 +8,7 @@
   --section-padding-y: clamp(1rem, 10vw, 4rem);
   --column-padding-x: clamp(1rem, 5vw, 4rem);
   --content-width: clamp(95vw, 95vw, 1368px);
-  --nav-height: clamp(50px, 10vh, 108px);
+  --nav-height: clamp(50px, 10vh, 120px);
   --logo-height: clamp(45px, 10vw, 60px);
 
   /* Colors */

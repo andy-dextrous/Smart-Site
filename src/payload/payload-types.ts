@@ -78,7 +78,6 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
-    menus: Menu;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -101,7 +100,6 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    menus: MenusSelect<false> | MenusSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -742,28 +740,6 @@ export interface Service {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menus".
- */
-export interface Menu {
-  id: string;
-  title: string;
-  items: {
-    label: string;
-    url: string;
-    subItems?:
-      | {
-          label: string;
-          url: string;
-          id?: string | null;
-        }[]
-      | null;
-    id?: string | null;
-  }[];
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -966,10 +942,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'menus';
-        value: string | Menu;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1317,29 +1289,6 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menus_select".
- */
-export interface MenusSelect<T extends boolean = true> {
-  title?: T;
-  items?:
-    | T
-    | {
-        label?: T;
-        url?: T;
-        subItems?:
-          | T
-          | {
-              label?: T;
-              url?: T;
-              id?: T;
-            };
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -1614,6 +1563,48 @@ export interface Header {
               } | null);
           url?: string | null;
           label: string;
+          hasSubItems?: boolean | null;
+          subItems?:
+            | {
+                link: {
+                  type?: ('reference' | 'custom') | null;
+                  newTab?: boolean | null;
+                  reference?:
+                    | ({
+                        relationTo: 'pages';
+                        value: string | Page;
+                      } | null)
+                    | ({
+                        relationTo: 'posts';
+                        value: string | Post;
+                      } | null);
+                  url?: string | null;
+                  label: string;
+                  hasSubItems?: boolean | null;
+                  subItems?:
+                    | {
+                        link: {
+                          type?: ('reference' | 'custom') | null;
+                          newTab?: boolean | null;
+                          reference?:
+                            | ({
+                                relationTo: 'pages';
+                                value: string | Page;
+                              } | null)
+                            | ({
+                                relationTo: 'posts';
+                                value: string | Post;
+                              } | null);
+                          url?: string | null;
+                          label: string;
+                        };
+                        id?: string | null;
+                      }[]
+                    | null;
+                };
+                id?: string | null;
+              }[]
+            | null;
         };
         id?: string | null;
       }[]
@@ -1705,6 +1696,36 @@ export interface HeaderSelect<T extends boolean = true> {
               reference?: T;
               url?: T;
               label?: T;
+              hasSubItems?: T;
+              subItems?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          hasSubItems?: T;
+                          subItems?:
+                            | T
+                            | {
+                                link?:
+                                  | T
+                                  | {
+                                      type?: T;
+                                      newTab?: T;
+                                      reference?: T;
+                                      url?: T;
+                                      label?: T;
+                                    };
+                                id?: T;
+                              };
+                        };
+                    id?: T;
+                  };
             };
         id?: T;
       };

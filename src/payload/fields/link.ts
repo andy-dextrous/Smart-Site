@@ -1,66 +1,79 @@
-import type { Field, GroupField } from 'payload'
+import type { Field, GroupField } from "payload"
 
-import deepMerge from '@/utilities/deepMerge'
+import deepMerge from "@/utilities/deepMerge"
 
-export type LinkAppearances = 'default' | 'outline'
+export type LinkAppearances = "default" | "outline"
 
-export const appearanceOptions: Record<LinkAppearances, { label: string; value: string }> = {
+export const appearanceOptions: Record<
+  LinkAppearances,
+  { label: string; value: string }
+> = {
   default: {
-    label: 'Default',
-    value: 'default',
+    label: "Default",
+    value: "default",
   },
   outline: {
-    label: 'Outline',
-    value: 'outline',
+    label: "Outline",
+    value: "outline",
   },
 }
 
 type LinkType = (options?: {
   appearances?: LinkAppearances[] | false
   disableLabel?: boolean
+  withSubItems?: boolean
+  maxDepth?: number
+  currentDepth?: number
   overrides?: Partial<GroupField>
 }) => Field
 
-export const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = {}) => {
+export const link: LinkType = ({
+  appearances,
+  disableLabel = false,
+  withSubItems = false,
+  maxDepth = 2,
+  currentDepth = 0,
+  overrides = {},
+} = {}) => {
   const linkResult: GroupField = {
-    name: 'link',
-    type: 'group',
+    name: "link",
+    type: "group",
     admin: {
       hideGutter: true,
     },
     fields: [
       {
-        type: 'row',
+        type: "row",
         fields: [
           {
-            name: 'type',
-            type: 'radio',
+            name: "type",
+            type: "radio",
             admin: {
-              layout: 'horizontal',
-              width: '50%',
+              layout: "horizontal",
+              width: "50%",
             },
-            defaultValue: 'reference',
+            defaultValue: "reference",
             options: [
               {
-                label: 'Internal link',
-                value: 'reference',
+                label: "Internal link",
+                value: "reference",
               },
               {
-                label: 'Custom URL',
-                value: 'custom',
+                label: "Custom URL",
+                value: "custom",
               },
             ],
           },
           {
-            name: 'newTab',
-            type: 'checkbox',
+            name: "newTab",
+            type: "checkbox",
             admin: {
               style: {
-                alignSelf: 'flex-end',
+                alignSelf: "flex-end",
               },
-              width: '50%',
+              width: "50%",
             },
-            label: 'Open in new tab',
+            label: "Open in new tab",
           },
         ],
       },
@@ -69,46 +82,46 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
 
   const linkTypes: Field[] = [
     {
-      name: 'reference',
-      type: 'relationship',
+      name: "reference",
+      type: "relationship",
       admin: {
-        condition: (_, siblingData) => siblingData?.type === 'reference',
+        condition: (_, siblingData) => siblingData?.type === "reference",
       },
-      label: 'Document to link to',
-      relationTo: ['pages', 'posts'],
+      label: "Document to link to",
+      relationTo: ["pages", "posts"],
       required: true,
     },
     {
-      name: 'url',
-      type: 'text',
+      name: "url",
+      type: "text",
       admin: {
-        condition: (_, siblingData) => siblingData?.type === 'custom',
+        condition: (_, siblingData) => siblingData?.type === "custom",
       },
-      label: 'Custom URL',
+      label: "Custom URL",
       required: true,
     },
   ]
 
   if (!disableLabel) {
-    linkTypes.map((linkType) => ({
+    linkTypes.map(linkType => ({
       ...linkType,
       admin: {
         ...linkType.admin,
-        width: '50%',
+        width: "50%",
       },
     }))
 
     linkResult.fields.push({
-      type: 'row',
+      type: "row",
       fields: [
         ...linkTypes,
         {
-          name: 'label',
-          type: 'text',
+          name: "label",
+          type: "text",
           admin: {
-            width: '50%',
+            width: "50%",
           },
-          label: 'Label',
+          label: "Label",
           required: true,
         },
       ],
@@ -121,17 +134,48 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
     let appearanceOptionsToUse = [appearanceOptions.default, appearanceOptions.outline]
 
     if (appearances) {
-      appearanceOptionsToUse = appearances.map((appearance) => appearanceOptions[appearance])
+      appearanceOptionsToUse = appearances.map(
+        appearance => appearanceOptions[appearance]
+      )
     }
 
     linkResult.fields.push({
-      name: 'appearance',
-      type: 'select',
+      name: "appearance",
+      type: "select",
       admin: {
-        description: 'Choose how the link should be rendered.',
+        description: "Choose how the link should be rendered.",
       },
-      defaultValue: 'default',
+      defaultValue: "default",
       options: appearanceOptionsToUse,
+    })
+  }
+
+  // Add subItems field if withSubItems is true and we haven't reached max depth
+  if (withSubItems && currentDepth < maxDepth) {
+    linkResult.fields.push({
+      name: "hasSubItems",
+      type: "checkbox",
+      label: "Has dropdown items",
+      defaultValue: false,
+    })
+
+    linkResult.fields.push({
+      name: "subItems",
+      type: "array",
+      label: "Dropdown Items",
+      admin: {
+        condition: (_, siblingData) => siblingData?.hasSubItems === true,
+      },
+      fields: [
+        link({
+          appearances,
+          disableLabel,
+          withSubItems: true,
+          maxDepth,
+          currentDepth: currentDepth + 1,
+        }),
+      ],
+      maxRows: 10,
     })
   }
 

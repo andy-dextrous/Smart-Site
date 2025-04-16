@@ -23,7 +23,9 @@ export async function Footer() {
         <div className="flex flex-col-reverse items-start gap-4 md:flex-row md:items-center">
           <nav className="flex flex-col gap-4 md:flex-row">
             {navItems.map(({ link }: { link: any }, i: number) => {
-              return <CMSLink className="text-white" key={i} {...link} />
+              return (
+                <CMSLink className="text-white hover:text-white/80" key={i} {...link} />
+              )
             })}
           </nav>
         </div>

@@ -182,14 +182,17 @@
     margin-left: base(0.6);
   }
 
-  .step-nav__home {
-    width: 100%;
-    min-width: 160px;
-    height: auto;
-    min-height: 50px;
+  .step-nav {
+    &__home {
+      width: 100%;
+      min-width: 160px;
+      height: auto;
+      min-height: 50px;
+    }
 
     span {
       overflow: visible;
+      text-overflow: unset;
     }
   }
 

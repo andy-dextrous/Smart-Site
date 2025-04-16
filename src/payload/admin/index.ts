@@ -13,14 +13,14 @@ const admin = {
     baseDir: path.resolve(dirname),
   },
   theme: "dark" as const,
-  // autoLogin:
-  //   process.env.NODE_ENV === "development"
-  //     ? {
-  //         email: process.env.PAYLOAD_ADMIN_EMAIL!,
-  //         password: process.env.PAYLOAD_ADMIN_PASSWORD!,
-  //         prefillOnly: false,
-  //       }
-  //     : undefined,
+  autoLogin:
+    process.env.NODE_ENV === "development"
+      ? {
+          email: process.env.PAYLOAD_ADMIN_EMAIL!,
+          password: process.env.PAYLOAD_ADMIN_PASSWORD!,
+          prefillOnly: false,
+        }
+      : undefined,
   components,
   meta: {
     title: "Admin | Wild Child",
@@ -34,6 +34,9 @@ const admin = {
     ],
   },
   livePreview: {
+    collections: ["pages", "posts", "services"],
+    globals: ["header", "footer"],
+    url: "http://localhost:3000",
     breakpoints: [
       {
         label: "Mobile",

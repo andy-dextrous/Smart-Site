@@ -1,66 +1,70 @@
-import { Button, type ButtonProps } from "@/components/ui/button"
+"use client"
+
 import { cn } from "@/utilities/ui"
 import Link from "next/link"
 import React from "react"
-
 import type { Page, Post } from "@/payload/payload-types"
+import type { LinkProps } from "next/link"
 
-type CMSLinkType = {
-  appearance?: "inline" | ButtonProps["variant"]
-  children?: React.ReactNode
-  className?: string
+// Base properties for Payload CMS links
+type PayloadLinkType = {
   label?: string | null
   newTab?: boolean | null
   reference?: {
     relationTo: "pages" | "posts"
     value: Page | Post | string | number
   } | null
-  size?: ButtonProps["size"] | null
   type?: "custom" | "reference" | null
   url?: string | null
+  hasSubItems?: any
+  subItems?: any
 }
+
+// Complete type for CMSLink component, including all standard Link props
+type CMSLinkType = PayloadLinkType & {
+  children?: React.ReactNode
+  className?: string
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>
+} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "type" | keyof LinkProps> &
+  Omit<LinkProps, "href">
 
 export const CMSLink: React.FC<CMSLinkType> = props => {
   const {
     type,
-    appearance = "inline",
     children,
     className,
     label,
     newTab,
     reference,
-    size: sizeFromProps,
     url,
+    hasSubItems,
+    subItems,
+    onClick,
+    ...rest
   } = props
 
   const href =
     type === "reference" && typeof reference?.value === "object" && reference.value.slug
-      ? `${reference?.relationTo !== "pages" ? `/${reference?.relationTo}` : ""}/${
-          reference.value.slug
-        }`
+      ? reference.value.slug === "home"
+        ? "/"
+        : `${reference?.relationTo !== "pages" ? `/${reference?.relationTo}` : ""}/${
+            reference.value.slug
+          }`
       : url
 
   if (!href) return null
 
-  const size = appearance === "link" ? null : sizeFromProps
   const newTabProps = newTab ? { rel: "noopener noreferrer", target: "_blank" } : {}
 
-  /* Ensure we don't break any styles set by richText */
-  if (appearance === "inline") {
-    return (
-      <Link className={cn(className)} href={href || url || ""} {...newTabProps}>
-        {label && label}
-        {children && children}
-      </Link>
-    )
-  }
-
   return (
-    <Button asChild className={className} size={size} variant={appearance}>
-      <Link className={cn(className)} href={href || url || ""} {...newTabProps}>
-        {label && label}
-        {children && children}
-      </Link>
-    </Button>
+    <Link
+      className={cn(className)}
+      href={href || url || ""}
+      onClick={onClick}
+      {...newTabProps}
+      {...rest}
+    >
+      {children && children}
+    </Link>
   )
 }

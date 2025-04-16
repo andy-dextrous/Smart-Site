@@ -2,6 +2,7 @@ import RichText from "@/payload/components/rich-text"
 import { cn } from "@/utilities/ui"
 import { CMSLink } from "@/payload/components/cms-link"
 import Image from "next/image"
+import { Button } from "@/components/ui/button"
 import type {
   Media,
   TextImageBlock as TextImageBlockProps,
@@ -27,9 +28,21 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
 
           {buttons && (
             <div className="flex gap-4">
-              {buttons.map((button: any) => (
-                <CMSLink {...button.link} key={button.id} appearance="default" />
-              ))}
+              {buttons.map((button: any) => {
+                const appearance = button.link.appearance || "default"
+
+                // Wrap in Button component when button styling is needed
+                if (appearance !== "inline") {
+                  return (
+                    <Button key={button.id} variant={appearance} asChild>
+                      <CMSLink {...button.link} />
+                    </Button>
+                  )
+                }
+
+                // Just return the link for inline appearance
+                return <CMSLink key={button.id} {...button.link} />
+              })}
             </div>
           )}
         </div>
