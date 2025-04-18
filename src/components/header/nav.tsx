@@ -12,7 +12,16 @@ import { SearchIcon } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
 
-type NavItemLink = NonNullable<HeaderType["navItems"]>[number]["link"]
+type NavItemLink = NonNullable<HeaderType["navItems"]>[number]["item"]["link"]
+// Simplify the type definition to avoid index signature errors
+type ChildItemType = {
+  link: NavItemLink
+  hasChildren?: boolean | null
+  subItems?: Array<{ link: NavItemLink }> | null
+}
+type SubItemType = {
+  link: NavItemLink
+}
 
 /****************************************************
  * Header Navigation - Main Navigation Of Website
@@ -24,12 +33,12 @@ export const HeaderNavigation: React.FC<{ data: HeaderType }> = ({ data }) => {
   return (
     <NavigationMenu className="hidden md:flex" orientation="vertical">
       <NavigationMenuList>
-        {navItems.map(({ link }, i: number) => {
-          // if (link.hasSubItems && link.subItems && link.subItems.length > 0) {
-          //   return <DropdownNavItem key={i} link={link} />
-          // } else {
-          return <NavItem key={i} link={link} />
-          // }
+        {navItems.map(({ item }, i: number) => {
+          if (item?.hasDropdown && item?.subItems && item?.subItems?.length > 0) {
+            return <NavItemWithDropdown key={i} item={item} />
+          } else {
+            return <NavItem key={i} link={item?.link} />
+          }
         })}
         <SearchNavItem />
       </NavigationMenuList>
@@ -55,62 +64,64 @@ const NavItem: React.FC<{ link: NavItemLink }> = ({ link }) => {
  * Dropdown menu item
  ****************************************************/
 
-// const DropdownNavItem: React.FC<{ link: NavItemLink }> = ({ link }) => {
-//   return (
-//     <NavigationMenuItem>
-//       <NavigationMenuTrigger className="cursor-pointer">
-//         {link.label}
-//       </NavigationMenuTrigger>
-//       <NavigationMenuContent>
-//         <ul className="grid w-fit gap-3 p-4">
-//           {link.subItems?.map((subItem, j: number) => {
-//             const subLink = subItem.link
+const NavItemWithDropdown: React.FC<{
+  item: NonNullable<HeaderType["navItems"]>[number]["item"]
+}> = ({ item }) => {
+  return (
+    <NavigationMenuItem>
+      <NavigationMenuTrigger className="cursor-pointer">
+        {item?.link?.label}
+      </NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <ul className="grid w-fit gap-3 p-4">
+          {item.subItems?.map((childItem, j: number) => {
+            const child = childItem.child
 
-//             if (subLink.hasSubItems && subLink.subItems && subLink.subItems.length > 0) {
-//               return <NestedDropdownItem key={j} subLink={subLink} />
-//             }
+            if (child.hasChildren && child.subItems && child.subItems.length > 0) {
+              return <NestedDropdownItem key={j} child={child} />
+            }
 
-//             return <DropdownLink key={j} subLink={subLink} />
-//           })}
-//         </ul>
-//       </NavigationMenuContent>
-//     </NavigationMenuItem>
-//   )
-// }
+            return <DropdownLink key={j} child={child} />
+          })}
+        </ul>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+  )
+}
 
 /****************************************************
  * Nested dropdown section
  ****************************************************/
 
-// const NestedDropdownItem: React.FC<{ subLink: SubItemLink }> = ({ subLink }) => {
-//   return (
-//     <li className="row-span-3">
-//       <div className="mb-2 cursor-pointer font-medium">{subLink.label}</div>
-//       <ul className="space-y-1">
-//         {subLink.subItems?.map((nestedItem, k: number) => (
-//           <li
-//             key={k}
-//             className="hover:bg-accent hover:text-accent-foreground block cursor-pointer rounded-md p-3 leading-none transition-colors select-none"
-//           >
-//             <CMSLink {...nestedItem.link}>{nestedItem.link.label}</CMSLink>
-//           </li>
-//         ))}
-//       </ul>
-//     </li>
-//   )
-// }
+const NestedDropdownItem: React.FC<{ child: ChildItemType }> = ({ child }) => {
+  return (
+    <li className="row-span-3">
+      <div className="mb-2 cursor-pointer font-medium">{child?.link?.label}</div>
+      <ul className="space-y-1">
+        {child?.subItems?.map((subItem: SubItemType, k: number) => (
+          <li
+            key={k}
+            className="hover:bg-accent hover:text-accent-foreground block cursor-pointer rounded-md p-3 leading-none transition-colors select-none"
+          >
+            <CMSLink {...subItem.link}>{subItem.link.label}</CMSLink>
+          </li>
+        ))}
+      </ul>
+    </li>
+  )
+}
 
 /****************************************************
  * Single dropdown link item
  ****************************************************/
 
-// const DropdownLink: React.FC<{ subLink: SubItemLink }> = ({ subLink }) => {
-//   return (
-//     <li className="hover:bg-accent hover:text-accent-foreground block cursor-pointer rounded-md p-3 leading-none transition-colors select-none">
-//       <CMSLink {...subLink}>{subLink.label}</CMSLink>
-//     </li>
-//   )
-// }
+const DropdownLink: React.FC<{ child: ChildItemType }> = ({ child }) => {
+  return (
+    <li className="hover:bg-accent hover:text-accent-foreground block cursor-pointer rounded-md p-3 leading-none transition-colors select-none">
+      <CMSLink {...child.link}>{child.link.label}</CMSLink>
+    </li>
+  )
+}
 
 /****************************************************
  * Search icon component
@@ -119,12 +130,12 @@ const NavItem: React.FC<{ link: NavItemLink }> = ({ link }) => {
 const SearchNavItem: React.FC = () => {
   return (
     <NavigationMenuItem>
-      <Link href="/search" passHref>
-        <NavigationMenuLink className="cursor-pointer">
+      <NavigationMenuLink asChild>
+        <Link href="/search">
           <SearchIcon className="h-4 w-4" />
           <span className="sr-only">Search</span>
-        </NavigationMenuLink>
-      </Link>
+        </Link>
+      </NavigationMenuLink>
     </NavigationMenuItem>
   )
 }

@@ -76,46 +76,71 @@ export const MobileNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             <nav className="flex flex-col space-y-4">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="flex flex-col gap-4">
-                {navItems.map(
-                  ({ link }, i: number) => {
-                    // if (link.hasSubItems && link.subItems && link.subItems.length > 0) {
-                    //   return (
-                    //     <div key={i} className="space-y-3">
-                    //       <h3 className="text-primary text-lg font-semibold">
-                    //         {link.label}
-                    //       </h3>
-                    //       <div className="flex flex-col space-y-2 pl-4">
-                    //         {link.subItems.map((subItem, j: number) => {
-                    //           return (
-                    //             <div key={j} className="py-1">
-                    //               <CMSLink
-                    //                 {...subItem.link}
-                    //                 className="hover:text-primary text-gray-700 transition-colors"
-                    //                 onClick={handleLinkClick}
-                    //               >
-                    //                 {subItem.link.label}
-                    //               </CMSLink>
-                    //             </div>
-                    //           )
-                    //         })}
-                    //       </div>
-                    //     </div>
-                    //   )
-                    // } else {
+                {navItems.map(({ item }, i: number) => {
+                  if (item?.hasDropdown && item?.subItems && item?.subItems?.length > 0) {
+                    return (
+                      <div key={i} className="space-y-3">
+                        <h3 className="text-primary text-lg font-semibold">
+                          {item.link?.label}
+                        </h3>
+                        <div className="flex flex-col space-y-2 pl-4">
+                          {item.subItems.map((childItem, j: number) => {
+                            const child = childItem.child
+                            if (
+                              child.hasChildren &&
+                              child.subItems &&
+                              child.subItems.length > 0
+                            ) {
+                              return (
+                                <div key={j} className="space-y-2 py-1">
+                                  <h4 className="font-medium text-gray-800">
+                                    {child.link?.label}
+                                  </h4>
+                                  <div className="flex flex-col space-y-1 pl-3">
+                                    {child.subItems.map((subItem, k: number) => (
+                                      <div key={k} className="py-1">
+                                        <CMSLink
+                                          {...subItem.link}
+                                          className="hover:text-primary text-gray-700 transition-colors"
+                                          onClick={handleLinkClick}
+                                        >
+                                          {subItem.link?.label}
+                                        </CMSLink>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return (
+                              <div key={j} className="py-1">
+                                <CMSLink
+                                  {...child.link}
+                                  className="hover:text-primary text-gray-700 transition-colors"
+                                  onClick={handleLinkClick}
+                                >
+                                  {child.link?.label}
+                                </CMSLink>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  } else {
                     return (
                       <div key={i}>
                         <CMSLink
-                          {...link}
+                          {...item.link}
                           className="hover:text-primary text-lg font-semibold text-gray-800 transition-colors"
                           onClick={handleLinkClick}
                         >
-                          {link.label}
+                          {item.link?.label}
                         </CMSLink>
                       </div>
                     )
                   }
-                  // }
-                )}
+                })}
               </div>
             </nav>
 

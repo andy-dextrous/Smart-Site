@@ -9,6 +9,7 @@ type LinkType = (options?: {
 export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) => {
   const linkResult: GroupField = {
     name: "link",
+    label: false,
     type: "group",
     admin: {
       hideGutter: true,

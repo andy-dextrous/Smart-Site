@@ -274,20 +274,74 @@ export const seed = async ({
       data: {
         navItems: [
           {
-            link: {
-              type: "custom",
-              label: "Posts",
-              url: "/posts",
+            item: {
+              link: {
+                type: "custom",
+                label: "Posts",
+                url: "/posts",
+              },
+              hasDropdown: false,
             },
           },
           {
-            link: {
-              type: "reference",
-              label: "Contact",
-              reference: {
-                relationTo: "pages",
-                value: contactPage.id,
+            item: {
+              link: {
+                type: "reference",
+                label: "Contact",
+                reference: {
+                  relationTo: "pages",
+                  value: contactPage.id,
+                },
               },
+              hasDropdown: false,
+            },
+          },
+          {
+            item: {
+              link: {
+                type: "custom",
+                label: "Services",
+                url: "/services",
+              },
+              hasDropdown: true,
+              subItems: [
+                {
+                  child: {
+                    link: {
+                      type: "custom",
+                      label: "Web Development",
+                      url: "/services/web-development",
+                    },
+                    hasChildren: false,
+                  },
+                },
+                {
+                  child: {
+                    link: {
+                      type: "custom",
+                      label: "Design",
+                      url: "/services/design",
+                    },
+                    hasChildren: true,
+                    subItems: [
+                      {
+                        link: {
+                          type: "custom",
+                          label: "UI/UX Design",
+                          url: "/services/design/ui-ux",
+                        },
+                      },
+                      {
+                        link: {
+                          type: "custom",
+                          label: "Brand Identity",
+                          url: "/services/design/brand-identity",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           },
         ],

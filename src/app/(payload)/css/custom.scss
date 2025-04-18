@@ -250,4 +250,12 @@
       flex: 1;
     }
   }
+
+  [id^="field-navItems__"][id$="__item__subItems"] {
+    padding-left: 2rem;
+  }
+
+  [id^="field-navItems__"][id$="__item__subItems__0__child__subItems"] {
+    padding-left: 2rem;
+  }
 }
