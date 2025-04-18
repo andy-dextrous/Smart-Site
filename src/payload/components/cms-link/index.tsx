@@ -1,74 +1,84 @@
-"use client"
+/****************************************************
+ * CMSLink Component for Payload CMS link fields.
+ ****************************************************/
 
-import { cn } from "@/utilities/ui"
-import Link from "next/link"
-import React from "react"
 import type { Page, Post, Service } from "@/payload/payload-types"
 import type { LinkProps } from "next/link"
+import Link from "next/link"
+import React from "react"
 
-// Base properties for Payload CMS links
-type PayloadLinkType = {
-  label?: string | null
-  newTab?: boolean | null
-  reference?: {
-    relationTo: "pages" | "posts" | "services"
-    value: Page | Post | Service | string | number
-  } | null
-  type?: "custom" | "reference" | null
-  url?: string | null
-  hasSubItems?: any
-  subItems?: any
+/****************************************************
+ * Type Declarations
+ ****************************************************/
+
+type PayloadReference = {
+  relationTo: "pages" | "posts" | "services"
+  value: Page | Post | Service | string | number
 }
 
-// Complete type for CMSLink component, including all standard Link props
-type CMSLinkType = PayloadLinkType & {
-  children?: React.ReactNode
-  className?: string
-  onClick?: React.MouseEventHandler<HTMLAnchorElement>
-} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "type" | keyof LinkProps> &
-  Omit<LinkProps, "href">
+type PayloadLink = {
+  type?: "custom" | "reference" | null
+  reference?: PayloadReference | null
+  url?: string | null
+  newTab?: boolean | null
+}
 
-export const CMSLink: React.FC<CMSLinkType> = props => {
-  const {
-    type,
-    children,
-    className,
-    label,
-    newTab,
-    reference,
-    url,
-    hasSubItems,
-    subItems,
-    onClick,
-    ...rest
-  } = props
+type CMSLinkProps = PayloadLink &
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "type" | keyof LinkProps> &
+  Omit<LinkProps, "href"> & {
+    children?: React.ReactNode
+    className?: string
+    onClick?: React.MouseEventHandler<HTMLAnchorElement>
+  }
 
-  const href =
-    type === "reference" && typeof reference?.value === "object" && reference.value.slug
-      ? reference.value.slug === "home"
-        ? "/"
-        : `${
-            reference?.relationTo === "posts"
-              ? "/blog"
-              : reference?.relationTo !== "pages"
-                ? `/${reference?.relationTo}`
-                : ""
-          }/${reference.value.slug}`
-      : url
+/****************************************************
+ * Build the link from the payload link field
+ ****************************************************/
 
+const buildHref = ({
+  type,
+  reference,
+  url,
+}: Pick<PayloadLink, "type" | "reference" | "url">): string | null => {
+  if (
+    type === "reference" &&
+    reference &&
+    typeof reference.value === "object" &&
+    "slug" in reference.value &&
+    reference.value.slug
+  ) {
+    if (reference.value.slug === "home") return "/"
+
+    const base =
+      reference.relationTo === "posts"
+        ? "/blog"
+        : reference.relationTo !== "pages"
+          ? `/${reference.relationTo}`
+          : ""
+
+    return `${base}/${reference.value.slug}`
+  }
+
+  return url ?? null
+}
+
+/****************************************************
+ * Component
+ ****************************************************/
+
+export const CMSLink: React.FC<CMSLinkProps> = props => {
+  const { type, reference, url, newTab, children, ...rest } = props
+
+  const href = buildHref({ type, reference, url })
   if (!href) return null
 
-  const newTabProps = newTab ? { rel: "noopener noreferrer", target: "_blank" } : {}
+  const targetProps = newTab
+    ? { rel: "noopener noreferrer", target: "_blank" }
+    : undefined
 
   return (
-    <Link
-      className={cn(className)}
-      href={href || url || ""}
-      onClick={onClick}
-      {...newTabProps}
-      {...rest}
-    >
-      {children && children}
+    <Link href={href} {...targetProps} {...rest}>
+      {children}
     </Link>
   )
 }
