@@ -76,31 +76,32 @@ export const MobileNav: React.FC<{ data: HeaderType }> = ({ data }) => {
             <nav className="flex flex-col space-y-4">
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="flex flex-col gap-4">
-                {navItems.map(({ link }, i: number) => {
-                  if (link.hasSubItems && link.subItems && link.subItems.length > 0) {
-                    return (
-                      <div key={i} className="space-y-3">
-                        <h3 className="text-primary text-lg font-semibold">
-                          {link.label}
-                        </h3>
-                        <div className="flex flex-col space-y-2 pl-4">
-                          {link.subItems.map((subItem, j: number) => {
-                            return (
-                              <div key={j} className="py-1">
-                                <CMSLink
-                                  {...subItem.link}
-                                  className="hover:text-primary text-gray-700 transition-colors"
-                                  onClick={handleLinkClick}
-                                >
-                                  {subItem.link.label}
-                                </CMSLink>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
-                  } else {
+                {navItems.map(
+                  ({ link }, i: number) => {
+                    // if (link.hasSubItems && link.subItems && link.subItems.length > 0) {
+                    //   return (
+                    //     <div key={i} className="space-y-3">
+                    //       <h3 className="text-primary text-lg font-semibold">
+                    //         {link.label}
+                    //       </h3>
+                    //       <div className="flex flex-col space-y-2 pl-4">
+                    //         {link.subItems.map((subItem, j: number) => {
+                    //           return (
+                    //             <div key={j} className="py-1">
+                    //               <CMSLink
+                    //                 {...subItem.link}
+                    //                 className="hover:text-primary text-gray-700 transition-colors"
+                    //                 onClick={handleLinkClick}
+                    //               >
+                    //                 {subItem.link.label}
+                    //               </CMSLink>
+                    //             </div>
+                    //           )
+                    //         })}
+                    //       </div>
+                    //     </div>
+                    //   )
+                    // } else {
                     return (
                       <div key={i}>
                         <CMSLink
@@ -113,7 +114,8 @@ export const MobileNav: React.FC<{ data: HeaderType }> = ({ data }) => {
                       </div>
                     )
                   }
-                })}
+                  // }
+                )}
               </div>
             </nav>
 

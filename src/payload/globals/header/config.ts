@@ -8,21 +8,11 @@ export const Header: GlobalConfig = {
   access: {
     read: () => true,
   },
-  admin: {
-    hideAPIURL: process.env.NODE_ENV === "production",
-  },
   fields: [
     {
       name: "navItems",
       type: "array",
-      fields: [
-        link({
-          appearances: false,
-          withSubItems: true,
-          maxDepth: 2,
-          currentDepth: 0,
-        }),
-      ],
+      fields: [link()],
       maxRows: 6,
       admin: {
         initCollapsed: true,

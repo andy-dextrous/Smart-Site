@@ -46,11 +46,7 @@ export const TextImage: Block = {
       name: "buttons",
       type: "array",
       maxRows: 2,
-      fields: [
-        link({
-          appearances: false,
-        }),
-      ],
+      fields: [link()],
     },
   ],
 }
