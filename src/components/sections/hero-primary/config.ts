@@ -1,10 +1,5 @@
 import type { Block } from "payload"
 
-import {
-  FixedToolbarFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from "@payloadcms/richtext-lexical"
 import { link } from "@/payload/fields/link"
 
 export const HeroPrimary: Block = {
@@ -31,6 +26,9 @@ export const HeroPrimary: Block = {
       name: "backgroundImage",
       type: "upload",
       relationTo: "media",
+      filterOptions: {
+        mimeType: { contains: "image" },
+      },
       admin: {
         description: "Optional background image for the hero section",
       },
