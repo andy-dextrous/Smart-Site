@@ -59,7 +59,7 @@ Most of the new Tailwind 4 information you need to understand lives in [the them
 
 3. Building designs:
 
-Wild Child is designed for a section-first approach to building websites. Every website has a <header />, <main /> and <footer /> that live inside the <body />. Wild Child is set up so that you can spend 90% of your time just building the sections from your design. Inside the <main> you will have stacked <section> elements that comprise the content of the website.
+Wild Child is designed for a section-first approach to building websites. Every website has a `<header />`, `<main />` and `<footer />` that live inside the `<body />`. Wild Child is set up so that you can spend 90% of your time just building the sections from your design. Inside the `<main>` you will have stacked `<section>` elements that comprise the content of the website.
 
 Payload CMS handles the templating - organising and building pages. This is acheieved by first building sections and then adding theme support for them in two places.
 
@@ -70,8 +70,9 @@ Payload CMS handles the templating - organising and building pages. This is ache
 3. After creating these files, start by modifying the config file. First, examine your Figma design and decide how much control the client would like to have over this section. **You want to decide on the fields that you will create which will allow the site user to modify designs**. This will likely include the obvious choices: a title (text field), content (rich-text), buttons (array block containing button attributes like url, text, variant). You may, however want to expose deeper levels of customisation that make components extremely flexible. For instance:
 
 - Layout Options (left-right, right-left, stacked etc)
-- Inclusion of optional elements (use a slider instead of card grid)
+- Inclusion of optional elements (use a slider instead of card grid, background icon etc)
 - Styling (Dark mode and light mode variants)
+- Positioning of certain elements
 - Animations
 
 The choice is ours to create whatever editor experience best suits this client and their budget. 4. Build out the config file to represent the schema you want in your editor. Use the below as a guide.

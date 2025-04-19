@@ -32,11 +32,7 @@ export const RenderSections: React.FC<{
             const Section = sectionsMap[blockType]
 
             if (Section) {
-              return (
-                <div key={index}>
-                  <Section {...section} disableInnerContainer />
-                </div>
-              )
+              return <Section {...section} key={index} disableInnerContainer />
             }
           }
           return null

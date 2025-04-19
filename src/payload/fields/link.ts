@@ -40,6 +40,7 @@ export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) =>
           {
             name: "newTab",
             type: "checkbox",
+            defaultValue: false,
             admin: {
               style: {
                 alignSelf: "flex-end",

@@ -614,6 +614,54 @@ export interface User {
  */
 export interface HeroPrimaryBlock {
   heading: string;
+  content: string;
+  /**
+   * Optional background image for the hero section
+   */
+  backgroundImage?: (string | null) | Media;
+  buttons?:
+    | {
+        button: {
+          /**
+           * Select the button type
+           */
+          buttonType?: ('primary' | 'secondary') | null;
+          link: {
+            type?: ('reference' | 'custom') | null;
+            newTab?: boolean | null;
+            reference?:
+              | ({
+                  relationTo: 'pages';
+                  value: string | Page;
+                } | null)
+              | ({
+                  relationTo: 'posts';
+                  value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'services';
+                  value: string | Service;
+                } | null);
+            url?: string | null;
+            label: string;
+          };
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero-primary';
+}
+/**
+ * Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: string;
+  title: string;
   content: {
     root: {
       type: string;
@@ -629,9 +677,11 @@ export interface HeroPrimaryBlock {
     };
     [k: string]: unknown;
   };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero-primary';
+  heroImage?: (string | null) | Media;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -683,36 +733,6 @@ export interface TextImageBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'text-image';
-}
-/**
- * Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: string;
-  title: string;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  heroImage?: (string | null) | Media;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * Team members are used to display the team on the website. They are different to users, which are used for the admin panel.
@@ -1055,6 +1075,26 @@ export interface PagesSelect<T extends boolean = true> {
 export interface HeroPrimaryBlockSelect<T extends boolean = true> {
   heading?: T;
   content?: T;
+  backgroundImage?: T;
+  buttons?:
+    | T
+    | {
+        button?:
+          | T
+          | {
+              buttonType?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+            };
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }

@@ -17,36 +17,7 @@ export const contact = ({
       {
         blockType: "hero-primary",
         heading: "Contact Us",
-        content: {
-          root: {
-            type: "root",
-            children: [
-              {
-                type: "paragraph",
-                children: [
-                  {
-                    type: "text",
-                    detail: 0,
-                    format: 0,
-                    mode: "normal",
-                    style: "",
-                    text: "Get in touch with our team. Please use the form below or contact us directly.",
-                    version: 1,
-                  },
-                ],
-                direction: "ltr",
-                format: "",
-                indent: 0,
-                textFormat: 0,
-                version: 1,
-              },
-            ],
-            direction: "ltr",
-            format: "",
-            indent: 0,
-            version: 1,
-          },
-        },
+        content: "Contact Us",
       },
     ],
     meta: {

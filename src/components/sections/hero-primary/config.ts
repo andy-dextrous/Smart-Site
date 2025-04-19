@@ -5,6 +5,7 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from "@payloadcms/richtext-lexical"
+import { link } from "@/payload/fields/link"
 
 export const HeroPrimary: Block = {
   slug: "hero-primary",
@@ -19,14 +20,43 @@ export const HeroPrimary: Block = {
     },
     {
       name: "content",
-      type: "richText",
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
-        },
-      }),
+      type: "textarea",
+      admin: {
+        rows: 10,
+      },
       label: false,
       required: true,
+    },
+    {
+      name: "backgroundImage",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        description: "Optional background image for the hero section",
+      },
+    },
+    {
+      name: "buttons",
+      type: "array",
+      fields: [
+        {
+          name: "button",
+          type: "group",
+          fields: [
+            {
+              name: "buttonType",
+              type: "select",
+              label: "Button type",
+              defaultValue: "primary",
+              options: ["primary", "secondary"],
+              admin: {
+                description: "Select the button type",
+              },
+            },
+            link(),
+          ],
+        },
+      ],
     },
   ],
   interfaceName: "HeroPrimaryBlock",
