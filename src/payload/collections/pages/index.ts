@@ -1,12 +1,12 @@
 import type { CollectionConfig } from "payload"
 
+import { sectionBlocks } from "@/components/sections/config"
 import { authenticated } from "@/payload/access/authenticated"
 import { authenticatedOrPublished } from "@/payload/access/authenticatedOrPublished"
 import { slugField } from "@/payload/fields/slug"
 import { populatePublishedAt } from "@/payload/hooks/populatePublishedAt"
 import { generatePreviewPath } from "@/utilities/generatePreviewPath"
 import { revalidateDelete, revalidatePage } from "./hooks/revalidatePage"
-import { sectionBlocks } from "@/components/sections/config"
 
 import {
   MetaDescriptionField,
