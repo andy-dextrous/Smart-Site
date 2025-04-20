@@ -33,6 +33,17 @@
     .blocks-field__block-number {
       display: none;
     }
+
+    .blocks-field__fields .collapsible-field__row-label-wrap span {
+      background-color: var(--color-base-800);
+      color: var(--color-base-150);
+      padding-inline: 5px;
+      padding-block: 1px;
+      height: unset;
+      min-height: unset;
+      border-radius: 3px;
+      font-size: 12px;
+    }
   }
 
   .btn--style-primary,
