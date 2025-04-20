@@ -83,20 +83,12 @@ export const Pages: CollectionConfig<"pages"> = {
       hasMany: true,
       relationTo: "categories",
     },
-    {
-      name: "featuredImage",
-      label: "Featured Image",
-      type: "upload",
-      relationTo: "media",
-      admin: {
-        position: "sidebar",
-      },
-    },
+
     {
       type: "tabs",
       tabs: [
         {
-          label: "Content",
+          label: "Page Layout",
           fields: [
             {
               name: "sections",
@@ -112,7 +104,7 @@ export const Pages: CollectionConfig<"pages"> = {
         },
         {
           name: "meta",
-          label: "SEO",
+          label: "SEO Metadata",
           fields: [
             OverviewField({
               titlePath: "meta.title",

@@ -20,6 +20,21 @@
     }
   }
 
+  .editor-container {
+    background-color: var(--color-base-850);
+    border: 1px solid var(--color-base-800);
+  }
+
+  #field-sections {
+    .blocks-field__block-pill {
+      background-color: var(--wild-child-indigo);
+    }
+
+    .blocks-field__block-number {
+      display: none;
+    }
+  }
+
   .btn--style-primary,
   .popup-button,
   .btn--icon-style-without-border:not(
