@@ -125,20 +125,21 @@ export const HeroPrimaryComponent: React.FC<HeroProps> = ({
             <p ref={descriptionRef} className="max-w-[70ch] text-white">
               {content}
             </p>
-
-            {buttons?.map(({ button }, i) => (
-              <CMSLink key={i} {...button.link}>
-                <Button
-                  ref={el => {
-                    if (el) buttonRefs.current[i] = el
-                  }}
-                  variant={button.buttonType === "primary" ? "default" : "secondary"}
-                  size="lg"
-                >
-                  {button.link.label}
-                </Button>
-              </CMSLink>
-            ))}
+            <div className="flex gap-4">
+              {buttons?.map(({ button }, i) => (
+                <CMSLink key={i} {...button.link} className="hover:cursor-pointer">
+                  <Button
+                    ref={el => {
+                      if (el) buttonRefs.current[i] = el
+                    }}
+                    variant={button.buttonType === "primary" ? "default" : "secondary"}
+                    size="lg"
+                  >
+                    {button.link.label}
+                  </Button>
+                </CMSLink>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -49,11 +49,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
         <Providers>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-          />
+          <AdminBar preview={isEnabled} />
           <Header />
           <main>{children}</main>
           <Footer />
