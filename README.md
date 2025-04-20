@@ -1,8 +1,8 @@
-# WILD Child
+# Wild Child
 
 This is the official Wild Child website/app starter, built using Next JS, Tailwind 4, GSAP and Payload CMS.
 
-## Installation
+## Installation & Setup
 
 1. Create a clone of this repo by clicking "Use This Template" in Github. This will create the new Wild Child site.
 2. In the new repo in Github, click on "Code" and "Open with Github Desktop"
@@ -30,15 +30,14 @@ This is the official Wild Child website/app starter, built using Next JS, Tailwi
     VERCEL_PROJECT_PRODUCTION_URL=... # production url
     BLOB_READ_WRITE_TOKEN=... # fetch from https://vercel.com/docs/storage/vercel-blob
 
-    # Resend - #not required for development - only prod. Fetch from https://resend.com/
+    # Resend - #not required for development - only prod. See below for instructions
     RESEND_API_KEY=...
 ```
 
 7. `npm run dev` will start the new website
 8. Create a new user
-9. Production - after setting up the site as a Vercel project, go to project settings and turn on functions -> Fluid Compute. It will improve front end performance. Also, on the functions page, open the Advanced Settings accordion and change the Function Region so that roundtrip durations are minimised. In developent, this should be Asia Pacific -> Sydney. On launch, set this to match the client's region, unless the client is on a paid plan in which case they can have more than one function location. If the client has a paid plan, scroll down to Functions CPU and choose Standard which provides a little more horsepower to the node.js function environment, making things a bit more snappy. If the site is on a paid plan, release vercel.json which will keep the serverless functions constantly warm, preventing any cold starts.
 
-## Building the site
+## Development - Building the Site's Designs/Content
 
 For the most part, Payload will come fully featured out of the box. It starts with collections for Pages, Services, Posts and Team Members.
 
@@ -141,3 +140,21 @@ export const NewSectionComponent: React.FC<NewSectionBlock> = props => {
   )
 }
 ```
+
+## Pushing To Production
+
+### Vercel
+
+First, you will want to set up a hobby or pro account at Vercel for the website. The paid tier is preferable because it offers more storage, security and performance.
+
+After setting up the site as a Vercel project, go to project -> settings and turn on functions -> Fluid Compute. It will improve front end performance. Also, on the functions page, open the Advanced Settings accordion and change the Function Region so that roundtrip durations are minimised. In developent, this should be Asia Pacific -> Sydney. On launch, set this to match the client's region, unless the client is on a paid plan in which case they can have more than one function location. If the client has a paid plan, scroll down to Functions CPU and choose Standard which provides a little more horsepower to the node.js function environment, making things a bit more snappy. If the site is on a paid plan, release vercel.json which will keep the serverless functions constantly warm, preventing any cold starts.
+
+### Configure Email Provider
+
+[Resend](https://resend.com) offers a seamless Payload integration and nice free tier compared to other email service providers. To enable Resend in your website:
+
+- Go to [Resend](https://resend.com) and sign up for free using your client's credentials
+- [Add an API Key](https://resend.com/api)
+- Add the domain that the website will live at by visting [Resend Domain](https://resend.com/domains) and adding the DNS records.
+- Go to src/payload/email/config and change the email address and name to match a real email from the production URL. ie, if the websit elives at example.com, the defaultFromAddress should be like john@example.com.
+- At this point, you should be able to go to the Login screen of the production app and click on "Forgot email" which will send your user address an email.
