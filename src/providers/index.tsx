@@ -1,6 +1,6 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import wildChildConfig from "@/wc.config"
-import GSAPProvider from "@/providers/gsap"
+import SmoothScrollProvider from "@/providers/gsap"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -36,5 +36,5 @@ const GSAP = ({ children }: { children: React.ReactNode }) => {
     return children
   }
 
-  return <GSAPProvider>{children}</GSAPProvider>
+  return <SmoothScrollProvider>{children}</SmoothScrollProvider>
 }

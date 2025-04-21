@@ -11,9 +11,21 @@ import { SplitText } from "gsap/SplitText"
 import { usePathname } from "next/navigation"
 import { createContext, useRef } from "react"
 
+/****************************************************
+ * Setup GSAP Plugins and Defaults
+ ****************************************************/
+
 if (canUseDOM) {
   gsap.registerPlugin(ScrollTrigger, ScrollSmoother, useGSAP, SplitText, CustomEase)
+  gsap.defaults({
+    ease: "power2.inOut",
+    duration: 0.3,
+  })
 }
+
+/****************************************************
+ * Smooth Scroll Context
+ ****************************************************/
 
 interface GSAPContextType {
   smootherInstance: ScrollSmoother | null
@@ -23,7 +35,11 @@ const GSAPContext = createContext<GSAPContextType>({
   smootherInstance: null,
 })
 
-const GSAPProvider = ({ children }: { children: React.ReactNode }) => {
+/****************************************************
+ * Smooth Scroll Provider
+ ****************************************************/
+
+const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const smootherRef = useRef<ScrollSmoother | null>(null)
 
@@ -54,6 +70,6 @@ const GSAPProvider = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export default GSAPProvider
+export default SmoothScrollProvider
 export * from "@gsap/react"
 export * from "gsap"
