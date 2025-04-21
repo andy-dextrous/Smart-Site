@@ -7,25 +7,21 @@ import {
 import { getContentCollections } from "@/lib/queries/collections"
 import { getSettings } from "@/lib/queries/globals"
 import { getCurrentUser } from "@/lib/queries/user"
-import { getClientSideURL } from "@/utilities/getURL"
 import { ChevronDown, PlusIcon, User } from "lucide-react"
-import Link from "next/link.js"
-import ExitCurrentPage from "./exit-current-page"
 import Image from "next/image"
+import Link from "next/link.js"
+import ClearCache from "./clear-cache"
+import ExitCurrentPage from "./exit-current-page"
+import Preview from "./preview"
 
 export const revalidate = 0
 
 interface PayloadAdminBarProps {
-  onPreviewExit?: () => void
   preview?: boolean
 }
 
 export async function PayloadAdminBar(props: PayloadAdminBarProps) {
   const { preview } = props
-
-  /*******************************************************/
-  /* Get User
-  /*******************************************************/
 
   const user = await getCurrentUser()
 
@@ -45,18 +41,6 @@ export async function PayloadAdminBar(props: PayloadAdminBarProps) {
 
   const siteName = settings?.general?.siteName || "My Site"
   const cmsURL = process.env.NEXT_PUBLIC_URL
-
-  /*******************************************************/
-  /* Clear Cache
-  /*******************************************************/
-
-  async function clearCache() {
-    "use server"
-
-    await fetch(`${getClientSideURL()}/api/revalidate`, {
-      method: "GET",
-    })
-  }
 
   return (
     <div className="fixed inset-x-0 top-0 z-[99999] flex h-[32px] w-full items-center gap-2 bg-[#18181a] px-4 font-sans text-[13px] text-white">
@@ -114,26 +98,8 @@ export async function PayloadAdminBar(props: PayloadAdminBarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-4">
-        <form action={clearCache}>
-          <button
-            className="cursor-pointer rounded-sm border-none bg-transparent px-2 text-white hover:bg-[#37373c]"
-            type="submit"
-          >
-            Clear Cache
-          </button>
-        </form>
-
-        {preview && (
-          <div>
-            <Link
-              href="/next/exit-preview"
-              className="cursor-pointer border-none bg-transparent text-white"
-            >
-              Exit preview mode
-            </Link>
-          </div>
-        )}
-
+        <ClearCache />
+        {preview && <Preview />}
         <UserDropdown />
       </div>
     </div>
