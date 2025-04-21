@@ -11,8 +11,8 @@ import { ChevronDown, PlusIcon, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link.js"
 import ClearCache from "./clear-cache"
-import ExitCurrentPage from "./exit-current-page"
-import Preview from "./preview"
+import ExitCurrentPage from "./edit-current-page"
+import Preview from "./exit-preview"
 import { Toaster } from "@/components/ui/sonner"
 
 export const revalidate = 0

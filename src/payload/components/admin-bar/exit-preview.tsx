@@ -8,6 +8,7 @@ export default function Preview() {
   return (
     <div>
       <button
+        className="cursor-pointer rounded-sm border-none bg-transparent px-2 text-white hover:cursor-pointer hover:bg-[#37373c]"
         onClick={() => {
           fetch("/next/exit-preview").then(() => {
             router.push("/")
