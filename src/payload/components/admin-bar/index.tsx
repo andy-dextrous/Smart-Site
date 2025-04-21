@@ -162,6 +162,7 @@ async function UserDropdown() {
                 alt={displayName || ""}
                 width={24}
                 height={24}
+                className="h-full w-full object-cover"
               />
             ) : (
               <User className="h-4 w-4 text-white" />
@@ -180,6 +181,7 @@ async function UserDropdown() {
                   alt={displayName || ""}
                   width={64}
                   height={64}
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <User className="h-10 w-10 text-white" />
@@ -196,8 +198,13 @@ async function UserDropdown() {
             </div>
           </div>
         </div>
-        <DropdownMenuItem asChild className="text-white">
-          <Link href={`${cmsURL}/admin/logout`}>Log Out</Link>
+        <DropdownMenuItem
+          asChild
+          className="!hover:bg-[#37373c] text-white hover:cursor-pointer"
+        >
+          <Link href={`${cmsURL}/admin/logout`} className="!hover:bg-[#37373c]">
+            Log Out
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
