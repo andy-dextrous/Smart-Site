@@ -1,6 +1,7 @@
 import Providers from "@/providers"
 import { Inter } from "next/font/google"
 import React from "react"
+import { Toaster } from "@/components/ui/sonner"
 
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
@@ -61,6 +62,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
           <Header />
           {children}
           <Footer />
+          <Toaster position="bottom-right" richColors />
 
           {bodyEnd && parse(bodyEnd)}
         </Providers>

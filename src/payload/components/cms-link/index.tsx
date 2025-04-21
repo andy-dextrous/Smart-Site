@@ -21,6 +21,10 @@ type CMSLinkType = PayloadLinkType & {
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "type" | keyof LinkProps> &
   Omit<LinkProps, "href">
 
+/*******************************************************/
+/* CMS Link
+/*******************************************************/
+
 export const CMSLink: React.FC<CMSLinkType> = props => {
   const {
     type, // reference to a document, custom link, or null
@@ -33,6 +37,7 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
 
   let relationToPath: string | undefined = reference?.relationTo
 
+  // Pages don't have a subfolder so we have to remove the /pages from the path
   if (reference?.relationTo === "pages") {
     relationToPath = ""
   } else if (reference?.relationTo === "posts") {
@@ -42,8 +47,8 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
   const href =
     type === "reference" && typeof reference?.value === "object" && reference.value.slug
       ? reference.value.slug === "home"
-        ? "/"
-        : `${relationToPath}/${reference.value.slug}`
+        ? `${process.env.NEXT_PUBLIC_URL}/`
+        : `${process.env.NEXT_PUBLIC_URL}/${relationToPath}/${reference.value.slug}`
       : url
 
   const newTabProps = newTab ? { rel: "noopener noreferrer", target: "_blank" } : {}

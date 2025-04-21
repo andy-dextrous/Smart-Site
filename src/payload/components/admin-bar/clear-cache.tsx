@@ -5,7 +5,7 @@
 /*******************************************************/
 
 import { getClientSideURL } from "@/utilities/getURL"
-import { toast } from "@payloadcms/ui"
+import { toast } from "sonner"
 
 function ClearCache() {
   async function clearCache() {
@@ -22,13 +22,13 @@ function ClearCache() {
 
     setTimeout(() => {
       window.location.reload()
-    }, 100)
+    }, 1000)
   }
 
   return (
     <button
       onClick={clearCache}
-      className="cursor-pointer rounded-sm border-none bg-transparent px-2 text-white hover:bg-[#37373c]"
+      className="cursor-pointer rounded-sm border-none bg-transparent px-2 text-white hover:cursor-pointer hover:bg-[#37373c]"
       type="submit"
     >
       Clear Cache
