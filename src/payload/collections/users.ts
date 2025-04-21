@@ -66,6 +66,9 @@ export const Users: CollectionConfig = {
       name: "avatar",
       type: "upload",
       relationTo: "media",
+      filterOptions: {
+        mimeType: { contains: "image" },
+      },
       admin: {
         position: "sidebar",
       },

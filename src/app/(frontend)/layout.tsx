@@ -5,7 +5,7 @@ import React from "react"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
 import { getSettings } from "@/lib/queries/globals"
-import { getMeUser } from "@/lib/queries/user"
+import { getCurrentUser } from "@/lib/queries/user"
 import { PayloadAdminBar } from "@/payload/components/admin-bar"
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
 import parse from "html-react-parser"
@@ -40,7 +40,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const head = integrations?.head
   const bodyEnd = integrations?.bodyEnd
 
-  const isLoggedIn = await getMeUser()
+  const isLoggedIn = await getCurrentUser()
 
   return (
     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>

@@ -2,7 +2,7 @@ import { headers as nextHeaders } from "next/headers"
 import { getPayload, User } from "payload"
 import configPromise from "@payload-config"
 
-export const getMeUser = async (args?: {
+export const getCurrentUser = async (args?: {
   nullUserRedirect?: string
   validUserRedirect?: string
 }): Promise<User | null> => {

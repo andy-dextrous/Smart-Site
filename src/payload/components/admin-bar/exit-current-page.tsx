@@ -31,7 +31,7 @@ export default function ExitCurrentPage() {
     <div>
       <Link
         href={`${process.env.NEXT_PUBLIC_URL}/admin/collections/${metaData?.collection}/${metaData?.id}/preview`}
-        className="cursor-pointer border-none bg-transparent text-white capitalize"
+        className="cursor-pointer rounded-sm border-none bg-transparent px-2 py-[2px] text-white hover:bg-[#37373c]"
       >
         Edit {metaData?.singleType}
       </Link>

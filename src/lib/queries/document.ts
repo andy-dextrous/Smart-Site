@@ -8,7 +8,7 @@ type Collection = keyof Config["collections"]
 
 /*******************************************************/
 /* Get Document By Slug
-  /*******************************************************/
+/*******************************************************/
 
 async function getDocument(
   collection: Collection | Collection[],
@@ -18,7 +18,6 @@ async function getDocument(
   const payload = await getPayload({ config: configPromise })
 
   if (Array.isArray(collection)) {
-    // Search across multiple collections
     const results = await Promise.all(
       collection.map(async col => {
         const result = await payload.find({
@@ -34,12 +33,10 @@ async function getDocument(
       })
     )
 
-    // Filter out null results and return first match
     const validResults = results.filter(Boolean)
     return validResults.length > 0 ? validResults[0] : null
   }
 
-  // Single collection search
   const page = await payload.find({
     collection,
     depth,

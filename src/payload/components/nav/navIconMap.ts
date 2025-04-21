@@ -25,7 +25,6 @@ export const navIconMap: Partial<
   forms: FaWpforms,
   "form-submissions": FaFileAlt,
   search: FaSearch,
-  // menus: IoMenu,
   settings: IoSettings,
   header: MdBorderTop,
   footer: MdBorderBottom,

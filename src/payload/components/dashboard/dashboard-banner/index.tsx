@@ -8,7 +8,7 @@ export const DashboardBanner = () => {
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__image-wrap`}>
-          <Image src={"/image-banner1.webp"} alt="" fill />
+          <Image src={"/assets/admin/images/image-banner1.webp"} alt="" fill />
         </div>
       </div>
     </div>
