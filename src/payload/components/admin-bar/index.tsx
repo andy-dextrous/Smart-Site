@@ -13,6 +13,7 @@ import Link from "next/link.js"
 import ClearCache from "./clear-cache"
 import ExitCurrentPage from "./exit-current-page"
 import Preview from "./preview"
+import { Toaster } from "@/components/ui/sonner"
 
 export const revalidate = 0
 
@@ -43,66 +44,69 @@ export async function PayloadAdminBar(props: PayloadAdminBarProps) {
   const cmsURL = process.env.NEXT_PUBLIC_URL
 
   return (
-    <div className="fixed inset-x-0 top-0 z-[99999] flex h-[32px] w-full items-center gap-2 bg-[#18181a] px-4 font-sans text-[13px] text-white">
-      <div className="flex items-center gap-2">
-        <Link
-          href={`${cmsURL}/admin`}
-          className="flex h-5 flex-shrink-0 items-center rounded-sm border-none bg-transparent px-2 text-white hover:bg-[#37373c]"
-        >
-          Dashboard
-        </Link>
+    <>
+      <div className="fixed inset-x-0 top-0 z-[99999] flex h-[32px] w-full items-center gap-2 bg-[#18181a] px-4 font-sans text-[13px] text-white">
+        <div className="flex items-center gap-2">
+          <Link
+            href={`${cmsURL}/admin`}
+            className="flex h-5 flex-shrink-0 items-center rounded-sm border-none bg-transparent px-2 text-white hover:bg-[#37373c]"
+          >
+            Dashboard
+          </Link>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1 rounded-sm border-none bg-transparent px-2 text-white hover:cursor-pointer hover:bg-[#37373c]">
-            <span>{siteName}</span>
-            <ChevronDown className="h-4 w-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="border-[unset] bg-[#18181a]">
-            <DropdownMenuItem asChild className="text-white">
-              <Link href={`${cmsURL}/admin/collections/pages`}>Pages</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-white">
-              <Link href={`${cmsURL}/admin/collections/posts`}>Posts</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-white">
-              <Link href={`${cmsURL}/admin/globals/header`}>Header</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-white">
-              <Link href={`${cmsURL}/admin/globals/footer`}>Footer</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="text-white">
-              <Link href={`${cmsURL}/admin/globals/settings`}>Settings</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1 rounded-sm border-none bg-transparent px-2 text-white hover:cursor-pointer hover:bg-[#37373c]">
-            <span className="flex items-center gap-1">
-              <PlusIcon className="h-4 w-4" /> New
-            </span>
-            <ChevronDown className="h-4 w-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="border-[unset] bg-[#18181a]">
-            {collections.map(collection => (
-              <DropdownMenuItem key={collection.slug} asChild className="text-white">
-                <Link href={`${cmsURL}/admin/collections/${collection.slug}/create`}>
-                  {collection.labels?.singular || collection.slug}
-                </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1 rounded-sm border-none bg-transparent px-2 text-white hover:cursor-pointer hover:bg-[#37373c]">
+              <span>{siteName}</span>
+              <ChevronDown className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="border-[unset] bg-[#18181a]">
+              <DropdownMenuItem asChild className="text-white">
+                <Link href={`${cmsURL}/admin/collections/pages`}>Pages</Link>
               </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem asChild className="text-white">
+                <Link href={`${cmsURL}/admin/collections/posts`}>Posts</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="text-white">
+                <Link href={`${cmsURL}/admin/globals/header`}>Header</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="text-white">
+                <Link href={`${cmsURL}/admin/globals/footer`}>Footer</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="text-white">
+                <Link href={`${cmsURL}/admin/globals/settings`}>Settings</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <ExitCurrentPage />
-      </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1 rounded-sm border-none bg-transparent px-2 text-white hover:cursor-pointer hover:bg-[#37373c]">
+              <span className="flex items-center gap-1">
+                <PlusIcon className="h-4 w-4" /> New
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="border-[unset] bg-[#18181a]">
+              {collections.map(collection => (
+                <DropdownMenuItem key={collection.slug} asChild className="text-white">
+                  <Link href={`${cmsURL}/admin/collections/${collection.slug}/create`}>
+                    {collection.labels?.singular || collection.slug}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-      <div className="ml-auto flex items-center gap-4">
-        <ClearCache />
-        {preview && <Preview />}
-        <UserDropdown />
+          <ExitCurrentPage />
+        </div>
+
+        <div className="ml-auto flex items-center gap-4">
+          <ClearCache />
+          {preview && <Preview />}
+          <UserDropdown />
+        </div>
       </div>
-    </div>
+      <Toaster position="bottom-right" richColors />
+    </>
   )
 }
 
