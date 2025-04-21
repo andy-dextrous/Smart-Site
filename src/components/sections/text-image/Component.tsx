@@ -47,7 +47,7 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
         <div className="flex flex-1 flex-col items-start gap-4">
           <div className="relative h-full max-h-[400px] min-h-[400px] w-full">
             {/* <Media resource={image} /> */}
-            <Image src={imageUrl} alt={image?.alt!} fill className="object-cover" />
+            <Image src={imageUrl} alt={image?.alt || ""} fill className="object-cover" />
           </div>
         </div>
       </div>

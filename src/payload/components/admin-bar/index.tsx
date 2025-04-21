@@ -1,94 +1,155 @@
-// "use client"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { getContentCollections } from "@/lib/queries/collections"
+import { getSettings } from "@/lib/queries/globals"
+import { getMeUser } from "@/lib/queries/user"
+import { getClientSideURL } from "@/utilities/getURL"
+import { ChevronDown, PlusIcon } from "lucide-react"
+import Link from "next/link.js"
+import ExitCurrentPage from "./exit-current-page"
 
-// import type { PayloadAdminBarProps, PayloadMeUser } from "@payloadcms/admin-bar"
+export const revalidate = 0
 
-// import { cn } from "@/utilities/ui"
-// import { useSelectedLayoutSegments } from "next/navigation"
-// import { PayloadAdminBar } from "@payloadcms/admin-bar"
-// import React, { useState } from "react"
-// import { useRouter } from "next/navigation"
+interface PayloadAdminBarProps {
+  onPreviewExit?: () => void
+  preview?: boolean
+}
 
-// import "./index.scss"
+export async function PayloadAdminBar(props: PayloadAdminBarProps) {
+  const { preview } = props
 
-// import { getClientSideURL } from "@/utilities/getURL"
+  /*******************************************************/
+  /* Get User
+  /*******************************************************/
 
-// const baseClass = "admin-bar"
+  const user = await getMeUser()
 
-// const collectionLabels = {
-//   pages: {
-//     plural: "Pages",
-//     singular: "Page",
-//   },
-//   posts: {
-//     plural: "Posts",
-//     singular: "Post",
-//   },
-//   projects: {
-//     plural: "Projects",
-//     singular: "Project",
-//   },
-// }
+  if (!user) {
+    return null
+  }
 
-// const Title: React.FC = () => <span>Dashboard</span>
+  const settings = await getSettings()
+  const collectionsData = await getContentCollections()
 
-// export const AdminBar: React.FC<{
-//   adminBarProps?: PayloadAdminBarProps
-// }> = props => {
-//   const { adminBarProps } = props || {}
-//   const segments = useSelectedLayoutSegments()
-//   const [show, setShow] = useState(false)
-//   const collection = (
-//     collectionLabels[segments?.[1] as keyof typeof collectionLabels]
-//       ? segments[1]
-//       : "pages"
-//   ) as keyof typeof collectionLabels
-//   const router = useRouter()
+  const collections = collectionsData.map(collection => ({
+    slug: collection.slug,
+    labels: {
+      singular: collection.slug.charAt(0).toUpperCase() + collection.slug.slice(1),
+    },
+  }))
 
-//   const onAuthChange = React.useCallback((user: PayloadMeUser) => {
-//     setShow(Boolean(user?.id))
-//   }, [])
+  const siteName = settings?.general?.siteName || "My Site"
+  const { id: userID, email, firstName, lastName } = user
+  const cmsURL = process.env.NEXT_PUBLIC_URL
 
-//   return (
-//     <div
-//       className={cn(baseClass, "bg-black py-2 text-white", {
-//         block: show,
-//         hidden: !show,
-//       })}
-//     >
-//       <div className="container">
-//         <PayloadAdminBar
-//           {...adminBarProps}
-//           className="py-2 text-white"
-//           classNames={{
-//             controls: "font-medium text-white",
-//             logo: "text-white",
-//             user: "text-white",
-//           }}
-//           cmsURL={getClientSideURL()}
-//           collectionSlug={collection}
-//           collectionLabels={{
-//             plural: collectionLabels[collection]?.plural || "Pages",
-//             singular: collectionLabels[collection]?.singular || "Page",
-//           }}
-//           logo={<Title />}
-//           onAuthChange={onAuthChange}
-//           onPreviewExit={() => {
-//             fetch("/next/exit-preview").then(() => {
-//               router.push("/")
-//               router.refresh()
-//             })
-//           }}
-//           style={{
-//             backgroundColor: "var(--color-base-850)",
-//             padding: 0,
-//             position: "relative",
-//             zIndex: "unset",
-//           }}
-//         />
-//       </div>
-//     </div>
-//   )
-// }
+  /*******************************************************/
+  /* Clear Cache
+  /*******************************************************/
 
-export { PayloadAdminBar as AdminBar } from "./admin-bar"
-export type { PayloadAdminBarProps, PayloadMeUser } from "./types"
+  async function clearCache() {
+    "use server"
+
+    await fetch(`${getClientSideURL()}/api/revalidate`, {
+      method: "GET",
+    })
+  }
+
+  return (
+    <div className="fixed inset-x-0 top-0 z-[99999] flex h-[32px] w-full items-center gap-2 bg-[#18181a] px-4 font-sans text-[13px] text-white">
+      <Link
+        href={`${cmsURL}/admin`}
+        className="mr-4 flex h-5 flex-shrink-0 items-center text-white no-underline"
+      >
+        Dashboard
+      </Link>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-1 text-white">
+          <span>{siteName}</span>
+          <ChevronDown className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="border-[unset] bg-[#18181a]">
+          <DropdownMenuItem asChild className="text-white">
+            <Link href={`${cmsURL}/admin/collections/pages`}>Pages</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="text-white">
+            <Link href={`${cmsURL}/admin/collections/posts`}>Posts</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="text-white">
+            <Link href={`${cmsURL}/admin/globals/header`}>Header</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="text-white">
+            <Link href={`${cmsURL}/admin/globals/footer`}>Footer</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="text-white">
+            <Link href={`${cmsURL}/admin/globals/settings`}>Settings</Link>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="ml-4 flex items-center gap-1 text-white">
+          <span className="flex items-center gap-1">
+            <PlusIcon className="h-4 w-4" /> New
+          </span>
+          <ChevronDown className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="border-[unset] bg-[#18181a]">
+          {collections.map(collection => (
+            <DropdownMenuItem key={collection.slug} asChild className="text-white">
+              <Link href={`${cmsURL}/admin/collections/${collection.slug}/create`}>
+                {collection.labels?.singular || collection.slug}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ExitCurrentPage />
+
+      <div className="ml-auto flex items-center gap-4">
+        <form action={clearCache}>
+          <button
+            className="cursor-pointer border-none bg-transparent text-white"
+            type="submit"
+          >
+            Clear Cache
+          </button>
+        </form>
+
+        {preview && (
+          <div>
+            <Link
+              href="/next/exit-preview"
+              className="cursor-pointer border-none bg-transparent text-white"
+            >
+              Exit preview mode
+            </Link>
+          </div>
+        )}
+
+        <Link
+          href={`${cmsURL}/admin/collections/users/${userID}`}
+          rel="noopener noreferrer"
+          target="_blank"
+          className="overflow-hidden text-ellipsis whitespace-nowrap text-white no-underline"
+        >
+          {email || "Profile"}
+        </Link>
+
+        <Link
+          href={`${cmsURL}/admin/logout`}
+          rel="noopener noreferrer"
+          target="_blank"
+          className="text-white no-underline"
+        >
+          Logout
+        </Link>
+      </div>
+    </div>
+  )
+}

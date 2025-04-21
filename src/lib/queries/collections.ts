@@ -1,3 +1,5 @@
+"use server"
+
 import type { Config } from "@/payload/payload-types"
 
 import { getPayload } from "payload"
@@ -6,14 +8,14 @@ import configPromise from "@payload-config"
 // Define CollectionSlug type from Config interface
 type CollectionSlug = keyof Config["collections"]
 
-export const getCollections = async () => {
+export const getContentCollections = async () => {
   const payload = await getPayload({ config: configPromise })
 
   const collectionSlugs = Object.keys(payload.collections) as CollectionSlug[]
 
   // Filter out internal Payload collections
   const nonPayloadCollections = collectionSlugs.filter(
-    slug => !slug.startsWith("payload-") || ["form-submissions"].includes(slug)
+    slug => !slug.startsWith("payload-") && !["form-submissions", "search"].includes(slug)
   )
 
   // Create an array to store all collections data

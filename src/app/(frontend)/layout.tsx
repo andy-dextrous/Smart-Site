@@ -2,10 +2,11 @@ import Providers from "@/providers"
 import { Inter } from "next/font/google"
 import React from "react"
 
-import { getSettings } from "@/lib/queries/globals"
-import { AdminBar } from "@/payload/components/admin-bar"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
+import { getSettings } from "@/lib/queries/globals"
+import { getMeUser } from "@/lib/queries/user"
+import { PayloadAdminBar } from "@/payload/components/admin-bar"
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
 import parse from "html-react-parser"
 import { draftMode } from "next/headers"
@@ -30,28 +31,35 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const { integrations } = await getSettings()
 
+  /*******************************************************/
+  /* Get Site Settings
+  /*******************************************************/
+
   const gtmId = integrations?.googleTagManager
   const gaId = integrations?.googleAnalytics
   const head = integrations?.head
   const bodyEnd = integrations?.bodyEnd
+
+  const isLoggedIn = await getMeUser()
 
   return (
     <html lang="en" className={`${inter.variable} font-sans`} suppressHydrationWarning>
       <head>
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
-        <link href="https://www.googletagmanager.com" rel="preconnect" />
-        <link href="https://www.google-analytics.com" rel="preconnect" />
+        {gtmId && <link href="https://www.googletagmanager.com" rel="preconnect" />}
+        {gaId && <link href="https://www.google-analytics.com" rel="preconnect" />}
         {head && parse(head)}
       </head>
 
-      <body>
+      <body className={isLoggedIn ? "relative !pt-[32px]" : ""}>
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
         <Providers>
-          <AdminBar preview={isEnabled} />
+          <PayloadAdminBar preview={isEnabled} />
+
           <Header />
-          <main>{children}</main>
+          {children}
           <Footer />
 
           {bodyEnd && parse(bodyEnd)}
