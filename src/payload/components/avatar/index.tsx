@@ -13,14 +13,14 @@ export const Avatar: FC<ServerProps> = props => {
   const avatar = user?.avatar as Media
 
   return (
-    <div>
+    <div className="h-[50px] w-[50px]">
       {avatar && avatar.url ? (
         <Image
           src={avatar.url}
           alt={user?.username || "User avatar"}
           width={46}
           height={46}
-          className="rounded-full border-2 border-(--color-base-750) hover:border-2 hover:border-(--color-base-700)"
+          className="h-[50px] w-[50px] rounded-full border-2 border-(--color-base-750) hover:border-(--color-base-700)"
         />
       ) : (
         <DefaultAccountIcon active={false} />

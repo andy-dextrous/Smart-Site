@@ -18,6 +18,10 @@ const nextConfig = {
           protocol: url.protocol.replace(":", ""),
         }
       }),
+      {
+        hostname: "picsum.photos",
+        protocol: "https",
+      },
     ],
   },
   reactStrictMode: true,
