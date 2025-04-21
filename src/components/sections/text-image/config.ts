@@ -31,22 +31,55 @@ export const TextImage: Block = {
       required: true,
     },
     {
-      name: "image",
-      type: "upload",
-      relationTo: "media",
-      required: true,
+      type: "collapsible",
+      admin: {
+        initCollapsed: true,
+      },
+      label: "Image",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "image",
+              type: "upload",
+              relationTo: "media",
+              required: true,
+              filterOptions: {
+                mimeType: { contains: "image" },
+              },
+              admin: {
+                width: "80%",
+              },
+            },
+            {
+              name: "imagePosition",
+              type: "select",
+              options: ["left", "right"],
+              required: true,
+              defaultValue: "left",
+              admin: {
+                width: "20%",
+              },
+            },
+          ],
+        },
+      ],
     },
     {
-      name: "imagePosition",
-      type: "select",
-      options: ["left", "right"],
-      required: true,
-    },
-    {
-      name: "buttons",
-      type: "array",
-      maxRows: 2,
-      fields: [link()],
+      type: "collapsible",
+      admin: {
+        initCollapsed: true,
+      },
+      label: "Buttons",
+      fields: [
+        {
+          name: "buttons",
+          type: "array",
+          maxRows: 2,
+          fields: [link()],
+        },
+      ],
     },
   ],
 }

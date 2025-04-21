@@ -58,6 +58,9 @@ const admin = {
       },
     ],
   },
+  // avatar: {
+  //   Component: "@/payload/components/avatar#Avatar",
+  // },
   avatar: {
     Component: "@/payload/components/avatar#Avatar",
   },

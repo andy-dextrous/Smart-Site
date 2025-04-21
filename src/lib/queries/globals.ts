@@ -7,7 +7,7 @@ type Global = keyof Config["globals"]
 
 /*******************************************************/
 /* Get Post By Slug
-  /*******************************************************/
+/*******************************************************/
 
 export const getSettings = cache(async () => {
   const payload = await getPayload({ config: configPromise })
@@ -26,7 +26,7 @@ export const getSettings = cache(async () => {
 
 /*******************************************************/
 /* Get Post By Slug
-  /*******************************************************/
+/*******************************************************/
 
 async function getGlobal(slug: Global, depth = 0) {
   const payload = await getPayload({ config: configPromise })

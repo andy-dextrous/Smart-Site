@@ -475,7 +475,6 @@ export interface Page {
   title: string;
   publishedAt?: string | null;
   categories?: (string | Category)[] | null;
-  featuredImage?: (string | null) | Media;
   sections: (HeroPrimaryBlock | TextImageBlock)[];
   meta?: {
     title?: string | null;
@@ -1037,7 +1036,6 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   publishedAt?: T;
   categories?: T;
-  featuredImage?: T;
   sections?:
     | T
     | {

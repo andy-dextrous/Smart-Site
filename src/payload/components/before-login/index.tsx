@@ -8,7 +8,7 @@ export const BeforeLogin = () => {
   return (
     <aside className={baseClass}>
       <div className={`${baseClass}__image-wrap`}>
-        <Image src="/image-login1.webp" alt="" fill />
+        <Image src="/assets/admin/images/image-login1.webp" alt="" fill />
       </div>
     </aside>
   )

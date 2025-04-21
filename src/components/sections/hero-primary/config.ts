@@ -9,49 +9,76 @@ export const HeroPrimary: Block = {
   },
   fields: [
     {
-      name: "heading",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "content",
-      type: "textarea",
+      type: "collapsible",
+      label: "Content",
       admin: {
-        rows: 10,
+        initCollapsed: false,
       },
-      label: false,
-      required: true,
-    },
-    {
-      name: "backgroundImage",
-      type: "upload",
-      relationTo: "media",
-      filterOptions: {
-        mimeType: { contains: "image" },
-      },
-      admin: {
-        description: "Optional background image for the hero section",
-      },
-    },
-    {
-      name: "buttons",
-      type: "array",
       fields: [
         {
-          name: "button",
-          type: "group",
+          name: "heading",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "content",
+          type: "textarea",
+          admin: {
+            rows: 10,
+          },
+          label: false,
+          required: true,
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Background Image",
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: "backgroundImage",
+          type: "upload",
+          relationTo: "media",
+          filterOptions: {
+            mimeType: { contains: "image" },
+          },
+          admin: {
+            description: "Optional background image for the hero section",
+          },
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Buttons",
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: "buttons",
+          type: "array",
           fields: [
             {
-              name: "buttonType",
-              type: "select",
-              label: "Button type",
-              defaultValue: "primary",
-              options: ["primary", "secondary"],
-              admin: {
-                description: "Select the button type",
-              },
+              name: "button",
+              type: "group",
+              fields: [
+                {
+                  name: "buttonType",
+                  type: "select",
+                  label: "Button type",
+                  defaultValue: "primary",
+                  options: ["primary", "secondary"],
+                  admin: {
+                    description: "Select the button type",
+                  },
+                },
+                link(),
+              ],
             },
-            link(),
           ],
         },
       ],
