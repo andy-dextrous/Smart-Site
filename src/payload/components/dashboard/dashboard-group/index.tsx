@@ -6,7 +6,6 @@ import Link from "next/link"
 import { BasePayload, CollectionSlug, StaticLabel } from "payload"
 
 import "./index.scss"
-import { adminGroups } from "@/utilities/adminGroups"
 
 type Props = {
   adminRoute: string
@@ -18,6 +17,12 @@ type Props = {
     type: EntityType
   }[]
   payload: BasePayload
+}
+
+const adminGroups = {
+  featured: "featured",
+  website: "website",
+  globals: "site wide",
 }
 
 export const DashboardGroup: FC<Props> = async ({

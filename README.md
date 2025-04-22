@@ -158,3 +158,17 @@ After setting up the site as a Vercel project, go to project -> settings and tur
 - Add the domain that the website will live at by visting [Resend Domain](https://resend.com/domains) and adding the DNS records.
 - Go to src/payload/email/config and change the email address and name to match a real email from the production URL. ie, if the websit elives at example.com, the defaultFromAddress should be like john@example.com.
 - At this point, you should be able to go to the Login screen of the production app and click on "Forgot Email" which will send your user address an email.
+
+## Roadmap
+
+- **Templates Plugin**: Automatically assigned and recallable sequences of section blocks assigned to post types or pages
+- **Deep SEO**: Full metadata, structured data, backend recommendations
+- **AI Content and Integrated Workflows Plugin**
+- **Sections Library**
+- **vO Integration/Workflow**
+- **Figma Integration**
+- **Design System**
+
+## Bugs
+
+- Slug behaviour

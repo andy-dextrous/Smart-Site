@@ -6,7 +6,7 @@ import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
 import { getSettings } from "@/lib/queries/globals"
 import { getCurrentUser } from "@/lib/queries/user"
-import { PayloadAdminBar } from "@/payload/components/admin-bar"
+import { WildChildAdminBar } from "@/payload/components/admin-bar"
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
 import parse from "html-react-parser"
 import { draftMode } from "next/headers"
@@ -56,7 +56,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
         <Providers>
-          <PayloadAdminBar preview={isEnabled} />
+          <WildChildAdminBar preview={isEnabled} />
 
           <Header />
           {children}
