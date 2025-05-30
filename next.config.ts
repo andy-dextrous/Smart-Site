@@ -26,6 +26,15 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  webpack: (config, { webpack }) => {
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+      })
+    )
+
+    return config
+  },
 } as NextConfig
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
