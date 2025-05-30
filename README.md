@@ -1,4 +1,4 @@
-# Wild Child
+# Wild Child Theme - Payload CMS Built In
 
 This is the official Wild Child website/app starter, built using Next JS, Tailwind 4, GSAP and Payload CMS.
 
