@@ -3,17 +3,131 @@
 */
 
 @theme {
-  /* Custom Dimensions */
-  --section-padding-x: clamp(1rem, 4vw, 4rem);
-  --section-padding-y: clamp(1rem, 10vw, 4rem);
-  --column-padding-x: clamp(1rem, 5vw, 4rem);
-  --content-width: clamp(95vw, 95vw, 1368px);
-  --nav-height: clamp(50px, 10vh, 120px);
-  --logo-height: clamp(45px, 10vw, 60px);
+  /* Geometry */
 
-  /* Colors */
-  --color-primary: aqua;
-  --color-secondary: yellow;
+  /* This is the default spacing unit for the whole library */
+  --spacing: 0.25rem;
+
+  /* Spacing */
+  --spacing-section-x: clamp(1rem, 4vw, 4rem);
+  --spacing-section-y: clamp(1rem, 10vw, 4rem);
+  --spacing-container-x: clamp(0.5rem, 4vw, 2rem);
+  --spacing-container-y: clamp(0.5rem, 10vw, 2rem);
+  --spacing-logo: clamp(45px, 10vw, 60px);
+  --spacing-nav: clamp(50px, 10vh, 120px);
+
+  --spacing-content: clamp(1rem, 5vw, 1.3rem);
+  --spacing-content-half: calc(var(--spacing-content) / 2);
+  --spacing-content-double: calc(var(--spacing-content) * 2);
+  --spacing-content-triple: calc(var(--spacing-content) * 3);
+
+  --spacing-column: clamp(2rem, 4vw, 4rem);
+  --spacing-column-half: calc(var(--spacing-column) / 2);
+  --spacing-column-double: calc(var(--spacing-column) * 2);
+  --spacing-column-triple: calc(var(--spacing-column) * 3);
+
+  --spacing-row: clamp(1rem, 4vw, 2rem);
+  --spacing-row-half: calc(var(--spacing-row) / 2);
+  --spacing-row-double: calc(var(--spacing-row) * 2);
+  --spacing-row-triple: calc(var(--spacing-row) * 3);
+
+  --spacing-card-padding: clamp(1rem, 4vw, 2rem);
+  --spacing-card-padding-half: calc(var(--spacing-card-padding) / 2);
+  --spacing-card-padding-double: calc(var(--spacing-card-padding) * 2);
+  --spacing-card-padding-triple: calc(var(--spacing-card-padding) * 3);
+
+  /* Containers and Max Widths */
+
+  /* Tailwind Core */
+  --container-3xs: 16rem;
+  --container-2xs: 18rem;
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-5xl: 64rem;
+  --container-6xl: 72rem;
+  --container-7xl: 80rem;
+
+  /* Custom */
+  --container-sm: clamp(95vw, 5vw, 900px);
+  --container-md: clamp(95vw, 5vw, 1368px);
+  --container-wide: 1500px;
+
+  /* Colors System Starters */
+  --color-primary: #495ae1; /* Primary Brand Colour */
+  --color-secondary: #51e0d0; /* Secondary Brand Colour */
+  --color-tertiary: #abb4f6; /* Tertiary Brand Colour */
+  --color-neutral: #6e717a; /* Brand Light Grey */
+  --color-dark: #18181a; /* Darkest Brand Colour - make more sense?  */
+  --color-light: var(--color-neutral-100); /* Light Text Colour */
+  --color-danger: #ff4d4d; /* Danger Colour - usually red */
+  --color-warning: #ffbb43; /* Warning Colour - usually yellow */
+  --color-success: #00c49f; /* Success Colour - usually green */
+  --color-info: #00b4d8; /* Info Colour - usually blue */
+
+  --color-border-dark: var(--color-dark-800);
+  --color-border-light: var(--color-light);
+
+  /* Color Shades - get from https://www.tailwindshades.com */
+  --color-primary-50: oklch(84.655% 0.06151 279.91);
+  --color-primary-100: oklch(80.033% 0.08105 278.95);
+  --color-primary-200: oklch(71.121% 0.12159 277.08);
+  --color-primary-300: oklch(62.117% 0.16324 275.1);
+  --color-primary-400: oklch(53.576% 0.20403 272.05);
+  --color-primary-500: oklch(44.252% 0.23174 267.74);
+  --color-primary-600: oklch(36.772% 0.18841 268.18);
+  --color-primary-700: oklch(28.972% 0.13979 268.83);
+  --color-primary-800: oklch(20.628% 0.08881 270.56);
+  --color-primary-900: oklch(11.162% 0.03001 267.77);
+  --color-primary-950: oklch(0% 0 none);
+
+  --color-secondary-50: oklch(94.096% 0.04562 187.95);
+  --color-secondary-100: oklch(92.279% 0.05936 187.01);
+  --color-secondary-200: oklch(88.596% 0.0844 187.36);
+  --color-secondary-300: oklch(85.449% 0.10625 185.63);
+  --color-secondary-400: oklch(82.631% 0.12348 184.64);
+  --color-secondary-500: oklch(78.139% 0.13305 183.16);
+  --color-secondary-600: oklch(64.811% 0.10982 183.14);
+  --color-secondary-700: oklch(50.464% 0.08434 182.98);
+  --color-secondary-800: oklch(35.028% 0.05635 184.31);
+  --color-secondary-900: oklch(17.959% 0.02461 185.65);
+  --color-secondary-950: oklch(0% 0 none);
+
+  --color-neutral-50: oklch(91.867% 0.00291 264.54);
+  --color-neutral-100: oklch(88.539% 0.00423 271.36);
+  --color-neutral-200: oklch(82.101% 0.00703 277.14);
+  --color-neutral-300: oklch(75.423% 0.00882 271.3);
+  --color-neutral-400: oklch(68.71% 0.01187 274.82);
+  --color-neutral-500: oklch(61.747% 0.01541 272.57);
+  --color-neutral-600: oklch(54.908% 0.01439 271.15);
+  --color-neutral-700: oklch(45.257% 0.01048 264.46);
+  --color-neutral-800: oklch(34.938% 0.00874 276.9);
+  --color-neutral-900: oklch(23.905% 0.00409 264.49);
+  --color-neutral-950: oklch(17.853% 0.00407 285.98);
+
+  --color-dark-50: oklch(82.18% 0.00692 286.25);
+  --color-dark-100: oklch(79.042% 0.00699 286.24);
+  --color-dark-200: oklch(72.087% 0.01002 286.15);
+  --color-dark-300: oklch(65.293% 0.01323 286.03);
+  --color-dark-400: oklch(58.284% 0.01514 285.92);
+  --color-dark-500: oklch(51.338% 0.01406 285.89);
+  --color-dark-600: oklch(44.475% 0.01133 285.93);
+  --color-dark-700: oklch(36.954% 0.00848 285.98);
+  --color-dark-800: #28282b;
+  --color-dark-900: #202023;
+  --color-dark-950: oklch(14.958% 0 none);
+
+  --dark-light: #202023;
+  --dark-lightest: #28282b;
+
+  --color-wc-base: #18181a;
+  --color-wc-base-light: #202023;
+  --color-wc-base-lightest: #28282b;
 
   /* Easing */
   --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
