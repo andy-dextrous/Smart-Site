@@ -8,12 +8,15 @@ import type {
 import { useRouter } from "next/navigation"
 import React, { useCallback, useState } from "react"
 import { useForm, FormProvider } from "react-hook-form"
-import RichText from "@/payload/components/rich-text"
-import { Button } from "@/payload/components/ui/button"
+import RichText from "@/payload/components/frontend/rich-text"
+import { Button } from "@/components/ui/button"
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical"
 
 import { fields } from "./fields"
-import { getClientSideURL } from "@/utilities/getURL"
+import { getClientSideURL } from "@/utilities/get-url"
+import { cn } from "@/utilities/ui"
+
+export type FormVariant = "white" | "dark" | "neutral" | "transparent"
 
 export type FormBlockType = {
   blockName?: string
@@ -21,7 +24,32 @@ export type FormBlockType = {
   enableIntro: boolean
   form: FormType
   introContent?: SerializedEditorState
+  variant?: FormVariant
 }
+
+/*************************************************************************/
+/*  FORM BUTTON COMPONENT
+/*************************************************************************/
+
+type FormButtonProps = React.ComponentProps<typeof Button> & {
+  formVariant: FormVariant
+}
+
+const FormButton: React.FC<FormButtonProps> = ({ formVariant, ...buttonProps }) => {
+  // Map form variants to button variants
+  const variantMapping = {
+    white: "default" as const,
+    dark: "white" as const,
+    neutral: "default" as const,
+    transparent: "outline" as const,
+  }
+
+  return <Button variant={variantMapping[formVariant]} {...buttonProps} />
+}
+
+/*************************************************************************/
+/*  FORM BLOCK COMPONENT
+/*************************************************************************/
 
 export const FormBlock: React.FC<
   {
@@ -39,6 +67,7 @@ export const FormBlock: React.FC<
       submitButtonLabel,
     } = {},
     introContent,
+    variant = "white",
   } = props
 
   const formMethods = useForm({
@@ -124,54 +153,70 @@ export const FormBlock: React.FC<
     [router, formID, redirect, confirmationType]
   )
 
-  return (
-    <section>
-      <div className="container">
-        {enableIntro && introContent && !hasSubmitted && (
-          <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
-        )}
-        <div className="border-border rounded-[0.8rem] border p-4 lg:p-6">
-          <FormProvider {...formMethods}>
-            {!isLoading && hasSubmitted && confirmationType === "message" && (
-              <RichText data={confirmationMessage} />
-            )}
-            {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-            {error && <div>{`${error.status || "500"}: ${error.message || ""}`}</div>}
-            {!hasSubmitted && (
-              <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-                <div className="mb-4 last:mb-0">
-                  {formFromProps &&
-                    formFromProps.fields &&
-                    formFromProps.fields?.map((field, index) => {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const Field: React.FC<any> =
-                        fields?.[field.blockType as keyof typeof fields]
-                      if (Field) {
-                        return (
-                          <div className="mb-6 last:mb-0" key={index}>
-                            <Field
-                              form={formFromProps}
-                              {...field}
-                              {...formMethods}
-                              control={control}
-                              errors={errors}
-                              register={register}
-                            />
-                          </div>
-                        )
-                      }
-                      return null
-                    })}
-                </div>
+  // Container styles based on variant
+  const containerClasses = {
+    white: "border-form-light-border bg-white",
+    dark: "border-form-dark-border bg-dark",
+    neutral: "border-form-neutral-border bg-neutral",
+    transparent: "border-form-transparent-border bg-transparent",
+  }
 
-                <Button form={formID} type="submit" variant="default">
-                  {submitButtonLabel}
-                </Button>
-              </form>
-            )}
-          </FormProvider>
-        </div>
+  return (
+    <div>
+      {enableIntro && introContent && !hasSubmitted && (
+        <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
+      )}
+      <div className={cn("border p-4 lg:p-6", containerClasses[variant])}>
+        <FormProvider {...formMethods}>
+          {!isLoading && hasSubmitted && confirmationType === "message" && (
+            <RichText data={confirmationMessage} />
+          )}
+          {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
+          {error && <div>{`${error.status || "500"}: ${error.message || ""}`}</div>}
+          {!hasSubmitted && (
+            <form id={formID} onSubmit={handleSubmit(onSubmit)} className="">
+              <div className="mb-4 last:mb-0">
+                {formFromProps &&
+                  formFromProps.fields &&
+                  formFromProps.fields?.map((field, index) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const Field: React.FC<any> =
+                      fields?.[field.blockType as keyof typeof fields]
+                    if (Field) {
+                      return (
+                        <div className="mb-6 last:mb-0" key={index}>
+                          <Field
+                            form={formFromProps}
+                            variant={`form-${variant}`}
+                            {...field}
+                            {...formMethods}
+                            control={control}
+                            errors={errors}
+                            register={register}
+                          />
+                        </div>
+                      )
+                    } else {
+                      console.log("field not found", field)
+                    }
+
+                    return null
+                  })}
+              </div>
+
+              <FormButton
+                form={formID}
+                type="submit"
+                formVariant={variant}
+                size="md"
+                className="flex w-full items-center justify-center hover:cursor-pointer"
+              >
+                {submitButtonLabel}
+              </FormButton>
+            </form>
+          )}
+        </FormProvider>
       </div>
-    </section>
+    </div>
   )
 }

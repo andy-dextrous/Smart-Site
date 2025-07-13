@@ -8,20 +8,31 @@ export const formatSlug = (val: string): string =>
 
 export const formatSlugHook =
   (fallback: string): FieldHook =>
-  ({ data, operation, value }) => {
-    if (typeof value === "string") {
+  ({ data, operation, value, originalDoc }) => {
+    // If user provided a value, always use it (formatted)
+    if (typeof value === "string" && value.trim() !== "") {
       return formatSlug(value)
     }
 
-    // Handle both create operations AND cases where the slug is empty/not set
-    // This ensures new documents get a proper slug initially
-    if (operation === "create" || !data?.slug) {
-      const fallbackData = data?.[fallback] || data?.[fallback]
+    // Check if document is published (has _status !== 'draft' or no _status field)
+    const isPublished =
+      originalDoc?._status === "published" || (originalDoc && !originalDoc._status)
+
+    // For new documents or unpublished documents, auto-generate from title
+    // But only if no existing slug and not locked
+    const shouldAutoGenerate =
+      (operation === "create" || !isPublished) &&
+      !data?.slugLock &&
+      (!originalDoc?.slug || originalDoc.slug === "")
+
+    if (shouldAutoGenerate) {
+      const fallbackData = data?.[fallback]
 
       if (fallbackData && typeof fallbackData === "string") {
         return formatSlug(fallbackData)
       }
     }
 
-    return value
+    // Preserve existing slug for published documents or when locked
+    return originalDoc?.slug || value || ""
   }

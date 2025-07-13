@@ -1,0 +1,135 @@
+.nav {
+  padding-block-start: 8rem;
+  padding-block-end: 1rem;
+  border-right: 1px solid var(--theme-elevation-100);
+
+  &__toggler {
+    margin-left: base(0.6);
+  }
+
+  &__group {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: base(1.25);
+
+    &__toggle {
+      margin-bottom: base(0.5);
+      color: var(--theme-elevation-400);
+
+      &:hover {
+        color: var(--theme-elevation-550);
+      }
+    }
+
+    &__label {
+      padding: 0 base(0.6);
+      text-transform: uppercase;
+      font-family: monospace;
+    }
+  }
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 16px;
+
+    &.active {
+      color: var(--wild-child-indigo-light);
+    }
+  }
+
+  &__controls {
+    margin-left: calc(var(--spacing) * 6) !important;
+    .nav__log-out {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background-color: var(--color-base-800);
+      border: 1px solid var(--color-base-800);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-base-0);
+    }
+  }
+
+  &__link {
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    margin-bottom: base(0.25);
+
+    &:hover {
+      background-color: var(--color-base-850);
+      text-decoration: none;
+    }
+
+    &.active {
+      background-color: var(--color-base-850);
+      border-left: 2px solid var(--wild-child-indigo-light);
+    }
+
+    // Notification badge positioning
+    .notification-badge {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    &-label {
+      font-size: base(0.75);
+      color: var(--theme-elevation-750);
+      flex: 1;
+    }
+
+    &-indicator {
+      background-color: var(--theme-elevation-250);
+    }
+
+    &__icon {
+      width: 18px;
+      height: 18px;
+      margin-right: base(0.5);
+    }
+  }
+
+  &__log-out {
+    color: var(--theme-elevation-750);
+    border-radius: 999px;
+    width: base(2.25);
+    height: base(2.25);
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background-color: var(--theme-elevation-150);
+    }
+  }
+
+  &__link-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--wild-child-indigo-light);
+    height: 100%;
+  }
+
+  &__link-label {
+    font-size: 14px;
+
+    &.active {
+      color: var(--wild-child-indigo-light);
+    }
+  }
+
+  &__scroll {
+    padding: 0;
+    overflow-y: auto;
+    height: 100%;
+  }
+}

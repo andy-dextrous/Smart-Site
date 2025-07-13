@@ -1,0 +1,45 @@
+.payload-richtext {
+  &--container {
+    max-width: 75ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  &--full-width {
+    max-width: none;
+  }
+
+  // Legacy prose styles kept for backwards compatibility
+  &--prose {
+    font-size: 1rem;
+    line-height: 1.75;
+    margin-left: auto;
+    margin-right: auto;
+
+    @media (min-width: 768px) {
+      font-size: 1.125rem;
+    }
+
+    &.dark {
+      color: rgba(255, 255, 255, 0.9);
+
+      a {
+        color: #58a6ff;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        color: #fff;
+      }
+
+      code {
+        background-color: rgba(0, 0, 0, 0.2);
+        color: #fff;
+      }
+    }
+  }
+}

@@ -82,11 +82,11 @@
     border-color: var(--wild-child-indigo-light);
   }
 
+  // Overrides
   .card {
     border-radius: var(--style-radius-s);
     border: 1px solid var(--color-base-800);
     align-items: center;
-    padding: 36px 52px;
 
     &__title {
       font-size: base(0.8);
@@ -106,31 +106,6 @@
     }
   }
 
-  .dashboard {
-    --cols: 4;
-    padding: var(--gutter-h);
-
-    &__wrap {
-      gap: calc(var(--base) * 3);
-    }
-
-    @include large-break {
-      --cols: 4;
-    }
-
-    @include mid-break {
-      --cols: 2;
-    }
-
-    @include small-break {
-      --cols: 2;
-    }
-
-    @include extra-small-break {
-      --cols: 1;
-    }
-  }
-
   .login {
     width: 50%;
     margin-left: auto;
@@ -139,82 +114,6 @@
     @include mid-break {
       width: 100%;
     }
-  }
-
-  .nav {
-    border-right: 1px solid var(--theme-elevation-100);
-
-    nav {
-      a:hover {
-        text-decoration: none;
-        background-color: var(--theme-elevation-150);
-      }
-
-      a,
-      a.active {
-        padding: base(0.35) base(0.6);
-      }
-    }
-
-    &__link {
-      margin-bottom: base(0.25);
-
-      &.active {
-        background-color: var(--color-base-850);
-        border-left: 2px solid var(--wild-child-indigo-light);
-      }
-
-      &-label {
-        font-size: base(0.75);
-        color: var(--theme-elevation-750);
-      }
-
-      &-indicator {
-        background-color: var(--theme-elevation-250);
-      }
-    }
-
-    &__icon {
-      width: 18px;
-      height: 18px;
-      margin-right: base(0.5);
-    }
-
-    &__log-out {
-      color: var(--theme-elevation-750);
-      border-radius: 999px;
-      width: base(2.25);
-      height: base(2.25);
-      display: flex;
-      align-items: center;
-
-      &:hover {
-        background-color: var(--theme-elevation-150);
-      }
-    }
-  }
-
-  .nav-group {
-    margin-bottom: base(1.25);
-
-    &__toggle {
-      margin-bottom: base(0.5);
-      color: var(--theme-elevation-400);
-
-      &:hover {
-        color: var(--theme-elevation-550);
-      }
-    }
-
-    &__label {
-      padding: 0 base(0.6);
-      text-transform: uppercase;
-      font-family: monospace;
-    }
-  }
-
-  .nav-toggler {
-    margin-left: base(0.6);
   }
 
   .step-nav {
@@ -236,9 +135,6 @@
   }
 
   .app-header {
-    // margin-bottom: 3rem !important;
-    // border-bottom: 1px solid var(--color-base-800);
-
     &__account {
       text-decoration: none;
     }

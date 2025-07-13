@@ -6,7 +6,8 @@ import { email } from "@/payload/email/config"
 import globals from "@/payload/globals"
 import jobs from "@/payload/jobs/config"
 import { plugins } from "@/payload/plugins"
-import { getServerSideURL } from "@/utilities/getURL"
+import { syncFrontendCollectionsOnInit } from "@/payload/collections/frontend"
+import { getServerSideURL } from "@/utilities/get-url"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import path from "path"
 import { buildConfig } from "payload"
@@ -28,8 +29,12 @@ export default buildConfig({
   plugins,
   jobs,
   secret: process.env.PAYLOAD_SECRET || "",
+  serverURL: getServerSideURL(),
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
+  },
+  onInit: async () => {
+    syncFrontendCollectionsOnInit()
   },
 })

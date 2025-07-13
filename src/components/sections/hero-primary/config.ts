@@ -4,8 +4,9 @@ import { link } from "@/payload/fields/link"
 
 export const HeroPrimary: Block = {
   slug: "hero-primary",
+  imageURL: "/api/media/file/home hero-600x561.png",
   admin: {
-    group: "Hero Sections",
+    group: "Page Headers",
   },
   fields: [
     {
@@ -27,6 +28,17 @@ export const HeroPrimary: Block = {
             rows: 10,
           },
           label: false,
+          required: true,
+        },
+        {
+          name: "usp",
+          type: "textarea",
+          admin: {
+            rows: 3,
+            description:
+              "The unique selling proposition text that appears below the hero content",
+          },
+          label: "USP Text",
           required: true,
         },
       ],
@@ -65,19 +77,7 @@ export const HeroPrimary: Block = {
             {
               name: "button",
               type: "group",
-              fields: [
-                {
-                  name: "buttonType",
-                  type: "select",
-                  label: "Button type",
-                  defaultValue: "primary",
-                  options: ["primary", "secondary"],
-                  admin: {
-                    description: "Select the button type",
-                  },
-                },
-                link(),
-              ],
+              fields: [link()],
             },
           ],
         },

@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "jsxImportSource": "react",
     "incremental": true,
     "plugins": [
       {
@@ -21,10 +22,11 @@
     "paths": {
       "@/*": ["./src/*"],
       "@payload-config": ["./src/payload/payload.config.ts"],
-      "@wild-child-config": ["src/wc.config.ts"]
+      "@product-studio-config": ["src/wc.config.ts"]
     },
-    "target": "ES2022"
+    "target": "ES2022",
+    "types": ["react/jsx-runtime"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "demos"]
 }

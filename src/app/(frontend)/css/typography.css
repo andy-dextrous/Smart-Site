@@ -1,72 +1,214 @@
-/* 
-  Typography 
+/*
+  Typography
 */
 
 /* https://www.fluid-type-scale.com/ */
 
 @theme {
-  --font-sans: "Inter", sans-serif;
-  --font-heading: "Inter", sans-serif;
+  --font-sans: "helvetica-neue-lt-pro", sans-serif;
+  --font-heading: "neue-haas-grotesk-display", sans-serif;
 
-  --text-h1: clamp(2rem, 5vw, 4rem);
-  --text-h2: clamp(1.5rem, 5vw, 3rem);
-  --text-h3: clamp(1.25rem, 5vw, 2.5rem);
-  --text-h4: clamp(1rem, 5vw, 2rem);
-  --text-h5: clamp(0.875rem, 5vw, 1.75rem);
-  --text-h6: clamp(0.75rem, 5vw, 1.5rem);
-  --text-base: clamp(0.875rem, 5vw, 1rem);
+  --text-h1: clamp(2.986rem, 1.5253rem + 7.3033vw, 8.5rem);
+  --text-h2: clamp(2.488rem, 1.4914rem + 4.9828vw, 6.25rem);
+  --text-h3: clamp(2.074rem, 1.7956rem + 1.3921vw, 3.125rem);
+  --text-h4: clamp(1.728rem, 1.6612rem + 0.3338vw, 1.98rem);
+  --text-h5: clamp(1.44rem, 5vw, 1.68rem);
+  --text-h6: clamp(1.2rem, 5vw, 1.414rem);
+  --text-base: clamp(1.0625rem, 1.0294rem + 0.1656vw, 1.1875rem);
+  --text-sm: clamp(0.833rem, 0.191vw + 0.837rem, 1rem);
+  --text-xs: clamp(0.694rem, 5vw, 0.875rem);
 }
+
+@layer components {
+  .text-gradient {
+    background: linear-gradient(
+      to right,
+      theme(colors.secondary-600),
+      theme(colors.primary-500)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-hover:hover {
+    background: linear-gradient(
+      to right,
+      theme(colors.secondary-600),
+      theme(colors.primary-500)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+/* Sitewide Typography Customizations */
 
 @layer base {
   h1 {
-    @apply font-heading text-h1 leading-tight font-bold tracking-tight text-gray-950;
+    font-family: theme(fontFamily.heading);
+    font-size: theme(fontSize.h1);
+    color: theme(colors.dark-950);
+    line-height: 1.05;
+    font-weight: theme(fontWeight.light);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   h2 {
-    @apply font-heading text-h2 leading-tight font-semibold tracking-tight text-gray-950;
+    font-family: theme(fontFamily.heading);
+    font-size: theme(fontSize.h2);
+    color: theme(colors.dark-950);
+    line-height: 1.1;
+    font-weight: theme(fontWeight.light);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   h3 {
-    @apply font-heading text-h3 leading-tight font-semibold tracking-tight text-gray-950;
+    font-family: theme(fontFamily.heading);
+    font-size: theme(fontSize.h3);
+    color: theme(colors.dark-950);
+    line-height: 1.3;
+    font-weight: theme(fontWeight.light);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   h4 {
-    @apply font-heading text-h4 leading-tight font-semibold tracking-tight text-gray-950;
+    font-family: theme(fontFamily.heading);
+    font-size: theme(fontSize.h4);
+    color: theme(colors.dark-950);
+    line-height: 1.43;
+    font-weight: theme(fontWeight.light);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   h5 {
-    @apply font-heading text-h5 leading-tight font-semibold tracking-tight text-gray-950;
+    font-family: theme(fontFamily.heading);
+    font-size: theme(fontSize.h5);
+    color: theme(colors.dark-950);
+    line-height: theme(lineHeight.tight);
+    font-weight: theme(fontWeight.light);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   h6 {
-    @apply font-heading text-h6 leading-tight font-semibold tracking-tight text-gray-950;
+    font-family: theme(fontFamily.heading);
+    font-size: theme(fontSize.h6);
+    color: theme(colors.dark-950);
+    line-height: theme(lineHeight.tight);
+    font-weight: theme(fontWeight.semibold);
+    letter-spacing: theme(letterSpacing.tight);
   }
 
   p {
-    @apply font-sans text-base leading-normal tracking-normal text-gray-950;
-  }
-
-  a {
-    @apply font-sans leading-normal tracking-normal;
+    color: theme(colors.dark-950);
+    font-family: theme(fontFamily.sans);
+    font-size: theme(fontSize.base);
+    line-height: 1.5;
+    font-weight: theme(fontWeight.light);
+    letter-spacing: 2%;
   }
 
   p a {
-    @apply text-primary-foreground font-semibold;
+    color: theme(colors.primary-500);
+    font-weight: theme(fontWeight.semibold);
+    text-decoration: none;
   }
 
   ul {
-    @apply font-sans text-base leading-normal tracking-normal text-gray-950;
+    color: theme(colors.dark-950);
+    font-family: theme(fontFamily.sans);
+    font-size: theme(fontSize.base);
+    line-height: theme(lineHeight.normal);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   ol {
-    @apply font-sans text-base leading-normal tracking-normal text-gray-950;
+    color: theme(colors.dark-950);
+    font-family: theme(fontFamily.sans);
+    font-size: theme(fontSize.base);
+    line-height: theme(lineHeight.normal);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   li {
-    @apply font-sans text-base leading-normal tracking-normal text-gray-950;
+    color: theme(colors.dark-950);
+    font-family: theme(fontFamily.sans);
+    font-size: theme(fontSize.base);
+    line-height: theme(lineHeight.normal);
+    letter-spacing: theme(letterSpacing.normal);
   }
 
   blockquote {
-    @apply font-sans text-base leading-normal tracking-normal text-gray-950;
+    color: theme(colors.dark-950);
+    font-family: theme(fontFamily.sans);
+    font-size: theme(fontSize.base);
+    line-height: theme(lineHeight.normal);
+    letter-spacing: theme(letterSpacing.normal);
+  }
+}
+
+/* Rich Text Typography Customizations */
+
+@layer base {
+  .prose {
+    --tw-prose-headings: theme(colors.dark-950);
+
+    & h1,
+    & h2,
+    & h3,
+    & h4,
+    & h5,
+    & h6 {
+      font-weight: theme(fontWeight.light) !important;
+      color: var(--tw-prose-headings) !important;
+    }
+  }
+
+  /* Force white text on prose content */
+  .prose-white {
+    & h1,
+    & h2,
+    & h3,
+    & h4,
+    & h5,
+    & h6 {
+      color: white !important;
+    }
+
+    & p {
+      color: color-mix(in oklab, var(--color-white) 80%, transparent) !important;
+    }
+
+    & li {
+      color: white !important;
+    }
+
+    & blockquote {
+      color: white !important;
+    }
+
+    & strong {
+      color: white !important;
+    }
+
+    &.gradient-headings {
+      & h1,
+      & h2,
+      & h3,
+      & h4,
+      & h5,
+      & h6 {
+        background: linear-gradient(
+          to right,
+          theme(colors.secondary-600),
+          theme(colors.primary-500)
+        );
+        background-clip: text;
+        color: transparent !important;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent !important;
+      }
+    }
   }
 }

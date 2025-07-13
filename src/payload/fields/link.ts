@@ -1,5 +1,6 @@
-import type { Field, GroupField } from "payload"
-import deepMerge from "@/utilities/deepMerge"
+import type { CollectionSlug, Field, GroupField } from "payload"
+import deepMerge from "@/utilities/deep-merge"
+import { getFrontendCollections } from "../collections/frontend"
 
 type LinkType = (options?: {
   disableLabel?: boolean
@@ -62,7 +63,9 @@ export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) =>
         condition: (_, siblingData) => siblingData?.type === "reference",
       },
       label: "Document to link to",
-      relationTo: ["pages", "posts", "services"],
+      relationTo: getFrontendCollections().map(
+        collection => collection.slug
+      ) as CollectionSlug[],
       required: true,
     },
     {

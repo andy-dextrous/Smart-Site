@@ -1,6 +1,18 @@
-import { BeforeSync, DocToSync } from '@payloadcms/plugin-search/types'
+import { BeforeSync, DocToSync } from "@payloadcms/plugin-search/types"
+import { shouldPreventHooks } from "@/utilities/prevent-hooks"
 
-export const beforeSyncWithSearch: BeforeSync = async ({ originalDoc, searchDoc }) => {
+export const beforeSyncWithSearch: BeforeSync = async ({
+  originalDoc,
+  searchDoc,
+  req,
+}) => {
+  // Check if hooks should be prevented (e.g., during seeding)
+  if (shouldPreventHooks(req.payload, req.context)) {
+    // During seeding, let PostgreSQL auto-generate search document IDs
+    const { id, ...searchDocWithoutId } = searchDoc
+    return searchDocWithoutId as DocToSync
+  }
+
   const {
     doc: { relationTo: collection },
   } = searchDoc
@@ -22,11 +34,11 @@ export const beforeSyncWithSearch: BeforeSync = async ({ originalDoc, searchDoc 
   if (categories && Array.isArray(categories) && categories.length > 0) {
     // get full categories and keep a flattened copy of their most important properties
     try {
-      const mappedCategories = categories.map((category) => {
+      const mappedCategories = categories.map(category => {
         const { id, title } = category
 
         return {
-          relationTo: 'categories',
+          relationTo: "categories",
           id,
           title,
         }
@@ -35,7 +47,7 @@ export const beforeSyncWithSearch: BeforeSync = async ({ originalDoc, searchDoc 
       modifiedDoc.categories = mappedCategories
     } catch (_err) {
       console.error(
-        `Failed. Category not found when syncing collection '${collection}' with id: '${id}' to search.`,
+        `Failed. Category not found when syncing collection '${collection}' with id: '${id}' to search.`
       )
     }
   }

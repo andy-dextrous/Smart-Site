@@ -1,0 +1,22 @@
+[
+  {
+    "slug": "pages",
+    "label": "Pages",
+    "hasSEO": true
+  },
+  {
+    "slug": "posts",
+    "label": "Posts",
+    "hasSEO": true
+  },
+  {
+    "slug": "team",
+    "label": "Team",
+    "hasSEO": true
+  },
+  {
+    "slug": "services",
+    "label": "Service Offerings",
+    "hasSEO": true
+  }
+]

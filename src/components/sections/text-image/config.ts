@@ -11,7 +11,7 @@ export const TextImage: Block = {
   slug: "text-image",
   interfaceName: "TextImageBlock",
   admin: {
-    group: "Content Sections",
+    group: "Content & Media",
   },
   fields: [
     {

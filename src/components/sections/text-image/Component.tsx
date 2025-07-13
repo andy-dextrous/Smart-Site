@@ -1,18 +1,37 @@
-import RichText from "@/payload/components/rich-text"
+"use client"
+
+import RichText from "@/payload/components/frontend/rich-text"
 import { cn } from "@/utilities/ui"
-import { CMSLink } from "@/payload/components/cms-link"
-import Image from "next/image"
+import { CMSLink } from "@/payload/components/frontend/cms-link"
+import { Media as PayloadMedia } from "@/payload/components/frontend/media"
 import { Button } from "@/components/ui/button"
 import type {
   Media,
   TextImageBlock as TextImageBlockProps,
 } from "@/payload/payload-types"
+import { gsap, useGSAP } from "@/providers/gsap"
+import { useRef } from "react"
 
 export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
   const { heading, content, image: imageProp, imagePosition, buttons } = props
   const image = imageProp as Media
+  const titleRef = useRef<HTMLHeadingElement>(null)
 
-  const imageUrl = image?.url || "https://picsum.photos/700/400"
+  /****************************************************
+   * GSAP Animation
+   ****************************************************/
+
+  useGSAP(() => {
+    if (titleRef.current) {
+      gsap.effects.titleReveal(titleRef.current, {
+        trigger: {
+          trigger: titleRef.current,
+          start: "top 90%",
+          end: "bottom 40%",
+        },
+      })
+    }
+  })
 
   return (
     <section>
@@ -23,7 +42,9 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
         )}
       >
         <div className="flex flex-1 flex-col items-start gap-4">
-          <h2 className="text-2xl font-bold">{heading}</h2>
+          <h2 ref={titleRef} className="title-hidden text-2xl font-bold">
+            {heading}
+          </h2>
           <div className="prose max-w-none">
             <RichText data={content} />
           </div>
@@ -46,8 +67,12 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
         </div>
         <div className="flex flex-1 flex-col items-start gap-4">
           <div className="relative h-full max-h-[400px] min-h-[400px] w-full">
-            {/* <Media resource={image} /> */}
-            <Image src={imageUrl} alt={image?.alt || ""} fill className="object-cover" />
+            <PayloadMedia
+              resource={image}
+              alt={image?.alt || ""}
+              fill
+              imgClassName="object-cover"
+            />
           </div>
         </div>
       </div>

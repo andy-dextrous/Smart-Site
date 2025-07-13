@@ -1,0 +1,70 @@
+@layer payload-default {
+	.card {
+		border-radius: var(--style-radius-s);
+		border: 1px solid var(--color-base-800);
+		align-items: center;
+		padding: 36px 52px;
+		overflow: hidden;
+		border-radius: 0.5rem;
+		border: 1px solid var(--border);
+		background-color: var(--theme-elevation-50);
+		cursor: pointer;
+
+		&:hover {
+			border: 1px solid var(--theme-elevation-450);
+		}
+
+		&__image-container {
+			position: relative;
+			width: 100%;
+		}
+
+		&__empty-image {
+			width: 100%;
+			aspect-ratio: 16/9;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: var(--muted);
+			color: var(--muted-foreground);
+		}
+
+		&__content {
+			padding: 1rem;
+		}
+
+		&__categories {
+			margin-bottom: 1rem;
+			font-size: 0.875rem;
+			text-transform: uppercase;
+		}
+
+		&__category {
+			display: inline;
+		}
+
+		&__title {
+			font-size: base(0.8);
+			font-weight: 600;
+			color: var(--theme-elevation-700);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100% !important;
+		}
+
+		&__title-link {
+			color: inherit;
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+
+		&__description {
+			margin-top: 0.5rem;
+			color: var(--muted-foreground);
+		}
+	}
+}

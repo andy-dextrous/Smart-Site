@@ -81,6 +81,41 @@ export const Users: CollectionConfig = {
     },
     {
       type: "array",
+      name: "education",
+      label: "Education",
+      fields: [
+        {
+          name: "degree",
+          type: "text",
+          label: "Degree/Qualification",
+          required: true,
+          admin: {
+            placeholder: "e.g., Bachelor of Health Science (Nutritional Medicine)",
+          },
+        },
+        {
+          name: "institution",
+          type: "text",
+          label: "Institution",
+          admin: {
+            placeholder: "e.g., University of Technology Sydney",
+          },
+        },
+        {
+          name: "year",
+          type: "number",
+          label: "Year Completed",
+          admin: {
+            placeholder: "e.g., 2020",
+          },
+        },
+      ],
+      admin: {
+        description: "Add educational qualifications and certifications",
+      },
+    },
+    {
+      type: "array",
       name: "socialLinks",
       label: "Social Links",
       fields: [

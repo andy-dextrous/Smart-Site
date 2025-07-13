@@ -1,10 +1,13 @@
 import { mongooseAdapter } from "@payloadcms/db-mongodb"
-import { vercelPostgresAdapter } from "@payloadcms/db-vercel-postgres"
+import { postgresAdapter } from "@payloadcms/db-postgres"
 
-const vercel = vercelPostgresAdapter({
+const vercel = postgresAdapter({
   pool: {
     connectionString: process.env.POSTGRES_URL!,
   },
+  tablesFilter: ["!mastra_*"],
+  schemaName: "payload",
+  idType: "uuid",
 })
 
 const mongoose = mongooseAdapter({

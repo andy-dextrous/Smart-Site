@@ -1,0 +1,31 @@
+.template-control-ui-field {
+  padding-bottom: 12px;
+
+  .field-label {
+    font-size: 13px;
+    font-weight: 400;
+    margin-bottom: 2px;
+    color: var(--theme-elevation-800);
+  }
+
+  .template-control-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .template-select {
+      flex: 1;
+    }
+
+    .apply-button {
+      flex-shrink: 0;
+
+      .btn {
+        margin: 0;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+  }
+}

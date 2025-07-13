@@ -1,7 +1,15 @@
 /* Utility Classes */
 
 @utility container {
-  @apply mx-auto;
+  @apply max-w-container mx-auto w-full;
+}
+
+@utility container-md {
+  @apply max-w-container-md mx-auto w-full;
+}
+
+@utility container-sm {
+  @apply max-w-container-sm mx-auto w-full;
 }
 
 @utility stop-scroll {
@@ -12,4 +20,24 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+@utility center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@utility fill-abs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@utility title-hidden {
+  visibility: hidden;
 }

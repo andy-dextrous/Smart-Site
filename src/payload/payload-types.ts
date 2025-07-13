@@ -75,9 +75,12 @@ export interface Config {
     posts: Post;
     team: Team;
     services: Service;
+    testimonials: Testimonial;
+    templates: Template;
     media: Media;
     categories: Category;
     users: User;
+    'uri-index': UriIndex;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -87,19 +90,18 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    categories: {
-      posts: 'posts';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     team: TeamSelect<false> | TeamSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    templates: TemplatesSelect<false> | TemplatesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'uri-index': UriIndexSelect<false> | UriIndexSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -128,6 +130,7 @@ export interface Config {
   };
   jobs: {
     tasks: {
+      'dependent-uri-updates': TaskDependentUriUpdates;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -183,7 +186,7 @@ export interface MediaBlock {
  */
 export interface Media {
   id: string;
-  alt: string;
+  alt?: string | null;
   caption?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -406,6 +409,16 @@ export interface Form {
             blockName?: string | null;
             blockType: 'textarea';
           }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'phone';
+          }
       )[]
     | null;
   submitButtonLabel?: string | null;
@@ -474,19 +487,145 @@ export interface Page {
   id: string;
   title: string;
   publishedAt?: string | null;
+  featuredImage?: (string | null) | Media;
   categories?: (string | Category)[] | null;
-  sections: (HeroPrimaryBlock | TextImageBlock)[];
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-    noIndex?: boolean | null;
-    canonicalUrl?: string | null;
+  sections: (
+    | HeroPrimaryBlock
+    | HeroFullBlock
+    | TextImageBlock
+    | CirclesAnimationBlock
+    | ServiceCardsListBlock
+    | TestimonialsBlock
+    | InfoGridBlock
+    | LatestArticlesBlock
+    | FullwidthCtaBlock
+    | GlobeLocationsBlock
+    | ContactFormBlock
+    | CtaFormBlock
+    | HeadingLeftContentBlock
+    | SimpleTextBlock
+    | PostHeroBlock
+    | PostContentBlock
+    | PostsArchiveBlock
+    | RelatedPostsBlock
+  )[];
+  seo?: {
+    meta?: {
+      /**
+       * Custom title for search engines (50-60 characters recommended)
+       */
+      title?: string | null;
+      /**
+       * Image for search results and social media sharing (1200x630px recommended)
+       */
+      image?: (string | null) | Media;
+      /**
+       * Custom description for search engines (150-160 characters recommended)
+       */
+      description?: string | null;
+      /**
+       * Prevent this content from appearing in search engines
+       */
+      noIndex?: boolean | null;
+      /**
+       * Override the default canonical URL for this content
+       */
+      canonicalUrl?: string | null;
+      /**
+       * Primary keywords for this content (comma-separated)
+       */
+      focusKeywords?: string | null;
+      /**
+       * Advanced robots directives for search engines
+       */
+      metaRobots?:
+        | (
+            | 'nofollow'
+            | 'noarchive'
+            | 'nosnippet'
+            | 'noimageindex'
+            | 'nocache'
+            | 'nositelinkssearchbox'
+            | 'notranslate'
+            | 'max-snippet'
+            | 'max-image-preview'
+            | 'max-video-preview'
+          )[]
+        | null;
+    };
+    socialMedia?: {
+      openGraph?: {
+        /**
+         * Override title for Facebook/Open Graph sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Facebook/Open Graph sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Facebook/Open Graph sharing (1200x630px recommended)
+         */
+        image?: (string | null) | Media;
+        type?: ('website' | 'article' | 'product' | 'video' | 'music' | 'book' | 'profile') | null;
+      };
+      twitter?: {
+        /**
+         * Override title for Twitter sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Twitter sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Twitter sharing (1200x675px recommended)
+         */
+        image?: (string | null) | Media;
+        cardType?: ('summary' | 'summary_large_image' | 'app' | 'player') | null;
+      };
+    };
+    structuredData?: {
+      /**
+       * Generate schema.org structured data for this content
+       */
+      enableStructuredData?: boolean | null;
+      /**
+       * Choose the appropriate schema.org type for this content
+       */
+      schemaType?:
+        | (
+            | 'WebPage'
+            | 'Article'
+            | 'Service'
+            | 'Person'
+            | 'Organization'
+            | 'LocalBusiness'
+            | 'Product'
+            | 'Event'
+            | 'FAQPage'
+            | 'HowTo'
+          )
+        | null;
+      /**
+       * Additional JSON properties to include in structured data (optional)
+       */
+      customSchemaProperties?:
+        | {
+            [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    };
   };
   slug?: string | null;
+  /**
+   * Auto-generated on publish based on slug and routing settings
+   */
+  uri?: string | null;
   slugLock?: boolean | null;
   parent?: (string | null) | Page;
   breadcrumbs?:
@@ -509,13 +648,6 @@ export interface Category {
   id: string;
   title: string;
   description?: string | null;
-  posts?: {
-    docs?: (string | Post)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  slug?: string | null;
-  slugLock?: boolean | null;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -527,6 +659,55 @@ export interface Category {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroPrimaryBlock".
+ */
+export interface HeroPrimaryBlock {
+  heading: string;
+  content: string;
+  /**
+   * The unique selling proposition text that appears below the hero content
+   */
+  usp: string;
+  /**
+   * Optional background image for the hero section
+   */
+  backgroundImage?: (string | null) | Media;
+  buttons?:
+    | {
+        button: {
+          link: {
+            type?: ('reference' | 'custom') | null;
+            newTab?: boolean | null;
+            reference?:
+              | ({
+                  relationTo: 'pages';
+                  value: string | Page;
+                } | null)
+              | ({
+                  relationTo: 'posts';
+                  value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'team';
+                  value: string | Team;
+                } | null)
+              | ({
+                  relationTo: 'services';
+                  value: string | Service;
+                } | null);
+            url?: string | null;
+            label: string;
+          };
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero-primary';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -553,13 +734,117 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
+  seo?: {
+    meta?: {
+      /**
+       * Custom title for search engines (50-60 characters recommended)
+       */
+      title?: string | null;
+      /**
+       * Image for search results and social media sharing (1200x630px recommended)
+       */
+      image?: (string | null) | Media;
+      /**
+       * Custom description for search engines (150-160 characters recommended)
+       */
+      description?: string | null;
+      /**
+       * Prevent this content from appearing in search engines
+       */
+      noIndex?: boolean | null;
+      /**
+       * Override the default canonical URL for this content
+       */
+      canonicalUrl?: string | null;
+      /**
+       * Primary keywords for this content (comma-separated)
+       */
+      focusKeywords?: string | null;
+      /**
+       * Advanced robots directives for search engines
+       */
+      metaRobots?:
+        | (
+            | 'nofollow'
+            | 'noarchive'
+            | 'nosnippet'
+            | 'noimageindex'
+            | 'nocache'
+            | 'nositelinkssearchbox'
+            | 'notranslate'
+            | 'max-snippet'
+            | 'max-image-preview'
+            | 'max-video-preview'
+          )[]
+        | null;
+    };
+    socialMedia?: {
+      openGraph?: {
+        /**
+         * Override title for Facebook/Open Graph sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Facebook/Open Graph sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Facebook/Open Graph sharing (1200x630px recommended)
+         */
+        image?: (string | null) | Media;
+        type?: ('website' | 'article' | 'product' | 'video' | 'music' | 'book' | 'profile') | null;
+      };
+      twitter?: {
+        /**
+         * Override title for Twitter sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Twitter sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Twitter sharing (1200x675px recommended)
+         */
+        image?: (string | null) | Media;
+        cardType?: ('summary' | 'summary_large_image' | 'app' | 'player') | null;
+      };
+    };
+    structuredData?: {
+      /**
+       * Generate schema.org structured data for this content
+       */
+      enableStructuredData?: boolean | null;
+      /**
+       * Choose the appropriate schema.org type for this content
+       */
+      schemaType?:
+        | (
+            | 'WebPage'
+            | 'Article'
+            | 'Service'
+            | 'Person'
+            | 'Organization'
+            | 'LocalBusiness'
+            | 'Product'
+            | 'Event'
+            | 'FAQPage'
+            | 'HowTo'
+          )
+        | null;
+      /**
+       * Additional JSON properties to include in structured data (optional)
+       */
+      customSchemaProperties?:
+        | {
+            [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    };
   };
   publishedAt?: string | null;
   authors?: (string | User)[] | null;
@@ -570,6 +855,10 @@ export interface Post {
       }[]
     | null;
   slug?: string | null;
+  /**
+   * Auto-generated on publish based on slug and routing settings
+   */
+  uri?: string | null;
   slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -586,6 +875,17 @@ export interface User {
   role: 'admin' | 'editor';
   avatar?: (string | null) | Media;
   bio?: string | null;
+  /**
+   * Add educational qualifications and certifications
+   */
+  education?:
+    | {
+        degree: string;
+        institution?: string | null;
+        year?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   socialLinks?:
     | {
         platform?:
@@ -605,15 +905,339 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
+ * Team members are used to display the team on the website. They are different to users, which are used for the admin panel.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroPrimaryBlock".
+ * via the `definition` "team".
  */
-export interface HeroPrimaryBlock {
+export interface Team {
+  id: string;
+  name: string;
+  email: string;
+  content: {
+    /**
+     * The image will be used as the profile image for the team member.
+     */
+    image: string | Media;
+    role: string;
+    bio: string;
+    socialLinks?:
+      | {
+          platform?:
+            | (
+                | 'twitter'
+                | 'facebook'
+                | 'instagram'
+                | 'linkedin'
+                | 'youtube'
+                | 'twitch'
+                | 'tiktok'
+                | 'github'
+                | 'website'
+              )
+            | null;
+          url?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  seo?: {
+    meta?: {
+      /**
+       * Custom title for search engines (50-60 characters recommended)
+       */
+      title?: string | null;
+      /**
+       * Image for search results and social media sharing (1200x630px recommended)
+       */
+      image?: (string | null) | Media;
+      /**
+       * Custom description for search engines (150-160 characters recommended)
+       */
+      description?: string | null;
+      /**
+       * Prevent this content from appearing in search engines
+       */
+      noIndex?: boolean | null;
+      /**
+       * Override the default canonical URL for this content
+       */
+      canonicalUrl?: string | null;
+      /**
+       * Primary keywords for this content (comma-separated)
+       */
+      focusKeywords?: string | null;
+      /**
+       * Advanced robots directives for search engines
+       */
+      metaRobots?:
+        | (
+            | 'nofollow'
+            | 'noarchive'
+            | 'nosnippet'
+            | 'noimageindex'
+            | 'nocache'
+            | 'nositelinkssearchbox'
+            | 'notranslate'
+            | 'max-snippet'
+            | 'max-image-preview'
+            | 'max-video-preview'
+          )[]
+        | null;
+    };
+    socialMedia?: {
+      openGraph?: {
+        /**
+         * Override title for Facebook/Open Graph sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Facebook/Open Graph sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Facebook/Open Graph sharing (1200x630px recommended)
+         */
+        image?: (string | null) | Media;
+        type?: ('website' | 'article' | 'product' | 'video' | 'music' | 'book' | 'profile') | null;
+      };
+      twitter?: {
+        /**
+         * Override title for Twitter sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Twitter sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Twitter sharing (1200x675px recommended)
+         */
+        image?: (string | null) | Media;
+        cardType?: ('summary' | 'summary_large_image' | 'app' | 'player') | null;
+      };
+    };
+    structuredData?: {
+      /**
+       * Generate schema.org structured data for this content
+       */
+      enableStructuredData?: boolean | null;
+      /**
+       * Choose the appropriate schema.org type for this content
+       */
+      schemaType?:
+        | (
+            | 'WebPage'
+            | 'Article'
+            | 'Service'
+            | 'Person'
+            | 'Organization'
+            | 'LocalBusiness'
+            | 'Product'
+            | 'Event'
+            | 'FAQPage'
+            | 'HowTo'
+          )
+        | null;
+      /**
+       * Additional JSON properties to include in structured data (optional)
+       */
+      customSchemaProperties?:
+        | {
+            [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    };
+  };
+  slug?: string | null;
+  /**
+   * Auto-generated on publish based on slug and routing settings
+   */
+  uri?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: string;
+  title: string;
+  /**
+   * Brief description of the service
+   */
+  description?: string | null;
+  publishedAt?: string | null;
+  featuredImage?: (string | null) | Media;
+  sections: (
+    | HeroPrimaryBlock
+    | HeroFullBlock
+    | TextImageBlock
+    | CirclesAnimationBlock
+    | ServiceCardsListBlock
+    | TestimonialsBlock
+    | InfoGridBlock
+    | LatestArticlesBlock
+    | FullwidthCtaBlock
+    | GlobeLocationsBlock
+    | ContactFormBlock
+    | CtaFormBlock
+    | HeadingLeftContentBlock
+    | SimpleTextBlock
+    | PostHeroBlock
+    | PostContentBlock
+    | PostsArchiveBlock
+    | RelatedPostsBlock
+  )[];
+  seo?: {
+    meta?: {
+      /**
+       * Custom title for search engines (50-60 characters recommended)
+       */
+      title?: string | null;
+      /**
+       * Image for search results and social media sharing (1200x630px recommended)
+       */
+      image?: (string | null) | Media;
+      /**
+       * Custom description for search engines (150-160 characters recommended)
+       */
+      description?: string | null;
+      /**
+       * Prevent this content from appearing in search engines
+       */
+      noIndex?: boolean | null;
+      /**
+       * Override the default canonical URL for this content
+       */
+      canonicalUrl?: string | null;
+      /**
+       * Primary keywords for this content (comma-separated)
+       */
+      focusKeywords?: string | null;
+      /**
+       * Advanced robots directives for search engines
+       */
+      metaRobots?:
+        | (
+            | 'nofollow'
+            | 'noarchive'
+            | 'nosnippet'
+            | 'noimageindex'
+            | 'nocache'
+            | 'nositelinkssearchbox'
+            | 'notranslate'
+            | 'max-snippet'
+            | 'max-image-preview'
+            | 'max-video-preview'
+          )[]
+        | null;
+    };
+    socialMedia?: {
+      openGraph?: {
+        /**
+         * Override title for Facebook/Open Graph sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Facebook/Open Graph sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Facebook/Open Graph sharing (1200x630px recommended)
+         */
+        image?: (string | null) | Media;
+        type?: ('website' | 'article' | 'product' | 'video' | 'music' | 'book' | 'profile') | null;
+      };
+      twitter?: {
+        /**
+         * Override title for Twitter sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Twitter sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Twitter sharing (1200x675px recommended)
+         */
+        image?: (string | null) | Media;
+        cardType?: ('summary' | 'summary_large_image' | 'app' | 'player') | null;
+      };
+    };
+    structuredData?: {
+      /**
+       * Generate schema.org structured data for this content
+       */
+      enableStructuredData?: boolean | null;
+      /**
+       * Choose the appropriate schema.org type for this content
+       */
+      schemaType?:
+        | (
+            | 'WebPage'
+            | 'Article'
+            | 'Service'
+            | 'Person'
+            | 'Organization'
+            | 'LocalBusiness'
+            | 'Product'
+            | 'Event'
+            | 'FAQPage'
+            | 'HowTo'
+          )
+        | null;
+      /**
+       * Additional JSON properties to include in structured data (optional)
+       */
+      customSchemaProperties?:
+        | {
+            [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    };
+  };
+  slug?: string | null;
+  /**
+   * Auto-generated on publish based on slug and routing settings
+   */
+  uri?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroFullBlock".
+ */
+export interface HeroFullBlock {
   heading: string;
   content: string;
+  size: 'full' | 'md' | 'sm';
+  colorScheme: 'background-image' | 'dark' | 'white' | 'primary' | 'secondary';
   /**
    * Optional background image for the hero section
    */
@@ -621,10 +1245,6 @@ export interface HeroPrimaryBlock {
   buttons?:
     | {
         button: {
-          /**
-           * Select the button type
-           */
-          buttonType?: ('primary' | 'secondary') | null;
           link: {
             type?: ('reference' | 'custom') | null;
             newTab?: boolean | null;
@@ -636,6 +1256,10 @@ export interface HeroPrimaryBlock {
               | ({
                   relationTo: 'posts';
                   value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'team';
+                  value: string | Team;
                 } | null)
               | ({
                   relationTo: 'services';
@@ -650,37 +1274,7 @@ export interface HeroPrimaryBlock {
     | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'hero-primary';
-}
-/**
- * Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: string;
-  title: string;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  heroImage?: (string | null) | Media;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  blockType: 'hero-full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -720,6 +1314,10 @@ export interface TextImageBlock {
                 value: string | Post;
               } | null)
             | ({
+                relationTo: 'team';
+                value: string | Team;
+              } | null)
+            | ({
                 relationTo: 'services';
                 value: string | Service;
               } | null);
@@ -734,30 +1332,877 @@ export interface TextImageBlock {
   blockType: 'text-image';
 }
 /**
- * Team members are used to display the team on the website. They are different to users, which are used for the admin panel.
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CirclesAnimationBlock".
+ */
+export interface CirclesAnimationBlock {
+  /**
+   * Use <span> tags to designate text that should have the purple gradient effect. Example: 'Bridging Vision & <span>Execution</span>'
+   */
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Exactly three words for the left circle
+   */
+  leftCircleWords: {
+    word: string;
+    id?: string | null;
+  }[];
+  /**
+   * Exactly three words for the right circle
+   */
+  rightCircleWords: {
+    word: string;
+    id?: string | null;
+  }[];
+  /**
+   * Text that appears at the bottom of the infographic
+   */
+  bottomText: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'circles-animation';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ServiceCardsListBlock".
+ */
+export interface ServiceCardsListBlock {
+  /**
+   * Main heading for the services section. Use <span> tags for gradient text: 'Commercial, Operational <span>& Technology Services</span>'
+   */
+  heading: string;
+  /**
+   * Brief description of your services and value proposition
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Text that appears before the call-to-action button
+   */
+  text: string;
+  /**
+   * Button that links to more services or related content
+   */
+  button: {
+    /**
+     * Select the button variant
+     */
+    variant?:
+      | (
+          | 'default'
+          | 'outline'
+          | 'outlineDark'
+          | 'outlineGradient'
+          | 'phoneSelect'
+          | 'secondary'
+          | 'white'
+          | 'dark'
+          | 'ghost'
+          | 'link'
+        )
+      | null;
+    /**
+     * Select the button size
+     */
+    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+    /**
+     * Select the button layout
+     */
+    layout?: ('default' | 'centered') | null;
+    /**
+     * Make this an icon-only button
+     */
+    icon?: boolean | null;
+    link: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'team';
+            value: string | Team;
+          } | null)
+        | ({
+            relationTo: 'services';
+            value: string | Service;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'service-cards-list';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  /**
+   * Main heading for testimonials. Use <span> tags for gradient text: 'Trusted By <span>Forward-Thinkers</span>'
+   */
+  heading: string;
+  /**
+   * Brief description about your testimonials and client success stories
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Select the testimonials to display in this section. They will appear in the order selected.
+   */
+  testimonials: (string | Testimonial)[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * Client testimonials displayed on the website. Each testimonial includes a quote, client information, and company logo.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "team".
+ * via the `definition` "testimonials".
  */
-export interface Team {
+export interface Testimonial {
   id: string;
-  name: string;
-  email: string;
   /**
-   * The image will be used as the profile image for the team member.
+   * Full name of the person giving the testimonial
    */
-  image: string | Media;
-  role: string;
-  bio: string;
-  socialLinks?:
+  name: string;
+  /**
+   * Job title of the person (e.g., 'Head of Digital Transformation')
+   */
+  title: string;
+  /**
+   * The testimonial quote from the client
+   */
+  quote: string;
+  /**
+   * Company name
+   */
+  company: string;
+  /**
+   * Company logo image - will be displayed as a small icon in the testimonial
+   */
+  companyLogo: string | Media;
+  /**
+   * Mark as featured to prioritize in displays
+   */
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InfoGridBlock".
+ */
+export interface InfoGridBlock {
+  /**
+   * Main heading for the info grid section. Use <span> tags for gradient text: 'How We Turn <span>Strategy Into Results</span>'
+   */
+  heading: string;
+  /**
+   * Brief description of your process and approach that appears below the heading
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Choose background color scheme for the section
+   */
+  backgroundColorScheme: 'dark' | 'light';
+  /**
+   * Number of columns for the process steps grid
+   */
+  gridColumns: '2' | '3' | '4';
+  /**
+   * Add process steps for your methodology. Steps will be automatically numbered based on their order.
+   */
+  processSteps: {
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'info-grid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LatestArticlesBlock".
+ */
+export interface LatestArticlesBlock {
+  /**
+   * Main heading for the latest articles section. Use <span> tags for gradient text: 'Expert <span>Insights</span>'
+   */
+  heading: string;
+  /**
+   * Brief description about your thought leadership and expertise that appears below the heading
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Text that appears before the call-to-action button
+   */
+  text: string;
+  /**
+   * Button that links to view all articles or related content
+   */
+  button: {
+    /**
+     * Select the button variant
+     */
+    variant?:
+      | (
+          | 'default'
+          | 'outline'
+          | 'outlineDark'
+          | 'outlineGradient'
+          | 'phoneSelect'
+          | 'secondary'
+          | 'white'
+          | 'dark'
+          | 'ghost'
+          | 'link'
+        )
+      | null;
+    /**
+     * Select the button size
+     */
+    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+    /**
+     * Select the button layout
+     */
+    layout?: ('default' | 'centered') | null;
+    /**
+     * Make this an icon-only button
+     */
+    icon?: boolean | null;
+    link: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'team';
+            value: string | Team;
+          } | null)
+        | ({
+            relationTo: 'services';
+            value: string | Service;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'latest-articles';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FullwidthCtaBlock".
+ */
+export interface FullwidthCtaBlock {
+  /**
+   * Main heading text. You can use HTML tags for styling.
+   */
+  heading: string;
+  /**
+   * Choose text alignment
+   */
+  textAlignment: 'left' | 'center' | 'right';
+  /**
+   * Choose overlay color scheme
+   */
+  colorScheme: 'gradient' | 'dark';
+  /**
+   * Supporting description text
+   */
+  description: string;
+  /**
+   * Background image for the CTA section
+   */
+  backgroundImage: string | Media;
+  /**
+   * Configure the CTA button
+   */
+  button: {
+    /**
+     * Select the button variant
+     */
+    variant?:
+      | (
+          | 'default'
+          | 'outline'
+          | 'outlineDark'
+          | 'outlineGradient'
+          | 'phoneSelect'
+          | 'secondary'
+          | 'white'
+          | 'dark'
+          | 'ghost'
+          | 'link'
+        )
+      | null;
+    /**
+     * Select the button size
+     */
+    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+    /**
+     * Select the button layout
+     */
+    layout?: ('default' | 'centered') | null;
+    /**
+     * Make this an icon-only button
+     */
+    icon?: boolean | null;
+    link: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'team';
+            value: string | Team;
+          } | null)
+        | ({
+            relationTo: 'services';
+            value: string | Service;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'fullwidth-cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GlobeLocationsBlock".
+ */
+export interface GlobeLocationsBlock {
+  /**
+   * Main heading for the locations section. Use <span> tags for gradient text.
+   */
+  heading: string;
+  /**
+   * Brief description of your global presence and office locations
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'globe-locations';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormBlock".
+ */
+export interface ContactFormBlock {
+  /**
+   * Main heading for the form section. Use <span> tags for gradient text.
+   */
+  heading: string;
+  /**
+   * Brief description that appears above the form
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Select the form to display
+   */
+  form: string | Form;
+  /**
+   * Visual style based on background
+   */
+  variant?: ('white' | 'dark' | 'neutral' | 'transparent') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contact-form';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaFormBlock".
+ */
+export interface CtaFormBlock {
+  /**
+   * Main heading for the CTA form section. Use <span> tags for gradient text: 'Ready to get started? <span>Let's talk</span>'
+   */
+  heading: string;
+  /**
+   * Brief description that appears below the heading in the left column
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Choose background color scheme for the section
+   */
+  backgroundColorScheme: 'dark' | 'light' | 'neutral' | 'image';
+  /**
+   * Visual style for the form based on background
+   */
+  variant?: ('dark' | 'light' | 'neutral' | 'transparent') | null;
+  /**
+   * Background image for the CTA form section
+   */
+  backgroundImage?: (string | null) | Media;
+  /**
+   * Select the form to display in the right column
+   */
+  form: string | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta-form';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeadingLeftContentBlock".
+ */
+export interface HeadingLeftContentBlock {
+  /**
+   * Main heading for the section. Use <span> tags for gradient text: 'Our Vision for a <span>Better Digital Future</span>'
+   */
+  heading: string;
+  /**
+   * Choose background color scheme for the section
+   */
+  backgroundColorScheme: 'dark' | 'light' | 'neutral';
+  /**
+   * Control the width ratio between heading and content columns
+   */
+  ratio: '1/2' | '1/1' | '2/1';
+  /**
+   * Rich text content to display in the right column
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heading-left-content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SimpleTextBlock".
+ */
+export interface SimpleTextBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'simple-text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostHeroBlock".
+ */
+export interface PostHeroBlock {
+  /**
+   * Show author information
+   */
+  showAuthor?: boolean | null;
+  /**
+   * Show publish date
+   */
+  showPublishDate?: boolean | null;
+  /**
+   * Show post categories
+   */
+  showCategories?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'post-hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostContentBlock".
+ */
+export interface PostContentBlock {
+  /**
+   * Show breadcrumb navigation
+   */
+  showBreadcrumbs?: boolean | null;
+  /**
+   * Show author information at the end of the post
+   */
+  showAuthorInfo?: boolean | null;
+  /**
+   * Control the size of the post content text
+   */
+  proseSize?: ('base' | 'lg' | 'xl' | '2xl') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'post-content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsArchiveBlock".
+ */
+export interface PostsArchiveBlock {
+  /**
+   * Main heading for the blog archive. Use <span> tags for gradient text: 'Latest <span>Articles</span>'
+   */
+  heading: string;
+  /**
+   * Brief description that appears below the heading
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Number of posts to display per page
+   */
+  postsPerPage?: number | null;
+  /**
+   * Choose how posts are displayed
+   */
+  layout?: ('grid' | 'list') | null;
+  /**
+   * Number of columns for grid layout
+   */
+  columns?: ('two' | 'three' | 'four') | null;
+  /**
+   * Show pagination controls
+   */
+  showPagination?: boolean | null;
+  /**
+   * Show page range information (e.g., 'Showing 1-12 of 24 posts')
+   */
+  showPageRange?: boolean | null;
+  /**
+   * Filter posts by specific categories (leave empty to show all)
+   */
+  categoryFilter?: (string | Category)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts-archive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedPostsBlock".
+ */
+export interface RelatedPostsBlock {
+  /**
+   * Heading for related posts section. Use <span> tags for gradient text: '<span>Related</span> Posts'
+   */
+  heading: string;
+  /**
+   * Optional description that appears below the heading
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Maximum number of related posts to display
+   */
+  maxPosts?: number | null;
+  /**
+   * Choose how related posts are displayed
+   */
+  layout?: ('grid' | 'list') | null;
+  /**
+   * Number of columns for grid layout
+   */
+  columns?: ('two' | 'three' | 'four') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'related-posts';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "templates".
+ */
+export interface Template {
+  id: string;
+  /**
+   * Template name (e.g. 'Service Page', 'Product Landing')
+   */
+  name: string;
+  /**
+   * What this template is used for
+   */
+  description?: string | null;
+  /**
+   * Pre-configured sections with default content
+   */
+  sections: (
+    | HeroPrimaryBlock
+    | HeroFullBlock
+    | TextImageBlock
+    | CirclesAnimationBlock
+    | ServiceCardsListBlock
+    | TestimonialsBlock
+    | InfoGridBlock
+    | LatestArticlesBlock
+    | FullwidthCtaBlock
+    | GlobeLocationsBlock
+    | ContactFormBlock
+    | CtaFormBlock
+    | HeadingLeftContentBlock
+    | SimpleTextBlock
+    | PostHeroBlock
+    | PostContentBlock
+    | PostsArchiveBlock
+    | RelatedPostsBlock
+  )[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uri-index".
+ */
+export interface UriIndex {
+  id: string;
+  /**
+   * The URI path for this document (e.g., /about, /blog/post-title)
+   */
+  uri: string;
+  /**
+   * The collection slug that contains the source document
+   */
+  sourceCollection: string;
+  /**
+   * The ID of the source document in the collection
+   */
+  documentId: string;
+  /**
+   * Reference to the actual document
+   */
+  document:
     | {
-        platform?:
-          | ('twitter' | 'facebook' | 'instagram' | 'linkedin' | 'youtube' | 'twitch' | 'tiktok' | 'github' | 'website')
-          | null;
-        url?: string | null;
+        relationTo: 'pages';
+        value: string | Page;
+      }
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'team';
+        value: string | Team;
+      }
+    | {
+        relationTo: 'services';
+        value: string | Service;
+      };
+  /**
+   * Publication status of the source document
+   */
+  status: 'published' | 'draft';
+  /**
+   * Pre-computed breadcrumb navigation chain for this document
+   */
+  breadcrumbs?:
+    | {
+        /**
+         * Display text for the breadcrumb link
+         */
+        label: string;
+        /**
+         * URI path for the breadcrumb link
+         */
+        uri: string;
+        /**
+         * Whether this breadcrumb represents the current page
+         */
+        isCurrentPage?: boolean | null;
         id?: string | null;
       }[]
     | null;
+  /**
+   * Previous URI paths for automatic redirect generation
+   */
+  previousURIs?:
+    | {
+        uri: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Template ID for this document (if assigned via routing settings)
+   */
+  templateId?: string | null;
+  /**
+   * Whether this URI is the homepage. Only one homepage is allowed.
+   */
+  isHomepage?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -784,6 +2229,14 @@ export interface Redirect {
         } | null);
     url?: string | null;
   };
+  /**
+   * How this redirect was created
+   */
+  type: 'manual' | 'automatic';
+  /**
+   * Source system that created this redirect
+   */
+  source: 'admin' | 'uri-index';
   updatedAt: string;
   createdAt: string;
 }
@@ -801,6 +2254,7 @@ export interface FormSubmission {
         id?: string | null;
       }[]
     | null;
+  isRead?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -891,7 +2345,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'dependent-uri-updates' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -924,7 +2378,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'dependent-uri-updates' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -955,6 +2409,14 @@ export interface PayloadLockedDocument {
         value: string | Service;
       } | null)
     | ({
+        relationTo: 'testimonials';
+        value: string | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'templates';
+        value: string | Template;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -965,6 +2427,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'uri-index';
+        value: string | UriIndex;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1035,23 +2501,74 @@ export interface PayloadMigration {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   publishedAt?: T;
+  featuredImage?: T;
   categories?: T;
   sections?:
     | T
     | {
         'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
+        'hero-full'?: T | HeroFullBlockSelect<T>;
         'text-image'?: T | TextImageBlockSelect<T>;
+        'circles-animation'?: T | CirclesAnimationBlockSelect<T>;
+        'service-cards-list'?: T | ServiceCardsListBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        'info-grid'?: T | InfoGridBlockSelect<T>;
+        'latest-articles'?: T | LatestArticlesBlockSelect<T>;
+        'fullwidth-cta'?: T | FullwidthCtaBlockSelect<T>;
+        'globe-locations'?: T | GlobeLocationsBlockSelect<T>;
+        'contact-form'?: T | ContactFormBlockSelect<T>;
+        'cta-form'?: T | CtaFormBlockSelect<T>;
+        'heading-left-content'?: T | HeadingLeftContentBlockSelect<T>;
+        'simple-text'?: T | SimpleTextBlockSelect<T>;
+        'post-hero'?: T | PostHeroBlockSelect<T>;
+        'post-content'?: T | PostContentBlockSelect<T>;
+        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
+        'related-posts'?: T | RelatedPostsBlockSelect<T>;
       };
-  meta?:
+  seo?:
     | T
     | {
-        title?: T;
-        image?: T;
-        description?: T;
-        noIndex?: T;
-        canonicalUrl?: T;
+        meta?:
+          | T
+          | {
+              title?: T;
+              image?: T;
+              description?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              focusKeywords?: T;
+              metaRobots?: T;
+            };
+        socialMedia?:
+          | T
+          | {
+              openGraph?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    type?: T;
+                  };
+              twitter?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    cardType?: T;
+                  };
+            };
+        structuredData?:
+          | T
+          | {
+              enableStructuredData?: T;
+              schemaType?: T;
+              customSchemaProperties?: T;
+            };
       };
   slug?: T;
+  uri?: T;
   slugLock?: T;
   parent?: T;
   breadcrumbs?:
@@ -1073,6 +2590,7 @@ export interface PagesSelect<T extends boolean = true> {
 export interface HeroPrimaryBlockSelect<T extends boolean = true> {
   heading?: T;
   content?: T;
+  usp?: T;
   backgroundImage?: T;
   buttons?:
     | T
@@ -1080,7 +2598,37 @@ export interface HeroPrimaryBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
-              buttonType?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroFullBlock_select".
+ */
+export interface HeroFullBlockSelect<T extends boolean = true> {
+  heading?: T;
+  content?: T;
+  size?: T;
+  colorScheme?: T;
+  backgroundImage?: T;
+  buttons?:
+    | T
+    | {
+        button?:
+          | T
+          | {
               link?:
                 | T
                 | {
@@ -1124,6 +2672,253 @@ export interface TextImageBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CirclesAnimationBlock_select".
+ */
+export interface CirclesAnimationBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  leftCircleWords?:
+    | T
+    | {
+        word?: T;
+        id?: T;
+      };
+  rightCircleWords?:
+    | T
+    | {
+        word?: T;
+        id?: T;
+      };
+  bottomText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ServiceCardsListBlock_select".
+ */
+export interface ServiceCardsListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  text?: T;
+  button?:
+    | T
+    | {
+        variant?: T;
+        size?: T;
+        layout?: T;
+        icon?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock_select".
+ */
+export interface TestimonialsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  testimonials?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InfoGridBlock_select".
+ */
+export interface InfoGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  backgroundColorScheme?: T;
+  gridColumns?: T;
+  processSteps?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LatestArticlesBlock_select".
+ */
+export interface LatestArticlesBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  text?: T;
+  button?:
+    | T
+    | {
+        variant?: T;
+        size?: T;
+        layout?: T;
+        icon?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FullwidthCtaBlock_select".
+ */
+export interface FullwidthCtaBlockSelect<T extends boolean = true> {
+  heading?: T;
+  textAlignment?: T;
+  colorScheme?: T;
+  description?: T;
+  backgroundImage?: T;
+  button?:
+    | T
+    | {
+        variant?: T;
+        size?: T;
+        layout?: T;
+        icon?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GlobeLocationsBlock_select".
+ */
+export interface GlobeLocationsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormBlock_select".
+ */
+export interface ContactFormBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  form?: T;
+  variant?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaFormBlock_select".
+ */
+export interface CtaFormBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  backgroundColorScheme?: T;
+  variant?: T;
+  backgroundImage?: T;
+  form?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeadingLeftContentBlock_select".
+ */
+export interface HeadingLeftContentBlockSelect<T extends boolean = true> {
+  heading?: T;
+  backgroundColorScheme?: T;
+  ratio?: T;
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SimpleTextBlock_select".
+ */
+export interface SimpleTextBlockSelect<T extends boolean = true> {
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostHeroBlock_select".
+ */
+export interface PostHeroBlockSelect<T extends boolean = true> {
+  showAuthor?: T;
+  showPublishDate?: T;
+  showCategories?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostContentBlock_select".
+ */
+export interface PostContentBlockSelect<T extends boolean = true> {
+  showBreadcrumbs?: T;
+  showAuthorInfo?: T;
+  proseSize?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsArchiveBlock_select".
+ */
+export interface PostsArchiveBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  postsPerPage?: T;
+  layout?: T;
+  columns?: T;
+  showPagination?: T;
+  showPageRange?: T;
+  categoryFilter?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedPostsBlock_select".
+ */
+export interface RelatedPostsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  maxPosts?: T;
+  layout?: T;
+  columns?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -1132,12 +2927,47 @@ export interface PostsSelect<T extends boolean = true> {
   categories?: T;
   heroImage?: T;
   content?: T;
-  meta?:
+  seo?:
     | T
     | {
-        title?: T;
-        image?: T;
-        description?: T;
+        meta?:
+          | T
+          | {
+              title?: T;
+              image?: T;
+              description?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              focusKeywords?: T;
+              metaRobots?: T;
+            };
+        socialMedia?:
+          | T
+          | {
+              openGraph?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    type?: T;
+                  };
+              twitter?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    cardType?: T;
+                  };
+            };
+        structuredData?:
+          | T
+          | {
+              enableStructuredData?: T;
+              schemaType?: T;
+              customSchemaProperties?: T;
+            };
       };
   publishedAt?: T;
   authors?: T;
@@ -1148,6 +2978,7 @@ export interface PostsSelect<T extends boolean = true> {
         name?: T;
       };
   slug?: T;
+  uri?: T;
   slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1160,16 +2991,65 @@ export interface PostsSelect<T extends boolean = true> {
 export interface TeamSelect<T extends boolean = true> {
   name?: T;
   email?: T;
-  image?: T;
-  role?: T;
-  bio?: T;
-  socialLinks?:
+  content?:
     | T
     | {
-        platform?: T;
-        url?: T;
-        id?: T;
+        image?: T;
+        role?: T;
+        bio?: T;
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
+              id?: T;
+            };
       };
+  seo?:
+    | T
+    | {
+        meta?:
+          | T
+          | {
+              title?: T;
+              image?: T;
+              description?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              focusKeywords?: T;
+              metaRobots?: T;
+            };
+        socialMedia?:
+          | T
+          | {
+              openGraph?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    type?: T;
+                  };
+              twitter?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    cardType?: T;
+                  };
+            };
+        structuredData?:
+          | T
+          | {
+              enableStructuredData?: T;
+              schemaType?: T;
+              customSchemaProperties?: T;
+            };
+      };
+  slug?: T;
+  uri?: T;
+  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1179,10 +3059,123 @@ export interface TeamSelect<T extends boolean = true> {
  */
 export interface ServicesSelect<T extends boolean = true> {
   title?: T;
-  content?: T;
-  heroImage?: T;
+  description?: T;
+  publishedAt?: T;
+  featuredImage?: T;
+  sections?:
+    | T
+    | {
+        'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
+        'hero-full'?: T | HeroFullBlockSelect<T>;
+        'text-image'?: T | TextImageBlockSelect<T>;
+        'circles-animation'?: T | CirclesAnimationBlockSelect<T>;
+        'service-cards-list'?: T | ServiceCardsListBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        'info-grid'?: T | InfoGridBlockSelect<T>;
+        'latest-articles'?: T | LatestArticlesBlockSelect<T>;
+        'fullwidth-cta'?: T | FullwidthCtaBlockSelect<T>;
+        'globe-locations'?: T | GlobeLocationsBlockSelect<T>;
+        'contact-form'?: T | ContactFormBlockSelect<T>;
+        'cta-form'?: T | CtaFormBlockSelect<T>;
+        'heading-left-content'?: T | HeadingLeftContentBlockSelect<T>;
+        'simple-text'?: T | SimpleTextBlockSelect<T>;
+        'post-hero'?: T | PostHeroBlockSelect<T>;
+        'post-content'?: T | PostContentBlockSelect<T>;
+        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
+        'related-posts'?: T | RelatedPostsBlockSelect<T>;
+      };
+  seo?:
+    | T
+    | {
+        meta?:
+          | T
+          | {
+              title?: T;
+              image?: T;
+              description?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              focusKeywords?: T;
+              metaRobots?: T;
+            };
+        socialMedia?:
+          | T
+          | {
+              openGraph?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    type?: T;
+                  };
+              twitter?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    cardType?: T;
+                  };
+            };
+        structuredData?:
+          | T
+          | {
+              enableStructuredData?: T;
+              schemaType?: T;
+              customSchemaProperties?: T;
+            };
+      };
   slug?: T;
+  uri?: T;
   slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  name?: T;
+  title?: T;
+  quote?: T;
+  company?: T;
+  companyLogo?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "templates_select".
+ */
+export interface TemplatesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  sections?:
+    | T
+    | {
+        'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
+        'hero-full'?: T | HeroFullBlockSelect<T>;
+        'text-image'?: T | TextImageBlockSelect<T>;
+        'circles-animation'?: T | CirclesAnimationBlockSelect<T>;
+        'service-cards-list'?: T | ServiceCardsListBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        'info-grid'?: T | InfoGridBlockSelect<T>;
+        'latest-articles'?: T | LatestArticlesBlockSelect<T>;
+        'fullwidth-cta'?: T | FullwidthCtaBlockSelect<T>;
+        'globe-locations'?: T | GlobeLocationsBlockSelect<T>;
+        'contact-form'?: T | ContactFormBlockSelect<T>;
+        'cta-form'?: T | CtaFormBlockSelect<T>;
+        'heading-left-content'?: T | HeadingLeftContentBlockSelect<T>;
+        'simple-text'?: T | SimpleTextBlockSelect<T>;
+        'post-hero'?: T | PostHeroBlockSelect<T>;
+        'post-content'?: T | PostContentBlockSelect<T>;
+        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
+        'related-posts'?: T | RelatedPostsBlockSelect<T>;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1286,9 +3279,6 @@ export interface MediaSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   description?: T;
-  posts?: T;
-  slug?: T;
-  slugLock?: T;
   parent?: T;
   breadcrumbs?:
     | T
@@ -1311,6 +3301,14 @@ export interface UsersSelect<T extends boolean = true> {
   role?: T;
   avatar?: T;
   bio?: T;
+  education?:
+    | T
+    | {
+        degree?: T;
+        institution?: T;
+        year?: T;
+        id?: T;
+      };
   socialLinks?:
     | T
     | {
@@ -1328,6 +3326,42 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uri-index_select".
+ */
+export interface UriIndexSelect<T extends boolean = true> {
+  uri?: T;
+  sourceCollection?: T;
+  documentId?: T;
+  document?: T;
+  status?: T;
+  breadcrumbs?:
+    | T
+    | {
+        label?: T;
+        uri?: T;
+        isCurrentPage?: T;
+        id?: T;
+      };
+  previousURIs?:
+    | T
+    | {
+        uri?: T;
+        id?: T;
+      };
+  templateId?: T;
+  isHomepage?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1342,6 +3376,8 @@ export interface RedirectsSelect<T extends boolean = true> {
         reference?: T;
         url?: T;
       };
+  type?: T;
+  source?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1454,6 +3490,17 @@ export interface FormsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        phone?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   submitButtonLabel?: T;
   confirmationType?: T;
@@ -1491,6 +3538,7 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  isRead?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1605,6 +3653,10 @@ export interface Header {
                   value: string | Post;
                 } | null)
               | ({
+                  relationTo: 'team';
+                  value: string | Team;
+                } | null)
+              | ({
                   relationTo: 'services';
                   value: string | Service;
                 } | null);
@@ -1628,6 +3680,10 @@ export interface Header {
                           value: string | Post;
                         } | null)
                       | ({
+                          relationTo: 'team';
+                          value: string | Team;
+                        } | null)
+                      | ({
                           relationTo: 'services';
                           value: string | Service;
                         } | null);
@@ -1648,6 +3704,10 @@ export interface Header {
                             | ({
                                 relationTo: 'posts';
                                 value: string | Post;
+                              } | null)
+                            | ({
+                                relationTo: 'team';
+                                value: string | Team;
                               } | null)
                             | ({
                                 relationTo: 'services';
@@ -1676,7 +3736,41 @@ export interface Header {
  */
 export interface Footer {
   id: string;
-  navItems?:
+  menus?:
+    | {
+        title: string;
+        menuItems?:
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'team';
+                      value: string | Team;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: string | Service;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  legals?:
     | {
         link: {
           type?: ('reference' | 'custom') | null;
@@ -1689,6 +3783,10 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'team';
+                value: string | Team;
               } | null)
             | ({
                 relationTo: 'services';
@@ -1714,11 +3812,37 @@ export interface Setting {
     siteDescription?: string | null;
   };
   social?: {
-    facebook?: string | null;
-    instagram?: string | null;
-    twitter?: string | null;
-    linkedin?: string | null;
-    youtube?: string | null;
+    /**
+     * Add social media links
+     */
+    socialLinks?:
+      | {
+          platform:
+            | 'facebook'
+            | 'instagram'
+            | 'linkedin'
+            | 'youtube'
+            | 'twitter'
+            | 'tiktok'
+            | 'pinterest'
+            | 'snapchat'
+            | 'whatsapp'
+            | 'telegram'
+            | 'discord'
+            | 'twitch'
+            | 'reddit'
+            | 'github'
+            | 'email'
+            | 'phone'
+            | 'website';
+          url: string;
+          /**
+           * Override default platform name
+           */
+          label?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   locations?: {
     locations?:
@@ -1729,9 +3853,123 @@ export interface Setting {
           country?: string | null;
           phone?: string | null;
           email?: string | null;
+          /**
+           * Full Google Maps URL for this location
+           */
+          googleMapsLink?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           id?: string | null;
         }[]
       | null;
+  };
+  routing?: {
+    /**
+     * Choose which page displays as your site's front page
+     */
+    homepage?: (string | null) | Page;
+    /**
+     * Default template for new pages (if no template is specified)
+     */
+    pagesDefaultTemplate?: (string | null) | Template;
+    postsCollectionLabel?: string | null;
+    postsArchivePage?: (string | null) | Page;
+    postsSingleTemplate?: (string | null) | Template;
+    teamCollectionLabel?: string | null;
+    teamArchivePage?: (string | null) | Page;
+    teamSingleTemplate?: (string | null) | Template;
+    servicesCollectionLabel?: string | null;
+    servicesArchivePage?: (string | null) | Page;
+    servicesSingleTemplate?: (string | null) | Template;
+  };
+  seo?: {
+    /**
+     * Default image for social media sharing and search results
+     */
+    defaultMetaImage?: (string | null) | Media;
+    /**
+     * Site favicon (.ico, .png, or .svg)
+     */
+    favicon?: (string | null) | Media;
+    organization?: {
+      /**
+       * Your business/organization name for structured data
+       */
+      name?: string | null;
+      type?:
+        | (
+            | 'Organization'
+            | 'LocalBusiness'
+            | 'Corporation'
+            | 'EducationalOrganization'
+            | 'GovernmentOrganization'
+            | 'NGO'
+            | 'SportsOrganization'
+          )
+        | null;
+      /**
+       * Logo for structured data (square format preferred)
+       */
+      logo?: (string | null) | Media;
+      /**
+       * Brief description of your organization
+       */
+      description?: string | null;
+      /**
+       * When your organization was founded
+       */
+      foundingDate?: string | null;
+    };
+    verification?: {
+      /**
+       * Google Search Console verification code
+       */
+      googleSiteVerification?: string | null;
+      /**
+       * Bing Webmaster Tools verification code
+       */
+      bingSiteVerification?: string | null;
+      /**
+       * Yandex Webmaster verification code
+       */
+      yandexSiteVerification?: string | null;
+      /**
+       * Pinterest domain verification code
+       */
+      pinterestSiteVerification?: string | null;
+    };
+    robots?: {
+      /**
+       * Override default robots.txt with custom directives
+       */
+      enableRobotsTxt?: boolean | null;
+      /**
+       * Custom robots.txt content
+       */
+      customRobotsTxt?: string | null;
+      /**
+       * Prevent entire site from being indexed (development sites)
+       */
+      globalNoIndex?: boolean | null;
+    };
+    social?: {
+      /**
+       * Default image for Facebook/Open Graph sharing (1200x630px)
+       */
+      defaultOGImage?: (string | null) | Media;
+      /**
+       * Default image for Twitter sharing (1200x675px)
+       */
+      defaultTwitterImage?: (string | null) | Media;
+      /**
+       * Your Twitter handle (e.g., @yourcompany)
+       */
+      twitterSite?: string | null;
+      /**
+       * Facebook App ID for Open Graph insights
+       */
+      facebookAppId?: string | null;
+    };
   };
   integrations?: {
     googleAnalytics?: string | null;
@@ -1808,7 +4046,27 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  navItems?:
+  menus?:
+    | T
+    | {
+        title?: T;
+        menuItems?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
+  legals?:
     | T
     | {
         link?:
@@ -1840,11 +4098,14 @@ export interface SettingsSelect<T extends boolean = true> {
   social?:
     | T
     | {
-        facebook?: T;
-        instagram?: T;
-        twitter?: T;
-        linkedin?: T;
-        youtube?: T;
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
+              label?: T;
+              id?: T;
+            };
       };
   locations?:
     | T
@@ -1858,7 +4119,63 @@ export interface SettingsSelect<T extends boolean = true> {
               country?: T;
               phone?: T;
               email?: T;
+              googleMapsLink?: T;
+              latitude?: T;
+              longitude?: T;
               id?: T;
+            };
+      };
+  routing?:
+    | T
+    | {
+        homepage?: T;
+        pagesDefaultTemplate?: T;
+        postsCollectionLabel?: T;
+        postsArchivePage?: T;
+        postsSingleTemplate?: T;
+        teamCollectionLabel?: T;
+        teamArchivePage?: T;
+        teamSingleTemplate?: T;
+        servicesCollectionLabel?: T;
+        servicesArchivePage?: T;
+        servicesSingleTemplate?: T;
+      };
+  seo?:
+    | T
+    | {
+        defaultMetaImage?: T;
+        favicon?: T;
+        organization?:
+          | T
+          | {
+              name?: T;
+              type?: T;
+              logo?: T;
+              description?: T;
+              foundingDate?: T;
+            };
+        verification?:
+          | T
+          | {
+              googleSiteVerification?: T;
+              bingSiteVerification?: T;
+              yandexSiteVerification?: T;
+              pinterestSiteVerification?: T;
+            };
+        robots?:
+          | T
+          | {
+              enableRobotsTxt?: T;
+              customRobotsTxt?: T;
+              globalNoIndex?: T;
+            };
+        social?:
+          | T
+          | {
+              defaultOGImage?: T;
+              defaultTwitterImage?: T;
+              twitterSite?: T;
+              facebookAppId?: T;
             };
       };
   integrations?:
@@ -1872,6 +4189,43 @@ export interface SettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDependent-uri-updates".
+ */
+export interface TaskDependentUriUpdates {
+  input: {
+    operation: string;
+    entityId: string;
+    additionalData?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  output: {
+    success?: boolean | null;
+    documentsUpdated?: number | null;
+    redirectsCreated?: number | null;
+    cacheEntriesCleared?: number | null;
+    errors?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    processedAt?: string | null;
+    operation?: string | null;
+    impactSize?: number | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1889,6 +4243,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'posts';
           value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
         } | null);
     global?: string | null;
     user?: (string | null) | User;

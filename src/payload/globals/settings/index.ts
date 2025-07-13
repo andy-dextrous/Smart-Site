@@ -1,10 +1,15 @@
 import type { GlobalConfig } from "payload"
-import { revalidateSettings } from "./hooks/revalidateSettings"
+import { socialLinks } from "@/payload/fields/social-links"
+import { afterSettingsChange } from "@/payload/hooks/globals/settings/after-change"
+import { generateRoutingFields } from "@/utilities/routing"
+import { authenticated } from "@/payload/access/authenticated"
+import { anyone } from "@/payload/access/anyone"
 
 export const Settings: GlobalConfig = {
   slug: "settings",
   access: {
-    read: () => true,
+    read: anyone,
+    update: authenticated,
   },
   admin: {
     hideAPIURL: process.env.NODE_ENV === "production",
@@ -31,39 +36,8 @@ export const Settings: GlobalConfig = {
         },
         {
           name: "social",
-          label: "Socials",
-          fields: [
-            {
-              type: "row",
-              fields: [
-                {
-                  name: "facebook",
-                  label: "Facebook",
-                  type: "text",
-                },
-                {
-                  name: "instagram",
-                  label: "Instagram",
-                  type: "text",
-                },
-                {
-                  name: "twitter",
-                  label: "X (Twitter)",
-                  type: "text",
-                },
-                {
-                  name: "linkedin",
-                  label: "LinkedIn",
-                  type: "text",
-                },
-                {
-                  name: "youtube",
-                  label: "YouTube",
-                  type: "text",
-                },
-              ],
-            },
-          ],
+          label: "Social Media",
+          fields: [socialLinks()],
         },
         {
           name: "locations",
@@ -97,6 +71,225 @@ export const Settings: GlobalConfig = {
                 {
                   name: "email",
                   type: "text",
+                },
+                {
+                  name: "googleMapsLink",
+                  label: "Google Maps Link",
+                  type: "text",
+                  admin: {
+                    description: "Full Google Maps URL for this location",
+                  },
+                },
+                {
+                  name: "latitude",
+                  type: "number",
+                },
+                {
+                  name: "longitude",
+                  type: "number",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: "routing",
+          label: "Routing",
+          fields: generateRoutingFields(),
+        },
+        {
+          name: "seo",
+          label: "SEO",
+          fields: [
+            {
+              name: "defaultMetaImage",
+              label: "Default Meta Image",
+              type: "upload",
+              relationTo: "media",
+              admin: {
+                description: "Default image for social media sharing and search results",
+              },
+            },
+            {
+              name: "favicon",
+              label: "Favicon",
+              type: "upload",
+              relationTo: "media",
+              admin: {
+                description: "Site favicon (.ico, .png, or .svg)",
+              },
+            },
+            {
+              name: "organization",
+              label: "Organization Data",
+              type: "group",
+              fields: [
+                {
+                  name: "name",
+                  label: "Organization Name",
+                  type: "text",
+                  admin: {
+                    description: "Your business/organization name for structured data",
+                  },
+                },
+                {
+                  name: "type",
+                  label: "Organization Type",
+                  type: "select",
+                  defaultValue: "Organization",
+                  options: [
+                    { label: "Organization", value: "Organization" },
+                    { label: "Local Business", value: "LocalBusiness" },
+                    { label: "Corporation", value: "Corporation" },
+                    {
+                      label: "Educational Organization",
+                      value: "EducationalOrganization",
+                    },
+                    { label: "Government Organization", value: "GovernmentOrganization" },
+                    { label: "NGO", value: "NGO" },
+                    { label: "Sports Organization", value: "SportsOrganization" },
+                  ],
+                },
+                {
+                  name: "logo",
+                  label: "Organization Logo",
+                  type: "upload",
+                  relationTo: "media",
+                  admin: {
+                    description: "Logo for structured data (square format preferred)",
+                  },
+                },
+                {
+                  name: "description",
+                  label: "Organization Description",
+                  type: "textarea",
+                  admin: {
+                    description: "Brief description of your organization",
+                  },
+                },
+                {
+                  name: "foundingDate",
+                  label: "Founding Date",
+                  type: "date",
+                  admin: {
+                    description: "When your organization was founded",
+                  },
+                },
+              ],
+            },
+            {
+              name: "verification",
+              label: "Search Engine Verification",
+              type: "group",
+              fields: [
+                {
+                  name: "googleSiteVerification",
+                  label: "Google Site Verification",
+                  type: "text",
+                  admin: {
+                    description: "Google Search Console verification code",
+                  },
+                },
+                {
+                  name: "bingSiteVerification",
+                  label: "Bing Site Verification",
+                  type: "text",
+                  admin: {
+                    description: "Bing Webmaster Tools verification code",
+                  },
+                },
+                {
+                  name: "yandexSiteVerification",
+                  label: "Yandex Site Verification",
+                  type: "text",
+                  admin: {
+                    description: "Yandex Webmaster verification code",
+                  },
+                },
+                {
+                  name: "pinterestSiteVerification",
+                  label: "Pinterest Site Verification",
+                  type: "text",
+                  admin: {
+                    description: "Pinterest domain verification code",
+                  },
+                },
+              ],
+            },
+            {
+              name: "robots",
+              label: "Robots Configuration",
+              type: "group",
+              fields: [
+                {
+                  name: "enableRobotsTxt",
+                  label: "Enable Custom Robots.txt",
+                  type: "checkbox",
+                  defaultValue: false,
+                  admin: {
+                    description: "Override default robots.txt with custom directives",
+                  },
+                },
+                {
+                  name: "customRobotsTxt",
+                  label: "Custom Robots.txt",
+                  type: "textarea",
+                  admin: {
+                    condition: (_, siblingData) => siblingData?.enableRobotsTxt === true,
+                    description: "Custom robots.txt content",
+                  },
+                },
+                {
+                  name: "globalNoIndex",
+                  label: "Global No Index",
+                  type: "checkbox",
+                  defaultValue: false,
+                  admin: {
+                    description:
+                      "Prevent entire site from being indexed (development sites)",
+                  },
+                },
+              ],
+            },
+            {
+              name: "social",
+              label: "Social Media Defaults",
+              type: "group",
+              fields: [
+                {
+                  name: "defaultOGImage",
+                  label: "Default Open Graph Image",
+                  type: "upload",
+                  relationTo: "media",
+                  admin: {
+                    description:
+                      "Default image for Facebook/Open Graph sharing (1200x630px)",
+                  },
+                },
+                {
+                  name: "defaultTwitterImage",
+                  label: "Default Twitter Image",
+                  type: "upload",
+                  relationTo: "media",
+                  admin: {
+                    description: "Default image for Twitter sharing (1200x675px)",
+                  },
+                },
+                {
+                  name: "twitterSite",
+                  label: "Twitter Site Handle",
+                  type: "text",
+                  admin: {
+                    description: "Your Twitter handle (e.g., @yourcompany)",
+                  },
+                },
+                {
+                  name: "facebookAppId",
+                  label: "Facebook App ID",
+                  type: "text",
+                  admin: {
+                    description: "Facebook App ID for Open Graph insights",
+                  },
                 },
               ],
             },
@@ -143,6 +336,6 @@ export const Settings: GlobalConfig = {
     },
   ],
   hooks: {
-    afterChange: [revalidateSettings],
+    afterChange: [afterSettingsChange],
   },
 }

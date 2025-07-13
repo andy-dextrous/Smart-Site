@@ -1,11 +1,8 @@
-/****************************************************/
-/* Base Styles are for element-level styles that
-/* are not part of a component
-/****************************************************/
+/* Base Styles are for element-level styles that are not part of a component */
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border selection:bg-primary selection:text-white;
   }
 
   body {
@@ -14,6 +11,6 @@
 
   /* Not Toaster from sonner */
   section:not([aria-label="Notifications alt+T"]) {
-    @apply relative w-full px-(--section-padding-x) py-(--section-padding-y);
+    @apply px-section-x py-section-y relative w-full;
   }
 }

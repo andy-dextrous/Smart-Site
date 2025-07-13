@@ -1,8 +1,9 @@
-interface WildChildConfig {
+interface SmartSiteConfig {
   themeToggle: boolean
   gsap: boolean
   smoothScroll: boolean
   i18n: boolean | i18nConfig
+  gsapDevTools: boolean
 }
 
 interface i18nConfig {
@@ -12,11 +13,12 @@ interface i18nConfig {
   localeCookie: string // example: "NEXT_LOCALE"
 }
 
-const wildChildConfig: WildChildConfig = {
+const wildChildConfig: SmartSiteConfig = {
   themeToggle: false,
   gsap: true,
-  smoothScroll: false, // depends on gsap as prerequisite
+  smoothScroll: true, // depends on gsap as prerequisite
   i18n: false,
+  gsapDevTools: true,
 }
 
 export default wildChildConfig

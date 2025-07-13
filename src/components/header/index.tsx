@@ -1,27 +1,42 @@
 import { HeaderNavigation } from "@/components/header/nav"
-import { getCachedGlobal } from "@/lib/queries/globals"
-import type { Header } from "@/payload/payload-types"
-import Image from "next/image"
+import { getGlobal, getSettings } from "@/lib/data/globals"
+import type { Header, Setting } from "@/payload/payload-types"
 import Link from "next/link"
 
 import type { Config } from "payload"
-import { MobileNav } from "./mobile-nav"
+import LogoPrimaryLight from "../logos/logo-light"
+import { MobileNavUpdated } from "./mobile-nav"
+import { getCurrentUser } from "@/lib/data/user"
+import { cn } from "@/utilities/ui"
 
 export async function Header() {
-  const headerData: Header = await getCachedGlobal(
-    "header" as keyof Config["globals"],
-    1
-  )()
+  const [headerData, settingsData, user] = await Promise.all([
+    getGlobal("header" as keyof Config["globals"], 1),
+    getSettings(),
+    getCurrentUser(),
+  ])
+
+  const settings = settingsData as Setting
 
   return (
-    <header className="logo-height relative z-20 h-(--nav-height) border-b border-gray-100 bg-white px-(--section-padding-x)">
-      <div className="container h-full">
+    <header
+      className={cn(
+        "h-nav md:px-section-x bg-dark/80 border-light-border fixed inset-x-0 z-[1000] border-b px-0 backdrop-blur-lg",
+        // If user is logged in, add 32px to the top of the header to accomodate the admin bar
+        user ? "top-[32px]" : "top-0"
+      )}
+    >
+      <div className="border-light-border h-full border-x-1 px-8">
         <div className="flex h-full items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3">
-            <Image src="/assets/logos/logo.svg" alt="Logo" width={160} height={40} />
+          <Link
+            href="/"
+            className="flex items-center space-x-3"
+            aria-label="Return to smart-site homepage"
+          >
+            <LogoPrimaryLight width={208} height={54} />
           </Link>
           <HeaderNavigation data={headerData} />
-          <MobileNav data={headerData} />
+          <MobileNavUpdated data={headerData} settings={settings} />
         </div>
       </div>
     </header>

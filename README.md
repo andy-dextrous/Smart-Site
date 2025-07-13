@@ -1,139 +1,251 @@
-# Wild Child Theme - Payload CMS Built In
+# Smart Site - Modern Website Starter
 
-This is the official Wild Child website/app starter, built using Next JS, Tailwind 4, GSAP and Payload CMS.
+A powerful website starter built with **Next.js 15+**, **Payload CMS**, **Tailwind CSS v4**, **GSAP**, and **Mastra AI**, designed for rapid development of section-based websites with enterprise-grade routing and caching.
 
-## Installation & Setup
+## 📋 Table of Contents
 
-1. Create a clone of this repo by clicking "Use This Template" in Github. This will create the new Wild Child site.
-2. In the new repo in Github, click on "Code" and "Open with Github Desktop"
-3. Clone the repo to your local machine and open the folder in Cursor.
-4. run `npm i`
-5. You will need to create a database and file storage for this site. Vercel has free tiers available for PostGres and Vercel Blob which should provide enough storage for a new site. They are also perfect for development.
-6. Rename .env.example to .env and fill in each environment variable.
+- [Installation & Getting Started](#installation--getting-started)
+- [Repository Overview](#repository-overview)
+- [Building a Website](#building-a-website)
+- [How Routing Works](#how-routing-works)
+- [Lib Folder Structure](#lib-folder-structure)
+- [Cursor Rules](#cursor-rules)
+- [Configuration](#configuration)
+- [Deployment](#deployment)
 
-```yml
-# Payload
-    DATABASE_PROVIDER=vercel # or choose mongoose if using MongoDB
-    DATABASE_URI=... # if using mongoose
-    POSTGRES_URL=... # if using vercel - get this from the storage/postgres page o vercel (https://vercel.com/scrivos-projects/~/stores)
-    PAYLOAD_SECRET=... # create a unique id for payload encryption (https://acte.ltd/utils/randomkeygen). Reuse in production as well.
-    PAYLOAD_CONFIG_PATH=./src/payload/payload.config.ts # don't change this
-    PAYLOAD_ADMIN_EMAIL=... # once you have created an account in your new app's admin, put the email and password here to enable auto-login during development to save you always having to log back in.
-    PAYLOAD_ADMIN_PASSWORD=... # same
-    PREVIEW_SECRET=... # create another unique id for previews (https://acte.ltd/utils/randomkeygen)
+## 🚀 Installation & Getting Started
 
-    # GSAP
-    TOKEN=ee697198-7190-48fb-98df-b5aa34edf555 # keep this identical, it is tied to a paid GSAP account with full features.
+### Prerequisites
 
-    # Next
-    NEXT_PUBLIC_URL=http://localhost:3000 # This should be localhost in development and your actual URL in production
-    VERCEL_PROJECT_PRODUCTION_URL=... # production url
-    BLOB_READ_WRITE_TOKEN=... # fetch from https://vercel.com/docs/storage/vercel-blob
+- **Node.js 20+**
+- **pnpm** (preferred package manager)
+- **Database**: PostgreSQL or MongoDB
+- **File Storage**: Vercel Blob (recommended) or other storage solution
 
-    # Resend - #not required for development - only prod. See below for instructions
-    RESEND_API_KEY=...
+### 1. Project Setup
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd smart-site
+
+# Install dependencies
+pnpm install
+
+# Copy environment file
+cp .env.example .env.local
 ```
 
-7. `npm run dev` will start the new website
-8. Create a new user
+### 2. Environment Configuration
 
-## Development - Building the Site's Designs/Content
+Configure your `.env.local` file with the following variables:
 
-For the most part, Payload will come fully featured out of the box. It starts with collections for Pages, Services, Posts and Team Members.
+```bash
+# Database Configuration
+DATABASE_PROVIDER=vercel                           # "vercel" for PostgreSQL or "mongoose" for MongoDB
+POSTGRES_URL=postgresql://username:password@host   # For PostgreSQL (get from Vercel Storage)
+DATABASE_URI=mongodb://localhost:27017/smart-site  # For MongoDB (if using mongoose)
 
-### Steps involved for bringing a Figma design to Wild Child
+# Payload CMS Configuration
+PAYLOAD_SECRET=your-unique-secret-key              # Generate at https://acte.ltd/utils/randomkeygen
+PAYLOAD_CONFIG_PATH=./src/payload/payload.config.ts
+PAYLOAD_ADMIN_EMAIL=admin@yourdomain.com           # For auto-login during development
+PAYLOAD_ADMIN_PASSWORD=your-admin-password
 
-1. Bring the Design System from Figma over to Tailwind. Navigate to the `src/(frontend)/css` folder. All frontend tailwind files live in here. The entry point is globals.css which is imported into the main layout of the site.
+# Preview & Draft Configuration
+PREVIEW_SECRET=another-unique-secret-key           # For draft mode functionality
 
-Most of the new Tailwind 4 information you need to understand lives in [the theme documentation](https://tailwindcss.com/docs/theme).
+# GSAP Configuration
+TOKEN=ee697198-7190-48fb-98df-b5aa34edf555       # Pre-configured token with full GSAP features
 
-2. Core CSS Files:
+# Next.js Configuration
+NEXT_PUBLIC_URL=http://localhost:3000              # Local development URL
+VERCEL_PROJECT_PRODUCTION_URL=yourdomain.com       # Production URL for deployment
 
-- **base.css**: Used to style primitives (html element-level styles)
-- **components.css**: Used to create traditional classes with lots of css rules (the old fashioned way). Only use components if absolutely necessary for readability and re-use. Don't use for creting new utility classes.
-- **theme.css**: Main theme file for extending and modifying tailwind classes and tokens. Use theme.css for adding custom global variables, extending colors, adding spacing rules (container width, section padding etc).
-- **typography.css**: All typography rules and variables managed from here. The @theme layer at the top of the file is used to add variables and classes specifically for global typography. The @base layer below is used to apply those variables and classes to typography primitives.
-- **ui.css**: ShadCN variables. Will change in the future to accomodate our own, preferred design system.
-- **utilities.css**: Used to add new, useful utility functions not already in Tailwind.
+# File Storage (Vercel Blob recommended)
+BLOB_READ_WRITE_TOKEN=your-vercel-blob-token       # Get from Vercel Storage dashboard
 
-3. Building designs:
+# Email Service (Resend - optional for development)
+RESEND_API_KEY=your-resend-api-key                 # Only needed for production email functionality
 
-Wild Child is designed for a section-first approach to building websites. Every website has a `<header />`, `<main />` and `<footer />` that live inside the `<body />`. Wild Child is set up so that you can spend 90% of your time just building the sections from your design. Inside the `<main>` you will have stacked `<section>` elements that comprise the content of the website.
+# AI Configuration (Mastra)
+OPENAI_API_KEY=your-openai-api-key                 # For AI-powered features
+```
 
-Payload CMS handles the templating - organising and building pages. This is acheieved by first building sections and then adding theme support for them in two places.
+### 3. Database Setup
 
-## Creating Section Blocks
+#### Option A: Vercel PostgreSQL (Recommended)
 
-1. Create a new folder inside `src/components/sections`. Give the folder the section name you want. Use kebab case for all folders.
-2. Every section block needs 2 files - a config file and a React component. The convention is to call them `config.ts` and `Component.tsx` however this is not **_technically_** necessary.
-3. After creating these files, start by modifying the config file. First, examine your Figma design and decide how much control the client would like to have over this section. **You want to decide on the fields that you will create which will allow the site user to modify designs**. This will likely include the obvious choices: a title (text field), content (rich-text), buttons (array block containing button attributes like url, text, variant). You may, however want to expose deeper levels of customisation that make components extremely flexible. For instance:
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Navigate to **Storage** → **Create Database** → **Postgres**
+3. Copy the `POSTGRES_URL` to your `.env.local`
 
-- Layout Options (left-right, right-left, stacked etc)
-- Inclusion of optional elements (use a slider instead of card grid, background icon etc)
-- Styling (Dark mode and light mode variants)
-- Positioning of certain elements
-- Animations
+#### Option B: MongoDB
 
-The choice is ours to create whatever editor experience best suits this client and their budget. 4. Build out the config file to represent the schema you want in your editor. Use the below as a guide.
+1. Set up MongoDB (local or Atlas)
+2. Set `DATABASE_PROVIDER=mongoose`
+3. Add your `DATABASE_URI` to `.env.local`
 
-```ts
+### 4. Development Server
+
+```bash
+# Start development server (includes Mastra AI dev server)
+pnpm dev
+
+# Alternative: Start only Next.js server
+pnpm dev:next
+
+# Fresh development start (resets database and seeds data)
+pnpm dev:fresh
+```
+
+### 5. Initial Setup
+
+1. **Access the admin**: Navigate to `http://localhost:3000/admin`
+2. **Create admin user**: Follow the setup wizard
+3. **Optional**: Run the seeder: `pnpm seed`
+
+### 6. Available Scripts
+
+```bash
+pnpm dev              # Start development with Next.js + Mastra AI
+pnpm dev:next         # Start only Next.js development server
+pnpm dev:mastra       # Start only Mastra AI development server
+pnpm build            # Build for production
+pnpm start            # Start production server
+pnpm lint             # Run ESLint
+pnpm lint:fix         # Fix ESLint issues
+pnpm type-check       # Run TypeScript checks
+
+# Database & Content Management
+pnpm db:schema        # Generate database schema
+pnpm db:reset         # Reset database and seed data
+pnpm seed             # Seed database with sample content
+pnpm regenerate-uris  # Regenerate URI index for routing
+
+# Payload CMS Commands
+pnpm payload          # Access Payload CLI
+pnpm generate:types   # Generate TypeScript types from Payload
+```
+
+## 📁 Repository Overview
+
+### Architecture Philosophy
+
+Smart Site uses a **section-first approach** to website building, where every page is composed of reusable section blocks managed through Payload CMS. This enables rapid development and content management flexibility.
+
+### Key Technologies
+
+- **Next.js 15+**: React framework with App Router
+- **Payload CMS**: Headless CMS with block-based content management
+- **Tailwind CSS v4**: Utility-first CSS framework with design system
+- **GSAP**: Professional-grade animations
+- **Mastra AI**: AI integration framework
+- **TypeScript**: Type safety throughout the application
+
+### Directory Structure
+
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── (frontend)/              # Public-facing pages
+│   │   ├── [[...slug]]/         # Dynamic routing for all pages
+│   │   ├── css/                 # Tailwind configuration
+│   │   └── api/                 # API routes
+│   └── (payload)/               # Payload CMS admin
+│       └── admin/               # Admin dashboard routes
+├── components/                   # React components
+│   ├── sections/                # CMS-powered section blocks
+│   ├── layout/                  # Reusable layout components
+│   ├── ui/                      # ShadCN UI components
+│   └── icons/                   # Icon components
+├── lib/                         # Server actions & business logic
+│   ├── cache/                   # Intelligent caching system
+│   ├── routing/                 # URI engine & routing logic
+│   ├── data/                    # Data access layer
+│   └── ai/                      # Mastra AI configuration
+├── payload/                     # Payload CMS configuration
+│   ├── collections/             # Content collections (Pages, Posts, etc.)
+│   ├── fields/                  # Reusable field configurations
+│   ├── components/              # Custom admin components
+│   └── plugins/                 # CMS plugins
+├── providers/                   # React context providers
+├── utilities/                   # Shared utility functions
+└── types/                       # TypeScript type definitions
+```
+
+## 🏗️ Building a Website
+
+### Understanding the Section System
+
+Smart Site is built around the concept of **sections** - reusable content blocks that can be combined to create pages. Each section consists of:
+
+1. **Configuration** (`config.ts`) - Defines CMS fields and admin interface
+2. **Component** (`Component.tsx`) - React component that renders the section
+
+### Creating a New Section
+
+#### 1. Create Section Files
+
+```bash
+# Create new section directory
+mkdir src/components/sections/hero-banner
+```
+
+Create two files:
+
+**`src/components/sections/hero-banner/config.ts`**
+
+```typescript
 import type { Block } from "payload"
+import { sectionIntro, sectionCta } from "@/payload/fields"
 
-import {
-  FixedToolbarFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from "@payloadcms/richtext-lexical"
-
-export const SectionName: Block = {
-  slug: "new-section-name", // Use kebab case, must be unique across the site
+export const HeroBanner: Block = {
+  slug: "hero-banner",
   admin: {
-    group: "Hero Sections", // Use the admin group if you want this section to be grouped with other types (eg all hereos together)
+    group: "Hero Sections",
   },
-  interfaceName: "NewSectionBlock", // This is used by Payload to create the types for this section. They will be imported into your component.
+  interfaceName: "HeroBannerBlock",
   fields: [
-    // fields are how we declare the data we want to be obtained from the admin. https://payloadcms.com/docs/fields/overview
+    sectionIntro({
+      collapsibleLabel: "Hero Content",
+      headingDescription: "Main hero heading",
+    }),
+    sectionCta({
+      collapsibleLabel: "Call to Action",
+    }),
     {
-      name: "heading",
-      type: "text",
-      required: true,
-    },
-    {
-      name: "content",
-      type: "richText",
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
-        },
-      }),
-      label: false,
-      required: true,
+      name: "backgroundImage",
+      type: "upload",
+      relationTo: "media",
+      required: false,
     },
   ],
 }
 ```
 
-4. Once you have built your config file, expose it to Payload by importing it into `src/components/sections/config.ts`. This will automatically add it to Payload.
-5. You also need to import your section's Component into `src/components/sections/RenderSections.tsx`. This file maps slugs to React components.
-6. Now, you are ready to build the Component. Your interfaceName will now exist inside payload.types.ts (automatically generated). This tells your component exactly how to work with the available data. Here is a blank starter component.
+**`src/components/sections/hero-banner/Component.tsx`**
 
-```tsx
-import { cn } from "@/utilities/ui"
-import RichText from "@/payload/components/rich-text"
-import Image from "next/image"
-import type { NewSectionBlock } from "@/payload/payload-types" // Note how this interface came from the config file.
+```typescript
+import { SectionIntro, SectionCta } from "@/components/layout"
+import { Media } from "@/payload/components/frontend"
+import type { HeroBannerBlock } from "@/payload/payload-types"
 
-export const NewSectionComponent: React.FC<NewSectionBlock> = props => {
-  const { heading, content } = props // Notice that these are the exact fields we added to our fields array in the config file. We get what we ask for passed in as props.
+export const HeroBannerComponent: React.FC<HeroBannerBlock> = (props) => {
+  const { sectionIntro, sectionCta, backgroundImage } = props
 
   return (
-    <section>
-      <div className="container flex gap-8">
-        <div className="flex flex-1 flex-col items-start gap-4">
-          <h2>{heading}</h2>
-          <div className="prose max-w-none">
-            <RichText data={content} />
-          </div>
+    <section className="relative min-h-screen flex items-center">
+      {backgroundImage && (
+        <div className="absolute inset-0 -z-10">
+          <Media resource={backgroundImage} className="w-full h-full object-cover" />
+        </div>
+      )}
+
+      <div className="container">
+        <div className="max-w-3xl">
+          <SectionIntro {...sectionIntro} />
+          <SectionCta {...sectionCta} />
         </div>
       </div>
     </section>
@@ -141,34 +253,360 @@ export const NewSectionComponent: React.FC<NewSectionBlock> = props => {
 }
 ```
 
-## Pushing To Production
+#### 2. Register the Section
 
-### Vercel
+**Add to `src/components/sections/config.ts`:**
 
-First, you will want to set up a hobby or pro account at Vercel for the website. The paid tier is preferable because it offers more storage, security and performance.
+```typescript
+import { HeroBanner } from "./hero-banner/config"
 
-After setting up the site as a Vercel project, go to project -> settings and turn on functions -> Fluid Compute. It will improve front end performance. Also, on the functions page, open the Advanced Settings accordion and change the Function Region so that roundtrip durations are minimised. In developent, this should be Asia Pacific -> Sydney. On launch, set this to match the client's region, unless the client is on a paid plan in which case they can have more than one function location. If the client has a paid plan, scroll down to Functions CPU and choose Standard which provides a little more horsepower to the node.js function environment, making things a bit more snappy. If the site is on a paid plan, release vercel.json which will keep the serverless functions constantly warm, preventing any cold starts.
+export const sectionsConfig = [
+  // ... existing sections
+  HeroBanner,
+]
+```
 
-### Configure Email Provider
+**Add to `src/components/sections/RenderSections.tsx`:**
 
-[Resend](https://resend.com) offers a seamless Payload integration and nice free tier compared to other email service providers. To enable Resend in your website:
+```typescript
+import { HeroBannerComponent } from "./hero-banner/Component"
 
-- Go to [Resend](https://resend.com) and sign up for free using your client's credentials
-- [Add an API Key](https://resend.com/api)
-- Add the domain that the website will live at by visting [Resend Domain](https://resend.com/domains) and adding the DNS records.
-- Go to src/payload/email/config and change the email address and name to match a real email from the production URL. ie, if the websit elives at example.com, the defaultFromAddress should be like john@example.com.
-- At this point, you should be able to go to the Login screen of the production app and click on "Forgot Email" which will send your user address an email.
+const sectionComponents = {
+  // ... existing components
+  "hero-banner": HeroBannerComponent,
+}
+```
 
-## Roadmap
+#### 3. Use in Pages
 
-- **Templates Plugin**: Automatically assigned and recallable sequences of section blocks assigned to post types or pages
-- **Deep SEO**: Full metadata, structured data, backend recommendations
-- **AI Content and Integrated Workflows Plugin**
-- **Sections Library**
-- **vO Integration/Workflow**
-- **Figma Integration**
-- **Design System**
+1. Go to `/admin` in your browser
+2. Create or edit a page
+3. Add your new "Hero Banner" section
+4. Configure the content and save
 
-## Bugs
+### Reusable Field System
 
-- Slug behaviour
+Smart Site includes pre-built field configurations for common patterns:
+
+- **`sectionIntro()`** - Heading + description pattern
+- **`sectionCta()`** - Call-to-action with button
+- **`button()` / `buttonsGroup()`** - Button configurations
+- **`link()`** - Internal/external link handling
+
+This ensures consistency across sections and reduces development time.
+
+## 🗺️ How Routing Works
+
+Smart Site implements a sophisticated routing system with O(1) URI resolution and automatic dependency management.
+
+### URI Index System
+
+Every piece of content gets a unique URI stored in the **URI Index Collection**:
+
+```
+/                    → Homepage
+/about               → About page
+/services            → Services page
+/services/consulting → Service detail page
+/blog                → Blog archive
+/blog/my-post        → Blog post
+```
+
+### Dynamic Route Resolution
+
+The `[[...slug]]` catch-all route handles all requests:
+
+1. **URI Lookup**: Single database query against URI Index
+2. **Content Resolution**: Direct fetch of the matched document
+3. **Template Rendering**: Automatic template selection based on content type
+
+### Automatic Features
+
+- **301 Redirects**: When content URIs change, automatic redirects are created
+- **Archive Integration**: Archive pages automatically list their child content
+- **Hierarchy Support**: Nested page structures with automatic URI generation
+- **Draft Mode**: Preview unpublished content with authentication
+
+### Static Generation
+
+```typescript
+// All routes are pre-generated at build time
+export async function generateStaticParams() {
+  const allURIs = await routingEngine.getAllURIs()
+  return allURIs.map(uri => ({ slug: uri.split("/").filter(Boolean) }))
+}
+```
+
+## 📚 Lib Folder Structure
+
+The `src/lib/` directory contains the core business logic organized by functionality:
+
+### `/cache` - Intelligent Caching System
+
+- **`cache.ts`** - Universal cache API with O(1) lookups
+- **`revalidation.ts`** - Smart cache invalidation
+- **`config.ts`** - Cache configuration and settings
+
+```typescript
+import { cache } from "@/lib/cache"
+
+// Get any document by URI (O(1) lookup)
+const page = await cache.getByURI("/about")
+
+// Get documents by collection and slug
+const post = await cache.getBySlug("posts", "my-blog-post")
+
+// Smart cache invalidation
+await revalidate({ collection: "pages", doc: updatedPage, action: "update" })
+```
+
+### `/routing` - URI Engine & Dependencies
+
+- **`uri-engine.ts`** - Core URI generation and conflict detection
+- **`index-manager.ts`** - URI Index management and bulk operations
+- **`dependency-detection.ts`** - Archive and hierarchy dependency tracking
+
+### `/data` - Data Access Layer
+
+- **`posts.ts`** - Blog post queries and operations
+- **`draft.ts`** - Draft mode and preview functionality
+- **`globals.ts`** - Global settings access
+- **`user.ts`** - User authentication helpers
+
+### `/ai` - Mastra AI Integration
+
+- **`mastra.ts`** - AI service configuration
+- **`agents/`** - AI agent definitions
+- **`tools/`** - Custom AI tools
+
+### `/sitemaps` - SEO & Discovery
+
+- **`generate.ts`** - Dynamic sitemap generation
+- **`config.ts`** - Sitemap configuration
+
+### `/redirects` - URL Management
+
+- **`legacy.ts`** - Legacy URL redirect mapping
+- **`automatic.ts`** - System-generated redirects
+
+### Server Actions Pattern
+
+All lib modules export async functions marked with `"use server"`:
+
+```typescript
+// ✅ Correct: Server action file
+"use server"
+
+export async function getPageBySlug(slug: string) {
+  // Server-only logic
+}
+
+export async function updatePageContent(data: PageData) {
+  // Server-only logic
+}
+
+// ❌ Don't export utilities from server action files
+// export const formatDate = (date: Date) => { ... } // This breaks the server action
+```
+
+Utilities should live in `/utilities` instead of `/lib`.
+
+## 🎯 Cursor Rules
+
+This project includes comprehensive **Cursor Rules** that provide AI-powered development guidance directly in your Cursor editor. These rules ensure consistent code patterns, proper architecture, and adherence to best practices.
+
+### 📂 Available Rule Categories
+
+The `.cursor/rules/` folder contains organized development guidelines:
+
+#### **Smart Site Rules** (`smart-site/`)
+
+- **`adding-new-sections.mdc`** - Step-by-step guide for creating new website sections
+- **`payload-config.mdc`** - Payload CMS field and component mapping patterns
+- **`tailwind.mdc`** - Tailwind v4 configuration and best practices
+- **`adding-animations.mdc`** - GSAP animation implementation guide
+- **`converting-static-to-payload.mdc`** - Converting static components to CMS-powered
+- **`application-overview.mdc`** - High-level architecture understanding
+- **`html-structure.mdc`** - Semantic HTML layout patterns
+- **`screenshots.mdc`** - Converting designs/screenshots to components
+- **`styling-rich-text.mdc`** - Rich text field styling guidelines
+
+#### **Behavioral Rules** (`behaviour/`)
+
+- **`coding-rules.mdc`** - Code style, patterns, and conventions
+- **`architecture.mdc`** - Project architecture principles
+
+#### **Integration Rules** (`mastra/`, `architecture/`)
+
+- Mastra AI framework integration patterns
+- Proof-of-concept development guidelines
+
+### 🚀 Activating Cursor Rules
+
+#### **Automatic Activation** (Recommended)
+
+Cursor automatically detects and applies rules based on:
+
+- **File patterns** - Rules trigger when editing matching files
+- **Context awareness** - Rules activate based on your current task
+
+#### **Manual Triggering**
+
+1. **Open Command Palette**: `Cmd/Ctrl + Shift + P`
+2. **Search for**: "Rules: Apply Rule"
+3. **Select rule**: Choose specific rule to apply
+4. **Browse available**: Use "Rules: Show All Rules" to see all available guidance
+
+#### **Rule-Specific Triggers**
+
+- **Sections**: Work in `src/components/sections/` to trigger section creation rules
+- **Payload**: Edit config files to activate CMS integration guidance
+- **Animations**: Add GSAP imports to trigger animation rules
+- **Styling**: Edit CSS/Tailwind files for styling guidance
+
+### 💡 How Rules Enhance Development
+
+#### **Smart Code Suggestions**
+
+```tsx
+// When creating a new section, rules guide you through:
+// 1. ✅ Proper file structure (config.ts + Component.tsx)
+// 2. ✅ Payload field configuration
+// 3. ✅ Component type safety
+// 4. ✅ Design system compliance
+```
+
+#### **Architecture Enforcement**
+
+- **Consistent patterns** across all sections
+- **Proper separation** of CMS config and React components
+- **Type safety** with Payload-generated interfaces
+- **Performance optimization** with caching patterns
+
+#### **Onboarding Acceleration**
+
+- **New developers** get instant context about project patterns
+- **Design decisions** are documented and enforced
+- **Best practices** are automatically suggested
+
+### 🔧 Customizing Rules
+
+Rules are designed to be **project-specific** and can be modified:
+
+1. **Edit existing rules** in `.cursor/rules/`
+2. **Add new rules** for project-specific patterns
+3. **Adjust glob patterns** to target specific file types
+4. **Modify descriptions** to match your team's terminology
+
+### 📚 Rule Documentation Format
+
+Each rule file uses this structure:
+
+```markdown
+---
+description: Brief explanation of when this rule applies
+globs: **/*.tsx  # File patterns that trigger this rule
+alwaysApply: false
+---
+
+# Rule Content
+
+Detailed guidance and examples...
+```
+
+These rules transform Cursor into a **smart development assistant** that understands your project's specific architecture, patterns, and requirements.
+
+## ⚙️ Configuration
+
+### Wild Child Config (`src/wc.config.ts`)
+
+```typescript
+const wildChildConfig = {
+  themeToggle: false, // Enable dark/light mode toggle
+  gsap: true, // Enable GSAP animations
+  smoothScroll: true, // Enable smooth scrolling (requires GSAP)
+  i18n: false, // Enable internationalization
+  gsapDevTools: true, // Enable GSAP dev tools in development
+}
+```
+
+### Tailwind CSS v4 Configuration
+
+Configuration is handled through CSS files in `src/app/(frontend)/css/`:
+
+- **`globals.css`** - Entry point importing all styles
+- **`theme.css`** - Design system tokens and brand colors
+- **`base.css`** - Element-level base styles
+- **`typography.css`** - Typography system and variables
+- **`components.css`** - Complex reusable CSS classes
+- **`utilities.css`** - Custom utility classes
+
+### Payload CMS Configuration
+
+Core CMS settings in `src/payload/payload.config.ts`:
+
+- **Collections**: Pages, Posts, Services, Team, Media, Forms
+- **Globals**: Settings, Navigation, Footer
+- **Plugins**: SEO, Redirects, Form Builder, Search
+- **Admin**: Custom dashboard styling and user experience
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. **Connect Repository**
+   - Import project to Vercel
+   - Configure build settings (auto-detected)
+
+2. **Environment Variables**
+   - Copy all variables from `.env.local`
+   - Update `NEXT_PUBLIC_URL` to production domain
+   - Set `VERCEL_PROJECT_PRODUCTION_URL`
+
+3. **Database & Storage**
+   - Configure Vercel Postgres in dashboard
+   - Set up Vercel Blob for file storage
+   - Copy connection strings to environment variables
+
+4. **Advanced Settings**
+   - Enable **Function Regions** (Sydney for AU/NZ projects)
+   - Enable **Fluid Compute** for better performance
+   - Consider **Standard CPU** for paid plans
+
+### Other Platforms
+
+Smart Site can deploy to any Node.js hosting platform:
+
+- **Netlify**: Use `@netlify/plugin-nextjs`
+- **Railway**: Direct deployment with PostgreSQL addon
+- **DigitalOcean**: App Platform with managed PostgreSQL
+- **AWS**: Amplify with RDS or DocumentDB
+
+### Production Checklist
+
+- [ ] Environment variables configured
+- [ ] Database provisioned and connected
+- [ ] File storage configured
+- [ ] Email service configured (Resend recommended)
+- [ ] Domain configured with proper DNS
+- [ ] SSL certificate enabled
+- [ ] Admin user created
+- [ ] Content seeded or migrated
+
+---
+
+## 📖 Additional Resources
+
+- **[Payload CMS Documentation](https://payloadcms.com/docs)**
+- **[Next.js 15 Documentation](https://nextjs.org/docs)**
+- **[Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)**
+- **[GSAP Documentation](https://greensock.com/docs/)**
+- **[Mastra AI Documentation](https://mastra.ai/docs)**
+
+## 🤝 Contributing
+
+This is an internal tool for rapid website development. For questions or improvements, consult the development team.
+
+## 📄 License
+
+MIT License - See LICENSE file for details.

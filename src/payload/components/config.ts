@@ -1,15 +1,15 @@
 const components = {
-  Nav: "@/payload/components/nav",
-  actions: ["@/payload/components/actions"],
+  Nav: "@/payload/components/backend/nav",
+  actions: ["@/payload/components/backend/actions"],
   views: {
     dashboard: {
-      Component: "@/payload/components/dashboard#Dashboard",
+      Component: "@/payload/components/backend/dashboard#Dashboard",
     },
   },
-  beforeLogin: ["@/payload/components/before-login#BeforeLogin"],
+  beforeLogin: ["@/payload/components/backend/before-login#BeforeLogin"],
   graphics: {
-    Icon: "@/payload/components/logo#Icon",
-    Logo: "@/payload/components/logo#Logo",
+    Icon: "@/payload/components/backend/logo#Icon",
+    Logo: "@/payload/components/backend/logo#Logo",
   },
 }
 

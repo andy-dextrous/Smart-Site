@@ -1,4 +1,4 @@
-import RichText from "@/payload/components/rich-text"
+import RichText from "@/payload/components/frontend/rich-text"
 import React from "react"
 
 import { Width } from "../width"

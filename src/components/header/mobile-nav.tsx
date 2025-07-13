@@ -1,89 +1,59 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet"
-import { CMSLink } from "@/payload/components/cms-link"
-import type { Header as HeaderType } from "@/payload/payload-types"
-import {
-  FacebookIcon,
-  LinkedinIcon,
-  Menu,
-  SearchIcon,
-  TwitterIcon,
-  X,
-} from "lucide-react"
-import Image from "next/image"
+import { CMSLink } from "@/payload/components/frontend/cms-link"
+import { SocialLinks } from "@/payload/components/frontend/social-links"
+import type { Header as HeaderType, Setting } from "@/payload/payload-types"
 import Link from "next/link"
 import * as React from "react"
+import { Hamburger } from "./hamburger"
+import LogoPrimaryLight from "../logos/logo-light"
+import LogomarkOutline from "../logos/logomark-outline"
 
-export const MobileNav: React.FC<{ data: HeaderType }> = ({ data }) => {
+/*************************************************************************/
+/*  MOBILE NAVIGATION WITH SHEET AND CUSTOM HAMBURGER
+/*************************************************************************/
+
+export const MobileNavUpdated: React.FC<{ data: HeaderType; settings?: Setting }> = ({
+  data,
+  settings,
+}) => {
   const [open, setOpen] = React.useState(false)
   const navItems = data?.navItems || []
 
-  const handleLinkClick = () => {
+  function handleLinkClick() {
     setOpen(false)
+  }
+
+  function handleToggle() {
+    setOpen(!open)
   }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-accent/50 z-50 flex size-12 items-center justify-center rounded-full md:hidden"
-        >
-          <Menu className="h-6 w-6 transition-transform duration-200" />
-          <span className="sr-only">Open navigation menu</span>
-        </Button>
-      </SheetTrigger>
+      <Hamburger isOpen={open} onClick={handleToggle} />
       <SheetContent
         side="left"
-        className="border-primary/20 fixed inset-y-0 left-0 h-full w-[80%] border-r bg-white p-0"
+        className="bg-dark border-light-border fixed inset-y-0 left-0 z-[1000] h-full w-[80%] border-r p-0 lg:hidden"
       >
-        <div className="flex h-full flex-col">
-          <SheetHeader className="flex items-center justify-between border-b p-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-6 right-6 z-50"
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close navigation menu</span>
-            </Button>
-
-            <div className="flex items-center justify-between">
-              <Link href="/" aria-label="Logo" onClick={() => setOpen(false)}>
-                <Image
-                  src="/assets/logos/logo.svg"
-                  alt="Logo"
-                  width={100}
-                  height={100}
-                  className="h-auto w-auto transition-colors duration-300"
-                />
-              </Link>
-            </div>
-          </SheetHeader>
-
-          <div className="overflow-y-auto p-6">
-            <nav className="flex flex-col space-y-4">
+        <div className="relative flex h-full w-full flex-col overflow-hidden">
+          <div className="px-section-x py-section-y flex-1 overflow-y-auto">
+            <nav className="flex h-full flex-col space-y-6">
               <SheetTitle className="sr-only">Menu</SheetTitle>
-              <div className="flex flex-col gap-4">
+
+              <div className="flex flex-1 flex-col justify-center gap-6">
                 {navItems.map(({ item }, i: number) => {
                   if (item?.hasDropdown && item?.subItems && item?.subItems?.length > 0) {
                     return (
-                      <div key={i} className="space-y-3">
-                        <h3 className="text-primary text-lg font-semibold">
-                          {item.link?.label}
-                        </h3>
-                        <div className="flex flex-col space-y-2 pl-4">
+                      <div key={i} className="space-y-4">
+                        <h3 className="text-white">{item.link?.label}</h3>
+                        <div className="flex flex-col space-y-3 pl-4">
                           {item.subItems.map((childItem, j: number) => {
                             const child = childItem.child
                             if (
@@ -92,31 +62,28 @@ export const MobileNav: React.FC<{ data: HeaderType }> = ({ data }) => {
                               child.subItems.length > 0
                             ) {
                               return (
-                                <div key={j} className="space-y-2 py-1">
-                                  <h4 className="font-medium text-gray-800">
-                                    {child.link?.label}
-                                  </h4>
-                                  <div className="flex flex-col space-y-1 pl-3">
+                                <div key={j} className="space-y-2">
+                                  <h4 className="text-white/90">{child.link?.label}</h4>
+                                  <div className="flex flex-col space-y-2 pl-3">
                                     {child.subItems.map((subItem, k: number) => (
-                                      <div key={k} className="py-1">
-                                        <CMSLink
-                                          {...subItem.link}
-                                          className="hover:text-primary text-gray-700 transition-colors"
-                                          onClick={handleLinkClick}
-                                        >
-                                          {subItem.link?.label}
-                                        </CMSLink>
-                                      </div>
+                                      <CMSLink
+                                        key={k}
+                                        {...subItem.link}
+                                        className="text-white/70 transition-colors hover:text-white"
+                                        onClick={handleLinkClick}
+                                      >
+                                        {subItem.link?.label}
+                                      </CMSLink>
                                     ))}
                                   </div>
                                 </div>
                               )
                             }
                             return (
-                              <div key={j} className="py-1">
+                              <div key={j}>
                                 <CMSLink
                                   {...child.link}
-                                  className="hover:text-primary text-gray-700 transition-colors"
+                                  className="text-white/80 transition-colors hover:text-white"
                                   onClick={handleLinkClick}
                                 >
                                   {child.link?.label}
@@ -129,66 +96,35 @@ export const MobileNav: React.FC<{ data: HeaderType }> = ({ data }) => {
                     )
                   } else {
                     return (
-                      <div key={i}>
-                        <CMSLink
-                          {...item.link}
-                          className="hover:text-primary text-lg font-semibold text-gray-800 transition-colors"
-                          onClick={handleLinkClick}
-                        >
-                          {item.link?.label}
-                        </CMSLink>
-                      </div>
+                      <CMSLink
+                        key={i}
+                        {...item.link}
+                        className="!text-h6 font-light text-white transition-colors"
+                        onClick={handleLinkClick}
+                      >
+                        {item.link?.label}
+                      </CMSLink>
                     )
                   }
                 })}
               </div>
             </nav>
 
-            <div className="mt-8 w-full border-y border-gray-200 py-8">
-              <div className="flex items-center justify-center space-x-2">
-                <SearchIcon className="h-5 w-5 text-gray-500" />
-                <Link
-                  href="/search"
-                  className="hover:text-primary text-gray-700 transition-colors"
-                  onClick={() => setOpen(false)}
-                >
-                  Search
-                </Link>
-              </div>
+            <div className="absolute right-0 bottom-[-100px] h-[80vh] w-auto">
+              <LogomarkOutline className="h-auto w-full" />
             </div>
+          </div>
 
-            <div className="mt-8">
-              <div className="flex flex-col gap-4 py-6 text-gray-500">
-                <SheetDescription className="text-center text-sm">
-                  © {new Date().getFullYear()} Your Company. All rights reserved.
-                </SheetDescription>
-                <div className="flex justify-center gap-4">
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    <LinkedinIcon className="h-5 w-5" />
-                  </a>
-                  <a
-                    href="https://twitter.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    <TwitterIcon className="h-5 w-5" />
-                  </a>
-                  <a
-                    href="https://facebook.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    <FacebookIcon className="h-5 w-5" />
-                  </a>
-                </div>
-              </div>
+          <div className="border-t border-white/10 p-6">
+            <div className="flex flex-col gap-4 text-white/60">
+              <SheetDescription className="text-center text-sm text-white/60">
+                © {new Date().getFullYear()} smart-site. All rights reserved.
+              </SheetDescription>
+              <SocialLinks
+                socialLinks={settings?.social?.socialLinks || []}
+                variant="icon"
+                className="[&>a]:from-secondary-600 [&>a]:to-primary-500 justify-center [&>a]:bg-gradient-to-r [&>a]:bg-clip-text [&>a]:text-transparent [&>a]:transition-all [&>a]:hover:scale-110"
+              />
             </div>
           </div>
         </div>

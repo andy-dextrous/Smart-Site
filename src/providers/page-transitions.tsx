@@ -1,6 +1,6 @@
 "use client"
 
-import canUseDom from "@/utilities/canUseDOM"
+import canUseDom from "@/utilities/can-use-dom"
 import { usePathname } from "next/navigation"
 import React, { useEffect, useReducer, useRef, useState } from "react"
 
