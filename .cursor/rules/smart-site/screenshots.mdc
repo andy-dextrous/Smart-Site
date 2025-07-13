@@ -1,0 +1,20 @@
+---
+description: When shown a screenshot and asked to recreate it.
+globs:
+alwaysApply: false
+---
+In order to build a screenshot correctly, you need to understand how this website is put together.
+- Before building anything, make sure you study a few other sections inside src/components/sections. They will often demonstrate these important considerations:
+
+## Design System & Components Available
+
+This website is built using a strictly defined style system, as found in the app/(frontend)/css folder. All colors, sizing etc should come from here.
+- Typography styles are predefined here. Never add typography weights, sizes, line heights etc inline. The whole site must follow the design system.
+- Try not to use generic colors to match a screenshot design. Instead, use the brand colors inside [theme.css](mdc:src/app/(frontend)/css/theme.css). Be discerning about applying them in a tasteful, similar way to the screnshot. We want to convert the screenshot into a branded version for this website.
+- Before you build anything, check what packages are available in [package.json](mdc:package.json). There will be ShadCN components to use for many reusable elements like buttons, accordions. Always use these. Always see what is available first.
+- Never write icons as SVGs - lucide and react-icons are installed already. And also, double check in the components/icons folder to see if a branded version of what you want is available.
+- You can use the cn() function from inside src/utilities/ui.ts.
+- There is a full component library inside components/ui to be used for any shadcn-applicable components. Make sure to use them.
+- Always use the Next JS Image for images
+- You will see that this app uses Payload. It often has Payload fields coupled to components. For example, the cms-link component is used throughout the app to map Payload links to rendered links. There are several such components which should be used where necessary. Make sure when you study the other sections, you pay close attention to how config is generated and if specific components map to reusable config.
+

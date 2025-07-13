@@ -1,0 +1,38 @@
+---
+description: When you are asked to convert any component to integrate/source data with Payload CMS
+globs:
+alwaysApply: false
+---
+
+When you are asked to convert any component to integrate its data with Payload CMS, this guide tells you exactly how to do this the right way.
+
+## Before Building
+
+- Always start by helping the user to decide which properties they want created in Payload. The best thing to do is to look at the section itself to see what its purpose is and what a website user may want to control from the CMS-side.
+- The obvious ones will be for content - images, titles, descriptions, card content, accordion arrays etc. This is highly dependent on the design.
+- Less obvious, but worth considering, are layout options and color scheme changes. For instance, if the section is aligned to the left, might the user like the option of a center or right aligned version? Or might the user want some options for overlay color etc?
+- Your initial job is just to think this through and respond to the user with your thoughts and some options. The initial exchange should be about you clarifying what fields and controls they'd like to have.
+- Note that, if the initial request is quite detailed and the user clearly knows what they want, don't offer more ideas - just build what they are asking.
+- The rule is: if the user asks for CMS integration without much specificity, come back with a question about which properties they would like controlled by the CMS.
+
+## When Building
+
+- This repo is designed for reusabilty and standardisation.
+- Before deciding on schemas, go and study other section configs in the components/sections folder. Things like headings, sub headings, descriptions, buttons, button groups and more will all likely have been built before. It would be ideal to keep the naming and schema identical so that JSX is also interchangable.
+- Sometimes you will see that schemas and defaults are stored in their own fields for quick reuse. Prefer these if the right one is available.
+- Do your best to integrate the Payload CMS fields with the design to achieve the intended functionality.
+- Use the cn function from @/utilities/ui in order to create conditional layouts.
+- You'll want to add dummy content to the fields that you create so that they don't break for pages already built. If valid content has been added to the section already (not lorem ipsum), then make this content the default. You can find examples of field defaults inside payload/fields/defaults.
+- Keep your fields nicely organised using rows, groups and collapsibles. Use rows when you have several small fields that belong together. Primarily, use collapsibles when you want to group fields together by role/component.
+
+## Payload Component Conversions
+
+- When converting static sections to Payload-powered ones, there are several components inside src/payload/components/frontend that map directly to certain fields.
+- The CMS Link pairs with the link or link group field. You can convert static Buttons or Next Links to CMS Links to handle CMS-provided URLs. Keep all props and displays the same.
+- The Payload Media pairs with images or video fields.
+
+## Payload Types
+
+- Don't ever try to generate payload types yourself using npm run generate:types. This will be run automatically by Payload if you are patient. Disregard type errors that will be inevitably solved once Payload automatically regenerates types.
+- NEVER create types manually that should be created by Payload. Ignore these.
+- Realise that whenever you are asked to work on a repo, the dev server is ALREADY running. Don't try to start it. Nor try to build it.

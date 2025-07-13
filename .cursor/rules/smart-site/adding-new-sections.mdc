@@ -1,0 +1,86 @@
+---
+description: When asked to build a new section, strictly use these instructions.
+globs:
+alwaysApply: false
+---
+
+# New sections are added to this app in a very specific way.
+
+This repo is designed for a section-first approach to building websites. Every website has a <header />, <main /> and <footer /> that live inside the <body />. It is set up so that the user can spend 90% of their time just building sections from designs. Inside the <main> you will have stacked <section> elements that comprise the content of the website.
+
+Payload CMS handles the templating - organising and building pages. This is acheieved by first building sections and then adding theme support for them in two places.
+
+Below are some instructions for how sections are added to this website and CMS. They must be followed closely and in this order. Below that are rules to follow when engaging with the user to make sure you build the section they want.
+
+## How to Create New Sections
+
+1. Create a new folder inside `src/components/sections`. Give the folder the section name you want. Use kebab case for all folders.
+2. Every section block needs 2 files - a config file and a React component. The convention is to call them `config.ts` and `Component.tsx` however this is not **_technically_** necessary.
+**PAUSE HERE** If the user does not request a design, do not create one. If no screenshot is provided or if no UI is described for you to build, simply create an empty config and empty component with a section in it. Otherwise proceed to 3.
+3. After creating these files, start by modifying the config file. First, examine your Figma design and decide how much control the client would like to have over this section. **You want to decide on the fields that you will create which will allow the site user to modify designs**. This will likely include the obvious choices: a title (text field), content (rich-text), buttons (array block containing button attributes like url, text, variant). You may, however want to expose deeper levels of customisation that make components extremely flexible. For instance:
+
+- Layout Options (left-right, right-left, stacked etc)
+- Inclusion of optional elements (use a slider instead of card grid)
+- Styling (Dark mode and light mode variants)
+- Animations
+
+The choice is ours to create whatever editor experience best suits this client and their budget. 4. Build out the config file to represent the schema you want in your editor. Use the below as a guide.
+
+```ts
+import type { Block } from "payload"
+
+import {
+  FixedToolbarFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from "@payloadcms/richtext-lexical"
+
+export const SectionName: Block = {
+  slug: "new-section-name", // Use kebab case, must be unique across the site
+  admin: {
+    group: "Hero Sections", // Use the admin group if you want this section to be grouped with other types (eg all hereos together)
+  },
+  interfaceName: "NewSectionBlock", // This is used by Payload to create the types for this section. They will be imported into your component.
+  fields:[] Don't add fields yet if asked to create aen empty section- simply add an empty array.
+}
+```
+
+4. Once you have built your config file, expose it to Payload by importing it into `src/components/sections/config.ts`. This will automatically add it to Payload.
+5. You also need to import your section's Component into `src/components/sections/RenderSections.tsx`. This file maps slugs to React components.
+6. Now, you are ready to build the Component. Your interfaceName will now exist inside payload.types.ts (automatically generated). This tells your component exactly how to work with the available data. Here is a blank starter component.
+
+```tsx
+import { cn } from "@/utilities/ui"
+import RichText from "@/payload/components/rich-text"
+import Image from "next/image"
+import type { NewSectionBlock } from "@/payload/payload-types" // Note how this interface came from the config file.
+
+export const NewSectionComponent: React.FC<NewSectionBlock> = props => {
+  const { heading, content } = props // Notice that these are the exact fields we added to our fields array in the config file. We get what we ask for passed in as props.
+
+  return (
+    <section>
+      <div className="container flex gap-8">
+        <div className="flex flex-1 flex-col items-start gap-4">
+          <h2>{heading}</h2>
+          <div className="prose max-w-none">
+            <RichText data={content} />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+```
+
+## Rules For Making Sections
+
+1. Confirm with the user what they would like added as fields before making them. If a chat starts with a screenshot/photo, try to undertand it first before asking for more information.
+2. If a photo of the section is provided, try to infer as many fields from it as possible and also try to infer the design of the section to the best of your ability. Map the design to your component's JSX using the design system implemented in the Tailwind folder `src/(frontend)/css`.
+3. DO NOT create readme files or any kind of markdown/documentation for anything you do.
+4. DO NOT create types or interfaces yourself - Payload will do this. If it hasn't yet, be patient, it will work. Ignore type errors caused by missing type files. ONLY create the two files mentioned below. NEVER create your own types for the Payload Props. These must come from payload. DO NOT FIX LINT ERRORS. If there are errors, try running this command in the terminal `npm run generate:types` to fix the errors..
+5. When naming a section, use architectural/layout names that describe the style of layout it is. DO NOT name it after the content that is in an example. The idea is to create REUSABLE layouts. Keep names as generic as possible. ie, instead of service-card-grid - just call it card-grid.
+6. DO NOT add GSAP code unless asked to. Don't assume each section should have animation.
+7. Strictly follow the tailwin rules for handling typography. The design system in tailwind pre-handles MANY styles for spacing and typography. Don't add typography classes for styles that are established by the design system.
+8. Always look at `src/payload/collections/config.ts` to see what post types are in this repo. You want to use this knowledge to make decisions about whether to use a relationship/join field or not.
+

@@ -1,0 +1,40 @@
+---
+globs: apps/smart-site/**/*
+alwaysApply: false
+---
+
+# Overview
+
+This repo contains two primary modules:
+
+1. a typical Next JS project using Next 15+ and the App Router
+2. a Payload CMS admin dashboard that is used to provide all data to the front end
+
+## Payload Setup
+
+- Payload code is deliberately kept separate from the rest of the app, to keep admin and front end features separated.
+- The entirety of Payload's config, components, fields etc live inside the src/payload/... folder.
+- The admin dashboard routes are all inside src/app/(payload)/admin
+- Some utilities used by Payload live inside src/utilities
+
+### Collections
+
+- This is set up as a **website** for small to medium sized businesses.
+- Collections are designed to mirror what is expected in a website-building CMS (WordPress is the biggest inspiration)
+- To modify styles in the dashboard, use either the global.scss file imported into the (payload)/layout.tsx or the scss files imported into each payload component
+- Payload form builder is installed and used for forms on the site
+
+## NextJS Setup
+
+- The lib folder is used for server actions, including direct database queries, server logic
+- Server actions (marked with "use server" at the top) should not export utilities as well. Server action files can only export async functions. Theyt are alsmost exclusively used to interact with the database via the payload client.
+- providers for the app are stored inside the src/providers folder
+
+## Packages
+
+- This website uses Tailwind v4, GSAP, ScrollSmoother (optional), Next JS
+- It has both lucide-icons and react-icons installed
+- usehooks-ts is installed for many useful front end utilities
+- shadcn is set up with minimal components. If you need to create a component that has components best imported from a library (modals, selects, navigation menus etc), instead of writing your own, see if shadcn has what you need
+- swiper js react is used for ALL sliders
+- use [package.json](mdc:package.json) to identify what is available for use.

@@ -1,0 +1,35 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Workspace Architecture
+
+This is a monorepo dedicated to developing the wild-child website building system for Brisbane agency, Wild Creative. The repo is built using turborepo, Next JS, Payload CMS, GSAP and Tailwind v4. Wild Child is built to act as a central place for our developers to build and configure ready-made, starter components for any kind of website design. The idea behind it is to save huge amounts of time writing repetitive boilerplate code when setting up a new website. Since so many sections and components will use the same CMS fields for their data, the library serves to enable rapid scaffolding of a CMS-enabled set of page layouts when building a new website.
+
+## Features
+
+1. **Payload CMS**: Comes with a WordPress-inspired, pre-configured Payload CMS library.
+2. **Blocks Library**: A growing library of component, section and layout blocks which are ready to be styled and integrate perfectly with Payload.
+3. **Wild Child CLI**: CLI tool inspired by ShadCN which allows for easy cloning of desired blocks into a project
+4. **Website Starter**: A website starter project, ready for blocks installation and rapid development.
+
+## Structure
+
+## Apps
+
+Inside the /apps folder, there are 3 main folders you should know about.
+
+1. **Blocks Library**: The blocks library is the central repository for all installable components, sections and layouts. It contains a Next JS website, designed separately from the other Next sites, specifically to allow easy development of both component files and their associated Payload config files. The blocks library is also where we create the design system, based on Tailwind 4, that is used as teh basis for all designs.
+
+2. **Website Starter**: The website starter package is our starter package for any new website. It is designed to consume our implementation of Payload CMS as an extendable source of shared truth (inspired by a common WordPress backend).
+
+3. **Website Starter Standalone**: This is a clone of the website starter but it houses the Payload config inside its files without relying on an external package. It is effectively divorced from the wild-child repo from the moment of creation.
+
+## Packages
+
+The 2 main packages you need to understand are the CLI tool and the Payload CMS package.
+
+1. **CLI**: This is our CLI tool for installing new sections into pre-existing websites, straight from our blocks library site. It is heavily inspired by ShadCN and works by copying files directly into the consuming Next JS site as a folder with 2 editable files: a Component.tsx file and a config.ts file which contains the blocks field information required to import it into the site.
+
+2. **Payload**: This package contains our preferred set of defaults, custom CSS, fields and components for building our WordPress-inspired CMS, which will be uniform across our fleet of websites and version-controlled - allowing us to create updates, roll out new features and performance upgrades.

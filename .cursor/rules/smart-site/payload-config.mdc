@@ -1,0 +1,311 @@
+---
+description: Explains the reusable field-to-component mapping patterns used throughout Payload CMS sections. Use when building new sections, working with CMS field configurations, or need to understand how field functions like sectionIntro(), sectionCta(), button(), and link() map to their corresponding React components.
+globs:
+alwaysApply: false
+---
+# Payload Config Patterns: Reusable Field-to-Component Mapping
+
+This document explains the systematic approach used in this app for creating reusable Payload CMS field configurations that map directly to frontend React components. This pattern creates a consistent, maintainable design system where CMS fields have predictable frontend representations.
+
+## Core Philosophy
+
+The app uses a **field-first component architecture** where:
+
+1. **Reusable field functions** in `src/payload/fields/` define CMS schemas
+2. **Layout components** in `src/components/layout/` consume the field data
+3. **Section components** compose these together for complete UI sections
+4. **Default values** ensure consistent editor experience
+
+This creates a 1:1 mapping between CMS fields and frontend components, making the codebase predictable and maintainable.
+
+## Reusable Field Functions
+
+### Location: `src/payload/fields/`
+
+Each field function returns a Payload field configuration that can be customized with options:
+
+#### 1. `sectionIntro(options)` → `<SectionIntro />`
+- **Purpose**: Standard section heading + description pattern
+- **File**: `src/payload/fields/section-intro.ts`
+- **Component**: `src/components/layout/section-intro.tsx`
+- **Usage Pattern**:
+```ts
+// In section config
+sectionIntro({
+  collapsibleLabel: "Content",
+  headingDescription: "Use <span> tags for gradient text: 'Commercial, Operational <span>& Technology Services</span>'",
+  descriptionDescription: "Brief description of your services",
+})
+
+// Generates CMS fields:
+// - heading (text)
+// - description (richText)
+```
+
+- **Component Consumption**:
+```tsx
+// In React component
+<SectionIntro heading={heading} description={description} align="center" />
+```
+
+#### 2. `sectionCta(options)` → `<SectionCta />`
+- **Purpose**: Standard call-to-action with text + button
+- **File**: `src/payload/fields/section-cta.ts`
+- **Component**: `src/components/layout/section-cta.tsx`
+- **Usage Pattern**:
+```ts
+// In section config
+sectionCta({
+  collapsibleLabel: "Section CTA",
+  textDescription: "Text that appears before the call-to-action button",
+  buttonDescription: "Button configuration including style, size, and link destination",
+})
+
+// Generates CMS fields:
+// - text (text)
+// - button (group with variant, size, layout, icon, link)
+```
+
+#### 3. `button(options)` → Used with `<CMSLink />`
+- **Purpose**: Single button with all variants and link options
+- **File**: `src/payload/fields/buttons.ts`
+- **Frontend**: `src/payload/components/frontend/cms-link/index.tsx`
+- **Usage Pattern**:
+```ts
+// In section config
+button({
+  name: "ctaButton",
+  required: true,
+  defaultValue: someDefaultButton,
+})
+
+// Generates CMS fields:
+// - variant (select: default, dark, white, etc.)
+// - size (select: sm, lg, etc.)
+// - layout (select: default, full-width, etc.)
+// - icon (checkbox)
+// - link (group with type, reference, url, label, newTab)
+```
+
+#### 4. `buttonsGroup(options)` → Multiple `<CMSLink />` elements
+- **Purpose**: Array of buttons for sections needing multiple CTAs
+- **File**: `src/payload/fields/buttons.ts`
+- **Usage**: Similar to `button()` but creates an array field
+
+#### 5. `link(options)` → `<CMSLink />`
+- **Purpose**: Core link functionality (internal references or external URLs)
+- **File**: `src/payload/fields/link.ts`
+- **Component**: `src/payload/components/frontend/cms-link/index.tsx`
+- **Usage Pattern**:
+```ts
+// In section config
+link({
+  disableLabel: false, // Include label field
+})
+
+// Generates CMS fields:
+// - type (radio: reference vs custom)
+// - reference (relationship to pages/posts/services)
+// - url (text for custom URLs)
+// - label (text)
+// - newTab (checkbox)
+```
+
+#### 6. `content()` / `richContent()` / `heading()` → `<RichText />` / direct text
+- **Purpose**: Standard content fields
+- **File**: `src/payload/fields/content.ts`
+- **Component**: `src/payload/components/frontend/rich-text/index.tsx`
+
+## Component Mapping Patterns
+
+### Layout Components (`src/components/layout/`)
+
+These components are designed to consume field data directly:
+
+#### `<SectionIntro />`
+```tsx
+interface SectionIntroProps {
+  heading?: string           // From sectionIntro() field
+  description?: any          // Rich text from sectionIntro() field
+  align?: "center" | "start" // Layout customization
+  // + className overrides
+}
+```
+
+Key features:
+- Automatically handles `<span>` tag parsing for gradient text
+- GSAP animation integration
+- Responsive typography from design system
+
+#### `<SectionCta />`
+```tsx
+interface SectionCtaProps {
+  text?: string              // From sectionCta() field
+  button?: {                 // From sectionCta() field
+    variant?: ButtonProps["variant"]
+    size?: ButtonProps["size"]
+    // ... all button options
+    link?: LinkProps
+  }
+}
+```
+
+#### `<CMSLink />`
+```tsx
+type CMSLinkType = {
+  appearance?: "inline" | ButtonProps["variant"] // Render as link or button
+  type?: "custom" | "reference"                  // From link() field
+  reference?: { relationTo: string, value: any } // From link() field
+  url?: string                                   // From link() field
+  newTab?: boolean                              // From link() field
+  // + all button styling props
+}
+```
+
+Key features:
+- Handles internal routing via Next.js Link
+- Automatic button/link rendering based on appearance
+- Path mapping for different collection types
+
+## Default Values System
+
+### Location: `src/payload/fields/default-values/`
+
+Provides consistent editor experience and realistic preview data:
+
+```ts
+// Example: fullwidth-cta.ts
+export const fullwidthCtaDefault = {
+  heading: "Ready to Transform Your Business?",
+  description: "Let's discuss how our strategic solutions can drive your growth.",
+  colorScheme: "gradient",
+  textAlignment: "center",
+  button: {
+    variant: "white",
+    size: "lg",
+    link: {
+      type: "custom",
+      url: "/contact",
+      label: "Get Started Today",
+      newTab: false,
+    },
+  },
+}
+```
+
+## Button Variant System
+
+### Location: `src/utilities/button-variants.ts`
+
+Dynamically extracts available variants from the UI component:
+
+```ts
+export function getButtonVariantOptions(): ButtonVariantOptions {
+  const variants = buttonVariants.variants  // From shadcn button component
+
+  return {
+    variantOptions: Object.keys(variants.variant || {}).map(key => ({
+      label: formatVariantLabel(key),
+      value: key,
+    })),
+    // ... same for size and layout options
+  }
+}
+```
+
+This ensures CMS options stay in sync with actual component variants.
+
+## Implementation Workflow
+
+### Adding a New Reusable Field:
+
+1. **Create field function** in `src/payload/fields/new-field.ts`:
+```ts
+export const newField = (options: NewFieldOptions = {}): Field => {
+  return deepMerge(baseFieldConfig, options)
+}
+```
+
+2. **Create corresponding component** in `src/components/layout/new-field.tsx`:
+```tsx
+interface NewFieldProps {
+  // Props that match the field output exactly
+}
+
+export const NewField: React.FC<NewFieldProps> = ({ ...props }) => {
+  // Component logic
+}
+```
+
+3. **Add default values** in `src/payload/fields/default-values/new-field.ts`
+
+4. **Use in section configs**:
+```ts
+// In any section config
+fields: [
+  newField({
+    customOption: "value",
+    collapsibleLabel: "Custom Label",
+  }),
+]
+```
+
+### Using in Section Components:
+
+```tsx
+export const SectionComponent: React.FC<SectionBlock> = (props) => {
+  const { fieldData } = props // Automatically typed by Payload
+
+  return (
+    <section>
+      <NewField {...fieldData} />
+    </section>
+  )
+}
+```
+
+## Key Benefits
+
+1. **Consistency**: Same field = same UI across all sections
+2. **Type Safety**: Payload generates interfaces that match exactly
+3. **Maintainability**: Change field function = updates everywhere
+4. **Designer-Friendly**: Predictable patterns for design system
+5. **Developer-Friendly**: No component decisions needed - patterns are established
+6. **Content-Editor-Friendly**: Familiar interfaces with helpful descriptions
+
+## Anti-Patterns to Avoid
+
+❌ **DON'T** create custom field configs inline in sections
+❌ **DON'T** create components that don't map to reusable fields
+❌ **DON'T** hardcode button variants - use the variant system
+❌ **DON'T** create field functions without corresponding components
+❌ **DON'T** skip default values - editors need realistic previews
+
+✅ **DO** use existing field functions when possible
+✅ **DO** create reusable patterns for repeated UI elements
+✅ **DO** keep field names consistent across sections
+✅ **DO** provide helpful admin descriptions in field configs
+✅ **DO** use the deepMerge utility for field customization
+
+## File Reference Summary
+
+```
+src/
+├── payload/fields/
+│   ├── section-intro.ts      → <SectionIntro />
+│   ├── section-cta.ts        → <SectionCta />
+│   ├── buttons.ts            → <CMSLink /> (as button)
+│   ├── link.ts               → <CMSLink />
+│   ├── content.ts            → <RichText /> / direct text
+│   ├── image.ts              → <Media />
+│   └── default-values/       → CMS preview data
+├── components/
+│   ├── layout/               → Field-consuming components
+│   │   ├── section-intro.tsx
+│   │   └── section-cta.tsx
+│   └── sections/             → Complete section assemblies
+└── utilities/
+    └── button-variants.ts    → Dynamic variant extraction
+```
+
+This pattern creates a scalable, maintainable system where adding new sections is primarily a composition exercise rather than building new field/component relationships from scratch.

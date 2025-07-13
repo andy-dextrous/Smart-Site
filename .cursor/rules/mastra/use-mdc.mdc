@@ -1,0 +1,12 @@
+---
+description: If asked to do ANYTHING in a Mastra app
+alwaysApply: false
+---
+
+Remember that you have the Mastra MCP server available for docs. You must be careful not to make up your own logic if you don't understand the Mastra package fully. Always look for a Mastra doc, guide or example to explain how to do anything concerning:
+
+- agents
+- workflows
+- networks
+- RAG
+- vector databases
