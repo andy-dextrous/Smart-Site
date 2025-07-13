@@ -99,11 +99,47 @@ pnpm dev:next
 pnpm dev:fresh
 ```
 
-### 5. Initial Setup
+### 5. Database Seeding & Initial Setup
 
-1. **Access the admin**: Navigate to `http://localhost:3000/admin`
-2. **Create admin user**: Follow the setup wizard
-3. **Optional**: Run the seeder: `pnpm seed`
+> **🗃️ Important:** Before you start building, seed your database with sample content for the best development experience.
+
+#### **Automatic Seeding (Recommended)**
+
+```bash
+# Start fresh with a clean database and sample content
+pnpm dev:fresh
+
+# Or seed manually after starting the server
+pnpm seed
+```
+
+#### **Manual Seeding via Admin Panel**
+
+1. **Start the development server**: `pnpm dev`
+2. **Access the admin panel**: Navigate to `http://localhost:3000/admin`
+3. **Create your admin user**: Follow the setup wizard
+4. **Seed via API**: Make a POST request to `http://localhost:3000/api/seed`
+
+   ```bash
+   # Command line seeding
+   curl -X POST http://localhost:3000/api/seed
+   ```
+
+#### **What Gets Seeded**
+
+The seeding process creates realistic sample content including:
+
+- **Pages**: Homepage, About, Services, Contact with realistic content
+- **Posts**: Blog posts with proper categories and tags
+- **Services**: Sample service offerings with descriptions
+- **Media**: Sample images and documents
+- **Forms**: Contact forms and lead capture forms
+- **Navigation**: Main navigation and footer structures
+- **Users**: Admin user (if none exists)
+- **Templates**: Page templates and section configurations
+- **Categories**: Content categorization and taxonomies
+
+> **💡 Pro Tip:** The seeded content follows all design system patterns and provides excellent examples for building your own sections.
 
 ### 6. Available Scripts
 
@@ -133,6 +169,8 @@ pnpm generate:types   # Generate TypeScript types from Payload
 ### Architecture Philosophy
 
 Smart Site uses a **section-first approach** to website building, where every page is composed of reusable section blocks managed through Payload CMS. This enables rapid development and content management flexibility.
+
+> **🎯 Cursor AI Tip:** The cursor rule `smart-site/adding-new-sections` automates the entire section creation process - just tell your AI agent "create a new section" and it handles the rest!
 
 ### Key Technologies
 
@@ -174,6 +212,8 @@ src/
 └── types/                       # TypeScript type definitions
 ```
 
+> **🏗️ HTML Structure Tip:** Use the cursor rule `smart-site/html-structure` to understand how semantic HTML should be structured throughout the application.
+
 ## 🏗️ Building a Website
 
 ### Understanding the Section System
@@ -183,7 +223,11 @@ Smart Site is built around the concept of **sections** - reusable content blocks
 1. **Configuration** (`config.ts`) - Defines CMS fields and admin interface
 2. **Component** (`Component.tsx`) - React component that renders the section
 
+> **⚡ Quick Start:** Use the cursor rule `smart-site/adding-new-sections` - your AI agent will guide you through creating sections with proper patterns automatically!
+
 ### Creating a New Section
+
+> **🤖 AI-Powered Section Creation:** Just tell your AI agent "create a new section called hero-banner" and the `smart-site/adding-new-sections` rule will handle the entire process including proper field configuration and component setup.
 
 #### 1. Create Section Files
 
@@ -224,6 +268,8 @@ export const HeroBanner: Block = {
 }
 ```
 
+> **⚙️ Field Configuration Tip:** Use the cursor rule `smart-site/payload-config` to understand how reusable field functions like `sectionIntro()` and `sectionCta()` map to React components.
+
 **`src/components/sections/hero-banner/Component.tsx`**
 
 ```typescript
@@ -252,6 +298,8 @@ export const HeroBannerComponent: React.FC<HeroBannerBlock> = (props) => {
   )
 }
 ```
+
+> **🎨 Animation Tip:** Want to add GSAP animations? Use the cursor rule `smart-site/adding-animations` - your AI agent knows exactly how to implement animations following our standards.
 
 #### 2. Register the Section
 
@@ -294,6 +342,16 @@ Smart Site includes pre-built field configurations for common patterns:
 - **`link()`** - Internal/external link handling
 
 This ensures consistency across sections and reduces development time.
+
+> **🔧 Advanced Configuration:** The cursor rule `smart-site/payload-config` explains the complete field-to-component mapping system and how to create your own reusable patterns.
+
+### Converting Static Components to CMS-Powered
+
+> **🔄 Static to Dynamic:** Use the cursor rule `smart-site/converting-static-to-payload` when you need to convert existing static components to work with Payload CMS data.
+
+### Working with Screenshots and Designs
+
+> **📸 Design Implementation:** When recreating sections from screenshots or designs, use the cursor rule `smart-site/screenshots` - your AI agent will know how to properly implement our design system and component patterns.
 
 ## 🗺️ How Routing Works
 
@@ -415,6 +473,8 @@ Utilities should live in `/utilities` instead of `/lib`.
 
 This project includes comprehensive **Cursor Rules** that provide AI-powered development guidance directly in your Cursor editor. These rules ensure consistent code patterns, proper architecture, and adherence to best practices.
 
+> **🤖 AI-Powered Development:** All cursor rules are designed to work seamlessly with AI agents. Simply reference the appropriate rule name when asking your AI assistant to help with specific tasks!
+
 ### 📂 Available Rule Categories
 
 The `.cursor/rules/` folder contains organized development guidelines:
@@ -430,6 +490,8 @@ The `.cursor/rules/` folder contains organized development guidelines:
 - **`html-structure.mdc`** - Semantic HTML layout patterns
 - **`screenshots.mdc`** - Converting designs/screenshots to components
 - **`styling-rich-text.mdc`** - Rich text field styling guidelines
+
+> **✍️ Rich Text Styling:** Use the cursor rule `smart-site/styling-rich-text` when you need to apply custom styles to rich text content.
 
 #### **Behavioral Rules** (`behaviour/`)
 
@@ -591,7 +653,10 @@ Smart Site can deploy to any Node.js hosting platform:
 - [ ] Domain configured with proper DNS
 - [ ] SSL certificate enabled
 - [ ] Admin user created
-- [ ] Content seeded or migrated
+- [ ] **Content seeded or migrated**
+- [ ] **Database seeding API endpoint secured for production**
+
+> **🚀 Production Seeding:** Remember to seed your production database after deployment using the same `/api/seed` endpoint or by running `pnpm seed` in your production environment.
 
 ---
 
