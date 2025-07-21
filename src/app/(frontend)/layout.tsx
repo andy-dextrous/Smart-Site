@@ -32,7 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
         {gtmId && <link href="https://www.googletagmanager.com" rel="preconnect" />}
         {gaId && <link href="https://www.google-analytics.com" rel="preconnect" />}
-        <link rel="stylesheet" href="https://use.typekit.net/lth5ndr.css" />
+        <link rel="stylesheet" href="https://use.typekit.net/dhn4bxv.css" />
         {head && parse(head)}
       </head>
 

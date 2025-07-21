@@ -12,7 +12,6 @@ import type {
   Locale,
   BasePayload,
 } from "payload"
-import { getServerSideURL } from "@/utilities/get-url"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,6 +22,16 @@ const admin = {
   importMap: {
     baseDir: path.resolve(dirname),
   },
+  autoLogin:
+    process.env.NODE_ENV === "development" &&
+    process.env.PAYLOAD_ADMIN_EMAIL &&
+    process.env.PAYLOAD_ADMIN_PASSWORD
+      ? {
+          email: process.env.PAYLOAD_ADMIN_EMAIL,
+          password: process.env.PAYLOAD_ADMIN_PASSWORD,
+          prefillOnly: true,
+        }
+      : false,
   theme: "dark" as const,
   components,
   meta: {

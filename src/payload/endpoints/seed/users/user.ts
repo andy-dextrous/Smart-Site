@@ -5,8 +5,8 @@ export const seedUser = (): Omit<User, "updatedAt" | "id" | "createdAt"> => {
     name: "Andrew",
     lastName: "Scrivens",
     role: "admin",
-    email: "andrew@wildcreative.com.au",
-    password: "Xp7#mK9@nV4$qW8!",
+    email: process.env.PAYLOAD_ADMIN_EMAIL!,
+    password: process.env.PAYLOAD_ADMIN_PASSWORD!,
     username: "scrivo", // Simple alphanumeric username
     socialLinks: [],
     education: [],
