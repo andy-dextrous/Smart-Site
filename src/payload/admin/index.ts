@@ -32,7 +32,6 @@ const admin = {
           prefillOnly: true,
         }
       : false,
-  theme: "dark" as const,
   components,
   meta: {
     title: "Admin | smart site",

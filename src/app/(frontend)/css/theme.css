@@ -1,103 +1,111 @@
-/* Spacing - applies to padding, margin, width & height */
+@layer frontend-theme {
+  /* Spacing - applies to padding, margin, width & height */
 
-@theme {
-  --spacing-section-x: clamp(1rem, -0.3907rem + 6.9536vw, 6.25rem);
-  --spacing-section-y: clamp(3rem, 2.1391rem + 4.3046vw, 6.25rem);
-  --spacing-section-xs: clamp(1.6875rem, 1.243vw + 1.439rem, 2.5rem);
-  --spacing-section-sm: clamp(2.25rem, 2.294vw + 1.791rem, 3.75rem);
-  --spacing-section-md: clamp(3rem, 4.015vw + 2.197rem, 5.625rem);
-  --spacing-section-lg: clamp(4rem, 6.788vw + 2.642rem, 8.4375rem);
-  --spacing-section-xl: clamp(5.5rem, 9.272vw + 3.646rem, 12.5rem); /* 200px */
-  --spacing-section-xxl: clamp(7.0625rem, 18.164vw + 3.43rem, 18.9375rem);
+  @theme {
+    --spacing-section-x: clamp(1rem, -0.3907rem + 6.9536vw, 6.25rem);
+    --spacing-section-y: clamp(3rem, 2.1391rem + 4.3046vw, 6.25rem);
+    --spacing-section-xs: clamp(1.6875rem, 1.243vw + 1.439rem, 2.5rem);
+    --spacing-section-sm: clamp(2.25rem, 2.294vw + 1.791rem, 3.75rem);
+    --spacing-section-md: clamp(3rem, 4.015vw + 2.197rem, 5.625rem);
+    --spacing-section-lg: clamp(4rem, 6.788vw + 2.642rem, 8.4375rem);
+    --spacing-section-xl: clamp(5.5rem, 9.272vw + 3.646rem, 12.5rem); /* 200px */
+    --spacing-section-xxl: clamp(7.0625rem, 18.164vw + 3.43rem, 18.9375rem);
 
-  --spacing-logo: clamp(45px, 10vw, 60px);
-  --spacing-nav: clamp(50px, 10vh, 80px);
+    --spacing-logo: clamp(45px, 10vw, 60px);
+    --spacing-nav: clamp(50px, 10vh, 80px);
 
-  --spacing-content: clamp(0.9375rem, 0.7719rem + 0.8278vw, 1.5625rem);
-  --spacing-content-sm: clamp(0.625rem, 0.4594rem + 0.8278vw, 1.25rem);
-  --spacing-content-lg: clamp(1.875rem, 1.5439rem + 1.6556vw, 3.125rem);
+    --spacing-content: clamp(0.9375rem, 0.7719rem + 0.8278vw, 1.5625rem);
+    --spacing-content-sm: clamp(0.625rem, 0.4594rem + 0.8278vw, 1.25rem);
+    --spacing-content-lg: clamp(1.875rem, 1.5439rem + 1.6556vw, 3.125rem);
 
-  --spacing-container: clamp(19.375rem, -0.7906rem + 100.8278vw, 95.5rem);
-  --spacing-container-md: clamp(17.5rem, 0.1821rem + 86.5894vw, 82.875rem);
-  --spacing-container-sm: clamp(17.5rem, 5.447rem + 60.2649vw, 63rem);
-}
+    --spacing-container: clamp(19.375rem, -0.7906rem + 100.8278vw, 95.5rem);
+    --spacing-container-md: clamp(17.5rem, 0.1821rem + 86.5894vw, 82.875rem);
+    --spacing-container-sm: clamp(17.5rem, 5.447rem + 60.2649vw, 63rem);
+  }
 
-/* Custom Calcs */
+  /* Custom Calcs */
 
-/* This is the the offset padding to use to get a fullwidth element to
-imitate where the edges of the containers would be. */
+  /* This is the the offset padding to use to get a fullwidth element to
+  imitate where the edges of the containers would be. */
 
-@theme {
-  --spacing-container-md-offset: calc(
-    (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container)) / 2
-  );
+  @theme {
+    --spacing-container-md-offset: calc(
+      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container)) / 2
+    );
 
-  --spacing-container-md-offset: calc(
-    (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-md)) / 2
-  );
+    --spacing-container-md-offset: calc(
+      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-md)) / 2
+    );
 
-  --spacing-container-sm-offset: calc(
-    (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-sm)) / 2
-  );
+    --spacing-container-sm-offset: calc(
+      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-sm)) / 2
+    );
 
-  --spacing-first-section-nav-offset: calc(var(--spacing-section-y) + var(--spacing-nav));
-}
+    --spacing-first-section-nav-offset: calc(
+      var(--spacing-section-y) + var(--spacing-nav)
+    );
+  }
 
-/* Grid Lines */
-/* This is used to control the responsive grid widths in the design. */
+  /* Grid Lines */
+  /* This is used to control the responsive grid widths in the design. */
 
-@theme {
-  --spacing-grid-col-width: max(
-    var(--spacing-section-x),
-    clamp(1rem, 17.632vw + -7.463rem, 9.375rem)
-  );
-}
+  @theme {
+    --spacing-grid-col-width: max(
+      var(--spacing-section-x),
+      clamp(1rem, 17.632vw + -7.463rem, 9.375rem)
+    );
+  }
 
-/* Brand Color Shades - get from https://www.tailwindshades.com */
+  /* Brand Color Shades - get from https://www.tailwindshades.com */
 
-@theme {
-  --color-primary: oklch(50.49% 0.171 302.71);
-  --color-primary-50: oklch(92.71% 0.02428 306.95);
-  --color-primary-100: oklch(88.858% 0.03907 307.2);
-  --color-primary-200: oklch(76.74% 0.082 306.86);
-  --color-primary-300: oklch(65.11% 0.127 305.34);
-  --color-primary-400: oklch(57.25% 0.155 304.34);
-  --color-primary-500: oklch(57.734% 0.15374 304.17);
-  --color-primary-600: oklch(50.49% 0.17053 302.71);
+  @theme {
+    --color-primary: oklch(50.49% 0.171 302.71);
+    --color-primary-50: oklch(92.71% 0.02428 306.95);
+    --color-primary-100: oklch(88.858% 0.03907 307.2);
+    --color-primary-200: oklch(76.74% 0.082 306.86);
+    --color-primary-300: oklch(65.11% 0.127 305.34);
+    --color-primary-400: oklch(57.25% 0.155 304.34);
+    --color-primary-500: oklch(57.734% 0.15374 304.17);
+    --color-primary-600: oklch(50.49% 0.17053 302.71);
 
-  --color-secondary: oklch(47.642% 0.29956 274.94);
-  --color-secondary-50: oklch(92.323% 0.04273 298.82);
-  --color-secondary-100: oklch(87.316% 0.07112 297.48);
-  --color-secondary-200: oklch(77.222% 0.13094 295.67);
-  --color-secondary-300: oklch(59.2% 0.211 277.79);
-  --color-secondary-400: oklch(49.24% 0.281 269.8);
-  --color-secondary-500: oklch(47.64% 0.3 274.94);
-  --color-secondary-600: oklch(39.675% 0.24803 275.67);
-  --color-secondary-700: oklch(0.4683 0.2511 283.09);
+    --color-secondary: oklch(47.642% 0.29956 274.94);
+    --color-secondary-50: oklch(92.323% 0.04273 298.82);
+    --color-secondary-100: oklch(87.316% 0.07112 297.48);
+    --color-secondary-200: oklch(77.222% 0.13094 295.67);
+    --color-secondary-300: oklch(59.2% 0.211 277.79);
+    --color-secondary-400: oklch(49.24% 0.281 269.8);
+    --color-secondary-500: oklch(47.64% 0.3 274.94);
+    --color-secondary-600: oklch(39.675% 0.24803 275.67);
+    --color-secondary-700: oklch(0.4683 0.2511 283.09);
 
-  --color-neutral: oklch(96.23% 0.005 286.3);
+    --color-neutral: oklch(96.23% 0.005 286.3);
 
-  --color-dark: oklch(14.557% 0.00884 273.86);
-  --color-dark-50: oklch(96.23% 0.005 286.3);
-  --color-dark-100: oklch(96.23% 0.005 286.3);
-  --color-dark-600: oklch(33.41% 0.04 274.2);
-  --color-dark-700: oklch(29.75% 0.033 274.52);
-  --color-dark-800: oklch(25.96% 0.027 275.01);
-  --color-dark-900: oklch(22.097% 0.02176 276.465);
-  --color-dark-950: oklch(14.557% 0.00884 273.86);
-}
+    --color-dark: oklch(14.557% 0.00884 273.86);
+    --color-dark-50: oklch(96.23% 0.005 286.3);
+    --color-dark-100: oklch(96.23% 0.005 286.3);
+    --color-dark-600: oklch(33.41% 0.04 274.2);
+    --color-dark-700: oklch(29.75% 0.033 274.52);
+    --color-dark-800: oklch(25.96% 0.027 275.01);
+    --color-dark-900: oklch(22.097% 0.02176 276.465);
+    --color-dark-950: oklch(14.557% 0.00884 273.86);
+  }
 
-/* Role-based Colors */
+  /* Role-based Colors */
 
-@theme {
-  --color-dark-border: color-mix(in oklab, var(--color-dark) 7%, transparent);
-  --color-light-border: color-mix(in oklab, var(--color-white) 7%, transparent);
-  --color-form-light-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
-  --color-form-dark-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
-  --color-form-neutral-border: color-mix(in oklab, var(--color-neutral) 10%, transparent);
-  --color-form-transparent-border: color-mix(
-    in oklab,
-    var(--color-transparent) 7%,
-    transparent
-  );
+  @theme {
+    --color-dark-border: color-mix(in oklab, var(--color-dark) 7%, transparent);
+    --color-light-border: color-mix(in oklab, var(--color-white) 7%, transparent);
+    --color-form-light-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
+    --color-form-dark-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
+    --color-form-neutral-border: color-mix(
+      in oklab,
+      var(--color-neutral) 10%,
+      transparent
+    );
+    --color-form-transparent-border: color-mix(
+      in oklab,
+      var(--color-transparent) 7%,
+      transparent
+    );
+  }
 }

@@ -1,6 +1,7 @@
 import { Mastra } from "@mastra/core/mastra"
 import { PinoLogger } from "@mastra/loggers"
 import { postgresStore } from "./database"
+import { LibSQLStore } from "@mastra/libsql"
 
 /*************************************************************************/
 /*  SMART SITE AI CONFIGURATION
@@ -9,7 +10,9 @@ import { postgresStore } from "./database"
 export const mastra = new Mastra({
   agents: {},
   workflows: {},
-  storage: postgresStore,
+  storage: new LibSQLStore({
+    url: "file:./storage.db",
+  }),
   logger: new PinoLogger({
     name: "SmartSiteAI",
     level: "info",

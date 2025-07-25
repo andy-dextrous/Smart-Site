@@ -10,7 +10,7 @@ import { notFound } from "next/navigation"
 
 type Args = {
   params: Promise<{
-    slug?: string[]
+    uri?: string[]
   }>
   searchParams?: Promise<{
     preview?: string
@@ -25,11 +25,11 @@ export default async function Page({
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: Args) {
-  const { slug = [] } = await paramsPromise
+  const { uri = [] } = await paramsPromise
   const searchParams = await searchParamsPromise
   const isPreview = searchParams?.preview === "true"
 
-  const URI = routingEngine.slugToURI(slug)
+  const URI = routingEngine.slugToURI(uri)
 
   const routeResponse = isPreview
     ? await getDraftModeData(URI)
@@ -75,8 +75,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params: paramsPromise,
 }: Args): Promise<Metadata> {
-  const { slug = [] } = await paramsPromise
-  const URI = routingEngine.slugToURI(slug)
+  const { uri = [] } = await paramsPromise
+  const URI = routingEngine.slugToURI(uri)
   const route = await cache.getByURI(URI)
 
   return (

@@ -1,17 +1,18 @@
+
 @layer payload-default {
   .avatar {
     padding: 4px 8px;
     transition-property: border;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
-    border: 1px solid var(--theme-elevation-50);
-    background-color: var(--theme-elevation-50);
+    border: 1px solid var(--color-admin-50);
+    background-color: var(--color-admin-50);
     display: inline-flex;
     align-items: center;
-    border-radius: 999px !important;
+    border-radius: 50% !important;
     height: 50px;
     width: 50px;
-    border: 2px solid var(--color-base-750);
+    border: 2px solid var(--color-admin-750);
     cursor: pointer;
     overflow: hidden;
     position: relative;
@@ -22,48 +23,48 @@
       object-fit: cover;
       z-index: 1;
       &:hover {
-        border-color: var(--color-base-700);
+        border-color: var(--color-admin-700);
       }
     }
 
     &__greeting,
     &__chevron {
-      color: var(--theme-elevation-300);
+      color: var(--color-admin-300);
     }
 
     &__username {
-      color: var(--theme-elevation-700);
+      color: var(--color-admin-700);
       font-weight: 600;
     }
 
     &:hover {
-      background-color: var(--theme-elevation-100);
-      border-color: var(--theme-elevation-100);
+      background-color: var(--color-admin-100);
+      border-color: var(--color-admin-100);
     }
   }
 
   .graphic-account {
     &__bg {
-      fill: var(--theme-elevation-50);
-      stroke: var(--theme-elevation-300);
+      fill: var(--color-admin-50);
+      stroke: var(--color-admin-300);
       stroke-width: 1px;
     }
 
     &__head,
     &__body {
-      fill: var(--theme-elevation-300);
+      fill: var(--color-admin-300);
     }
 
     &:hover:not(.graphic-account--active) {
       .graphic-account {
         &__bg {
-          fill: var(--theme-elevation-50);
-          stroke: var(--theme-elevation-300);
+          fill: var(--color-admin-50);
+          stroke: var(--color-admin-300);
         }
 
         &__head,
         &__body {
-          fill: var(--theme-elevation-300);
+          fill: var(--color-admin-300);
         }
       }
     }

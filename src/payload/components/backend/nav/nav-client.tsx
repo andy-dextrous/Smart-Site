@@ -25,7 +25,7 @@ type Props = {
 const omittedEntities = ["search"]
 
 /*******************************************************/
-/*  Items to omit from the nav
+/*  Nav Client Component
 /*******************************************************/
 
 export const NavClient: FC<Props> = ({ groups, unreadFormSubmissionsCount }) => {
@@ -43,7 +43,7 @@ export const NavClient: FC<Props> = ({ groups, unreadFormSubmissionsCount }) => 
     <Fragment>
       {groups.map(({ entities }, key) => {
         return (
-          <div key={key} className="nav__group">
+          <div key={key} className="nav-group">
             {entities
               .filter(({ slug }) => !omittedEntities.includes(slug))
               .map(({ slug, type, label }, i) => {
@@ -73,39 +73,33 @@ export const NavClient: FC<Props> = ({ groups, unreadFormSubmissionsCount }) => 
 
                 const Icon = getNavIcon(slug)
 
+                const navItemClasses = ["nav-item"]
+                if (activeCollection) navItemClasses.push("nav-item--active")
+
+                const iconClasses = ["icon"]
+                if (activeCollection) iconClasses.push("icon--active")
+
+                const labelClasses = ["label"]
+                if (activeCollection) labelClasses.push("label--active")
+
                 return (
                   <LinkElement
-                    className={[`${baseClass}__link`, activeCollection && `active`]
-                      .filter(Boolean)
-                      .join(" ")}
+                    className={navItemClasses.join(" ")}
                     href={href}
                     id={id}
                     key={i}
                     prefetch={false}
                   >
-                    {activeCollection && (
-                      <div className={`${baseClass}__link-indicator`} />
-                    )}
-                    {Icon && (
-                      <Icon
-                        className={[
-                          `${baseClass}__icon`,
-                          activeCollection && "active",
-                        ].join(" ")}
-                      />
-                    )}
-                    <span
-                      className={[
-                        `${baseClass}__link-label`,
-                        activeCollection && "active",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
+                    {activeCollection && <div className="nav-active-indicator" />}
+                    {Icon && <Icon className={iconClasses.join(" ")} />}
+                    <span className={labelClasses.join(" ")}>
                       {getTranslation(label, i18n)}
                     </span>
                     {slug === "form-submissions" && unreadFormSubmissionsCount > 0 && (
-                      <NotificationBadge count={unreadFormSubmissionsCount} />
+                      <NotificationBadge
+                        count={unreadFormSubmissionsCount}
+                        className="nav-badge-container"
+                      />
                     )}
                   </LinkElement>
                 )

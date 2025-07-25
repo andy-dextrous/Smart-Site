@@ -1,13 +1,14 @@
+
 @layer payload-default {
   .dashboard {
     --cols: 4;
     width: 100%;
-    padding: var(--gutter-h);
+    padding: var(--gutter-h, 1rem);
 
     &__wrap {
       display: flex;
       flex-direction: column;
-      gap: calc(var(--base) * 3);
+      gap: calc(var(--base, 1rem) * 3);
     }
 
     &__group {
@@ -19,7 +20,7 @@
     &__label {
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--wild-child-indigo-light);
+      color: var(--color-admin-accent);
       margin: 0;
       text-transform: uppercase;
       letter-spacing: 0.75px;
@@ -28,7 +29,7 @@
     &__card-list {
       display: grid;
       grid-template-columns: repeat(var(--cols), 1fr);
-      gap: calc(var(--base) * 1);
+      gap: var(--base, 1rem);
       list-style: none;
       padding: 0;
       margin: 0;

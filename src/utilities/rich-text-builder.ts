@@ -391,7 +391,7 @@ export function calloutBox(
   buttonUrl: string,
   options?: { newTab?: boolean }
 ) {
-  return createRichText([
+  return [
     heading(title, { tag: "h3" }),
     paragraph(description),
     paragraph(
@@ -399,7 +399,7 @@ export function calloutBox(
         { type: "link", text: buttonText, url: buttonUrl, newTab: options?.newTab },
       ])
     ),
-  ])
+  ]
 }
 
 /*************************************************************************/

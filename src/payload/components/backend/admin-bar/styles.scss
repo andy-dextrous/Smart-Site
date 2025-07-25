@@ -104,18 +104,52 @@
     }
   }
 
+  &__dropdown-list {
+    background-color: #202023 !important;
+    border: 1px solid #505056;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    min-width: 12rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 9999999 !important;
+    position: relative;
+  }
+
   &__dropdown-content {
-    border: unset;
-    background: #18181a !important;
-    z-index: 99999999;
-    &--user {
-      margin-top: 0.25rem;
-      min-width: 200px;
+    background-color: #202023 !important;
+    border: 1px solid #505056 !important;
+    border-radius: 0.25rem !important;
+    padding: 0.25rem !important;
+    min-width: 12rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    z-index: 9999999 !important;
+  }
+
+  &__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 14px;
+    color: #ebebed;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #37373c;
+      color: #f8f8f9;
     }
   }
 
+  &__separator {
+    height: 1px;
+    background-color: #505056;
+    margin: 0.25rem 0;
+  }
+
   &__user-container {
-    border-bottom: 1px solid #374151;
+    border-bottom: 1px solid #505056;
     padding: 1rem;
   }
 
@@ -133,7 +167,7 @@
     justify-content: center;
     overflow: hidden;
     border-radius: 9999px;
-    background-color: #6b7280;
+    background-color: #81818b;
 
     &--small {
       height: 1.5rem;
@@ -143,7 +177,7 @@
       justify-content: center;
       overflow: hidden;
       border-radius: 9999px;
-      background-color: #6b7280;
+      background-color: #81818b;
     }
   }
 
@@ -155,7 +189,7 @@
 
   &__user-text-link {
     font-size: 0.875rem;
-    color: #8190ff;
+    color: #4f37fb;
   }
 
   &__menu-item {
@@ -209,11 +243,11 @@
   }
 
   &__toaster-success-icon {
-    color: #8190ff;
+    color: #4f37fb;
   }
 
   &__toaster-error-icon {
-    color: #ff4500;
+    color: #dc2626;
   }
 }
 

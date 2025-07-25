@@ -30,6 +30,7 @@ const nextConfig = {
       },
     ],
   },
+  devIndicators: false,
   reactStrictMode: true,
   redirects,
   sassOptions: {
@@ -53,6 +54,7 @@ const nextConfig = {
 
     return config
   },
+  serverExternalPackages: ["@mastra/*"],
 } as NextConfig
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

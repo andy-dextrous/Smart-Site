@@ -1,6 +1,6 @@
 /* Base Styles are for element-level styles that are not part of a component */
 
-@layer base {
+@layer frontend-base-custom {
   * {
     @apply border-border selection:bg-primary selection:text-white;
   }

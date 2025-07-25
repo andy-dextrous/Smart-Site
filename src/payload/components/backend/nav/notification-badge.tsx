@@ -1,6 +1,7 @@
 "use client"
 
 import { FC } from "react"
+import "./styles.scss"
 
 type Props = {
   count: number
@@ -16,9 +17,12 @@ export const NotificationBadge: FC<Props> = ({ count, className = "" }) => {
     return null
   }
 
+  const classes = ["notification-badge"]
+  if (className) classes.push(className)
+
   return (
     <div
-      className={`notification-badge inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white ${className}`}
+      className={classes.join(" ")}
       title={`${count} unread form submission${count === 1 ? "" : "s"}`}
     >
       {count > 99 ? "99+" : count}

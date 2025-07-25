@@ -5,7 +5,7 @@ import Link from "next/link"
 export default async function Actions() {
   return (
     <Link href="/">
-      <Button variant="icon" size="lg">
+      <Button variant="ghost" size="icon">
         <HiOutlineExternalLink />
       </Button>
     </Link>

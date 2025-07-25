@@ -1,18 +1,27 @@
-/* Tailwind Core */
-@import "tailwindcss";
+/* CSS Layers Declaration */
+@layer frontend-theme, frontend-base, frontend-base-custom, frontend-components, frontend-utilities;
+
+/* Tailwind Core with Frontend Layer */
+@import "tailwindcss/theme.css" layer(frontend-theme);
+@import "tailwindcss/preflight.css" layer(frontend-base);
+@import "tailwindcss/utilities.css" layer(frontend-utilities);
+
+/* Source exclusions */
 @source not "planning/**/*";
 @source not "demos/**/*";
+
+/* External Plugins */
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
 /* ShadCN UI */
-@import "./ui.css";
+@import "./ui.css" layer(frontend-components);
 
-/* Custom Theme */
-@import "./theme.css";
+/* Custom Frontend Theme */
+@import "./theme.css" layer(frontend-theme);
 
-/* Tailwind Layers */
-@import "./base.css";
-@import "./components.css";
+/* Frontend Custom Layers */
+@import "./base.css" layer(frontend-base-custom);
+@import "./components.css" layer(frontend-components);
 @import "./utilities.css";
-@import "./typography.css";
+@import "./typography.css" layer(frontend-components);

@@ -9,7 +9,7 @@ export function seoFields(options: { seoSchemaType?: string } = {}): Field[] {
   return [
     {
       name: "meta",
-      label: "SEO Metadata",
+      label: false,
       type: "group",
       fields: [
         {

@@ -1,5 +1,6 @@
+
 .routing-grid-wrapper {
-  margin-top: 4rem;
+  margin-top: 3rem;
 
   .row__fields {
     display: grid !important;
@@ -9,9 +10,9 @@
 
     // Each group field (collection) becomes a grid item
     .group-field {
-      border: 1px solid var(--theme-elevation-100);
+      border: 1px solid var(--color-admin-100);
       border-radius: 6px;
-      background: var(--theme-bg);
+      background: var(--color-admin-900);
       padding: 0;
       margin: 0;
 
@@ -19,8 +20,8 @@
         height: 100%;
 
         .group-field__header {
-          background: var(--theme-elevation-50);
-          border-bottom: 1px solid var(--theme-elevation-100);
+          background: var(--color-admin-50);
+          border-bottom: 1px solid var(--color-admin-100);
           padding: 1rem;
           margin-bottom: 0;
           border-top-left-radius: 6px;
@@ -50,7 +51,7 @@
   }
 
   // Responsive design
-  @media (max-width: 1200px) {
+  @media (max-width: 1280px) {
     .row__fields {
       grid-template-columns: repeat(2, 1fr);
       gap: 1.5rem;

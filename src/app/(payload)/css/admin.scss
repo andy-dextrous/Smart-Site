@@ -1,0 +1,226 @@
+@import "~@payloadcms/ui/scss";
+
+// Root SCSS file for Payload admin interface
+// This replaces all Tailwind dependencies
+
+// No variables import needed - using CSS custom properties directly
+
+/*************************************************************************/
+/*  BASE ELEMENT STYLES
+/*************************************************************************/
+
+a {
+  text-decoration: none;
+}
+
+/*************************************************************************/
+/*  IMPORT CONVERTED GLOBAL STYLES
+/*************************************************************************/
+
+@media (max-width: 1200px) {
+  .upload__dropzoneContent__buttons {
+    flex-direction: column;
+  }
+}
+
+.app-header__content {
+  display: none;
+}
+
+.step-nav {
+  &__home {
+    height: auto;
+    min-height: 50px;
+    width: 100%;
+    min-width: 135px;
+  }
+
+  span {
+    overflow: visible;
+    text-overflow: unset;
+  }
+}
+
+#nav-toggler {
+  display: none;
+}
+
+.template-default {
+  background: linear-gradient(
+    90deg,
+    var(--color-admin-900) 0%,
+    var(--color-admin-850) 100%
+  );
+  height: 100%;
+  min-height: calc(100vh - var(--spacing-nav));
+  display: flex;
+
+  .template-default__wrap {
+    padding-top: var(--spacing-admin-section-y);
+    background-color: transparent;
+  }
+}
+
+.editor-container {
+  background-color: var(--color-admin-850);
+  border-color: var(--color-admin-800);
+}
+
+.card .btn {
+  background-color: var(--color-admin-850);
+  color: var(--color-admin-100);
+}
+
+.card .card__title {
+  color: var(--color-admin-100);
+  z-index: 10;
+}
+
+#field-sections {
+  .blocks-field__block-pill {
+    background-color: var(--color-admin-accent);
+  }
+
+  .blocks-field__block-number {
+    display: none;
+  }
+
+  .blocks-field__fields .collapsible-field__row-label-wrap span {
+    background-color: var(--color-admin-800);
+    color: var(--color-admin-150);
+    border-radius: 3px;
+    padding-inline: 5px;
+    padding-block: 1px;
+    font-size: 12px;
+    height: unset;
+    min-height: unset;
+  }
+
+  .blocks-field__header-actions button {
+    color: var(--color-admin-350);
+  }
+
+  .array-field__header-actions button {
+    color: var(--color-admin-350);
+  }
+}
+
+#field-breadcrumbs {
+  display: none;
+}
+
+.checkbox-input {
+  &__input {
+    background-color: var(--color-admin-800);
+    border-color: var(--color-admin-700);
+  }
+}
+
+.btn--style-primary,
+.popup-button,
+.btn--icon-style-without-border:not(
+  .status__action,
+  .lock-button,
+  .card__click,
+  .preview-btn,
+  .upload__createNewToggler,
+  .upload__listToggler,
+  .btn--style-secondary,
+  .relationship-add-new__add-button
+) {
+  --bg-color: #{var(--color-admin-accent)};
+  --color: #{var(--color-admin-0)};
+  --hover-color: #{var(--color-admin-0)};
+  --hover-bg: #{var(--color-admin-accent-light)};
+  border-color: var(--color-admin-accent);
+}
+
+.upload__createNewToggler,
+.upload__listToggler {
+  --bg-color: #{var(--color-admin-accent-light)};
+  --color: #{var(--color-admin-0)};
+  --hover-color: #{var(--color-admin-0)};
+  --hover-bg: #{var(--color-admin-accent-light)};
+  border-color: var(--color-admin-accent-light);
+}
+
+.card {
+  border-color: var(--color-admin-800);
+  align-items: center;
+  border-radius: 10px;
+  border-width: 1px;
+  overflow: hidden;
+
+  &__title {
+    color: var(--color-admin-300);
+    font-size: base(0.73);
+    font-weight: 600;
+  }
+
+  &.btn {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  &:hover {
+    border-color: var(--color-admin-700);
+  }
+}
+
+.confirmation-modal__controls {
+  justify-content: stretch;
+
+  button {
+    flex: 1;
+  }
+}
+
+.login {
+  margin-right: 0;
+  margin-left: auto;
+  width: 50%;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+[data-theme="light"] {
+  .nav {
+    background-color: var(--color-admin-850);
+
+    &__link {
+      color: var(--color-admin-0);
+
+      &:hover {
+        background-color: var(--color-admin-800);
+      }
+    }
+
+    &-toggler .hamburger {
+      background-color: var(--color-admin-850);
+      border-color: var(--color-admin-800);
+
+      svg path {
+        stroke: var(--color-admin-0) !important;
+      }
+    }
+  }
+
+  .document-fields__sidebar-wrap,
+  .doc-controls {
+    background-color: var(--color-admin-50);
+  }
+
+  .icon--logout {
+    color: var(--color-admin-0);
+  }
+}
+
+[id^="field-navItems__"][id$="__item__subItems"] {
+  padding-left: 2rem;
+}
+
+[id^="field-navItems__"][id$="__item__subItems__0__child__subItems"] {
+  padding-left: 2rem;
+}

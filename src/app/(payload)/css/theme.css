@@ -1,0 +1,454 @@
+/*
+/*  ADMIN COLOR PALETTE
+*/
+
+@theme {
+  --theme-border-color: var(--theme-elevation-150);
+
+  --color-admin-0: #ffffff;
+  --color-admin-50: #f8f8f9;
+  --color-admin-100: #ebebed;
+  --color-admin-150: #dedee0;
+  --color-admin-200: #d1d1d4;
+  --color-admin-250: #c3c3c8;
+  --color-admin-300: #b6b6bc;
+  --color-admin-350: #a9a9af;
+  --color-admin-400: #9c9ca3;
+  --color-admin-450: #8e8e97;
+  --color-admin-500: #81818b;
+  --color-admin-550: #74747e;
+  --color-admin-600: #686871;
+  --color-admin-650: #5c5c63;
+  --color-admin-700: #505056;
+  --color-admin-750: #434349;
+  --color-admin-800: #37373c;
+  --color-admin-850: #202023;
+  --color-admin-900: #18181a;
+  --color-admin-950: #0f0f0f;
+  --color-admin-1000: #0c0c0c;
+
+  --color-admin-accent: #4f37fb;
+  --color-admin-accent-light: #8373fc;
+  --color-admin-accent-lightest: #b8affd;
+
+  --color-admin-error: #dc2626;
+  --color-admin-success: #16a34a;
+  --color-admin-warning: #d97706;
+}
+
+/*
+/*  LAYOUT & SPACING
+*/
+
+@theme {
+  --spacing-admin-nav-width: 240px;
+  --spacing-nav: 60px;
+  --spacing-nav-side: 70px;
+  --spacing-nav-side-half: calc(var(--spacing-nav-side) / 2);
+  --spacing-admin-section-y: 4rem;
+  --spacing-sidebar-nav-y: 6rem;
+
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+
+/*
+/*  TRANSITIONS & EFFECTS
+*/
+
+@theme {
+  --transition-duration: 150ms;
+  --transition-duration-slow: 300ms;
+
+  --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  --animation-duration: 150ms;
+  --animation-easing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+/*  SHADCN/UI SEMANTIC MAPPINGS
+*/
+
+@theme {
+  --color-background: var(--color-admin-900);
+  --color-foreground: var(--color-admin-50);
+  --color-primary: var(--color-admin-accent);
+  --color-primary-foreground: var(--color-admin-0);
+  --color-secondary: var(--color-admin-800);
+  --color-secondary-foreground: var(--color-admin-100);
+  --color-card: var(--color-admin-850);
+  --color-card-foreground: var(--color-admin-100);
+  --color-border: var(--color-admin-800);
+  --color-muted: var(--color-admin-800);
+  --color-muted-foreground: var(--color-admin-400);
+  --color-destructive: var(--color-admin-error);
+  --color-destructive-foreground: var(--color-admin-0);
+  --color-popover: var(--color-admin-850);
+  --color-popover-foreground: var(--color-admin-100);
+  --color-ring: var(--color-admin-accent);
+}
+
+/*
+/*  SIDEBAR COMPONENT VARIABLES
+*/
+
+@theme {
+  --sidebar-background: var(--color-admin-950);
+  --sidebar-foreground: var(--color-admin-100);
+  --sidebar-primary: var(--color-admin-accent);
+  --sidebar-primary-foreground: var(--color-admin-0);
+  --sidebar-accent: var(--color-admin-800);
+  --sidebar-accent-foreground: var(--color-admin-100);
+  --sidebar-border: var(--color-admin-800);
+  --sidebar-ring: var(--color-admin-accent);
+}
+
+/*
+/*  LEGACY COMPATIBILITY MAPPINGS
+*/
+
+@theme {
+  --secondary: var(--color-admin-800);
+  --secondary-foreground: var(--color-admin-100);
+  --background: var(--color-admin-900);
+  --card: var(--color-admin-850);
+  --card-foreground: var(--color-admin-100);
+  --border: var(--color-admin-800);
+  --accent-foreground: var(--color-admin-100);
+  --destructive: var(--color-admin-error);
+  --destructive-foreground: var(--color-admin-0);
+  --primary: var(--color-admin-accent);
+  --primary-foreground: var(--color-admin-0);
+  --foreground: var(--color-admin-50);
+  --muted: var(--color-admin-800);
+  --muted-foreground: var(--color-admin-400);
+  --popover: var(--color-admin-850);
+  --popover-foreground: var(--color-admin-100);
+  --ring: var(--color-admin-accent);
+}
+
+/*
+/*  PAYLOAD DARK MODE OVERRIDES
+*/
+
+html {
+  --theme-elevation-0: var(--color-admin-900);
+  --theme-elevation-50: var(--color-admin-850);
+  --theme-elevation-100: var(--color-admin-800);
+  --theme-elevation-150: var(--color-admin-750);
+  --theme-elevation-200: var(--color-admin-700);
+  --theme-elevation-250: var(--color-admin-650);
+  --theme-elevation-300: var(--color-admin-600);
+  --theme-elevation-350: var(--color-admin-550);
+  --theme-elevation-400: var(--color-admin-450);
+  --theme-elevation-450: var(--color-admin-400);
+  --theme-elevation-550: var(--color-admin-350);
+  --theme-elevation-600: var(--color-admin-300);
+  --theme-elevation-650: var(--color-admin-250);
+  --theme-elevation-700: var(--color-admin-200);
+  --theme-elevation-750: var(--color-admin-150);
+  --theme-elevation-800: var(--color-admin-100);
+  --theme-elevation-850: var(--color-admin-50);
+  --theme-elevation-900: var(--color-admin-0);
+  --theme-elevation-950: var(--color-admin-0);
+  --theme-elevation-1000: var(--color-admin-0);
+}
+
+html[data-theme="dark"] {
+  /* Override Payload's theme elevation variables with our custom dark theme */
+  --theme-elevation-0: var(--color-admin-900);
+  --theme-elevation-50: var(--color-admin-850);
+  --theme-elevation-100: var(--color-admin-800);
+  --theme-elevation-150: var(--color-admin-750);
+  --theme-elevation-200: var(--color-admin-700);
+  --theme-elevation-250: var(--color-admin-650);
+  --theme-elevation-300: var(--color-admin-600);
+  --theme-elevation-350: var(--color-admin-550);
+  --theme-elevation-400: var(--color-admin-450);
+  --theme-elevation-450: var(--color-admin-400);
+  --theme-elevation-500: var(--color-admin-350);
+  --theme-elevation-550: var(--color-admin-300);
+  --theme-elevation-600: var(--color-admin-250);
+  --theme-elevation-650: var(--color-admin-200);
+  --theme-elevation-700: var(--color-admin-150);
+  --theme-elevation-750: var(--color-admin-100);
+  --theme-elevation-800: var(--color-admin-50);
+  --theme-elevation-850: var(--color-admin-0);
+  --theme-elevation-900: var(--color-admin-0);
+  --theme-elevation-950: var(--color-admin-0);
+  --theme-elevation-1000: var(--color-admin-0);
+
+  --theme-border-color: var(--theme-elevation-150);
+}
+
+/*
+/*  ANIMATION UTILITY CLASSES
+*/
+
+@layer utilities {
+  .animate-in {
+    animation-name: enter;
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+  }
+
+  .animate-out {
+    animation-name: exit;
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+  }
+
+  .fade-in-0 {
+    animation-name: fade-in;
+    --animation-opacity: 0;
+  }
+
+  .fade-out-0 {
+    animation-name: fade-out;
+    --animation-opacity: 0;
+  }
+
+  .zoom-in-95 {
+    animation-name: zoom-in;
+    --animation-scale: 0.95;
+  }
+
+  .zoom-out-95 {
+    animation-name: zoom-out;
+    --animation-scale: 0.95;
+  }
+
+  .slide-in-from-top-2 {
+    animation-name: slide-in-from-top;
+    --animation-translate-y: -0.5rem;
+  }
+
+  .slide-in-from-right-2 {
+    animation-name: slide-in-from-right;
+    --animation-translate-x: 0.5rem;
+  }
+
+  .slide-in-from-bottom-2 {
+    animation-name: slide-in-from-bottom;
+    --animation-translate-y: 0.5rem;
+  }
+
+  .slide-in-from-left-2 {
+    animation-name: slide-in-from-left;
+    --animation-translate-x: -0.5rem;
+  }
+
+  .slide-in-from-right {
+    animation-name: slide-in-from-right-full;
+  }
+
+  .slide-in-from-left {
+    animation-name: slide-in-from-left-full;
+  }
+
+  .slide-out-to-right {
+    animation-name: slide-out-to-right-full;
+  }
+
+  .slide-out-to-left {
+    animation-name: slide-out-to-left-full;
+  }
+
+  /*
+/*  ANIMATION KEYFRAMES
+*/
+
+  @keyframes enter {
+    from {
+      opacity: var(--animation-opacity, 1);
+      transform: translate3d(
+          var(--animation-translate-x, 0),
+          var(--animation-translate-y, 0),
+          0
+        )
+        scale3d(
+          var(--animation-scale, 1),
+          var(--animation-scale, 1),
+          var(--animation-scale, 1)
+        );
+    }
+  }
+
+  @keyframes exit {
+    to {
+      opacity: var(--animation-opacity, 1);
+      transform: translate3d(
+          var(--animation-translate-x, 0),
+          var(--animation-translate-y, 0),
+          0
+        )
+        scale3d(
+          var(--animation-scale, 1),
+          var(--animation-scale, 1),
+          var(--animation-scale, 1)
+        );
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes zoom-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes zoom-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  @keyframes slide-in-from-top {
+    from {
+      transform: translateY(-0.5rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(0.5rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-left {
+    from {
+      transform: translateX(-0.5rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-right {
+    from {
+      transform: translateX(0.5rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-from-right-full {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-from-left-full {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-out-to-right-full {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes slide-out-to-left-full {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* Data-state variants for animations */
+  .data-\[state\=open\]\:animate-in[data-state="open"] {
+    animation-name: enter;
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+  }
+
+  .data-\[state\=closed\]\:animate-out[data-state="closed"] {
+    animation-name: exit;
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+  }
+
+  .data-\[state\=open\]\:slide-in-from-right[data-state="open"] {
+    animation-name: slide-in-from-right-full;
+  }
+
+  .data-\[state\=closed\]\:slide-out-to-right[data-state="closed"] {
+    animation-name: slide-out-to-right-full;
+  }
+
+  .data-\[state\=open\]\:slide-in-from-left[data-state="open"] {
+    animation-name: slide-in-from-left-full;
+  }
+
+  .data-\[state\=closed\]\:slide-out-to-left[data-state="closed"] {
+    animation-name: slide-out-to-left-full;
+  }
+
+  .data-\[state\=open\]\:fade-in-0[data-state="open"] {
+    animation-name: fade-in;
+  }
+
+  .data-\[state\=closed\]\:fade-out-0[data-state="closed"] {
+    animation-name: fade-out;
+  }
+}

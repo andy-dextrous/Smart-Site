@@ -1,0 +1,6 @@
+---
+description: If asked to do ANYTHING using assistant-ui
+alwaysApply: false
+---
+
+Remember that you have the Assistant UI MCP server available for docs. You must be careful not to make up your own logic if you don't understand the Assistant UI package fully. Always look for a doc, guide or example to explain how to do anything concerning the front end chat layer of this app.

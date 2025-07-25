@@ -76,21 +76,29 @@ export async function getRelatedPosts({
     const categories = document.categories || []
 
     if (categories.length > 0) {
-      // Extract proper category IDs, handling both objects and raw IDs
+      // Extract proper category IDs, handling both UUIDs and integers
       const categoryIds = categories
         .map((cat: any) => {
           if (typeof cat === "number") return cat
           if (typeof cat === "string") {
+            // If it looks like a UUID, keep it as string; otherwise try to parse as number
+            if (cat.length > 10 && cat.includes("-")) {
+              return cat // UUID string
+            }
             const num = parseInt(cat, 10)
-            return isNaN(num) ? null : num
+            return isNaN(num) ? cat : num // Keep as string if not a number
           }
           if (cat && typeof cat === "object" && cat.id) {
+            // Handle object with id property
+            if (typeof cat.id === "string" && cat.id.length > 10 && cat.id.includes("-")) {
+              return cat.id // UUID string
+            }
             const num = typeof cat.id === "number" ? cat.id : parseInt(cat.id, 10)
-            return isNaN(num) ? null : num
+            return isNaN(num) ? cat.id : num
           }
           return null
         })
-        .filter((id): id is number => id !== null && !isNaN(id))
+        .filter((id): id is string | number => id !== null)
 
       // Only proceed if we have valid category IDs
       if (categoryIds.length > 0) {

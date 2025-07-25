@@ -2,7 +2,7 @@
   Components (for components that are too complex for utilities)
 */
 
-@layer components {
+@layer frontend-components {
   .gradient-border {
     border: 1px solid transparent;
     background: transparent;

@@ -1,3 +1,4 @@
+
 @layer payload-default {
   .before-login {
     position: absolute;
@@ -5,7 +6,7 @@
     left: 0;
     width: 50%;
     height: 100%;
-    border-right: 2px solid var(--theme-elevation-100);
+    border-right: 2px solid var(--color-admin-100);
 
     &__image-wrap {
       position: relative;

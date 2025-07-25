@@ -1,25 +1,25 @@
-/*
-  Typography
-*/
+@layer frontend-components {
+  /*
+    Typography
+  */
 
-/* https://www.fluid-type-scale.com/ */
+  /* https://www.fluid-type-scale.com/ */
 
-@theme {
-  --font-sans: "helvetica-neue-lt-pro", sans-serif;
-  --font-heading: "neue-haas-grotesk-display", sans-serif;
+  @theme {
+    --font-sans: "helvetica-neue-lt-pro", sans-serif;
+    --font-heading: "neue-haas-grotesk-display", sans-serif;
 
-  --text-h1: clamp(2.986rem, 1.5253rem + 7.3033vw, 8.5rem);
-  --text-h2: clamp(2.488rem, 1.4914rem + 4.9828vw, 6.25rem);
-  --text-h3: clamp(2.074rem, 1.7956rem + 1.3921vw, 3.125rem);
-  --text-h4: clamp(1.728rem, 1.6612rem + 0.3338vw, 1.98rem);
-  --text-h5: clamp(1.44rem, 5vw, 1.68rem);
-  --text-h6: clamp(1.2rem, 5vw, 1.414rem);
-  --text-base: clamp(1.0625rem, 1.0294rem + 0.1656vw, 1.1875rem);
-  --text-sm: clamp(0.833rem, 0.191vw + 0.837rem, 1rem);
-  --text-xs: clamp(0.694rem, 5vw, 0.875rem);
-}
+    --text-h1: clamp(2.986rem, 1.5253rem + 7.3033vw, 8.5rem);
+    --text-h2: clamp(2.488rem, 1.4914rem + 4.9828vw, 6.25rem);
+    --text-h3: clamp(2.074rem, 1.7956rem + 1.3921vw, 3.125rem);
+    --text-h4: clamp(1.728rem, 1.6612rem + 0.3338vw, 1.98rem);
+    --text-h5: clamp(1.44rem, 5vw, 1.68rem);
+    --text-h6: clamp(1.2rem, 5vw, 1.414rem);
+    --text-base: clamp(1.0625rem, 1.0294rem + 0.1656vw, 1.1875rem);
+    --text-sm: clamp(0.833rem, 0.191vw + 0.837rem, 1rem);
+    --text-xs: clamp(0.694rem, 5vw, 0.875rem);
+  }
 
-@layer components {
   .text-gradient {
     background: linear-gradient(
       to right,
@@ -41,11 +41,9 @@
     -webkit-background-clip: text;
     color: transparent;
   }
-}
 
-/* Sitewide Typography Customizations */
+  /* Sitewide Typography Customizations */
 
-@layer base {
   h1 {
     font-family: theme(fontFamily.heading);
     font-size: theme(fontSize.h1);
@@ -146,11 +144,9 @@
     line-height: theme(lineHeight.normal);
     letter-spacing: theme(letterSpacing.normal);
   }
-}
 
-/* Rich Text Typography Customizations */
+  /* Rich Text Typography Customizations */
 
-@layer base {
   .prose {
     --tw-prose-headings: theme(colors.dark-950);
 

@@ -90,6 +90,7 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
     admin: {
       position: "sidebar",
       readOnly: true,
+      hidden: true,
       description: "Auto-generated on publish based on slug and routing settings",
       ...(uriOverrides?.admin || {}),
     },

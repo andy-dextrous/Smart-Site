@@ -2,33 +2,34 @@ import { EntityToGroup, EntityType, groupNavItems } from "@payloadcms/ui/shared"
 import { ServerProps } from "payload"
 import { FC } from "react"
 
-import { Logout } from "@payloadcms/ui"
-import { RenderServerComponent } from "@payloadcms/ui/elements/RenderServerComponent"
-import { getNavPrefs } from "./getNavPrefs"
-import { NavClient } from "./index.client"
-import { NavHamburger } from "./NavHamburger"
-import { NavWrapper } from "./NavWrapper"
 import { getUnreadFormSubmissionsCount } from "@/lib/data/form-submissions"
+import { getNavPrefs } from "./getNavPrefs"
+import { NavClient } from "./nav-client"
+import { NavWrapper } from "./nav-wrapper"
+import "./styles.scss"
 
 export const baseClass = "nav"
 
-const Nav: FC<ServerProps> = async props => {
-  const {
-    documentSubViewType,
-    i18n,
-    locale,
-    params,
-    payload,
-    permissions,
-    searchParams,
-    user,
-    viewType,
-    visibleEntities,
-  } = props
+const Nav: FC<ServerProps> = async ({
+  documentSubViewType,
+  i18n,
+  locale,
+  params,
+  payload,
+  permissions,
+  searchParams,
+  user,
+  viewType,
+  visibleEntities,
+}) => {
+  if (true) return null
 
   if (!payload?.config || !permissions) {
     return null
   }
+
+  // TypeScript assertion - permissions is guaranteed non-null after the check above
+  const safePermissions = permissions!
 
   const {
     admin: {
@@ -59,47 +60,22 @@ const Nav: FC<ServerProps> = async props => {
             }) satisfies EntityToGroup
         ),
     ],
-    permissions,
+    safePermissions,
     i18n
   )
 
   const navPreferences = await getNavPrefs({ payload, user: user as any })
   const unreadFormSubmissionsCount = await getUnreadFormSubmissionsCount()
 
-  const LogoutComponent = RenderServerComponent({
-    clientProps: {
-      documentSubViewType,
-      viewType,
-    },
-    Component: logout?.Button,
-    Fallback: Logout,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
   return (
     <NavWrapper baseClass={baseClass}>
-      <nav className={`${baseClass}__wrap`}>
+      <nav>
         <NavClient
           groups={groups}
           navPreferences={navPreferences}
           unreadFormSubmissionsCount={unreadFormSubmissionsCount}
         />
-        <div className={`${baseClass}__controls`}>{LogoutComponent}</div>
       </nav>
-      <div className={`${baseClass}__header`}>
-        <div className={`${baseClass}__header-content`}>
-          <NavHamburger baseClass={baseClass} />
-        </div>
-      </div>
     </NavWrapper>
   )
 }

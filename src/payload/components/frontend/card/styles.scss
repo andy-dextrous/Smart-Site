@@ -1,70 +1,69 @@
+
 @layer payload-default {
-	.card {
-		border-radius: var(--style-radius-s);
-		border: 1px solid var(--color-base-800);
-		align-items: center;
-		padding: 36px 52px;
-		overflow: hidden;
-		border-radius: 0.5rem;
-		border: 1px solid var(--border);
-		background-color: var(--theme-elevation-50);
-		cursor: pointer;
+  .card {
+    border-radius: $radius-lg;
+    border: 1px solid $admin-800;
+    align-items: center;
+    padding: 36px 52px;
+    overflow: hidden;
+    background-color: $admin-850;
+    cursor: pointer;
 
-		&:hover {
-			border: 1px solid var(--theme-elevation-450);
-		}
+    &:hover {
+      border: 1px solid $admin-700;
+    }
 
-		&__image-container {
-			position: relative;
-			width: 100%;
-		}
+    &__image-container {
+      position: relative;
+      width: 100%;
+    }
 
-		&__empty-image {
-			width: 100%;
-			aspect-ratio: 16/9;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background-color: var(--muted);
-			color: var(--muted-foreground);
-		}
+    &__empty-image {
+      width: 100%;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: $admin-800;
+      color: $admin-400;
+    }
 
-		&__content {
-			padding: 1rem;
-		}
+    &__content {
+      padding: $spacing-md;
+    }
 
-		&__categories {
-			margin-bottom: 1rem;
-			font-size: 0.875rem;
-			text-transform: uppercase;
-		}
+    &__categories {
+      margin-bottom: $spacing-md;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
 
-		&__category {
-			display: inline;
-		}
+    &__category {
+      display: inline;
+    }
 
-		&__title {
-			font-size: base(0.8);
-			font-weight: 600;
-			color: var(--theme-elevation-700);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			height: 100% !important;
-		}
+    &__title {
+      font-size: base(0.8);
+      font-weight: 600;
+      color: $admin-200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100% !important;
+    }
 
-		&__title-link {
-			color: inherit;
-			text-decoration: none;
+    &__title-link {
+      color: inherit;
+      text-decoration: none;
 
-			&:hover {
-				text-decoration: underline;
-			}
-		}
+      &:hover {
+        text-decoration: underline;
+      }
+    }
 
-		&__description {
-			margin-top: 0.5rem;
-			color: var(--muted-foreground);
-		}
-	}
+    &__description {
+      margin-top: $spacing-sm;
+      color: $admin-400;
+    }
+  }
 }
