@@ -1,9 +1,9 @@
-import RichText from "@/payload/components/frontend/rich-text"
-import type { PostContentBlock } from "@/payload/payload-types"
+import RichText from "@/admin/payload/components/frontend/rich-text"
+import type { PostContentBlock } from "@/admin/payload/payload-types"
 import { PostAuthorInfo } from "@/components/posts/post-author-info"
 import { DocumentBreadcrumbs } from "@/components/ui/breadcrumbs"
 import { cn } from "@/utilities/ui"
-import { PageData } from "@/components/sections/RenderSections"
+import { PageData } from "@/admin/components/render-sections"
 
 /*************************************************************************/
 /*  POST CONTENT SECTION COMPONENT

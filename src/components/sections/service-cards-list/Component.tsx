@@ -11,7 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import type { ServiceCardsListBlock } from "@/payload/payload-types"
+import type { ServiceCardsListBlock } from "@/admin/payload/payload-types"
 import { ScrollTrigger, useSmoothContext } from "@/providers/gsap"
 import Image from "next/image"
 

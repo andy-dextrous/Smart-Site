@@ -1,8 +1,8 @@
 import { SectionIntro } from "@/components/layout/section-intro"
-import { RelatedPosts as RelatedPostsBlock } from "@/payload/blocks/related-posts/Component"
-import { getRelatedPosts } from "@/lib/data/posts"
-import type { RelatedPostsBlock as RelatedPostsBlockType } from "@/payload/payload-types"
-import { PageData } from "@/components/sections/RenderSections"
+import { RelatedPosts as RelatedPostsBlock } from "@/admin/payload/blocks/related-posts/Component"
+import { getRelatedPosts } from "@/admin/lib/data/posts"
+import type { RelatedPostsBlock as RelatedPostsBlockType } from "@/admin/payload/payload-types"
+import { PageData } from "@/admin/components/render-sections"
 
 /*************************************************************************/
 /*  RELATED POSTS SECTION COMPONENT

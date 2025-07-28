@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { getServerSideURL } from "@/utilities/get-url"
+import { getServerSideURL } from "@/admin/utilities/get-url"
 
 /*************************************************************************/
 /*  ROBOTS.TXT GENERATION - SIMPLIFIED FOR SITEMAP INDEX

@@ -1,15 +1,19 @@
 "use client"
 
 import { Grid, GridLines } from "@/components/layout/grid"
-import { Media } from "@/payload/components/frontend/media"
-import type { Post, Media as MediaType, PostHeroBlock } from "@/payload/payload-types"
+import { Media } from "@/admin/payload/components/frontend/media"
+import type {
+  Post,
+  Media as MediaType,
+  PostHeroBlock,
+} from "@/admin/payload/payload-types"
 import { gsap, useGSAP } from "@/providers/gsap"
 import { SplitText } from "gsap/SplitText"
-import { formatAuthors } from "@/utilities/format-authors"
+import { formatAuthors } from "@/admin/utilities/format-authors"
 import React, { useRef } from "react"
 import { tv } from "tailwind-variants"
 import { cn } from "@/utilities/ui"
-import { PageData } from "@/components/sections/RenderSections"
+import { PageData } from "@/admin/components/render-sections"
 
 /****************************************************
  * Post Hero Container Variants Configuration
@@ -41,15 +45,7 @@ export const PostHeroComponent: React.FC<PostHeroBlock & PageData> = props => {
   } = props
 
   // Use document (from template context) as the post data
-  const postData = document
-
-  if (!postData) {
-    return (
-      <section className="bg-dark border-light-border pt-first-section-nav-offset flex min-h-[40vh] items-center justify-center">
-        <p className="text-white">Post not found</p>
-      </section>
-    )
-  }
+  const postData = document as Post
 
   const { categories, heroImage, populatedAuthors, publishedAt, title } = postData
 

@@ -17,23 +17,33 @@ import { PostContent } from "@/components/sections/post-content/config"
 import { PostsArchive } from "@/components/sections/posts-archive/config"
 import { RelatedPosts } from "@/components/sections/related-posts/config"
 
-export const sectionBlocks = [
-  HeroPrimary,
-  HeroFull,
-  TextImage,
-  CirclesAnimation,
-  ServiceCardsList,
-  Testimonials,
-  InfoGrid,
-  LatestArticles,
-  FullwidthCta,
-  GlobeLocations,
-  ContactForm,
-  CtaForm,
-  HeadingLeftContent,
-  SimpleText,
-  PostHero,
-  PostContent,
-  PostsArchive,
-  RelatedPosts,
-]
+/*************************************************************************/
+/*  UNIFIED SECTIONS CONFIG
+/*
+/*  Provides both Payload block configs AND component import paths
+/*  Admin gets sectionBlocks, RenderSections gets importMap
+/*************************************************************************/
+
+export const sections = {
+  // For Payload CMS - array of block configurations
+  sectionBlocks: [
+    HeroPrimary,
+    HeroFull,
+    TextImage,
+    CirclesAnimation,
+    ServiceCardsList,
+    Testimonials,
+    InfoGrid,
+    LatestArticles,
+    FullwidthCta,
+    GlobeLocations,
+    ContactForm,
+    CtaForm,
+    HeadingLeftContent,
+    SimpleText,
+    PostHero,
+    PostContent,
+    PostsArchive,
+    RelatedPosts,
+  ],
+}

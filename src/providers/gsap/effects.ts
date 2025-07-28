@@ -60,7 +60,6 @@ gsap.registerEffect({
       })
 
       // If using scroll-based trigger, use scrubbed timeline for true in/out
-      let tl: gsap.core.Timeline
       const timelineConfig: any = {}
       const isScroll = !!settings.trigger
       if (isScroll) {
@@ -73,7 +72,7 @@ gsap.registerEffect({
         }
       }
 
-      tl = gsap.timeline(timelineConfig)
+      const tl = gsap.timeline(timelineConfig)
 
       // Remove hidden class and make element visible at the start of animation
       tl.call(

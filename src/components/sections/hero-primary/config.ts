@@ -1,6 +1,6 @@
 import type { Block } from "payload"
 
-import { link } from "@/payload/fields/link"
+import { link } from "@/admin/payload/fields/link"
 
 export const HeroPrimary: Block = {
   slug: "hero-primary",

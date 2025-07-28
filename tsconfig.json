@@ -21,9 +21,14 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@payload-config": ["./src/payload/payload.config.ts"],
-      "@product-studio-config": ["src/wc.config.ts"],
-      "@payload-components": ["./src/payload/components"],
+      "@payload-config": ["./src/admin/payload/payload.config.ts"],
+      "@payload-types": ["./src/admin/payload/types"],
+      "@smartsite-config": ["src/smartsite.config.ts"],
+      "@admin-lib": ["./src/admin/lib"],
+      "@admin-components": ["./src/admin/components"],
+      "@admin-styles": ["./src/admin/css/admin.scss"],
+      "@admin-utilities": ["./src/admin/utilities"],
+      "@payload-components": ["./src/admin/payload/components"],
       "@payload-styles": ["./src/app/(payload)/css/admin.scss"]
     },
     "target": "ES2022",

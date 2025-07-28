@@ -1,7 +1,7 @@
 "use client"
 
-import type { FullwidthCtaBlock, Media } from "@/payload/payload-types"
-import { CMSLink } from "@/payload/components/frontend/cms-link"
+import type { FullwidthCtaBlock, Media } from "@/admin/payload/payload-types"
+import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
 import ArrowRightIcon from "@/components/icons/arrow-right"
 import Image from "next/image"
 import { Grid, GridLines } from "@/components/layout/grid"

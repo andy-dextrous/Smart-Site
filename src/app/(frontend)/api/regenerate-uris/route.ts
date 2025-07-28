@@ -1,4 +1,4 @@
-import { regenerateURIs } from "@/lib/routing/index-manager"
+import { regenerateURIs } from "@/admin/lib/routing/index-manager"
 import { getPayload } from "payload"
 import config from "@payload-config"
 import { headers } from "next/headers"

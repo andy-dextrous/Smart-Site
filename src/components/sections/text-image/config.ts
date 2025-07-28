@@ -1,5 +1,5 @@
 import type { Block } from "payload"
-import { link } from "@/payload/fields/link"
+import { link } from "@/admin/payload/fields/link"
 
 import {
   FixedToolbarFeature,

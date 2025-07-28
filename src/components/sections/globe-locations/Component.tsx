@@ -1,5 +1,5 @@
-import { getSettings } from "@/lib/data/globals"
-import type { GlobeLocationsBlock, Setting } from "@/payload/payload-types"
+import { getSettings } from "@/admin/lib/data/globals"
+import type { GlobeLocationsBlock, Setting } from "@/admin/payload/payload-types"
 import { GlobeLocationsClientComponent } from "./client-component"
 
 /*************************************************************************/

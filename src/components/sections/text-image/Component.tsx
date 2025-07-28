@@ -1,14 +1,14 @@
 "use client"
 
-import RichText from "@/payload/components/frontend/rich-text"
+import RichText from "@/admin/payload/components/frontend/rich-text"
 import { cn } from "@/utilities/ui"
-import { CMSLink } from "@/payload/components/frontend/cms-link"
-import { Media as PayloadMedia } from "@/payload/components/frontend/media"
+import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
+import { Media as PayloadMedia } from "@/admin/payload/components/frontend/media"
 import { Button } from "@/components/ui/button"
 import type {
   Media,
   TextImageBlock as TextImageBlockProps,
-} from "@/payload/payload-types"
+} from "@/admin/payload/payload-types"
 import { gsap, useGSAP } from "@/providers/gsap"
 import { useRef } from "react"
 
@@ -55,10 +55,8 @@ export const TextImageComponent: React.FC<TextImageBlockProps> = props => {
                 const appearance = button.link.appearance || "default"
 
                 return (
-                  <CMSLink {...button.link}>
-                    <Button key={button.id} variant={appearance}>
-                      {button.link.label}
-                    </Button>
+                  <CMSLink key={button.id} {...button.link}>
+                    <Button variant={appearance}>{button.link.label}</Button>
                   </CMSLink>
                 )
               })}

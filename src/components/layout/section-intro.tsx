@@ -1,6 +1,6 @@
 "use client"
 
-import RichText from "@/payload/components/frontend/rich-text"
+import RichText from "@/admin/payload/components/frontend/rich-text"
 import { cn } from "@/utilities/ui"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 import { gsap, useGSAP } from "@/providers/gsap"

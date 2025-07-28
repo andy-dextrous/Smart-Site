@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next"
 import { unstable_cache } from "next/cache"
-import { getFrontendCollectionKeys } from "@/lib/sitemaps/config"
-import { generateSitemap } from "@/lib/sitemaps/generator"
-import { getServerSideURL } from "@/utilities/get-url"
+import { getFrontendCollectionKeys } from "@/admin/lib/sitemaps/config"
+import { generateSitemap } from "@/admin/lib/sitemaps/generator"
+import { getServerSideURL } from "@/admin/utilities/get-url"
 
 /*************************************************************************/
 /*  GENERATE SITEMAPS - ONE PER FRONTEND COLLECTION

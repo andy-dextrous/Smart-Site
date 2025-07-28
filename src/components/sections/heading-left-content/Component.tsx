@@ -1,7 +1,7 @@
 "use client"
 
-import type { HeadingLeftContentBlock } from "@/payload/payload-types"
-import RichText from "@/payload/components/frontend/rich-text"
+import type { HeadingLeftContentBlock } from "@/admin/payload/payload-types"
+import RichText from "@/admin/payload/components/frontend/rich-text"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 import { tv } from "tailwind-variants"
 import { gsap, useGSAP } from "@/providers/gsap"

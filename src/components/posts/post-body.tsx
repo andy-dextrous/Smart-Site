@@ -1,10 +1,10 @@
-import { RelatedPosts } from "@/payload/blocks/related-posts/Component"
-import RichText from "@/payload/components/frontend/rich-text"
-import { Post } from "@/payload/payload-types"
+import { RelatedPosts } from "@/admin/payload/blocks/related-posts/Component"
+import RichText from "@/admin/payload/components/frontend/rich-text"
+import { Post } from "@/admin/payload/payload-types"
 import { SectionIntro } from "../layout/section-intro"
 import { PostAuthorInfo } from "./post-author-info"
 import { DocumentBreadcrumbs } from "@/components/ui/breadcrumbs"
-import { BreadcrumbItem } from "@/lib/routing/uri-engine"
+import { BreadcrumbItem } from "@/admin/lib/routing/uri-engine"
 
 /*************************************************************************/
 /*  POST BODY COMPONENT

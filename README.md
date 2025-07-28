@@ -42,7 +42,7 @@ Configure your `.env.local` file with the following variables:
 
 ```bash
 # Database Configuration
-DATABASE_PROVIDER=vercel                           # "vercel" for PostgreSQL or "mongoose" for MongoDB
+DATABASE_PROVIDER=postgres                           # "vercel" for PostgreSQL or "mongoose" for MongoDB
 POSTGRES_URL=postgresql://username:password@host   # For PostgreSQL (get from Vercel Storage)
 DATABASE_URI=mongodb://localhost:27017/smart-site  # For MongoDB (if using mongoose)
 

@@ -7,9 +7,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { CMSLink } from "@/payload/components/frontend/cms-link"
-import { SocialLinks } from "@/payload/components/frontend/social-links"
-import type { Header as HeaderType, Setting } from "@/payload/payload-types"
+import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
+import { SocialLinks } from "@/admin/payload/components/frontend/social-links"
+import type { Header as HeaderType, Setting } from "@/admin/payload/payload-types"
 import Link from "next/link"
 import * as React from "react"
 import { Hamburger } from "./hamburger"

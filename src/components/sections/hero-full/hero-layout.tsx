@@ -1,7 +1,7 @@
 import Envelope from "@/components/icons/envelope"
 import SpeechBubble from "@/components/icons/speech-bubble"
 import { Button } from "@/components/ui/button"
-import type { HeroFullBlock as HeroProps } from "@/payload/payload-types"
+import type { HeroFullBlock as HeroProps } from "@/admin/payload/payload-types"
 import { tv } from "tailwind-variants"
 import React from "react"
 import { HeroContent } from "./hero-content"

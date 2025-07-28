@@ -1,6 +1,6 @@
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
-import { SmartSiteAdminBar } from "@/payload/components/backend/admin-bar"
-import { getSettings } from "@/lib/data/globals"
+import { SmartSiteAdminBar } from "@/admin/payload/components/backend/admin-bar"
+import { getSettings } from "@/admin/lib/data/globals"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
 import parse from "html-react-parser"

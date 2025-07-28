@@ -1,7 +1,7 @@
-import type { LatestArticlesBlock } from "@/payload/payload-types"
+import type { LatestArticlesBlock } from "@/admin/payload/payload-types"
 import { SectionCta } from "@/components/layout/section-cta"
 import { SectionIntro } from "@/components/layout/section-intro"
-import { getRecentPosts } from "@/lib/data/posts"
+import { getRecentPosts } from "@/admin/lib/data/posts"
 import { PostCard } from "@/components/posts/post-card"
 
 /*************************************************************************/

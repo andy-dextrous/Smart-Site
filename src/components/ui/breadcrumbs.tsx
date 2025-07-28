@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { cn } from "@/utilities/ui"
-import { BreadcrumbItem as BreadcrumbItemType } from "@/lib/routing/uri-engine"
+import { BreadcrumbItem as BreadcrumbItemType } from "@/admin/lib/routing/uri-engine"
 import {
   Breadcrumb,
   BreadcrumbItem,

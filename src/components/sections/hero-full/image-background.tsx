@@ -1,5 +1,5 @@
-import { Media as PayloadMedia } from "@/payload/components/frontend/media"
-import type { Media } from "@/payload/payload-types"
+import { Media as PayloadMedia } from "@/admin/payload/components/frontend/media"
+import type { Media } from "@/admin/payload/payload-types"
 import { cn } from "@/utilities/ui"
 import React from "react"
 

@@ -1,7 +1,7 @@
 "use client"
 
-import RichText from "@/payload/components/frontend/rich-text"
-import type { CirclesAnimationBlock } from "@/payload/payload-types"
+import RichText from "@/admin/payload/components/frontend/rich-text"
+import type { CirclesAnimationBlock } from "@/admin/payload/payload-types"
 import { gsap, useGSAP } from "@/providers/gsap"
 import { SplitText } from "gsap/SplitText"
 import { parseHeadingGradient } from "@/components/heading-gradient"

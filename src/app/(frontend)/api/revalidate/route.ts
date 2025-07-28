@@ -1,4 +1,4 @@
-import { revalidateAll } from "@/lib/cache/revalidation"
+import { revalidateAll } from "@/admin/lib/cache/revalidation"
 
 export async function GET() {
   const result = await revalidateAll()

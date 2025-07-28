@@ -1,7 +1,7 @@
-import { Post } from "@/payload/payload-types"
+import { Post } from "@/admin/payload/payload-types"
 import { cn } from "@/utilities/ui"
 import { DocumentBreadcrumbs } from "@/components/ui/breadcrumbs"
-import { BreadcrumbItem } from "@/lib/routing/uri-engine"
+import { BreadcrumbItem } from "@/admin/lib/routing/uri-engine"
 
 /*************************************************************************/
 /*  POST BREADCRUMBS COMPONENT

@@ -18,7 +18,7 @@ function loadFrontendCollections() {
   try {
     const jsonPath = path.join(
       process.cwd(),
-      "src/payload/collections/frontend/frontend-collections.json"
+      "src/admin/payload/collections/frontend/frontend-collections.json"
     )
     const jsonData = fs.readFileSync(jsonPath, "utf8")
     return JSON.parse(jsonData)

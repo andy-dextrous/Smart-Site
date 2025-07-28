@@ -1,7 +1,7 @@
 "use client"
 
 import { Grid, GridLines } from "@/components/layout/grid"
-import type { HeroFullBlock as HeroProps } from "@/payload/payload-types"
+import type { HeroFullBlock as HeroProps } from "@/admin/payload/payload-types"
 import { gsap, useGSAP } from "@/providers/gsap"
 import { SplitText } from "gsap/SplitText"
 import { parseHeadingGradient } from "@/components/heading-gradient"

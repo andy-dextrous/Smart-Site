@@ -1,4 +1,4 @@
-import type { InfoGridBlock } from "@/payload/payload-types"
+import type { InfoGridBlock } from "@/admin/payload/payload-types"
 import { SectionIntro } from "@/components/layout/section-intro"
 import { tv } from "tailwind-variants"
 

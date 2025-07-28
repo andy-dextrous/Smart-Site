@@ -4,7 +4,7 @@ import { SectionIntro } from "@/components/layout/section-intro"
 import { cn } from "@/utilities/ui"
 import dynamic from "next/dynamic"
 import { useEffect, useState, useRef, useImperativeHandle } from "react"
-import type { Setting } from "@/payload/payload-types"
+import type { Setting } from "@/admin/payload/payload-types"
 
 /*************************************************************************/
 /*  DYNAMIC REACT GLOBE COMPONENT

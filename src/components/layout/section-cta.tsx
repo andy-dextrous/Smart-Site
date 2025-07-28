@@ -1,4 +1,4 @@
-import { CMSLink } from "@/payload/components/frontend/cms-link"
+import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
 import { Button, type ButtonProps } from "@/components/ui/button"
 import { cn } from "@/utilities/ui"
 import ArrowRightIcon from "@/components/icons/arrow-right"

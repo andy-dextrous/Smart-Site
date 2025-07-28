@@ -1,6 +1,6 @@
 import type { Block } from "payload"
-import { sectionCta } from "@/payload/fields/section-cta"
-import { sectionIntro } from "@/payload/fields/section-intro"
+import { sectionCta } from "@/admin/payload/fields/section-cta"
+import { sectionIntro } from "@/admin/payload/fields/section-intro"
 
 export const LatestArticles: Block = {
   slug: "latest-articles",

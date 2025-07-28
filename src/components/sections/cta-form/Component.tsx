@@ -1,8 +1,8 @@
 "use client"
 
-import type { CtaFormBlock, Media } from "@/payload/payload-types"
-import { CMSForm } from "@/payload/components/frontend/cms-form"
-import RichText from "@/payload/components/frontend/rich-text"
+import type { CtaFormBlock, Media } from "@/admin/payload/payload-types"
+import { CMSForm } from "@/admin/payload/components/frontend/cms-form"
+import RichText from "@/admin/payload/components/frontend/rich-text"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 import { tv } from "tailwind-variants"
 import { gsap, useGSAP } from "@/providers/gsap"

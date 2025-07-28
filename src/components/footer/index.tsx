@@ -1,8 +1,8 @@
 import LogoPrimaryLight from "@/components/logos/logo-light"
-import { getGlobal, getSettings } from "@/lib/data/globals"
-import { CMSLink } from "@/payload/components/frontend/cms-link"
-import { SocialLinks } from "@/payload/components/frontend/social-links"
-import type { Footer as FooterType, Setting } from "@/payload/payload-types"
+import { getGlobal, getSettings } from "@/admin/lib/data/globals"
+import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
+import { SocialLinks } from "@/admin/payload/components/frontend/social-links"
+import type { Footer as FooterType, Setting } from "@/admin/payload/payload-types"
 import Link from "next/link"
 import LogomarkOutline from "../logos/logomark-outline"
 

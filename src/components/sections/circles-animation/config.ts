@@ -1,5 +1,5 @@
 import type { Block } from "payload"
-import { richContent } from "@/payload/fields/content"
+import { richContent } from "@/admin/payload/fields/content"
 
 export const CirclesAnimation: Block = {
   slug: "circles-animation",

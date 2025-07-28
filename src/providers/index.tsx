@@ -1,5 +1,5 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes"
-import wildChildConfig from "@/wc.config"
+import smartSiteConfig from "@/smartsite.config"
 import SmoothScrollProvider from "@/providers/gsap"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -11,7 +11,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 }
 
 const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const { themeToggle: colorModeToggle } = wildChildConfig
+  const { themeToggle: colorModeToggle } = smartSiteConfig.settings
 
   if (!colorModeToggle) {
     return children
@@ -30,7 +30,7 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 }
 
 const GSAP = ({ children }: { children: React.ReactNode }) => {
-  const { gsap } = wildChildConfig
+  const { gsap } = smartSiteConfig.settings
 
   if (!gsap) {
     return children

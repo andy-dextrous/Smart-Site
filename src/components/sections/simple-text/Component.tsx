@@ -1,4 +1,4 @@
-import RichText from "@/payload/components/frontend/rich-text"
+import RichText from "@/admin/payload/components/frontend/rich-text"
 
 /*************************************************************************/
 /*  SIMPLE TEXT COMPONENT

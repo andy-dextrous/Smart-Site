@@ -1,5 +1,5 @@
 import { createLocalReq, getPayload } from "payload"
-import { DynamicSeedManager } from "@/payload/endpoints/seed"
+import { DynamicSeedManager } from "@/admin/payload/endpoints/seed"
 import config from "@payload-config"
 import { headers } from "next/headers"
 

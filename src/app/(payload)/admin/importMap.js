@@ -22,24 +22,24 @@ import { RelationshipFeatureClient as RelationshipFeatureClient_e70f5e05f09f93e0
 import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { default as default_f141ac117f58e902ce5e04cf716d7649 } from '@/payload/components/backend/assign-template'
-import { SlugComponent as SlugComponent_06f5ecd34cec23977f48ef7f3504e5cd } from '@/payload/fields/slug/slug-component'
+import { default as default_d1988c653dbb7de5dc8bb77db36a0ffc } from '@/admin/payload/components/backend/assign-template'
+import { SlugComponent as SlugComponent_6c420b1b8714748be3eba61478399bf0 } from '@/admin/payload/fields/slug/slug-component'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
-import { RowLabel as RowLabel_ac590f04e7b67b0cd330fd91c828079e } from '@/payload/globals/header/row-label'
-import { RowLabel as RowLabel_d4fd277a286d50f536848872bd9d5784 } from '@/payload/globals/footer/RowLabel'
-import { SocialLinksRowLabel as SocialLinksRowLabel_387b56607e83cdf3c58cb58eba96b79a } from '@/payload/fields/social-links-row-label'
-import { default as default_dcaaf1931d843feb9398d62d70c9b40e } from '@/payload/components/backend/row-grid'
-import { Avatar as Avatar_1846a465315586e38caf5c11952a6ef0 } from '@/payload/components/backend/avatar'
-import { default as default_0aa20e033b47825da0f34df6e2689062 } from '@/payload/components/backend/nav'
-import { Icon as Icon_b3ad8f927b79b366aab6de43edcf542a } from '@/payload/components/backend/logo'
-import { Logo as Logo_b3ad8f927b79b366aab6de43edcf542a } from '@/payload/components/backend/logo'
-import { default as default_89243f998d9f5209918b6c2f63f556e1 } from '@/payload/components/backend/actions'
-import { BeforeLogin as BeforeLogin_4eac130ed1882e33afc7b8cd00bf46be } from '@/payload/components/backend/before-login'
-import { AIProvider as AIProvider_31929612e7440dc653be6e7def390ac7 } from '@/payload/components/providers/ai-provider'
-import { AILayoutProvider as AILayoutProvider_0a4272d6814a6a7a8ccdb5b7a66b7dcf } from '@/payload/components/providers/layout-provider'
-import { default as default_d200b73e84857fa86c4416f6cb9f2645 } from '@/payload/components/backend/views/my-custom-view'
-import { Dashboard as Dashboard_6a8d59d0fd0dd95d82047df6fc3c638f } from '@/payload/components/backend/dashboard'
+import { RowLabel as RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6 } from '@/admin/payload/globals/header/row-label'
+import { RowLabel as RowLabel_6d6b76e060b56c87a47bd22280eeb127 } from '@/admin/payload/globals/footer/RowLabel'
+import { SocialLinksRowLabel as SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7 } from '@/admin/payload/fields/social-links-row-label'
+import { default as default_e5d96bbf460917257cf7b4a80fa7fc85 } from '@/admin/payload/components/backend/row-grid'
+import { Avatar as Avatar_d32b090974b4543643d700af29e0b32b } from '@/admin/payload/components/backend/avatar'
+import { default as default_f2ccf5b28ea897a84aa17ece60da1642 } from '@/admin/payload/components/backend/nav'
+import { Icon as Icon_81e8042dbd61adf4500fa58396806cc9 } from '@/admin/payload/components/backend/logo'
+import { Logo as Logo_81e8042dbd61adf4500fa58396806cc9 } from '@/admin/payload/components/backend/logo'
+import { default as default_deb3d3e0d7ebd4444dedc22425d9c39c } from '@/admin/payload/components/backend/actions'
+import { BeforeLogin as BeforeLogin_7928b506e44967428d9de145b0f5de84 } from '@/admin/payload/components/backend/before-login'
+import { AIProvider as AIProvider_60a9abb034156393a5335c785c8cc821 } from '@/admin/payload/components/providers/ai-provider'
+import { AILayoutProvider as AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45 } from '@/admin/payload/components/providers/layout-provider'
+import { default as default_9ee648b3974452a71d896ede05001fcf } from '@/admin/payload/components/backend/views/my-custom-view'
+import { Dashboard as Dashboard_2318927de43c97f7df38b2e062d88eaf } from '@/admin/payload/components/backend/dashboard'
 
 export const importMap = {
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -66,22 +66,22 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BlockquoteFeatureClient": BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "@/payload/components/backend/assign-template#default": default_f141ac117f58e902ce5e04cf716d7649,
-  "@/payload/fields/slug/slug-component#SlugComponent": SlugComponent_06f5ecd34cec23977f48ef7f3504e5cd,
+  "@/admin/payload/components/backend/assign-template#default": default_d1988c653dbb7de5dc8bb77db36a0ffc,
+  "@/admin/payload/fields/slug/slug-component#SlugComponent": SlugComponent_6c420b1b8714748be3eba61478399bf0,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
-  "@/payload/globals/header/row-label#RowLabel": RowLabel_ac590f04e7b67b0cd330fd91c828079e,
-  "@/payload/globals/footer/RowLabel#RowLabel": RowLabel_d4fd277a286d50f536848872bd9d5784,
-  "@/payload/fields/social-links-row-label#SocialLinksRowLabel": SocialLinksRowLabel_387b56607e83cdf3c58cb58eba96b79a,
-  "@/payload/components/backend/row-grid#default": default_dcaaf1931d843feb9398d62d70c9b40e,
-  "@/payload/components/backend/avatar#Avatar": Avatar_1846a465315586e38caf5c11952a6ef0,
-  "@/payload/components/backend/nav#default": default_0aa20e033b47825da0f34df6e2689062,
-  "@/payload/components/backend/logo#Icon": Icon_b3ad8f927b79b366aab6de43edcf542a,
-  "@/payload/components/backend/logo#Logo": Logo_b3ad8f927b79b366aab6de43edcf542a,
-  "@/payload/components/backend/actions#default": default_89243f998d9f5209918b6c2f63f556e1,
-  "@/payload/components/backend/before-login#BeforeLogin": BeforeLogin_4eac130ed1882e33afc7b8cd00bf46be,
-  "@/payload/components/providers/ai-provider#AIProvider": AIProvider_31929612e7440dc653be6e7def390ac7,
-  "@/payload/components/providers/layout-provider#AILayoutProvider": AILayoutProvider_0a4272d6814a6a7a8ccdb5b7a66b7dcf,
-  "@/payload/components/backend/views/my-custom-view#default": default_d200b73e84857fa86c4416f6cb9f2645,
-  "@/payload/components/backend/dashboard#Dashboard": Dashboard_6a8d59d0fd0dd95d82047df6fc3c638f
+  "@/admin/payload/globals/header/row-label#RowLabel": RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6,
+  "@/admin/payload/globals/footer/RowLabel#RowLabel": RowLabel_6d6b76e060b56c87a47bd22280eeb127,
+  "@/admin/payload/fields/social-links-row-label#SocialLinksRowLabel": SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7,
+  "@/admin/payload/components/backend/row-grid#default": default_e5d96bbf460917257cf7b4a80fa7fc85,
+  "@/admin/payload/components/backend/avatar#Avatar": Avatar_d32b090974b4543643d700af29e0b32b,
+  "@/admin/payload/components/backend/nav#default": default_f2ccf5b28ea897a84aa17ece60da1642,
+  "@/admin/payload/components/backend/logo#Icon": Icon_81e8042dbd61adf4500fa58396806cc9,
+  "@/admin/payload/components/backend/logo#Logo": Logo_81e8042dbd61adf4500fa58396806cc9,
+  "@/admin/payload/components/backend/actions#default": default_deb3d3e0d7ebd4444dedc22425d9c39c,
+  "@/admin/payload/components/backend/before-login#BeforeLogin": BeforeLogin_7928b506e44967428d9de145b0f5de84,
+  "@/admin/payload/components/providers/ai-provider#AIProvider": AIProvider_60a9abb034156393a5335c785c8cc821,
+  "@/admin/payload/components/providers/layout-provider#AILayoutProvider": AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45,
+  "@/admin/payload/components/backend/views/my-custom-view#default": default_9ee648b3974452a71d896ede05001fcf,
+  "@/admin/payload/components/backend/dashboard#Dashboard": Dashboard_2318927de43c97f7df38b2e062d88eaf
 }

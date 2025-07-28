@@ -5,9 +5,11 @@ import LogoipOptium from "./logoip-optium"
 
 export { LogoipLorum, LogoipSpanum, LogoipGohissum, LogoipOptium }
 
-export default {
+const partnerLogos = {
   LogoipLorum,
   LogoipSpanum,
   LogoipGohissum,
   LogoipOptium,
 }
+
+export default partnerLogos

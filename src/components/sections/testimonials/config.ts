@@ -1,5 +1,5 @@
 import type { Block } from "payload"
-import { sectionIntro } from "@/payload/fields/section-intro"
+import { sectionIntro } from "@/admin/payload/fields/section-intro"
 
 export const Testimonials: Block = {
   slug: "testimonials",

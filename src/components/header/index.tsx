@@ -1,12 +1,12 @@
 import { HeaderNavigation } from "@/components/header/nav"
-import { getGlobal, getSettings } from "@/lib/data/globals"
-import type { Header, Setting } from "@/payload/payload-types"
+import { getGlobal, getSettings } from "@/admin/lib/data/globals"
+import type { Header, Setting } from "@/admin/payload/payload-types"
 import Link from "next/link"
 
 import type { Config } from "payload"
 import LogoPrimaryLight from "../logos/logo-light"
 import { MobileNavUpdated } from "./mobile-nav"
-import { getCurrentUser } from "@/lib/data/user"
+import { getCurrentUser } from "@/admin/lib/data/user"
 import { cn } from "@/utilities/ui"
 
 export async function Header() {

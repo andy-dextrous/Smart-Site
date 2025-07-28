@@ -1,9 +1,9 @@
 import { SectionIntro } from "@/components/layout/section-intro"
 import { PostCard } from "@/components/posts/post-card"
-import { PageRange } from "@/payload/components/frontend/page-range"
-import { Pagination } from "@/payload/components/frontend/pagination"
-import { getPostsWithPagination } from "@/lib/data/posts"
-import type { PostsArchiveBlock } from "@/payload/payload-types"
+import { PageRange } from "@/admin/payload/components/frontend/page-range"
+import { Pagination } from "@/admin/payload/components/frontend/pagination"
+import { getPostsWithPagination } from "@/admin/lib/data/posts"
+import type { PostsArchiveBlock } from "@/admin/payload/payload-types"
 import { cn } from "@/utilities/ui"
 
 /*************************************************************************/
