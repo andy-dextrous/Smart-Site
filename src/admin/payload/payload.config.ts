@@ -43,6 +43,6 @@ const baseConfig = {
 }
 
 // Intelligently merge client config with base config
-const mergedConfig = mergePayloadConfig(baseConfig, smartSiteConfig.payload)
+const mergedConfig = mergePayloadConfig(baseConfig, smartSiteConfig)
 
 export default buildConfig(mergedConfig)

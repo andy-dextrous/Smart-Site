@@ -95,15 +95,49 @@ useGSAP(
 
 ## Payload CMS Integration
 
+### SmartSite Configuration System
+
+The `smartsite.config.ts` uses a powerful override system for Payload collections, globals, and blocks:
+
+**Boolean Override System**:
+```typescript
+// smartsite.config.ts
+const smartSiteConfig = defineConfig({
+  // Disable default collections with boolean flags
+  collections: [
+    { services: false, team: false }, // Disable services & team
+    CustomProducts,                   // Add custom collection
+  ],
+  
+  // Same pattern for globals and blocks
+  globals: [{ footer: false }],       // Disable footer
+  blocks: [{ form: false }],          // Disable form block
+  
+  // Other Payload config goes here
+  payload: {
+    cors: ['https://mydomain.com'],
+  }
+})
+```
+
+**Benefits**:
+- **Type Safe**: `collections: (CollectionConfig | {services: false})[]`
+- **Clean API**: Easy boolean flags for disabling defaults
+- **Flexible**: Mix custom configs with boolean overrides
+- **No Conflicts**: Separate from main Payload config typing
+
 ### Collections Structure
 
-Located in `src/admin/payload/collections/`:
+**Default Collections** (can be disabled with boolean flags):
 - **Pages**: Main page content with flexible sections
-- **Posts**: Blog/article content
+- **Posts**: Blog/article content  
 - **Services**: Service-specific pages
 - **Team**: Team member profiles
 - **Templates**: Reusable page templates
 - **URI Index**: URL routing and management
+- **Media**: File/image management
+- **Categories**: Content categorization
+- **Users**: Admin user management
 
 ### Field-to-Component Architecture
 

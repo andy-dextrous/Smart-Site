@@ -1,38 +1,54 @@
 import deepMerge from "./deep-merge"
+import { resolveCollections } from "@/admin/payload/collections/registry"
+import { resolveGlobals } from "@/admin/payload/globals/registry"
+import { resolveBlocks } from "@/admin/payload/blocks/registry"
+import { SmartSiteConfig } from "@/admin/config"
 
 /**
- * Intelligently merges Payload configurations with special handling for arrays
+ * Intelligently merges Payload configurations with SmartSite config support
  * 
- * Arrays like collections, globals, and plugins are concatenated rather than replaced
- * Other properties are deep merged
+ * Uses registry resolvers for collections, globals, and blocks to handle boolean overrides
+ * Other properties are deep merged as before
  * 
- * @param baseConfig - The base Payload configuration
- * @param clientConfig - Client overrides/extensions
+ * @param baseConfig - The base Payload configuration  
+ * @param smartSiteConfig - SmartSite configuration with separate keys
  * @returns Merged configuration
  */
-export function mergePayloadConfig(baseConfig: any, clientConfig: any = {}): any {
-  // Arrays that should be concatenated, not replaced
-  const concatenateArrays = ["collections", "globals", "plugins", "blocks"]
-  
+export function mergePayloadConfig(baseConfig: any, smartSiteConfig: SmartSiteConfig): any {
   // Start with a deep clone of the base config
   const merged = { ...baseConfig }
   
-  // Handle each property in the client config
-  for (const key in clientConfig) {
-    const baseValue = baseConfig[key]
-    const clientValue = clientConfig[key]
-    
-    // Special handling for arrays that should be concatenated
-    if (concatenateArrays.includes(key) && Array.isArray(baseValue) && Array.isArray(clientValue)) {
-      merged[key] = [...baseValue, ...clientValue]
-    } 
-    // Deep merge objects
-    else if (typeof baseValue === "object" && typeof clientValue === "object" && !Array.isArray(baseValue)) {
-      merged[key] = deepMerge(baseValue, clientValue)
-    }
-    // Otherwise, client value overrides
-    else {
-      merged[key] = clientValue
+  // Use registry resolvers for collections, globals, blocks
+  if (smartSiteConfig.collections !== undefined) {
+    merged.collections = resolveCollections(smartSiteConfig.collections)
+  }
+  
+  if (smartSiteConfig.globals !== undefined) {
+    merged.globals = resolveGlobals(smartSiteConfig.globals)
+  }
+  
+  if (smartSiteConfig.blocks !== undefined) {
+    merged.blocks = resolveBlocks(smartSiteConfig.blocks)
+  }
+  
+  // Handle payload config (excluding collections, globals, blocks)
+  if (smartSiteConfig.payload) {
+    for (const key in smartSiteConfig.payload) {
+      const baseValue = baseConfig[key]
+      const clientValue = smartSiteConfig.payload[key]
+      
+      // Arrays like plugins are concatenated
+      if (key === "plugins" && Array.isArray(baseValue) && Array.isArray(clientValue)) {
+        merged[key] = [...baseValue, ...clientValue]
+      } 
+      // Deep merge objects
+      else if (typeof baseValue === "object" && typeof clientValue === "object" && !Array.isArray(baseValue)) {
+        merged[key] = deepMerge(baseValue, clientValue)
+      }
+      // Otherwise, client value overrides
+      else {
+        merged[key] = clientValue
+      }
     }
   }
   
