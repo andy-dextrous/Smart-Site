@@ -32,7 +32,7 @@ Every section MUST have exactly two files:
 ```typescript
 // config.ts template
 import type { Block } from "payload"
-import { sectionIntro, sectionCta } from "@/payload/fields"
+import { sectionIntro, sectionCta } from "@/admin/payload/fields"
 
 export const NewSectionName: Block = {
   slug: "new-section-name", // MUST match folder name
@@ -52,15 +52,23 @@ export const NewSectionName: Block = {
 #### A. Export config in `src/components/sections/config.ts`:
 ```typescript
 export { NewSectionName } from "./new-section-name/config"
+
+// Add to sectionBlocks array
+export const sections = {
+  sectionBlocks: [
+    // ... existing sections
+    NewSectionName,
+  ],
+}
 ```
 
-#### B. Register component in `src/components/sections/RenderSections.tsx`:
+#### B. Register component in `src/components/sections/sections-map.tsx`:
 ```typescript
 import { NewSectionNameComponent } from "./new-section-name/Component"
 
-const blockComponents = {
+export const sectionsMap: Record<string, React.ComponentType<any>> = {
+  // ... existing sections
   "new-section-name": NewSectionNameComponent,
-  // ... other sections
 }
 ```
 
@@ -70,7 +78,7 @@ Only after config registration, build the component:
 ```typescript
 // Component.tsx template
 import { cn } from "@/utilities/ui"
-import type { NewSectionNameBlock } from "@/payload/payload-types"
+import type { NewSectionNameBlock } from "@/admin/payload/payload-types"
 
 /*************************************************************************/
 /*  NEW SECTION NAME COMPONENT
@@ -93,7 +101,7 @@ export const NewSectionNameComponent: React.FC<NewSectionNameBlock> = props => {
 
 ### Using Reusable Field Functions
 
-**ALWAYS prefer reusable field functions** from `@/payload/fields`:
+**ALWAYS prefer reusable field functions** from `@/admin/payload/fields`:
 
 ```typescript
 import { 
@@ -102,7 +110,7 @@ import {
   button, 
   link,
   content 
-} from "@/payload/fields"
+} from "@/admin/payload/fields"
 
 fields: [
   sectionIntro({
@@ -159,8 +167,8 @@ fields: [
 import { cn } from "@/utilities/ui"
 import { SectionIntro } from "@/components/layout/section-intro"
 import { SectionCta } from "@/components/layout/section-cta"
-import { Media } from "@/payload/components/frontend/media"
-import type { HeroSplitBlock } from "@/payload/payload-types"
+import { Media } from "@/admin/payload/components/frontend/media"
+import type { HeroSplitBlock } from "@/admin/payload/payload-types"
 
 /*************************************************************************/
 /*  HERO SPLIT COMPONENT
@@ -298,39 +306,6 @@ fields: [
 ]
 ```
 
-## Design System Integration
-
-### Tailwind v4 Classes
-
-Use design system classes consistently:
-
-```typescript
-// Typography - let design system handle
-<h2 className="text-display-lg">{heading}</h2>
-<p className="text-body-lg text-slate-600">{description}</p>
-
-// Spacing - use consistent scale  
-<div className="space-y-6 lg:space-y-8">
-<section className="py-16 lg:py-24">
-
-// Layout - responsive patterns
-<div className="grid gap-8 lg:gap-16 lg:grid-cols-2">
-```
-
-### Color Scheme Handling
-
-```typescript
-// Support multiple color schemes
-const colorClasses = {
-  light: "bg-white text-slate-900",
-  dark: "bg-slate-900 text-white", 
-  gradient: "bg-gradient-to-br from-blue-600 to-purple-700 text-white",
-  brand: "bg-brand-500 text-white",
-}
-
-<section className={cn("py-16", colorClasses[colorScheme])}>
-```
-
 ## Content Editor Considerations
 
 ### Field Descriptions
@@ -385,40 +360,46 @@ fields: [
 ]
 ```
 
+## Section Development Rules
+
+1. **Confirm fields** with user before creating them
+2. **Infer from screenshots** when provided - map to design system  
+3. **NO documentation files** - code should be self-documenting
+4. **NO manual types** - Payload generates automatically
+5. **Generic naming** - architectural, not content-specific
+6. **Check collections** in `src/admin/payload/collections/` for relationships
+
 ## Common Anti-Patterns
 
 ### ❌ Avoid These Mistakes
 
 1. **Creating types manually**:
 ```typescript
-// DON'T DO THIS
+// DON'T DO THIS - Payload generates types automatically
 interface HeroProps {
   title: string
   content: string
 }
-// Payload generates types automatically
 ```
 
 2. **Hardcoding content**:
 ```typescript
-// DON'T DO THIS
+// DON'T DO THIS - Make it configurable via CMS
 <h2>Our Services</h2>
-// Make it configurable via CMS
 ```
 
 3. **Skipping registration**:
 ```typescript
 // DON'T FORGET to add to both:
-// - src/components/sections/config.ts
-// - src/components/sections/RenderSections.tsx
+// - src/components/sections/config.ts (sectionBlocks array)
+// - src/components/sections/sections-map.tsx (sectionsMap object)
 ```
 
 4. **Content-specific naming**:
 ```typescript
-// DON'T DO THIS
+// DON'T DO THIS - Use architectural names instead
 export const ServicesHero: Block = {
   slug: "services-hero"
-  // Use architectural names instead
 }
 ```
 
@@ -436,8 +417,8 @@ npm run generate:types
 ### Section Not Appearing
 
 Check that section is registered in BOTH places:
-1. `config.ts` exports
-2. `RenderSections.tsx` component mapping
+1. `config.ts` exports and `sectionBlocks` array
+2. `sections-map.tsx` component mapping
 
 ### CMS Fields Not Saving
 
@@ -447,8 +428,8 @@ Verify field configuration matches expected Payload field types and naming conve
 
 Before considering a section complete:
 
-- [ ] Config exported in `config.ts`  
-- [ ] Component registered in `RenderSections.tsx`
+- [ ] Config exported in `config.ts` and added to `sectionBlocks` array
+- [ ] Component registered in `sections-map.tsx`
 - [ ] Uses architectural naming (not content-specific)
 - [ ] Leverages reusable field functions where possible
 - [ ] Provides helpful admin descriptions

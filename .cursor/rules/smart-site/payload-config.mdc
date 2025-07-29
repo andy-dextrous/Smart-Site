@@ -1,6 +1,6 @@
 ---
 description: Explains the reusable field-to-component mapping patterns used throughout Payload CMS sections. Use when building new sections, working with CMS field configurations, or need to understand how field functions like sectionIntro(), sectionCta(), button(), and link() map to their corresponding React components.
-globs:
+globs: apps/smart-site/src/admin/payload/**/*
 alwaysApply: false
 ---
 # Payload Config Patterns: Reusable Field-to-Component Mapping
@@ -26,7 +26,7 @@ Each field function returns a Payload field configuration that can be customized
 
 #### 1. `sectionIntro(options)` → `<SectionIntro />`
 - **Purpose**: Standard section heading + description pattern
-- **File**: `src/payload/fields/section-intro.ts`
+- **File**: `src/admin/payload/fields/section-intro.ts`
 - **Component**: `src/components/layout/section-intro.tsx`
 - **Usage Pattern**:
 ```ts
@@ -50,7 +50,7 @@ sectionIntro({
 
 #### 2. `sectionCta(options)` → `<SectionCta />`
 - **Purpose**: Standard call-to-action with text + button
-- **File**: `src/payload/fields/section-cta.ts`
+- **File**: `src/admin/payload/fields/section-cta.ts`
 - **Component**: `src/components/layout/section-cta.tsx`
 - **Usage Pattern**:
 ```ts
@@ -68,8 +68,8 @@ sectionCta({
 
 #### 3. `button(options)` → Used with `<CMSLink />`
 - **Purpose**: Single button with all variants and link options
-- **File**: `src/payload/fields/buttons.ts`
-- **Frontend**: `src/payload/components/frontend/cms-link/index.tsx`
+- **File**: `src/admin/payload/fields/buttons.ts`
+- **Frontend**: `src/admin/payload/components/frontend/cms-link/index.tsx`
 - **Usage Pattern**:
 ```ts
 // In section config
@@ -89,13 +89,13 @@ button({
 
 #### 4. `buttonsGroup(options)` → Multiple `<CMSLink />` elements
 - **Purpose**: Array of buttons for sections needing multiple CTAs
-- **File**: `src/payload/fields/buttons.ts`
+- **File**: `src/admin/payload/fields/buttons.ts`
 - **Usage**: Similar to `button()` but creates an array field
 
 #### 5. `link(options)` → `<CMSLink />`
 - **Purpose**: Core link functionality (internal references or external URLs)
-- **File**: `src/payload/fields/link.ts`
-- **Component**: `src/payload/components/frontend/cms-link/index.tsx`
+- **File**: `src/admin/payload/fields/link.ts`
+- **Component**: `src/admin/payload/components/frontend/cms-link/index.tsx`
 - **Usage Pattern**:
 ```ts
 // In section config
@@ -113,8 +113,8 @@ link({
 
 #### 6. `content()` / `richContent()` / `heading()` → `<RichText />` / direct text
 - **Purpose**: Standard content fields
-- **File**: `src/payload/fields/content.ts`
-- **Component**: `src/payload/components/frontend/rich-text/index.tsx`
+- **File**: `src/admin/payload/fields/content.ts`
+- **Component**: `src/admin/payload/components/frontend/rich-text/index.tsx`
 
 ## Component Mapping Patterns
 
@@ -169,7 +169,7 @@ Key features:
 
 ## Default Values System
 
-### Location: `src/payload/fields/default-values/`
+### Location: `src/admin/payload/fields/default-values/`
 
 Provides consistent editor experience and realistic preview data:
 
@@ -195,7 +195,7 @@ export const fullwidthCtaDefault = {
 
 ## Button Variant System
 
-### Location: `src/utilities/button-variants.ts`
+### Location: `src/admin/utilities/button-variants.ts`
 
 Dynamically extracts available variants from the UI component:
 
@@ -219,7 +219,7 @@ This ensures CMS options stay in sync with actual component variants.
 
 ### Adding a New Reusable Field:
 
-1. **Create field function** in `src/payload/fields/new-field.ts`:
+1. **Create field function** in `src/admin/payload/fields/new-field.ts`:
 ```ts
 export const newField = (options: NewFieldOptions = {}): Field => {
   return deepMerge(baseFieldConfig, options)
@@ -237,7 +237,7 @@ export const NewField: React.FC<NewFieldProps> = ({ ...props }) => {
 }
 ```
 
-3. **Add default values** in `src/payload/fields/default-values/new-field.ts`
+3. **Add default values** in `src/admin/payload/fields/default-values/new-field.ts`
 
 4. **Use in section configs**:
 ```ts
@@ -291,21 +291,22 @@ export const SectionComponent: React.FC<SectionBlock> = (props) => {
 
 ```
 src/
-├── payload/fields/
-│   ├── section-intro.ts      → <SectionIntro />
-│   ├── section-cta.ts        → <SectionCta />
-│   ├── buttons.ts            → <CMSLink /> (as button)
-│   ├── link.ts               → <CMSLink />
-│   ├── content.ts            → <RichText /> / direct text
-│   ├── image.ts              → <Media />
-│   └── default-values/       → CMS preview data
+├── admin/
+│   ├── payload/fields/
+│   │   ├── section-intro.ts      → <SectionIntro />
+│   │   ├── section-cta.ts        → <SectionCta />
+│   │   ├── buttons.ts            → <CMSLink /> (as button)
+│   │   ├── link.ts               → <CMSLink />
+│   │   ├── content.ts            → <RichText /> / direct text
+│   │   ├── image.ts              → <Media />
+│   │   └── default-values/       → CMS preview data
+│   └── utilities/
+│       └── button-variants.ts    → Dynamic variant extraction
 ├── components/
 │   ├── layout/               → Field-consuming components
 │   │   ├── section-intro.tsx
 │   │   └── section-cta.tsx
 │   └── sections/             → Complete section assemblies
-└── utilities/
-    └── button-variants.ts    → Dynamic variant extraction
 ```
 
 This pattern creates a scalable, maintainable system where adding new sections is primarily a composition exercise rather than building new field/component relationships from scratch.

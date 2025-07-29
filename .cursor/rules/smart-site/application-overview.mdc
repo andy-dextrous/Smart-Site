@@ -13,9 +13,10 @@ This repo contains two primary modules:
 ## Payload Setup
 
 - Payload code is deliberately kept separate from the rest of the app, to keep admin and front end features separated.
-- The entirety of Payload's config, components, fields etc live inside the src/payload/... folder.
+- The entirety of Payload's config, components, fields etc live inside the src/admin/payload/... folder.
 - The admin dashboard routes are all inside src/app/(payload)/admin
-- Some utilities used by Payload live inside src/utilities
+- Admin-specific utilities live inside src/admin/utilities
+- Frontend utilities live inside src/utilities
 
 ### Collections
 
@@ -26,9 +27,10 @@ This repo contains two primary modules:
 
 ## NextJS Setup
 
-- The lib folder is used for server actions, including direct database queries, server logic
-- Server actions (marked with "use server" at the top) should not export utilities as well. Server action files can only export async functions. Theyt are alsmost exclusively used to interact with the database via the payload client.
-- providers for the app are stored inside the src/providers folder
+- The admin lib folder (src/admin/lib/) is used for admin-specific server actions, database queries, and routing logic
+- The frontend lib folder (src/lib/) contains minimal frontend utilities only
+- Server actions (marked with "use server" at the top) should not export utilities as well. Server action files can only export async functions. They are almost exclusively used to interact with the database via the payload client.
+- Providers for the app are stored inside the src/providers folder
 
 ## Packages
 

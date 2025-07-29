@@ -1,11 +1,12 @@
 # Smart Site - Modern Website Starter
 
-A powerful website starter built with **Next.js 15+**, **Payload CMS**, **Tailwind CSS v4**, **GSAP**, and **Mastra AI**, designed for rapid development of section-based websites with enterprise-grade routing and caching.
+A powerful website starter built with **Next.js 15+**, **Payload CMS**, **Tailwind CSS v4**, **GSAP**, and **AI integration via remote Mastra backend**, designed for rapid development of section-based websites with enterprise-grade routing and caching.
 
 ## 📋 Table of Contents
 
 - [Installation & Getting Started](#installation--getting-started)
 - [Repository Overview](#repository-overview)
+- [AI Backend Integration](#ai-backend-integration)
 - [Building a Website](#building-a-website)
 - [How Routing Works](#how-routing-works)
 - [Lib Folder Structure](#lib-folder-structure)
@@ -21,6 +22,7 @@ A powerful website starter built with **Next.js 15+**, **Payload CMS**, **Tailwi
 - **pnpm** (preferred package manager)
 - **Database**: PostgreSQL or MongoDB
 - **File Storage**: Vercel Blob (recommended) or other storage solution
+- **AI Backend**: Smart Site AI server (separate installation)
 
 ### 1. Project Setup
 
@@ -43,12 +45,12 @@ Configure your `.env.local` file with the following variables:
 ```bash
 # Database Configuration
 DATABASE_PROVIDER=postgres                           # "vercel" for PostgreSQL or "mongoose" for MongoDB
-POSTGRES_URL=postgresql://username:password@host   # For PostgreSQL (get from Vercel Storage)
-DATABASE_URI=mongodb://localhost:27017/smart-site  # For MongoDB (if using mongoose)
+DATABASE_URL=postgresql://username:password@host   # For PostgreSQL (get from Vercel Storage)
+DATABASE_URL=mongodb://localhost:27017/smart-site  # For MongoDB (if using mongoose)
 
 # Payload CMS Configuration
 PAYLOAD_SECRET=your-unique-secret-key              # Generate at https://acte.ltd/utils/randomkeygen
-PAYLOAD_CONFIG_PATH=./src/payload/payload.config.ts
+PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts
 PAYLOAD_ADMIN_EMAIL=admin@yourdomain.com           # For auto-login during development
 PAYLOAD_ADMIN_PASSWORD=your-admin-password
 
@@ -67,9 +69,6 @@ BLOB_READ_WRITE_TOKEN=your-vercel-blob-token       # Get from Vercel Storage das
 
 # Email Service (Resend - optional for development)
 RESEND_API_KEY=your-resend-api-key                 # Only needed for production email functionality
-
-# AI Configuration (Mastra)
-OPENAI_API_KEY=your-openai-api-key                 # For AI-powered features
 ```
 
 ### 3. Database Setup
@@ -86,20 +85,21 @@ OPENAI_API_KEY=your-openai-api-key                 # For AI-powered features
 2. Set `DATABASE_PROVIDER=mongoose`
 3. Add your `DATABASE_URI` to `.env.local`
 
-### 4. Development Server
+### 4. AI Backend Setup
+
+Smart Site requires a separate AI backend service. See the [AI Backend Integration](#ai-backend-integration) section for setup instructions.
+
+### 5. Development Server
 
 ```bash
-# Start development server (includes Mastra AI dev server)
+# Start development server
 pnpm dev
-
-# Alternative: Start only Next.js server
-pnpm dev:next
 
 # Fresh development start (resets database and seeds data)
 pnpm dev:fresh
 ```
 
-### 5. Database Seeding & Initial Setup
+### 6. Database Seeding & Initial Setup
 
 > **🗃️ Important:** Before you start building, seed your database with sample content for the best development experience.
 
@@ -141,12 +141,10 @@ The seeding process creates realistic sample content including:
 
 > **💡 Pro Tip:** The seeded content follows all design system patterns and provides excellent examples for building your own sections.
 
-### 6. Available Scripts
+### 7. Available Scripts
 
 ```bash
-pnpm dev              # Start development with Next.js + Mastra AI
-pnpm dev:next         # Start only Next.js development server
-pnpm dev:mastra       # Start only Mastra AI development server
+pnpm dev              # Start development server
 pnpm build            # Build for production
 pnpm start            # Start production server
 pnpm lint             # Run ESLint
@@ -168,7 +166,7 @@ pnpm generate:types   # Generate TypeScript types from Payload
 
 ### Architecture Philosophy
 
-Smart Site uses a **section-first approach** to website building, where every page is composed of reusable section blocks managed through Payload CMS. This enables rapid development and content management flexibility.
+Smart Site uses a **section-first approach** to website building, where every page is composed of reusable section blocks managed through Payload CMS. The AI functionality is provided by a separate backend service, ensuring clean separation of concerns and scalable architecture.
 
 > **🎯 Cursor AI Tip:** The cursor rule `smart-site/adding-new-sections` automates the entire section creation process - just tell your AI agent "create a new section" and it handles the rest!
 
@@ -178,7 +176,7 @@ Smart Site uses a **section-first approach** to website building, where every pa
 - **Payload CMS**: Headless CMS with block-based content management
 - **Tailwind CSS v4**: Utility-first CSS framework with design system
 - **GSAP**: Professional-grade animations
-- **Mastra AI**: AI integration framework
+- **@mastra/client-js**: AI integration via remote Mastra backend
 - **TypeScript**: Type safety throughout the application
 
 ### Directory Structure
@@ -187,32 +185,129 @@ Smart Site uses a **section-first approach** to website building, where every pa
 src/
 ├── app/                          # Next.js App Router
 │   ├── (frontend)/              # Public-facing pages
-│   │   ├── [[...slug]]/         # Dynamic routing for all pages
+│   │   ├── [[...uri]]/          # Dynamic routing for all pages
 │   │   ├── css/                 # Tailwind configuration
-│   │   └── api/                 # API routes
-│   └── (payload)/               # Payload CMS admin
-│       └── admin/               # Admin dashboard routes
-├── components/                   # React components
+│   │   └── api/                 # API routes (including AI endpoints)
+│   └── (payload)/               # Payload CMS admin routes
+│       ├── admin/               # Admin dashboard routes
+│       └── api/                 # Payload API endpoints
+├── admin/                        # Admin-only code (protected IP)
+│   ├── config.ts                # Configuration management
+│   ├── components/              # Admin-specific React components
+│   ├── css/                     # Admin styling
+│   ├── lib/                     # Admin utilities and business logic
+│   │   ├── cache/               # Intelligent caching system
+│   │   ├── routing/             # URI engine & routing logic
+│   │   ├── data/                # Data access layer
+│   │   ├── redirects/           # URL management
+│   │   └── sitemaps/            # SEO & discovery
+│   ├── payload/                 # Payload CMS configuration
+│   │   ├── collections/         # Content collections (Pages, Posts, etc.)
+│   │   ├── fields/              # Reusable field configurations
+│   │   ├── components/          # Custom admin components
+│   │   ├── globals/             # Global settings
+│   │   ├── blocks/              # CMS block definitions
+│   │   ├── hooks/               # Payload hooks
+│   │   ├── jobs/                # Background jobs
+│   │   ├── plugins/             # CMS plugins
+│   │   └── payload.config.ts    # Main Payload configuration
+│   └── utilities/               # Admin-specific utilities
+├── components/                   # Frontend React components
 │   ├── sections/                # CMS-powered section blocks
 │   ├── layout/                  # Reusable layout components
 │   ├── ui/                      # ShadCN UI components
-│   └── icons/                   # Icon components
-├── lib/                         # Server actions & business logic
-│   ├── cache/                   # Intelligent caching system
-│   ├── routing/                 # URI engine & routing logic
-│   ├── data/                    # Data access layer
-│   └── ai/                      # Mastra AI configuration
-├── payload/                     # Payload CMS configuration
-│   ├── collections/             # Content collections (Pages, Posts, etc.)
-│   ├── fields/                  # Reusable field configurations
-│   ├── components/              # Custom admin components
-│   └── plugins/                 # CMS plugins
+│   ├── header/                  # Header components
+│   ├── footer/                  # Footer components
+│   ├── posts/                   # Post-related components
+│   ├── icons/                   # Icon components
+│   └── logos/                   # Logo components
 ├── providers/                   # React context providers
+│   └── gsap/                    # GSAP animation providers
 ├── utilities/                   # Shared utility functions
-└── types/                       # TypeScript type definitions
+├── hooks/                       # Custom React hooks
+├── types/                       # TypeScript type definitions
+├── lib/                         # Empty (moved to admin/lib)
+├── middleware.ts                # Next.js middleware
+└── smartsite.config.ts          # Main site configuration
 ```
 
 > **🏗️ HTML Structure Tip:** Use the cursor rule `smart-site/html-structure` to understand how semantic HTML should be structured throughout the application.
+
+## 🤖 AI Backend Integration
+
+Smart Site integrates with AI functionality via a separate **Smart Site AI** backend service, ensuring clean architecture and IP protection.
+
+### Architecture Overview
+
+```
+┌─────────────────┐     HTTP API     ┌─────────────────┐
+│   Smart Site    │ ◄──────────────► │ Smart Site AI   │
+│   (Frontend)    │                  │   (Backend)     │
+│                 │                  │                 │
+│ • Next.js       │                  │ • Mastra Core   │
+│ • Payload CMS   │                  │ • AI Agents     │
+│ • UI Components │                  │ • Workflows     │
+│ • Client SDK    │                  │ • LibSQL Store  │
+└─────────────────┘                  └─────────────────┘
+```
+
+### Client Configuration
+
+AI integration is configured in `src/smartsite.config.ts`:
+
+```typescript
+export default defineConfig({
+  settings: {
+    ai: {
+      enabled: true,
+      url: "http://localhost:4112", // Development
+      // url: "https://your-ai-backend.vercel.app", // Production
+    },
+  },
+})
+```
+
+### Setting Up the AI Backend
+
+1. **Navigate to AI Backend**:
+
+   ```bash
+   cd ../smart-site-ai  # From smart-site directory
+   ```
+
+2. **Install Dependencies**:
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Start AI Server**:
+
+   ```bash
+   pnpm dev  # Runs on port 4112
+   ```
+
+4. **Verify Connection**:
+   - Smart Site will automatically connect to the AI backend
+   - Check the admin chat panel to test functionality
+
+### AI Features Available
+
+- **Chat Assistant**: AI-powered chat in the admin panel
+- **Content Generation**: AI-assisted content creation
+- **SEO Optimization**: Automated SEO suggestions
+- **Content Analysis**: Smart content analysis and recommendations
+
+### Production Deployment
+
+For production, deploy the AI backend separately and update the URL in your config:
+
+```typescript
+ai: {
+  enabled: true,
+  url: "https://your-ai-backend.vercel.app",
+}
+```
 
 ## 🏗️ Building a Website
 
@@ -242,7 +337,7 @@ Create two files:
 
 ```typescript
 import type { Block } from "payload"
-import { sectionIntro, sectionCta } from "@/payload/fields"
+import { sectionIntro, sectionCta } from "@/admin/payload/fields"
 
 export const HeroBanner: Block = {
   slug: "hero-banner",
@@ -274,8 +369,8 @@ export const HeroBanner: Block = {
 
 ```typescript
 import { SectionIntro, SectionCta } from "@/components/layout"
-import { Media } from "@/payload/components/frontend"
-import type { HeroBannerBlock } from "@/payload/payload-types"
+import { Media } from "@/admin/payload/components/frontend"
+import type { HeroBannerBlock } from "@/admin/payload/payload-types"
 
 export const HeroBannerComponent: React.FC<HeroBannerBlock> = (props) => {
   const { sectionIntro, sectionCta, backgroundImage } = props
@@ -395,9 +490,9 @@ export async function generateStaticParams() {
 }
 ```
 
-## 📚 Lib Folder Structure
+## 📚 Admin Lib Structure
 
-The `src/lib/` directory contains the core business logic organized by functionality:
+The `src/admin/lib/` directory contains the core business logic organized by functionality:
 
 ### `/cache` - Intelligent Caching System
 
@@ -406,7 +501,7 @@ The `src/lib/` directory contains the core business logic organized by functiona
 - **`config.ts`** - Cache configuration and settings
 
 ```typescript
-import { cache } from "@/lib/cache"
+import { cache } from "@/admin/lib/cache"
 
 // Get any document by URI (O(1) lookup)
 const page = await cache.getByURI("/about")
@@ -431,12 +526,6 @@ await revalidate({ collection: "pages", doc: updatedPage, action: "update" })
 - **`globals.ts`** - Global settings access
 - **`user.ts`** - User authentication helpers
 
-### `/ai` - Mastra AI Integration
-
-- **`mastra.ts`** - AI service configuration
-- **`agents/`** - AI agent definitions
-- **`tools/`** - Custom AI tools
-
 ### `/sitemaps` - SEO & Discovery
 
 - **`generate.ts`** - Dynamic sitemap generation
@@ -447,12 +536,16 @@ await revalidate({ collection: "pages", doc: updatedPage, action: "update" })
 - **`legacy.ts`** - Legacy URL redirect mapping
 - **`automatic.ts`** - System-generated redirects
 
+### AI Client Integration
+
+- **`mastra-client.ts`** - Remote AI backend client configuration
+
 ### Server Actions Pattern
 
-All lib modules export async functions marked with `"use server"`:
+All admin lib modules export async functions marked with `"use server"`:
 
 ```typescript
-// ✅ Correct: Server action file
+// ✅ Correct: Server action file in admin/lib/
 "use server"
 
 export async function getPageBySlug(slug: string) {
@@ -467,7 +560,7 @@ export async function updatePageContent(data: PageData) {
 // export const formatDate = (date: Date) => { ... } // This breaks the server action
 ```
 
-Utilities should live in `/utilities` instead of `/lib`.
+Utilities should live in `/utilities` or `/admin/utilities` depending on scope.
 
 ## 🎯 Cursor Rules
 
@@ -605,7 +698,7 @@ Configuration is handled through CSS files in `src/app/(frontend)/css/`:
 
 ### Payload CMS Configuration
 
-Core CMS settings in `src/payload/payload.config.ts`:
+Core CMS settings in `src/admin/payload/payload.config.ts`:
 
 - **Collections**: Pages, Posts, Services, Team, Media, Forms
 - **Globals**: Settings, Navigation, Footer
@@ -614,10 +707,10 @@ Core CMS settings in `src/payload/payload.config.ts`:
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Frontend Deployment (Vercel Recommended)
 
 1. **Connect Repository**
-   - Import project to Vercel
+   - Import smart-site project to Vercel
    - Configure build settings (auto-detected)
 
 2. **Environment Variables**
@@ -635,6 +728,30 @@ Core CMS settings in `src/payload/payload.config.ts`:
    - Enable **Fluid Compute** for better performance
    - Consider **Standard CPU** for paid plans
 
+### AI Backend Deployment
+
+The Smart Site AI backend must be deployed separately:
+
+1. **Deploy AI Backend**
+   - Deploy `smart-site-ai` to Vercel, Railway, or other hosting
+   - Set environment variables (`DATABASE_URL`, `OPENAI_API_KEY`)
+   - Note the deployed URL
+
+2. **Update Frontend Configuration**
+   - Update `smartsite.config.ts` with production AI backend URL:
+
+   ```typescript
+   ai: {
+     enabled: true,
+     url: "https://your-ai-backend.vercel.app",
+   }
+   ```
+
+3. **Security Considerations**
+   - AI backend can be private/internal-only
+   - Frontend communicates via HTTP API only
+   - No AI secrets exposed to frontend
+
 ### Other Platforms
 
 Smart Site can deploy to any Node.js hosting platform:
@@ -646,6 +763,8 @@ Smart Site can deploy to any Node.js hosting platform:
 
 ### Production Checklist
 
+#### Frontend (Smart Site)
+
 - [ ] Environment variables configured
 - [ ] Database provisioned and connected
 - [ ] File storage configured
@@ -655,6 +774,14 @@ Smart Site can deploy to any Node.js hosting platform:
 - [ ] Admin user created
 - [ ] **Content seeded or migrated**
 - [ ] **Database seeding API endpoint secured for production**
+
+#### AI Backend (Smart Site AI)
+
+- [ ] AI backend deployed separately
+- [ ] AI backend environment variables configured (`DATABASE_URL`, `OPENAI_API_KEY`)
+- [ ] AI backend URL updated in frontend config
+- [ ] AI backend health check accessible
+- [ ] Frontend can successfully connect to AI backend
 
 > **🚀 Production Seeding:** Remember to seed your production database after deployment using the same `/api/seed` endpoint or by running `pnpm seed` in your production environment.
 
@@ -667,6 +794,7 @@ Smart Site can deploy to any Node.js hosting platform:
 - **[Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)**
 - **[GSAP Documentation](https://greensock.com/docs/)**
 - **[Mastra AI Documentation](https://mastra.ai/docs)**
+- **[Smart Site AI Backend](../smart-site-ai/README.md)** - Separate AI backend documentation
 
 ## 🤝 Contributing
 

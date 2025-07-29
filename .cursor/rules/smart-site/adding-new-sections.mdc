@@ -45,8 +45,8 @@ export const SectionName: Block = {
 }
 ```
 
-4. Once you have built your config file, expose it to Payload by importing it into `src/components/sections/config.ts`. This will automatically add it to Payload.
-5. You also need to import your section's Component into `src/components/sections/RenderSections.tsx`. This file maps slugs to React components.
+4. Once you have built your config file, expose it to Payload by importing it into `src/components/sections/config.ts` and adding it to the `sectionBlocks` array. This automatically registers it with Payload.
+5. You also need to import your section's Component into `src/components/sections/sections-map.tsx` and add it to the `sectionsMap` object. This maps block types to React components.
 6. Now, you are ready to build the Component. Your interfaceName will now exist inside payload.types.ts (automatically generated). This tells your component exactly how to work with the available data. Here is a blank starter component.
 
 ```tsx
@@ -82,5 +82,5 @@ export const NewSectionComponent: React.FC<NewSectionBlock> = props => {
 5. When naming a section, use architectural/layout names that describe the style of layout it is. DO NOT name it after the content that is in an example. The idea is to create REUSABLE layouts. Keep names as generic as possible. ie, instead of service-card-grid - just call it card-grid.
 6. DO NOT add GSAP code unless asked to. Don't assume each section should have animation.
 7. Strictly follow the tailwin rules for handling typography. The design system in tailwind pre-handles MANY styles for spacing and typography. Don't add typography classes for styles that are established by the design system.
-8. Always look at `src/payload/collections/config.ts` to see what post types are in this repo. You want to use this knowledge to make decisions about whether to use a relationship/join field or not.
+8. Always look at `src/admin/payload/collections/` to see what collections are available in this repo. Check the frontend collections at `src/admin/payload/collections/frontend/` to understand what post types exist. Use this knowledge to make decisions about whether to use a relationship/join field or not.
 

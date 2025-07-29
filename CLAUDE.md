@@ -14,118 +14,27 @@ This is a **section-first, field-driven website builder** using Next.js 15, Payl
 
 **Key Directories**:
 - `src/components/sections/` - All page sections (primary development area)
-- `src/payload/` - CMS configuration separated from frontend
-- `src/lib/cache/` - Performance caching utilities
-- `src/lib/routing/` - URI routing engine and navigation
-- `src/utilities/` - Shared utilities used by Payload and frontend
+- `src/admin/payload/` - CMS configuration separated from frontend
+- `src/admin/lib/` - Admin server actions, routing, and caching utilities
+- `src/utilities/` - Frontend utilities
+- `src/admin/utilities/` - Admin-specific utilities
 
-## Section Development Workflow
+### Admin/Frontend Separation
 
-### The Section-First Approach
+**Critical**: Admin and frontend code are completely separated:
+- **Admin Layer**: `src/admin/` contains all Payload CMS, server actions, routing logic
+- **Frontend Layer**: `src/components/`, `src/app/(frontend)/` contains public website code
+- **Never mix**: Admin components shouldn't be used in frontend routes
 
-Every website consists of stacked `<section>` elements inside `<main>`. Payload CMS handles page templating by organizing these sections.
+## Sections Config System
 
-### Creating New Sections
+**Unified Configuration**: Sections use a centralized registration system:
 
-**CRITICAL**: Follow this exact process in order:
+1. **Config Registration**: `src/components/sections/config.ts` exports `sectionBlocks` array
+2. **Component Mapping**: `src/components/sections/sections-map.tsx` maps block types to React components  
+3. **Rendering**: `src/admin/components/render-sections.tsx` handles server-side rendering
 
-1. **Create folder**: `src/components/sections/new-section-name/` (kebab-case)
-2. **Create files**: `Component.tsx` and `config.ts`
-3. **Build config first**: Design CMS fields based on client control needs
-4. **Export to system**: Add to `src/components/sections/config.ts`
-5. **Register component**: Add to `src/components/sections/RenderSections.tsx`
-6. **Build component**: Use generated Payload types
-
-### Section Naming Convention
-
-Use **architectural/layout names**, NOT content-specific names:
-- ✅ `hero-split`, `card-grid`, `text-image`
-- ❌ `service-hero`, `product-grid`, `about-content`
-
-### Config File Pattern
-
-```typescript
-import type { Block } from "payload"
-
-export const SectionName: Block = {
-  slug: "section-name", // kebab-case, unique across site
-  admin: {
-    group: "Content Sections", // Group related sections
-  },
-  interfaceName: "SectionNameBlock", // Payload generates types from this
-  fields: [
-    // Field definitions here
-  ]
-}
-```
-
-### Component File Pattern
-
-```typescript
-import { cn } from "@/utilities/ui"
-import RichText from "@/payload/components/rich-text"
-import type { SectionNameBlock } from "@/payload/payload-types"
-
-/*************************************************************************/
-/*  SECTION NAME COMPONENT
-/*************************************************************************/
-
-export const SectionNameComponent: React.FC<SectionNameBlock> = props => {
-  const { heading, content } = props
-
-  return (
-    <section>
-      <div className="container flex gap-8">
-        <div className="flex flex-1 flex-col items-start gap-4">
-          <h2>{heading}</h2>
-          <div className="prose max-w-none">
-            <RichText data={content} />
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-```
-
-## Field-to-Component Architecture
-
-### Reusable Field Functions (src/payload/fields/)
-
-The app uses **reusable field functions** that map 1:1 to React components:
-
-- `sectionIntro()` → `<SectionIntro />` - Standard heading + description
-- `sectionCta()` → `<SectionCta />` - Call-to-action with button
-- `button()` → `<CMSLink />` - Single button with variants
-- `buttonsGroup()` → Multiple `<CMSLink />` elements
-- `link()` → `<CMSLink />` - Internal references or external URLs
-- `content()` → `<RichText />` - Rich text content fields
-
-### Using Field Functions
-
-```typescript
-// In section config
-fields: [
-  sectionIntro({
-    collapsibleLabel: "Content",
-    headingDescription: "Use <span> tags for gradient text",
-  }),
-  sectionCta({
-    collapsibleLabel: "Call to Action",
-    buttonDescription: "Primary action button",
-  }),
-]
-```
-
-### Layout Components (src/components/layout/)
-
-Pre-built components that consume field data directly:
-
-```typescript
-// In section component
-<SectionIntro heading={heading} description={description} align="center" />
-<SectionCta text={ctaText} button={ctaButton} />
-```
+This replaces the old pattern of importing into separate files.
 
 ## Tailwind v4 Implementation
 
@@ -155,7 +64,7 @@ All Tailwind config is in CSS files, not JavaScript:
 
 ### Setup Requirements
 
-1. **Config**: Set `gsap: true` in `src/wc.config.ts`
+1. **Config**: Set `gsap: true` in `src/smartsite.config.ts`
 2. **Provider**: Import from `@/providers/gsap` (not node_modules)
 3. **Client Component**: Add `"use client"` to animated components
 
@@ -188,12 +97,32 @@ useGSAP(
 
 ### Collections Structure
 
+Located in `src/admin/payload/collections/`:
 - **Pages**: Main page content with flexible sections
 - **Posts**: Blog/article content
 - **Services**: Service-specific pages
 - **Team**: Team member profiles
 - **Templates**: Reusable page templates
 - **URI Index**: URL routing and management
+
+### Field-to-Component Architecture
+
+**Reusable Field Functions** (`src/admin/payload/fields/`) map 1:1 to React components:
+
+- `sectionIntro()` → `<SectionIntro />` - Standard heading + description
+- `sectionCta()` → `<SectionCta />` - Call-to-action with button
+- `button()` → `<CMSLink />` - Single button with variants
+- `link()` → `<CMSLink />` - Internal references or external URLs
+- `content()` → `<RichText />` - Rich text content fields
+
+### Layout Components (`src/components/layout/`)
+
+Pre-built components that consume field data directly:
+
+```typescript
+<SectionIntro heading={heading} description={description} align="center" />
+<SectionCta text={ctaText} button={ctaButton} />
+```
 
 ### Data Fetching Patterns
 
@@ -206,28 +135,13 @@ const data = await getPayload().findByID({
   id: params.id,
 })
 
-// Client components (when needed)
+// Client components (when needed)  
 import { useFetch } from "@/hooks/useFetch"
 
 const { data } = useFetch(`/api/pages/${id}`)
 ```
 
-### Route Groups Separation
-
-- **Frontend Logic**: Keep in `(frontend)` routes
-- **Admin Logic**: Keep in `(payload)` routes
-- **Never mix**: Admin components shouldn't be used in frontend
-
 ## Development Guidelines
-
-### Section Development Rules
-
-1. **Confirm fields** with user before creating them
-2. **Infer from screenshots** when provided - map to design system
-3. **NO documentation files** - code should be self-documenting
-4. **NO manual types** - Payload generates automatically
-5. **Generic naming** - architectural, not content-specific
-6. **Check collections** in `src/payload/collections/config.ts` for relationships
 
 ### Type Generation
 
@@ -250,7 +164,7 @@ npm run generate:types
 ```bash
 # Before committing any changes
 pnpm lint          # ESLint validation
-pnpm check-types   # TypeScript validation
+pnpm type-check    # TypeScript validation
 pnpm format        # Prettier formatting
 ```
 
@@ -266,7 +180,7 @@ pnpm seed          # Repopulate with sample data
 ### Rich Text Handling
 
 ```typescript
-import RichText from "@/payload/components/rich-text"
+import RichText from "@/admin/payload/components/frontend/rich-text"
 
 <div className="prose max-w-none">
   <RichText data={content} />
@@ -276,7 +190,7 @@ import RichText from "@/payload/components/rich-text"
 ### Media Handling
 
 ```typescript
-import { Media } from "@/payload/components/frontend/media"
+import { Media } from "@/admin/payload/components/frontend/media"
 
 <Media resource={image} className="aspect-video object-cover" />
 ```
@@ -284,7 +198,7 @@ import { Media } from "@/payload/components/frontend/media"
 ### Link Handling
 
 ```typescript
-import { CMSLink } from "@/payload/components/frontend/cms-link"
+import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
 
 <CMSLink {...button} appearance={button?.variant || "default"} />
 ```

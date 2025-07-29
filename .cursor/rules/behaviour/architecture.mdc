@@ -18,18 +18,20 @@ This is a monorepo dedicated to developing the wild-child website building syste
 
 ## Apps
 
-Inside the /apps folder, there are 3 main folders you should know about.
+Inside the /apps folder, there are main applications you should know about:
 
-1. **Blocks Library**: The blocks library is the central repository for all installable components, sections and layouts. It contains a Next JS website, designed separately from the other Next sites, specifically to allow easy development of both component files and their associated Payload config files. The blocks library is also where we create the design system, based on Tailwind 4, that is used as teh basis for all designs.
+1. **Smart Site**: The primary Next.js 15 website application with separated admin/frontend layers. Features a unified sections config system where sections are registered in `src/components/sections/config.ts` and mapped in `src/components/sections/sections-map.tsx`. The admin layer is completely separated in `src/admin/` with its own Payload configuration, routing, and utilities.
 
-2. **Website Starter**: The website starter package is our starter package for any new website. It is designed to consume our implementation of Payload CMS as an extendable source of shared truth (inspired by a common WordPress backend).
+2. **Agent Starter**: Mastra AI orchestration system for building AI agents and workflows.
 
-3. **Website Starter Standalone**: This is a clone of the website starter but it houses the Payload config inside its files without relying on an external package. It is effectively divorced from the wild-child repo from the moment of creation.
+3. **Blocks Library**: Repository for installable components and sections with design system based on Tailwind v4.
 
 ## Packages
 
-The 2 main packages you need to understand are the CLI tool and the Payload CMS package.
+The main packages you need to understand:
 
-1. **CLI**: This is our CLI tool for installing new sections into pre-existing websites, straight from our blocks library site. It is heavily inspired by ShadCN and works by copying files directly into the consuming Next JS site as a folder with 2 editable files: a Component.tsx file and a config.ts file which contains the blocks field information required to import it into the site.
+1. **CLI**: CLI tool for installing new sections, inspired by ShadCN. Copies Component.tsx and config.ts files directly into consuming Next.js sites.
 
-2. **Payload**: This package contains our preferred set of defaults, custom CSS, fields and components for building our WordPress-inspired CMS, which will be uniform across our fleet of websites and version-controlled - allowing us to create updates, roll out new features and performance upgrades.
+2. **Payload**: Contains shared CMS patterns, fields, and components. Now integrated into the admin layer of smart-site at `src/admin/payload/` rather than as a separate external package.
+
+3. **Agents**: AI tools, prompts, and workflows for the Mastra integration.
