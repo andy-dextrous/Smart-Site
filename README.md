@@ -43,32 +43,29 @@ cp .env.example .env.local
 Configure your `.env.local` file with the following variables:
 
 ```bash
-# Database Configuration
-DATABASE_PROVIDER=postgres                           # "vercel" for PostgreSQL or "mongoose" for MongoDB
-DATABASE_URL=postgresql://username:password@host   # For PostgreSQL (get from Vercel Storage)
-DATABASE_URL=mongodb://localhost:27017/smart-site  # For MongoDB (if using mongoose)
+# Database Configuration (choose one)
+# FOR MONGODB:
+DATABASE_PROVIDER=mongoose
+DATABASE_URL=mongodb+srv://...
+
+# FOR POSTGRES:
+DATABASE_PROVIDER=postgres
+DATABASE_URL="postgres://..."
 
 # Payload CMS Configuration
-PAYLOAD_SECRET=your-unique-secret-key              # Generate at https://acte.ltd/utils/randomkeygen
+PAYLOAD_SECRET=your-unique-secret-key              # Create any random secret string
+PREVIEW_SECRET=your-preview-secret                 # Create any short nanoid string
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...           # Vercel Blob storage token
+RESEND_API_KEY=re_...                             # Resend email service API key
+
+# Payload Config Path
 PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts
-PAYLOAD_ADMIN_EMAIL=admin@yourdomain.com           # For auto-login during development
-PAYLOAD_ADMIN_PASSWORD=your-admin-password
+NEXT_PUBLIC_URL=http://localhost:3000
+NEXT_PUBLIC_AI_URL=http://localhost:4112           # AI backend URL
 
-# Preview & Draft Configuration
-PREVIEW_SECRET=another-unique-secret-key           # For draft mode functionality
-
-# GSAP Configuration
-TOKEN=ee697198-7190-48fb-98df-b5aa34edf555       # Pre-configured token with full GSAP features
-
-# Next.js Configuration
-NEXT_PUBLIC_URL=http://localhost:3000              # Local development URL
-VERCEL_PROJECT_PRODUCTION_URL=yourdomain.com       # Production URL for deployment
-
-# File Storage (Vercel Blob recommended)
-BLOB_READ_WRITE_TOKEN=your-vercel-blob-token       # Get from Vercel Storage dashboard
-
-# Email Service (Resend - optional for development)
-RESEND_API_KEY=your-resend-api-key                 # Only needed for production email functionality
+# Admin User (for seeding)
+PAYLOAD_ADMIN_EMAIL="user@example.com"
+PAYLOAD_ADMIN_PASSWORD=your-strong-password        # Will be created during seeding
 ```
 
 ### 3. Database Setup
@@ -179,56 +176,45 @@ Smart Site uses a **section-first approach** to website building, where every pa
 - **@mastra/client-js**: AI integration via remote Mastra backend
 - **TypeScript**: Type safety throughout the application
 
-### Directory Structure
+### Directory Structure (Frontend-Focused)
+
+> **⚠️ IMPORTANT**: Never directly modify files in the `src/admin/` directory. All customizations should be done through `smartsite.config.ts` to maintain clean separation between admin/frontend code.
 
 ```
 src/
 ├── app/                          # Next.js App Router
-│   ├── (frontend)/              # Public-facing pages
+│   ├── (frontend)/              # 🎯 PUBLIC WEBSITE - Your main development area
 │   │   ├── [[...uri]]/          # Dynamic routing for all pages
-│   │   ├── css/                 # Tailwind configuration
-│   │   └── api/                 # API routes (including AI endpoints)
-│   └── (payload)/               # Payload CMS admin routes
-│       ├── admin/               # Admin dashboard routes
-│       └── api/                 # Payload API endpoints
-├── admin/                        # Admin-only code (protected IP)
-│   ├── config.ts                # Configuration management
-│   ├── components/              # Admin-specific React components
-│   ├── css/                     # Admin styling
-│   ├── lib/                     # Admin utilities and business logic
-│   │   ├── cache/               # Intelligent caching system
-│   │   ├── routing/             # URI engine & routing logic
-│   │   ├── data/                # Data access layer
-│   │   ├── redirects/           # URL management
-│   │   └── sitemaps/            # SEO & discovery
-│   ├── payload/                 # Payload CMS configuration
-│   │   ├── collections/         # Content collections (Pages, Posts, etc.)
-│   │   ├── fields/              # Reusable field configurations
-│   │   ├── components/          # Custom admin components
-│   │   ├── globals/             # Global settings
-│   │   ├── blocks/              # CMS block definitions
-│   │   ├── hooks/               # Payload hooks
-│   │   ├── jobs/                # Background jobs
-│   │   ├── plugins/             # CMS plugins
-│   │   └── payload.config.ts    # Main Payload configuration
-│   └── utilities/               # Admin-specific utilities
-├── components/                   # Frontend React components
-│   ├── sections/                # CMS-powered section blocks
-│   ├── layout/                  # Reusable layout components
+│   │   ├── css/                 # Tailwind v4 configuration
+│   │   └── api/                 # Frontend API routes (AI, preview, etc.)
+│   └── (payload)/               # CMS admin routes (don't modify)
+├── components/                   # 🎯 FRONTEND COMPONENTS - Primary development area
+│   ├── sections/                # 📍 Section blocks (90% of development time)
+│   │   ├── config.ts            # Section registration
+│   │   ├── sections-map.tsx     # Component mapping
+│   │   └── [section-name]/      # Individual section folders
+│   │       ├── Component.tsx    # React component
+│   │       └── config.ts        # CMS fields configuration
+│   ├── layout/                  # Reusable layout components (SectionIntro, etc.)
 │   ├── ui/                      # ShadCN UI components
 │   ├── header/                  # Header components
 │   ├── footer/                  # Footer components
-│   ├── posts/                   # Post-related components
-│   ├── icons/                   # Icon components
-│   └── logos/                   # Logo components
+│   └── posts/                   # Blog/post components
 ├── providers/                   # React context providers
-│   └── gsap/                    # GSAP animation providers
-├── utilities/                   # Shared utility functions
+│   └── gsap/                    # GSAP animation setup
+├── utilities/                   # Frontend utility functions
 ├── hooks/                       # Custom React hooks
 ├── types/                       # TypeScript type definitions
-├── lib/                         # Empty (moved to admin/lib)
 ├── middleware.ts                # Next.js middleware
-└── smartsite.config.ts          # Main site configuration
+├── smartsite.config.ts          # 🎯 MAIN CONFIG - All customizations go here
+└── admin/                       # ⛔ PROTECTED - Don't modify directly
+    ├── config.ts                # Base admin configuration
+    ├── payload/                 # Complete CMS setup
+    │   ├── collections/         # Content types (Pages, Posts, etc.)
+    │   ├── fields/              # Reusable field patterns
+    │   ├── blocks/              # Available section blocks
+    │   └── payload.config.ts    # Generated from smartsite.config.ts
+    └── lib/                     # Admin business logic
 ```
 
 > **🏗️ HTML Structure Tip:** Use the cursor rule `smart-site/html-structure` to understand how semantic HTML should be structured throughout the application.
@@ -320,18 +306,22 @@ Smart Site is built around the concept of **sections** - reusable content blocks
 
 > **⚡ Quick Start:** Use the cursor rule `smart-site/adding-new-sections` - your AI agent will guide you through creating sections with proper patterns automatically!
 
-### Creating a New Section
+### Section Creation Workflow
 
 > **🤖 AI-Powered Section Creation:** Just tell your AI agent "create a new section called hero-banner" and the `smart-site/adding-new-sections` rule will handle the entire process including proper field configuration and component setup.
 
-#### 1. Create Section Files
+**Every section follows the mandatory two-file pattern**:
+1. **`config.ts`** - Payload CMS field configuration
+2. **`Component.tsx`** - React component implementation
+
+#### Step 1: Create Section Directory
 
 ```bash
-# Create new section directory
+# Always use kebab-case naming
 mkdir src/components/sections/hero-banner
 ```
 
-Create two files:
+#### Step 2: Create Config First (Always start here)
 
 **`src/components/sections/hero-banner/config.ts`**
 
@@ -340,15 +330,15 @@ import type { Block } from "payload"
 import { sectionIntro, sectionCta } from "@/admin/payload/fields"
 
 export const HeroBanner: Block = {
-  slug: "hero-banner",
+  slug: "hero-banner",               // MUST match folder name
   admin: {
     group: "Hero Sections",
   },
-  interfaceName: "HeroBannerBlock",
+  interfaceName: "HeroBannerBlock", // Payload generates types from this
   fields: [
     sectionIntro({
       collapsibleLabel: "Hero Content",
-      headingDescription: "Main hero heading",
+      headingDescription: "Main hero heading - use <span> tags for gradient text",
     }),
     sectionCta({
       collapsibleLabel: "Call to Action",
@@ -358,28 +348,67 @@ export const HeroBanner: Block = {
       type: "upload",
       relationTo: "media",
       required: false,
+      admin: {
+        description: "Background image for the hero section",
+      },
     },
   ],
 }
 ```
 
-> **⚙️ Field Configuration Tip:** Use the cursor rule `smart-site/payload-config` to understand how reusable field functions like `sectionIntro()` and `sectionCta()` map to React components.
+#### Step 3: Register the Section (Required for CMS)
+
+**A. Export in `src/components/sections/config.ts`:**
+
+```typescript
+export { HeroBanner } from "./hero-banner/config"
+
+// Add to sectionBlocks array
+export const sections = {
+  sectionBlocks: [
+    // ... existing sections
+    HeroBanner,
+  ],
+}
+```
+
+**B. Map component in `src/components/sections/sections-map.tsx`:**
+
+```typescript
+import { HeroBannerComponent } from "./hero-banner/Component"
+
+export const sectionsMap: Record<string, React.ComponentType<any>> = {
+  // ... existing sections
+  "hero-banner": HeroBannerComponent,
+}
+```
+
+#### Step 4: Build the Component
 
 **`src/components/sections/hero-banner/Component.tsx`**
 
 ```typescript
+import { cn } from "@/utilities/ui"
 import { SectionIntro, SectionCta } from "@/components/layout"
-import { Media } from "@/admin/payload/components/frontend"
+import { Media } from "@/admin/payload/components/frontend/media"
 import type { HeroBannerBlock } from "@/admin/payload/payload-types"
 
-export const HeroBannerComponent: React.FC<HeroBannerBlock> = (props) => {
+/*************************************************************************/
+/*  HERO BANNER COMPONENT
+/*************************************************************************/
+
+export const HeroBannerComponent: React.FC<HeroBannerBlock> = props => {
   const { sectionIntro, sectionCta, backgroundImage } = props
 
   return (
     <section className="relative min-h-screen flex items-center">
       {backgroundImage && (
         <div className="absolute inset-0 -z-10">
-          <Media resource={backgroundImage} className="w-full h-full object-cover" />
+          <Media 
+            resource={backgroundImage} 
+            fill 
+            className="object-cover" 
+          />
         </div>
       )}
 
@@ -394,38 +423,26 @@ export const HeroBannerComponent: React.FC<HeroBannerBlock> = (props) => {
 }
 ```
 
-> **🎨 Animation Tip:** Want to add GSAP animations? Use the cursor rule `smart-site/adding-animations` - your AI agent knows exactly how to implement animations following our standards.
+#### Step 5: Use in CMS
 
-#### 2. Register the Section
+1. **Start dev server**: `pnpm dev`
+2. **Access admin**: `http://localhost:3000/admin`
+3. **Create/edit page**: Add your new "Hero Banner" section
+4. **Configure content**: Fill in fields and save
 
-**Add to `src/components/sections/config.ts`:**
+### Section Naming Rules
 
-```typescript
-import { HeroBanner } from "./hero-banner/config"
+**✅ Use Architectural Names**:
+- `hero-split` - Hero with content/image split
+- `card-grid` - Grid of cards
+- `text-image` - Text with image
+- `stats-row` - Statistics in a row
+- `cta-centered` - Centered call-to-action
 
-export const sectionsConfig = [
-  // ... existing sections
-  HeroBanner,
-]
-```
-
-**Add to `src/components/sections/RenderSections.tsx`:**
-
-```typescript
-import { HeroBannerComponent } from "./hero-banner/Component"
-
-const sectionComponents = {
-  // ... existing components
-  "hero-banner": HeroBannerComponent,
-}
-```
-
-#### 3. Use in Pages
-
-1. Go to `/admin` in your browser
-2. Create or edit a page
-3. Add your new "Hero Banner" section
-4. Configure the content and save
+**❌ Avoid Content-Specific Names**:
+- `services-hero` - Too specific to services
+- `about-section` - Page-specific
+- `pricing-cards` - Business logic in name
 
 ### Reusable Field System
 
@@ -673,17 +690,63 @@ These rules transform Cursor into a **smart development assistant** that underst
 
 ## ⚙️ Configuration
 
-### Wild Child Config (`src/wc.config.ts`)
+### SmartSite Config (`src/smartsite.config.ts`)
+
+> **🚨 CRITICAL**: All configuration changes must be made through `smartsite.config.ts`. Never directly modify files in the `src/admin/` directory as this breaks the admin/frontend separation and can cause deployment issues.
 
 ```typescript
-const wildChildConfig = {
-  themeToggle: false, // Enable dark/light mode toggle
-  gsap: true, // Enable GSAP animations
-  smoothScroll: true, // Enable smooth scrolling (requires GSAP)
-  i18n: false, // Enable internationalization
-  gsapDevTools: true, // Enable GSAP dev tools in development
-}
+import { defineConfig } from "@/admin/config"
+
+const smartSiteConfig = defineConfig({
+  settings: {
+    gsap: true,                    // Enable GSAP animations
+    smoothScroll: true,           // Enable smooth scrolling
+    themeToggle: false,           // Enable dark/light mode toggle
+    i18n: false,                  // Enable internationalization
+    gsapDevTools: true,           // GSAP dev tools in development
+    ai: {
+      enabled: true,              // Enable AI integration
+      url: process.env.NEXT_PUBLIC_AI_URL,
+    },
+    search: true,                 // Enable search functionality
+    analytics: true,              // Enable analytics
+    templateSupport: true,        // Enable page templates
+  },
+
+  // Disable default collections with boolean flags
+  collections: [
+    // { services: false },        // Disable services collection
+    // CustomProducts,             // Add custom collections
+  ],
+
+  // Disable default globals
+  globals: [
+    // { footer: false },          // Disable footer global
+  ],
+
+  // Disable default blocks
+  blocks: [
+    // { form: false },            // Disable form block
+  ],
+
+  // Additional Payload configuration
+  payload: {
+    // Custom admin settings, plugins, etc.
+  },
+})
+
+export default smartSiteConfig
 ```
+
+### ⚠️ Admin Directory Warning
+
+**DO NOT MODIFY ANYTHING IN `src/admin/`**:
+- ❌ Don't edit `src/admin/payload/payload.config.ts`
+- ❌ Don't modify collection configs directly
+- ❌ Don't change admin utilities
+- ✅ Instead, use the override system in `smartsite.config.ts`
+
+The admin directory is designed to be **framework code** that remains untouched. All site-specific customizations flow through the `smartsite.config.ts` file using the boolean override system.
 
 ### Tailwind CSS v4 Configuration
 
