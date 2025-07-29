@@ -8,8 +8,8 @@
     background: transparent;
     border-image: linear-gradient(
         to right,
-        theme(colors.secondary-600),
-        theme(colors.primary-500)
+        var(--color-secondary-600),
+        var(--color-primary-500)
       )
       1;
   }
@@ -34,8 +34,8 @@
   .cta-overlay-spotlight {
     background: radial-gradient(
       67.41% 86.41% at 73.99% 10.24%,
-      color-mix(in oklab, theme(colors.primary-500) 30%, transparent) 0%,
-      theme(colors.primary-500) 100%
+      color-mix(in oklab, var(--color-primary-500) 30%, transparent) 0%,
+      var(--color-primary-500) 100%
     );
     mix-blend-mode: hard-light;
   }
@@ -43,8 +43,8 @@
   .cta-overlay-base {
     background: radial-gradient(
       53.09% 69.9% at 70.4% 31.94%,
-      color-mix(in oklab, theme(colors.primary-500) 24%, transparent) 0%,
-      color-mix(in oklab, theme(colors.primary-500) 80%, transparent) 100%
+      color-mix(in oklab, var(--color-primary-500) 24%, transparent) 0%,
+      color-mix(in oklab, var(--color-primary-500) 80%, transparent) 100%
     );
   }
 
@@ -54,13 +54,13 @@
       content: "";
       position: absolute;
       inset-block-start: 0;
-      inset-inline-start: theme(spacing.section-x);
-      inset-inline-end: theme(spacing.section-x);
+      inset-inline-start: var(--spacing-section-x);
+      inset-inline-end: var(--spacing-section-x);
       z-index: 0;
       height: 100%;
-      width: calc(100vw - (theme(spacing.section-x) * 2));
-      border-inline-start: 1px solid theme(colors.dark-border);
-      border-inline-end: 1px solid theme(colors.dark-border);
+      width: calc(100vw - (var(--spacing-section-x) * 2));
+      border-inline-start: 1px solid var(--color-dark-border);
+      border-inline-end: 1px solid var(--color-dark-border);
       pointer-events: none;
     }
   }
@@ -71,13 +71,13 @@
       content: "";
       position: absolute;
       inset-block-start: 0;
-      inset-inline-start: theme(spacing.section-x);
-      inset-inline-end: theme(spacing.section-x);
+      inset-inline-start: var(--spacing-section-x);
+      inset-inline-end: var(--spacing-section-x);
       z-index: 0;
       height: 100%;
-      width: calc(100vw - (theme(spacing.section-x) * 2));
-      border-inline-start: 1px solid theme(colors.light-border);
-      border-inline-end: 1px solid theme(colors.light-border);
+      width: calc(100vw - (var(--spacing-section-x) * 2));
+      border-inline-start: 1px solid var(--color-light-border);
+      border-inline-end: 1px solid var(--color-light-border);
       pointer-events: none;
     }
   }
@@ -92,7 +92,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background-color: theme(colors.dark.950);
+      background-color: var(--color-dark-950);
       pointer-events: none;
       z-index: -10;
     }
@@ -106,7 +106,7 @@
       left: 0;
       right: 0;
       height: 10px;
-      background-color: theme(colors.dark.950);
+      background-color: var(--color-dark-950);
       pointer-events: none;
       z-index: 50;
     }
