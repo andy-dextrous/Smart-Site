@@ -70,17 +70,17 @@ PAYLOAD_ADMIN_PASSWORD=your-strong-password        # Will be created during seed
 
 ### 3. Database Setup
 
-#### Option A: Vercel PostgreSQL (Recommended)
-
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Navigate to **Storage** → **Create Database** → **Postgres**
-3. Copy the `POSTGRES_URL` to your `.env.local`
-
-#### Option B: MongoDB
+#### Option A: MongoDB (Recommended)
 
 1. Set up MongoDB (local or Atlas)
 2. Set `DATABASE_PROVIDER=mongoose`
 3. Add your `DATABASE_URI` to `.env.local`
+
+#### Option B: Vercel PostgreSQL
+
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Navigate to **Storage** → **Create Database** → **Postgres**
+3. Copy the `POSTGRES_URL` to your `.env.local`
 
 ### 4. AI Backend Setup
 
@@ -253,30 +253,6 @@ export default defineConfig({
 })
 ```
 
-### Setting Up the AI Backend
-
-1. **Navigate to AI Backend**:
-
-   ```bash
-   cd ../smart-site-ai  # From smart-site directory
-   ```
-
-2. **Install Dependencies**:
-
-   ```bash
-   pnpm install
-   ```
-
-3. **Start AI Server**:
-
-   ```bash
-   pnpm dev  # Runs on port 4112
-   ```
-
-4. **Verify Connection**:
-   - Smart Site will automatically connect to the AI backend
-   - Check the admin chat panel to test functionality
-
 ### AI Features Available
 
 - **Chat Assistant**: AI-powered chat in the admin panel
@@ -311,6 +287,7 @@ Smart Site is built around the concept of **sections** - reusable content blocks
 > **🤖 AI-Powered Section Creation:** Just tell your AI agent "create a new section called hero-banner" and the `smart-site/adding-new-sections` rule will handle the entire process including proper field configuration and component setup.
 
 **Every section follows the mandatory two-file pattern**:
+
 1. **`config.ts`** - Payload CMS field configuration
 2. **`Component.tsx`** - React component implementation
 
@@ -330,7 +307,7 @@ import type { Block } from "payload"
 import { sectionIntro, sectionCta } from "@/admin/payload/fields"
 
 export const HeroBanner: Block = {
-  slug: "hero-banner",               // MUST match folder name
+  slug: "hero-banner", // MUST match folder name
   admin: {
     group: "Hero Sections",
   },
@@ -404,10 +381,10 @@ export const HeroBannerComponent: React.FC<HeroBannerBlock> = props => {
     <section className="relative min-h-screen flex items-center">
       {backgroundImage && (
         <div className="absolute inset-0 -z-10">
-          <Media 
-            resource={backgroundImage} 
-            fill 
-            className="object-cover" 
+          <Media
+            resource={backgroundImage}
+            fill
+            className="object-cover"
           />
         </div>
       )}
@@ -433,6 +410,7 @@ export const HeroBannerComponent: React.FC<HeroBannerBlock> = props => {
 ### Section Naming Rules
 
 **✅ Use Architectural Names**:
+
 - `hero-split` - Hero with content/image split
 - `card-grid` - Grid of cards
 - `text-image` - Text with image
@@ -440,6 +418,7 @@ export const HeroBannerComponent: React.FC<HeroBannerBlock> = props => {
 - `cta-centered` - Centered call-to-action
 
 **❌ Avoid Content-Specific Names**:
+
 - `services-hero` - Too specific to services
 - `about-section` - Page-specific
 - `pricing-cards` - Business logic in name
@@ -469,9 +448,24 @@ This ensures consistency across sections and reduces development time.
 
 Smart Site implements a sophisticated routing system with O(1) URI resolution and automatic dependency management.
 
+## 0(1) Resolution System Explained
+
+O(1) URI resolution in this app refers to a constant-time URL lookup system that resolves any URI in a single database query, regardless of site size.
+
+The system uses a centralized URI Index Collection (`src/admin/payload/collections/uri-index.ts`) that maintains a pre-computed mapping between URIs and their source documents. When a request comes for `/about/team`, the system performs one indexed database lookup instead of traversing hierarchies or performing complex queries.
+
+Key features:
+
+- **Single Query Resolution**: Any URI resolves in one database hit
+- **Automatic Index Maintenance**: URIs are generated and cached via Payload hooks
+- **Redirect Management**: Automatic 301 redirects when URIs change
+- **Dependency Tracking**: When parent pages or archive pages change, all dependent URIs update automatically via background jobs
+
+This provides instant page resolution at scale, unlike traditional CMS systems that perform multiple queries to resolve hierarchical URLs.
+
 ### URI Index System
 
-Every piece of content gets a unique URI stored in the **URI Index Collection**:
+Every piece of frontend content gets a unique URI stored in the **URI Index Collection**:
 
 ```
 /                    → Homepage
@@ -484,7 +478,7 @@ Every piece of content gets a unique URI stored in the **URI Index Collection**:
 
 ### Dynamic Route Resolution
 
-The `[[...slug]]` catch-all route handles all requests:
+The `[[...uri]]` catch-all route handles **all** requests:
 
 1. **URI Lookup**: Single database query against URI Index
 2. **Content Resolution**: Direct fetch of the matched document
@@ -699,18 +693,18 @@ import { defineConfig } from "@/admin/config"
 
 const smartSiteConfig = defineConfig({
   settings: {
-    gsap: true,                    // Enable GSAP animations
-    smoothScroll: true,           // Enable smooth scrolling
-    themeToggle: false,           // Enable dark/light mode toggle
-    i18n: false,                  // Enable internationalization
-    gsapDevTools: true,           // GSAP dev tools in development
+    gsap: true, // Enable GSAP animations
+    smoothScroll: true, // Enable smooth scrolling
+    themeToggle: false, // Enable dark/light mode toggle
+    i18n: false, // Enable internationalization
+    gsapDevTools: true, // GSAP dev tools in development
     ai: {
-      enabled: true,              // Enable AI integration
+      enabled: true, // Enable AI integration
       url: process.env.NEXT_PUBLIC_AI_URL,
     },
-    search: true,                 // Enable search functionality
-    analytics: true,              // Enable analytics
-    templateSupport: true,        // Enable page templates
+    search: true, // Enable search functionality
+    analytics: true, // Enable analytics
+    templateSupport: true, // Enable page templates
   },
 
   // Disable default collections with boolean flags
@@ -741,6 +735,7 @@ export default smartSiteConfig
 ### ⚠️ Admin Directory Warning
 
 **DO NOT MODIFY ANYTHING IN `src/admin/`**:
+
 - ❌ Don't edit `src/admin/payload/payload.config.ts`
 - ❌ Don't modify collection configs directly
 - ❌ Don't change admin utilities

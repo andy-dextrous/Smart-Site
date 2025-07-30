@@ -27,9 +27,18 @@ export function getMastraClient(): MastraClient | null {
     serverUrl = ai.url
   }
 
+  // Prepare headers with JWT authentication
+  const headers: Record<string, string> = {}
+  
+  // Include JWT token if available
+  if (process.env.MASTRA_JWT_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.MASTRA_JWT_TOKEN}`
+  }
+
   // Initialize client
   mastraClient = new MastraClient({
     baseUrl: serverUrl,
+    headers,
     retries: 3,
     backoffMs: 300,
     maxBackoffMs: 5000,

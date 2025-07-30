@@ -5,8 +5,7 @@ const pg = postgresAdapter({
   pool: {
     connectionString: process.env.DATABASE_URL!,
   },
-  tablesFilter: ["!mastra_*"],
-  schemaName: "payload",
+  schemaName: "smart-site",
   idType: "uuid",
 })
 
