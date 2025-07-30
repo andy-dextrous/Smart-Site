@@ -86,7 +86,7 @@ const ThreadWelcomeSuggestions: FC = () => {
   return (
     <div className="mt-3 flex w-full items-stretch justify-center gap-4">
       <ThreadPrimitive.Suggestion
-        className="hover:bg-admin-850 border-admin-700 bg-admin-800 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in"
+        className="hover:bg-admin-850 border-admin-700 bg-admin-800 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in-out"
         prompt="What is the weather in Tokyo?"
         method="replace"
         autoSend
@@ -96,7 +96,7 @@ const ThreadWelcomeSuggestions: FC = () => {
         </span>
       </ThreadPrimitive.Suggestion>
       <ThreadPrimitive.Suggestion
-        className="hover:bg-admin-850 border-admin-700 bg-admin-800 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in"
+        className="hover:bg-admin-850 border-admin-700 bg-admin-800 flex max-w-sm grow basis-0 flex-col items-center justify-center rounded-lg border p-3 transition-colors ease-in-out"
         prompt="What is assistant-ui?"
         method="replace"
         autoSend
@@ -111,7 +111,7 @@ const ThreadWelcomeSuggestions: FC = () => {
 
 const Composer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="focus-within:border-admin-accent/20 border-admin-700 bg-admin-800 bg-admin-900 flex w-full flex-wrap items-end rounded-lg border px-2.5 shadow-sm transition-colors ease-in">
+    <ComposerPrimitive.Root className="focus-within:border-admin-accent/20 border-admin-700 bg-admin-800 bg-admin-900 flex w-full flex-wrap items-end rounded-lg border px-2.5 shadow-sm transition-colors ease-in-out">
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
@@ -131,7 +131,7 @@ const ComposerAction: FC = () => {
           <TooltipIconButton
             tooltip="Send"
             variant="default"
-            className="my-2.5 size-8 p-2 transition-opacity ease-in"
+            className="my-2.5 size-8 p-2 transition-opacity ease-in-out"
           >
             <SendHorizontalIcon />
           </TooltipIconButton>
@@ -142,7 +142,7 @@ const ComposerAction: FC = () => {
           <TooltipIconButton
             tooltip="Cancel"
             variant="default"
-            className="my-2.5 size-8 p-2 transition-opacity ease-in"
+            className="my-2.5 size-8 p-2 transition-opacity ease-in-out"
           >
             <CircleStopIcon />
           </TooltipIconButton>

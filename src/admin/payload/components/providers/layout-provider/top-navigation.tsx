@@ -25,8 +25,8 @@ export function TopNavigation() {
   }
 
   return (
-    <nav className="bg-admin-950 border-admin-800 h-nav flex items-center justify-between border-b px-6">
-      <Link href="/admin" className="text-admin-50 flex items-center gap-2 font-semibold">
+    <nav className="bg-admin-50 border-admin-200 dark:bg-admin-950 dark:border-admin-800 h-nav flex items-center justify-between border-b px-6">
+      <Link href="/admin" className="text-admin-900 dark:text-admin-50 flex items-center gap-2 font-semibold">
         <Sparkles className="text-admin-accent h-6 w-6" />
         <span className="text-lg">Smart Site Admin</span>
       </Link>

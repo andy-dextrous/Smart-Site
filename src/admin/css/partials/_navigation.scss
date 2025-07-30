@@ -1,0 +1,35 @@
+/*************************************************************************/
+/*  NAVIGATION STYLES
+/*************************************************************************/
+
+[data-theme="light"] {
+  .nav {
+    background-color: var(--color-admin-850);
+
+    &__link {
+      color: var(--color-admin-0);
+
+      &:hover {
+        background-color: var(--color-admin-800);
+      }
+    }
+
+    &-toggler .hamburger {
+      background-color: var(--color-admin-850);
+      border-color: var(--color-admin-800);
+
+      svg path {
+        stroke: var(--color-admin-0) !important;
+      }
+    }
+  }
+
+  .document-fields__sidebar-wrap,
+  .doc-controls {
+    background-color: var(--color-admin-50);
+  }
+
+  .icon--logout {
+    color: var(--color-admin-0);
+  }
+}

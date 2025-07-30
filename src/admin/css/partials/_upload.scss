@@ -1,0 +1,18 @@
+/*************************************************************************/
+/*  UPLOAD COMPONENT STYLES
+/*************************************************************************/
+
+@media (max-width: 1200px) {
+  .upload__dropzoneContent__buttons {
+    flex-direction: column;
+  }
+}
+
+.upload__createNewToggler,
+.upload__listToggler {
+  --bg-color: #{var(--color-admin-accent-light)};
+  --color: #{var(--color-admin-0)};
+  --hover-color: #{var(--color-admin-0)};
+  --hover-bg: #{var(--color-admin-accent-light)};
+  border-color: var(--color-admin-accent-light);
+}

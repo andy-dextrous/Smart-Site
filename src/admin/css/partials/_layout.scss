@@ -1,0 +1,56 @@
+/*************************************************************************/
+/*  LAYOUT AND TEMPLATE STYLES
+/*************************************************************************/
+
+.template-default {
+  background: var(--color-admin-100);
+  height: 100%;
+  min-height: calc(100vh - var(--spacing-nav));
+  display: flex;
+
+  .template-default__wrap {
+    padding-top: var(--spacing-admin-section-y);
+    background-color: transparent;
+  }
+}
+
+[data-theme="dark"] {
+  .template-default {
+    background: linear-gradient(
+      90deg,
+      var(--color-admin-900) 0%,
+      var(--color-admin-850) 100%
+    );
+  }
+}
+
+.step-nav {
+  &__home {
+    height: auto;
+    min-height: 50px;
+    width: 100%;
+    min-width: 135px;
+  }
+
+  span {
+    overflow: visible;
+    text-overflow: unset;
+  }
+}
+
+.confirmation-modal__controls {
+  justify-content: stretch;
+
+  button {
+    flex: 1;
+  }
+}
+
+// Navigation items padding for nested structure
+[id^="field-navItems__"][id$="__item__subItems"] {
+  padding-left: 2rem;
+}
+
+[id^="field-navItems__"][id$="__item__subItems__0__child__subItems"] {
+  padding-left: 2rem;
+}

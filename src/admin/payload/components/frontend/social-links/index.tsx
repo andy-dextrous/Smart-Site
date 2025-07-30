@@ -122,7 +122,7 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
     className
   )
 
-  const linkBaseClass = "transition-colors"
+  const linkBaseClass = "transition-colors duration-100"
 
   const getLinkClass = () => {
     switch (variant) {

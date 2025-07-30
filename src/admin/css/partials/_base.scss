@@ -1,0 +1,33 @@
+/*************************************************************************/
+/*  BASE ELEMENT STYLES
+/*************************************************************************/
+
+a {
+  text-decoration: none;
+}
+
+#field-breadcrumbs {
+  display: none;
+}
+
+.document-fields__sidebar-wrap {
+  max-width: 450px;
+}
+
+#nav-toggler {
+  display: none;
+}
+
+.app-header__content {
+  display: none;
+}
+
+html[data-theme="light"] {
+  * {
+    border-color: var(--color-admin-200) !important;
+    border-top-color: var(--color-admin-200) !important;
+    border-bottom-color: var(--color-admin-200) !important;
+    border-left-color: var(--color-admin-200) !important;
+    border-right-color: var(--color-admin-200) !important;
+  }
+}

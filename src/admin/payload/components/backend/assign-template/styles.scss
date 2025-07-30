@@ -5,7 +5,7 @@
     font-size: 13px;
     font-weight: 400;
     margin-bottom: 2px;
-    color: var(--color-admin-100);
+    color: var(--color-admin-800);
   }
 
   .template-control-row {
@@ -26,6 +26,18 @@
         padding-left: 10px;
         padding-right: 10px;
       }
+
+      span {
+        border: none;
+      }
+    }
+  }
+}
+
+html[data-theme="dark"] {
+  .template-control-ui-field {
+    .field-label {
+      color: var(--color-admin-100);
     }
   }
 }

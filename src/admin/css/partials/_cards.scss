@@ -1,0 +1,59 @@
+/*************************************************************************/
+/*  CARD COMPONENT STYLES
+/*************************************************************************/
+
+.card {
+  border-color: var(--color-admin-200);
+  align-items: center;
+  border-radius: 10px;
+  border-width: 1px;
+  overflow: hidden;
+
+  &__title {
+    color: var(--color-admin-700);
+    font-size: base(0.73);
+    font-weight: 600;
+  }
+
+  &.btn {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  &:hover {
+    border-color: var(--color-admin-300);
+  }
+}
+
+.card .btn {
+  background-color: var(--color-admin-150);
+  color: var(--color-admin-900);
+}
+
+.card .card__title {
+  color: var(--color-admin-900);
+  z-index: 10;
+}
+
+[data-theme="dark"] {
+  .card {
+    border-color: var(--color-admin-800);
+
+    &__title {
+      color: var(--color-admin-300);
+    }
+
+    &:hover {
+      border-color: var(--color-admin-700);
+    }
+  }
+
+  .card .btn {
+    background-color: var(--color-admin-850);
+    color: var(--color-admin-100);
+  }
+
+  .card .card__title {
+    color: var(--color-admin-100);
+  }
+}

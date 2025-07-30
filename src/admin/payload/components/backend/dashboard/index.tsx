@@ -1,40 +1,91 @@
-import { type groupNavItems } from "@payloadcms/ui/shared"
+import { type groupNavItems, EntityType } from "@payloadcms/ui/shared"
 import { AdminViewProps, ServerProps } from "payload"
 import { FC, Fragment } from "react"
 import { DashboardBanner } from "./dashboard-banner"
 import { DashboardGroup } from "./dashboard-group"
+import { getNavIcon } from "@/admin/payload/components/backend/nav/navIconMap"
 import "./styles.scss"
 
-type DashboardProps = {
-	navGroups: ReturnType<typeof groupNavItems>
-} & AdminViewProps &
-	ServerProps
+type DashboardProps = AdminViewProps & ServerProps
 
 export const Dashboard: FC<DashboardProps> = (props) => {
 	const {
-		navGroups,
 		i18n,
-		payload,
 		payload: {
 			config: {
 				routes: { admin: adminRoute },
+				collections,
+				globals,
 			},
 		},
 	} = props
+
+	const omittedEntities = [
+		"uri-index",
+		"payload-preferences", 
+		"payload-migrations",
+		"payload-jobs",
+		"payload-locked-documents",
+		"search",
+	]
+
+	const visibleCollections = collections.filter(
+		({ slug }) => !omittedEntities.includes(slug)
+	)
+	const visibleGlobals = globals.filter(({ slug }) => !omittedEntities.includes(slug))
+
+	// Define dashboard groups
+	const dashboardGroups = {
+		main: {
+			label: "Quick Access",
+			items: ["pages", "posts", "media", "users"]
+		},
+		business: {
+			label: "Your Business", 
+			items: ["team", "services", "testimonials"],
+		},
+		settings: {
+			label: "Settings",
+			items: ["settings", "header", "footer", "templates"],
+		},
+	}
+
+	// Create organized groups
+	const organizedGroups = Object.entries(dashboardGroups).map(([, group]) => {
+		const entities = [...visibleCollections, ...visibleGlobals]
+			.filter(item => group.items.includes(item.slug))
+			.map(item => {
+				const isCollection = "labels" in item
+				const label = isCollection
+					? (typeof item.labels?.plural === "string" ? item.labels.plural : item.slug)
+					: (typeof item.label === "string" ? item.label : item.slug)
+				
+				return {
+					slug: item.slug,
+					type: isCollection ? EntityType.collection : EntityType.global,
+					label,
+					icon: getNavIcon(item.slug),
+				}
+			})
+
+		return {
+			label: group.label,
+			entities,
+		}
+	}).filter(group => group.entities.length > 0) // Only show groups with entities
 
 	return (
 		<Fragment>
 			<DashboardBanner />
 			<div className="dashboard">
 				<div className="dashboard__wrap">
-					{navGroups.map(({ label, entities }, entityIndex) => (
+					{organizedGroups.map(({ label, entities }, entityIndex) => (
 						<DashboardGroup
 							key={entityIndex}
 							label={label}
 							entities={entities}
 							adminRoute={adminRoute}
 							i18n={i18n}
-							payload={payload}
 						/>
 					))}
 				</div>

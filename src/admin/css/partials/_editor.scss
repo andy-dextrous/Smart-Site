@@ -1,0 +1,154 @@
+/*************************************************************************/
+/*  LEXICAL EDITOR STYLES
+/*************************************************************************/
+
+.editor-container {
+  background-color: var(--color-admin-50);
+  border-color: var(--color-admin-300);
+}
+
+[data-theme="dark"] {
+  .editor-container {
+    background-color: var(--color-admin-800);
+    border-color: var(--color-admin-800);
+  }
+}
+
+.ContentEditable__root {
+  // Base typography spacing similar to prose
+  line-height: 1.75;
+
+  // Paragraph spacing
+  .LexicalEditorTheme__paragraph {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Heading spacing
+  .LexicalEditorTheme__h1 {
+    margin-top: 0;
+    margin-bottom: 0.8888889em;
+    font-size: 2.25em;
+    line-height: 1.1111111;
+  }
+
+  .LexicalEditorTheme__h2 {
+    margin-top: 2em;
+    margin-bottom: 1em;
+    font-size: 1.5em;
+    line-height: 1.3333333;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .LexicalEditorTheme__h3 {
+    margin-top: 1.6em;
+    margin-bottom: 0.6em;
+    font-size: 1.25em;
+    line-height: 1.6;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .LexicalEditorTheme__h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-size: 1.125em;
+    line-height: 1.5555556;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  // List spacing
+  .LexicalEditorTheme__ul,
+  .LexicalEditorTheme__ol1 {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    padding-left: 1.625em;
+
+    .LexicalEditorTheme__listItem {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      padding-left: 0.375em;
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // Nested list spacing
+  .LexicalEditorTheme__ul .LexicalEditorTheme__ul,
+  .LexicalEditorTheme__ol1 .LexicalEditorTheme__ol1,
+  .LexicalEditorTheme__ul .LexicalEditorTheme__ol1,
+  .LexicalEditorTheme__ol1 .LexicalEditorTheme__ul {
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+  }
+
+  // Link spacing
+  .LexicalEditorTheme__link {
+    color: var(--color-admin-accent);
+    text-decoration: underline;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--color-admin-accent-light);
+    }
+  }
+
+  [data-theme="dark"] & {
+    .LexicalEditorTheme__link {
+      color: var(--color-admin-accent-light);
+
+      &:hover {
+        color: var(--color-admin-accent);
+      }
+    }
+  }
+
+  // Bold text
+  .LexicalEditorTheme__textBold {
+    font-weight: 600;
+  }
+
+  // Ensure proper spacing between different element types
+  .LexicalEditorTheme__paragraph + .LexicalEditorTheme__h2,
+  .LexicalEditorTheme__paragraph + .LexicalEditorTheme__h3,
+  .LexicalEditorTheme__paragraph + .LexicalEditorTheme__h4 {
+    margin-top: 2em;
+  }
+
+  .LexicalEditorTheme__ul + .LexicalEditorTheme__h2,
+  .LexicalEditorTheme__ol1 + .LexicalEditorTheme__h2,
+  .LexicalEditorTheme__ul + .LexicalEditorTheme__h3,
+  .LexicalEditorTheme__ol1 + .LexicalEditorTheme__h3,
+  .LexicalEditorTheme__ul + .LexicalEditorTheme__h4,
+  .LexicalEditorTheme__ol1 + .LexicalEditorTheme__h4 {
+    margin-top: 2em;
+  }
+
+  .LexicalEditorTheme__h2 + .LexicalEditorTheme__paragraph,
+  .LexicalEditorTheme__h3 + .LexicalEditorTheme__paragraph,
+  .LexicalEditorTheme__h4 + .LexicalEditorTheme__paragraph {
+    margin-top: 0.5em;
+  }
+}

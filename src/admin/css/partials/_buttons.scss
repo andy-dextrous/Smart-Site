@@ -1,0 +1,35 @@
+/*************************************************************************/
+/*  BUTTON STYLES AND VARIANTS
+/*************************************************************************/
+
+.btn--style-primary,
+.popup-button,
+.btn--icon-style-without-border:not(
+  .status__action,
+  .lock-button,
+  .card__click,
+  .preview-btn,
+  .upload__createNewToggler,
+  .upload__listToggler,
+  .btn--style-secondary,
+  .relationship-add-new__add-button
+) {
+  --bg-color: #{var(--color-admin-accent)};
+  --color: #{var(--color-admin-0)};
+  --hover-color: #{var(--color-admin-0)};
+  --hover-bg: #{rgba(var(--color-admin-accent), 0.9)};
+  border-color: var(--color-admin-accent);
+}
+
+.pill-version-count {
+  background-color: var(--color-admin-accent-light);
+  color: var(--color-admin-0);
+  border-color: var(--color-admin-accent-light);
+}
+
+.btn,
+.relationship-add-new__add-button {
+  transition-duration: 0.1s !important;
+  transition-timing-function: ease-in-out !important;
+}
+

@@ -37,7 +37,7 @@ export default function UserDropdown() {
     return (
       <Button
         size="icon-round"
-        className="text-admin-100 flex items-center gap-2"
+        className="text-admin-800 dark:text-admin-100 flex items-center gap-2"
         disabled
       >
         <User />
@@ -62,7 +62,7 @@ export default function UserDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="bg-admin-850 border-admin-700 text-admin-100 min-w-[200px]"
+        className="bg-admin-100 border-admin-300 text-admin-900 dark:bg-admin-850 dark:border-admin-700 dark:text-admin-100 min-w-[200px]"
       >
         <DropdownMenuItem asChild className="px-4 py-2.5 text-base">
           <a href={`${cmsURL}/admin/collections/users/${user.id}`}>

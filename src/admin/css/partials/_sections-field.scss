@@ -1,0 +1,53 @@
+/*************************************************************************/
+/*  SECTIONS FIELD CUSTOMIZATIONS
+/*************************************************************************/
+
+#field-sections {
+  .blocks-field__block-pill {
+    background-color: var(--color-admin-accent);
+
+    & span {
+      color: var(--color-admin-100);
+    }
+  }
+
+  .blocks-field__block-number {
+    display: none;
+  }
+
+  .blocks-field__fields .collapsible-field__row-label-wrap span {
+    background-color: var(--color-admin-200);
+    color: var(--color-admin-700);
+    border-radius: 3px;
+    padding-inline: 5px;
+    padding-block: 1px;
+    font-size: 12px;
+    height: unset;
+    min-height: unset;
+  }
+
+  .blocks-field__header-actions button {
+    color: var(--color-admin-600);
+  }
+
+  .array-field__header-actions button {
+    color: var(--color-admin-600);
+  }
+}
+
+[data-theme="dark"] {
+  #field-sections {
+    .blocks-field__fields .collapsible-field__row-label-wrap span {
+      background-color: var(--color-admin-800);
+      color: var(--color-admin-150);
+    }
+
+    .blocks-field__header-actions button {
+      color: var(--color-admin-350);
+    }
+
+    .array-field__header-actions button {
+      color: var(--color-admin-350);
+    }
+  }
+}

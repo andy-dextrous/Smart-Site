@@ -18,7 +18,6 @@ import {
   ChevronRightIcon,
   CopyIcon,
   PaperclipIcon,
-  PencilIcon,
   RefreshCwIcon,
   SendHorizontalIcon,
   SparklesIcon,
@@ -48,7 +47,7 @@ export function ChatPanel() {
       <Sheet open={isChatOpen} onOpenChange={open => !open && closeChat()}>
         <SheetContent
           side="right"
-          className="bg-admin-950 border-admin-800 flex w-[520px] flex-col overflow-hidden p-0 sm:max-w-[480px]"
+          className="bg-admin-50 border-admin-200 dark:bg-admin-950 dark:border-admin-800 flex w-[620px] max-w-[620px] flex-col overflow-hidden p-0 sm:max-w-[480px]"
         >
           <ChatHeader />
           <ChatThread />
@@ -64,7 +63,7 @@ export function ChatPanel() {
 
 function ChatHeader() {
   return (
-    <SheetHeader className="border-admin-850 bg-admin-900 border-b p-4">
+    <SheetHeader className="border-admin-200 bg-admin-100 dark:border-admin-850 dark:bg-admin-900 border-b p-4">
       <div className="flex items-center gap-3">
         <div className="bg-admin-accent/30 flex h-8 w-8 items-center justify-center rounded-full">
           <SparklesIcon className="text-admin-accent-light h-4 w-4" />
@@ -99,7 +98,7 @@ function ChatThread() {
           <div className="min-h-8 flex-grow" />
         </ThreadPrimitive.If>
 
-        <div className="from-admin-950 via-admin-950/95 sticky bottom-0 mt-6 flex w-full flex-col items-center justify-end gap-3 rounded-t-lg bg-gradient-to-t to-transparent pt-8 pb-6">
+        <div className="from-admin-50 via-admin-50/95 dark:from-admin-950 dark:via-admin-950/95 sticky bottom-0 mt-6 flex w-full flex-col items-center justify-end gap-3 rounded-t-lg bg-gradient-to-t to-transparent pt-8 pb-6">
           <ThreadScrollToBottom />
           <Composer />
         </div>
@@ -114,7 +113,7 @@ const ThreadScrollToBottom: FC = () => {
       <Button
         variant="outline"
         size="sm"
-        className="bg-admin-900 border-admin-800 text-admin-300 hover:bg-admin-850 hover:text-admin-100 rounded-full disabled:invisible"
+        className="bg-admin-100 border-admin-300 text-admin-700 hover:bg-admin-200 hover:text-admin-900 dark:bg-admin-900 dark:border-admin-800 dark:text-admin-300 dark:hover:bg-admin-850 dark:hover:text-admin-100 rounded-full disabled:invisible"
       >
         <ArrowDownIcon className="h-4 w-4" />
       </Button>
@@ -130,10 +129,10 @@ const ThreadWelcome: FC = () => {
           <div className="from-admin-accent/20 to-admin-accent/5 border-admin-accent/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full border bg-gradient-to-br">
             <SparklesIcon className="text-admin-accent h-8 w-8" />
           </div>
-          <h2 className="text-admin-50 m-0 mb-2 text-2xl font-semibold">
+          <h2 className="text-admin-900 dark:text-admin-50 m-0 mb-2 text-2xl font-semibold">
             Smart Site Assistant
           </h2>
-          <p className="text-admin-400 m-0 max-w-80 text-sm leading-6">
+          <p className="text-admin-600 dark:text-admin-400 m-0 max-w-80 text-sm leading-6">
             I can help you build and manage your website sections, configure CMS fields,
             optimize content, and guide you through the platform&apos;s features.
           </p>
@@ -148,21 +147,25 @@ const ThreadWelcomeSuggestions: FC = () => {
   return (
     <div className="flex w-full flex-wrap justify-center gap-3">
       <ThreadPrimitive.Suggestion
-        className="border-admin-700 bg-admin-850 hover:border-admin-600 hover:bg-admin-800 flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-150 hover:-translate-y-px hover:shadow-lg"
+        className="border-admin-300 bg-admin-100 hover:border-admin-400 hover:bg-admin-200 dark:border-admin-700 dark:bg-admin-850 dark:hover:border-admin-600 dark:hover:bg-admin-800 flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-100 hover:-translate-y-px hover:shadow-lg"
         prompt="How do I add a new page?"
         method="replace"
         autoSend
       >
-        <div className="text-admin-100 mb-1 font-semibold">Add a new page</div>
+        <div className="text-admin-900 dark:text-admin-100 mb-1 font-semibold">
+          Add a new page
+        </div>
       </ThreadPrimitive.Suggestion>
 
       <ThreadPrimitive.Suggestion
-        className="border-admin-700 bg-admin-850 hover:border-admin-600 hover:bg-admin-800 flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-150 hover:-translate-y-px hover:shadow-lg"
+        className="border-admin-300 bg-admin-100 hover:border-admin-400 hover:bg-admin-200 dark:border-admin-700 dark:bg-admin-850 dark:hover:border-admin-600 dark:hover:bg-admin-800 flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-100 hover:-translate-y-px hover:shadow-lg"
         prompt="What can you help me with?"
         method="replace"
         autoSend
       >
-        <div className="text-admin-100 mb-1 font-semibold">Create A Blog Post</div>
+        <div className="text-admin-900 dark:text-admin-100 mb-1 font-semibold">
+          Create A Blog Post
+        </div>
       </ThreadPrimitive.Suggestion>
     </div>
   )
@@ -174,10 +177,10 @@ const ThreadWelcomeSuggestions: FC = () => {
 
 const AttachmentUI: FC = () => {
   return (
-    <AttachmentPrimitive.Root className="border-admin-700 bg-admin-850 hover:bg-admin-800 flex items-center gap-2 rounded-lg border p-2 transition-colors">
+    <AttachmentPrimitive.Root className="border-admin-300 bg-admin-100 hover:bg-admin-200 dark:border-admin-700 dark:bg-admin-850 dark:hover:bg-admin-800 flex items-center gap-2 rounded-lg border p-2 transition-colors duration-100">
       {/* <AttachmentPrimitive.Name className="text-admin-100 truncate text-sm font-medium" /> */}
       <AttachmentPrimitive.Remove asChild>
-        <button className="text-admin-400 hover:text-admin-100 hover:bg-admin-700 flex h-4 w-4 items-center justify-center rounded-sm">
+        <button className="text-admin-600 hover:text-admin-900 hover:bg-admin-300 dark:text-admin-400 dark:hover:text-admin-100 dark:hover:bg-admin-700 flex h-4 w-4 items-center justify-center rounded-sm">
           <XIcon className="h-3 w-3" />
         </button>
       </AttachmentPrimitive.Remove>
@@ -205,7 +208,7 @@ const ComposerAddAttachment: FC = () => {
   return (
     <ComposerPrimitive.AddAttachment asChild>
       <TooltipIconButton
-        className="my-2.5 size-8 p-2 transition-opacity ease-in"
+        className="my-2.5 size-8 p-2 transition-opacity ease-in-out"
         tooltip="Add Attachment"
         variant="ghost"
       >
@@ -221,14 +224,14 @@ const ComposerAddAttachment: FC = () => {
 
 const Composer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="focus-within:ring-admin-accent/20 border-admin-700 bg-admin-900/80 hover:border-admin-600 flex w-full flex-wrap items-end rounded-xl border px-2.5 shadow-sm backdrop-blur-sm transition-all ease-in focus-within:ring-2">
+    <ComposerPrimitive.Root className="focus-within:ring-admin-accent/20 border-admin-300 bg-admin-100/80 hover:border-admin-400 dark:border-admin-700 dark:bg-admin-900/80 dark:hover:border-admin-600 flex w-full flex-wrap items-end rounded-xl border px-2.5 shadow-sm backdrop-blur-sm transition-all ease-in-out focus-within:ring-2">
       <ComposerAttachments />
       <ComposerAddAttachment />
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
         placeholder="Type your message..."
-        className="text-admin-100 placeholder:text-admin-500 max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+        className="text-admin-900 placeholder:text-admin-500 dark:text-admin-100 dark:placeholder:text-admin-500 max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
     </ComposerPrimitive.Root>
@@ -243,7 +246,7 @@ const ComposerAction: FC = () => {
           <Button
             variant="default"
             size="sm"
-            className="bg-admin-accent text-admin-0 hover:bg-admin-accent/90 my-2.5 h-8 w-8 rounded-full p-2 transition-all duration-200 hover:scale-105"
+            className="bg-admin-accent text-admin-0 hover:bg-admin-accent/90 my-2.5 h-8 w-8 rounded-full p-2 transition-all duration-100 hover:scale-105"
           >
             <SendHorizontalIcon className="h-4 w-4" />
           </Button>
@@ -263,36 +266,23 @@ const ComposerAction: FC = () => {
 const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root className="mb-4 grid grid-cols-[minmax(72px,1fr)_auto] gap-2 [&>*]:col-start-2">
-      <UserActionBar />
       <UserMessageAttachments />
-      <div className="bg-admin-accent text-admin-0 max-w-64 rounded-[20px_20px_4px_20px] px-4 py-3 leading-snug break-words">
+      <div className="bg-admin-accent text-admin-0 max-w-64 rounded-[20px_20px_4px_20px] px-4 py-3 text-lg leading-snug break-words">
         <MessagePrimitive.Content />
       </div>
-      <BranchPicker className="text-admin-400 col-start-1 -mr-1 inline-flex items-center justify-end gap-1 text-xs" />
+      <BranchPicker className="text-admin-600 dark:text-admin-400 col-start-1 -mr-1 inline-flex items-center justify-end gap-1 text-xs" />
     </MessagePrimitive.Root>
   )
 }
 
 const UserActionBar: FC = () => {
-  return (
-    <ActionBarPrimitive.Root
-      hideWhenRunning
-      autohide="not-last"
-      className="col-start-1 mt-3 mr-2 flex flex-col items-end"
-    >
-      <ActionBarPrimitive.Edit asChild>
-        <Button variant="ghost" size="sm">
-          <PencilIcon className="h-3.5 w-3.5" />
-        </Button>
-      </ActionBarPrimitive.Edit>
-    </ActionBarPrimitive.Root>
-  )
+  return null
 }
 
 const EditComposer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="border-admin-700 bg-admin-850 my-4 flex w-full flex-col gap-3 rounded-xl border p-4">
-      <ComposerPrimitive.Input className="text-admin-100 min-h-10 resize-none border-none bg-transparent outline-none" />
+    <ComposerPrimitive.Root className="border-admin-300 bg-admin-100 dark:border-admin-700 dark:bg-admin-850 my-4 flex w-full flex-col gap-3 rounded-xl border p-4">
+      <ComposerPrimitive.Input className="text-admin-900 dark:text-admin-100 min-h-10 resize-none border-none bg-transparent outline-none" />
       <div className="flex items-center justify-end gap-2">
         <ComposerPrimitive.Cancel asChild>
           <Button variant="ghost" size="sm">
@@ -314,12 +304,12 @@ const AssistantMessage: FC = () => {
         <div className="from-admin-accent/20 to-admin-accent/5 border-admin-accent/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border bg-gradient-to-br">
           <SparklesIcon className="text-admin-accent h-4 w-4" />
         </div>
-        <div className="text-admin-100 max-w-64 leading-relaxed break-words">
+        <div className="text-admin-900 dark:text-admin-100 max-w-64 text-lg leading-relaxed break-words">
           <MessagePrimitive.Content />
         </div>
       </div>
       <AssistantActionBar />
-      <BranchPicker className="text-admin-400 col-start-2 ml-11 inline-flex items-center gap-1 text-xs" />
+      <BranchPicker className="text-admin-600 dark:text-admin-400 col-start-2 ml-11 inline-flex items-center justify-end gap-1 text-xs" />
     </MessagePrimitive.Root>
   )
 }
@@ -330,7 +320,7 @@ const AssistantActionBar: FC = () => {
       hideWhenRunning
       autohide="not-last"
       autohideFloat="single-branch"
-      className="text-admin-400 data-[floating]:bg-admin-900 data-[floating]:border-admin-700 col-start-3 mt-1 flex gap-1 data-[floating]:absolute data-[floating]:rounded-md data-[floating]:border data-[floating]:p-1 data-[floating]:shadow-lg"
+      className="text-admin-600 data-[floating]:bg-admin-100 data-[floating]:border-admin-300 dark:text-admin-400 dark:data-[floating]:bg-admin-900 dark:data-[floating]:border-admin-700 col-start-3 mt-1 flex gap-1 data-[floating]:absolute data-[floating]:rounded-md data-[floating]:border data-[floating]:p-1 data-[floating]:shadow-lg"
     >
       <ActionBarPrimitive.Copy asChild>
         <Button variant="ghost" size="sm">
@@ -355,7 +345,10 @@ const BranchPicker: FC<{ className?: string }> = ({ className }) => {
   return (
     <BranchPickerPrimitive.Root
       hideWhenSingleBranch
-      className={cn("text-admin-400 inline-flex items-center gap-1 text-xs", className)}
+      className={cn(
+        "text-admin-600 dark:text-admin-400 inline-flex items-center gap-1 text-xs",
+        className
+      )}
     >
       <BranchPickerPrimitive.Previous asChild>
         <Button variant="ghost" size="sm">

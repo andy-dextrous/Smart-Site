@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 
-import { useConfig, useTranslation } from "@payloadcms/ui"
+import { useConfig, useTranslation, usePreferences } from "@payloadcms/ui"
 import { formatAdminURL } from "@payloadcms/ui/shared"
 import { getTranslation } from "@payloadcms/translations"
 import { usePathname } from "next/navigation"
@@ -33,13 +33,15 @@ function NavItem({
   const linkContent = (
     <Link
       href={href}
-      className={`text-admin-100 hover:bg-admin-800 hover:text-admin-100 group flex items-center gap-3 rounded-lg px-4 py-3 text-base no-underline transition-all duration-200 ${
-        isActive ? "bg-admin-accent text-admin-0 hover:bg-admin-accent/90" : ""
+      className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-base no-underline transition-all duration-100 ${
+        isActive
+          ? "bg-admin-accent text-admin-0 hover:bg-admin-accent/90 hover:text-admin-0"
+          : "text-admin-800 hover:bg-admin-100 hover:text-admin-900 dark:text-admin-100 dark:hover:bg-admin-800 dark:hover:text-admin-100"
       } ${isCollapsed ? "justify-center px-3" : ""}`}
     >
       {Icon && <Icon className="h-5 w-5 flex-shrink-0" />}
       {!isCollapsed && (
-        <span className="truncate font-medium opacity-0 transition-opacity delay-100 duration-300 group-hover:opacity-100 lg:opacity-100">
+        <span className="truncate font-medium opacity-0 transition-opacity delay-100 duration-100 group-hover:opacity-100 lg:opacity-100">
           {label}
         </span>
       )}
@@ -82,18 +84,18 @@ function NavGroup({
   const groupHeader = (
     <button
       onClick={onToggle}
-      className={`text-admin-100 hover:bg-admin-800 hover:text-admin-100 group flex w-full cursor-pointer items-center gap-3 rounded-lg border-none bg-transparent px-4 py-3 text-base no-underline transition-all duration-200 ${
+      className={`text-admin-800 hover:bg-admin-100 hover:text-admin-900 dark:text-admin-100 dark:hover:bg-admin-800 dark:hover:text-admin-100 group flex w-full cursor-pointer items-center gap-3 rounded-lg border-none bg-transparent px-4 py-3 text-base no-underline transition-all duration-100 ${
         isCollapsed ? "justify-center px-3" : ""
       }`}
     >
       {Icon && <Icon className="h-5 w-5 flex-shrink-0" />}
       {!isCollapsed && (
         <>
-          <span className="flex-1 truncate text-left font-medium opacity-0 transition-opacity delay-100 duration-300 group-hover:opacity-100 lg:opacity-100">
+          <span className="flex-1 truncate text-left font-medium opacity-0 transition-opacity delay-100 duration-100 group-hover:opacity-100 lg:opacity-100">
             {label}
           </span>
           <ChevronDown
-            className={`h-4 w-4 transition-transform duration-200 ${
+            className={`h-4 w-4 transition-transform duration-100 ${
               isOpen ? "rotate-180" : ""
             }`}
           />
@@ -138,6 +140,7 @@ export function AppSidebar() {
     },
   } = useConfig()
   const { i18n } = useTranslation()
+  const { getPreference, setPreference } = usePreferences()
 
   /*************************************************************************/
   /*  STATE FOR SIDEBAR COLLAPSE
@@ -150,38 +153,54 @@ export function AppSidebar() {
     settings: false,
   })
 
-  // Load saved state from localStorage on mount
+  // Load saved state from Payload preferences on mount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedCollapsed = localStorage.getItem("admin-sidebar-collapsed")
-      if (savedCollapsed === "true") {
-        setIsCollapsed(true)
-      }
-
-      const savedGroups = localStorage.getItem("admin-sidebar-groups")
-      if (savedGroups) {
-        try {
-          setOpenGroups(JSON.parse(savedGroups))
-        } catch (error) {
-          console.warn("Failed to parse saved sidebar groups:", error)
+    const loadPreferences = async () => {
+      try {
+        const collapsedPref = await getPreference("admin-sidebar-collapsed")
+        if (collapsedPref?.value === true) {
+          setIsCollapsed(true)
+        } else if (collapsedPref?.value === false) {
+          setIsCollapsed(false)
         }
+
+        const groupsPref = await getPreference("admin-sidebar-groups")
+        if (groupsPref?.value && typeof groupsPref.value === "object") {
+          setOpenGroups(groupsPref.value as Record<string, boolean>)
+        }
+      } catch (error) {
+        console.warn("Failed to load sidebar preferences:", error)
       }
     }
-  }, [])
 
-  // Save state to localStorage when it changes
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("admin-sidebar-collapsed", isCollapsed.toString())
-    }
-  }, [isCollapsed])
+    loadPreferences()
+  }, [getPreference])
 
-  // Save group state to localStorage when it changes
+  // Save collapsed state to Payload preferences when it changes
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("admin-sidebar-groups", JSON.stringify(openGroups))
+    const saveCollapsedState = async () => {
+      try {
+        await setPreference("admin-sidebar-collapsed", isCollapsed)
+      } catch (error) {
+        console.warn("Failed to save sidebar collapsed state:", error)
+      }
     }
-  }, [openGroups])
+
+    saveCollapsedState()
+  }, [isCollapsed, setPreference])
+
+  // Save group state to Payload preferences when it changes
+  useEffect(() => {
+    const saveGroupState = async () => {
+      try {
+        await setPreference("admin-sidebar-groups", openGroups)
+      } catch (error) {
+        console.warn("Failed to save sidebar group state:", error)
+      }
+    }
+
+    saveGroupState()
+  }, [openGroups, setPreference])
 
   /*************************************************************************/
   /*  TOGGLE HANDLER
@@ -265,6 +284,7 @@ export function AppSidebar() {
             "redirects",
             "categories",
             "users",
+            "media",
           ].includes(col.slug)
       )
       .map(col => ({
@@ -287,7 +307,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className={`bg-admin-950 border-admin-800 relative flex flex-col border-r transition-all duration-300 ${
+      className={`bg-admin-50 border-admin-200 dark:bg-admin-950 dark:border-admin-800 relative flex flex-col border-r transition-all duration-100 ${
         isCollapsed ? "w-20" : "w-admin-nav-width"
       }`}
     >
@@ -475,7 +495,7 @@ export function AppSidebar() {
       </div>
 
       {/* Toggle Button at Bottom */}
-      <div className="border-admin-800 border-t p-4">
+      <div className="border-admin-200 dark:border-admin-800 border-t p-4">
         <Button
           onClick={toggleSidebar}
           size="icon"

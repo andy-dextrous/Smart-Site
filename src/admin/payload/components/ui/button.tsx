@@ -4,17 +4,18 @@ import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/admin/utilities/ui"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent disabled:pointer-events-none disabled:opacity-50 border-solid",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-100 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-accent disabled:pointer-events-none disabled:opacity-50 border-solid",
   {
     variants: {
       variant: {
-        default: "bg-admin-800 text-admin-100 hover:bg-admin-750 border border-admin-750",
+        default:
+          "bg-admin-150 text-admin-900 hover:bg-admin-200 border border-admin-150 dark:bg-admin-800 dark:text-admin-100 dark:hover:bg-admin-750 dark:border-admin-750",
         secondary:
           "bg-admin-accent border-admin-accent text-admin-0 hover:bg-admin-accent-light shadow-sm",
         outline:
-          "border border-admin-700 bg-transparent text-admin-100 hover:bg-admin-850 hover:border-admin-600",
+          "border border-admin-300 bg-transparent text-admin-900 hover:bg-admin-100 hover:border-admin-400 dark:border-admin-700 dark:text-admin-100 dark:hover:bg-admin-850 dark:hover:border-admin-600",
         ghost:
-          "bg-admin-800 text-admin-100 hover:bg-admin-850 hover:text-admin-50 border-none",
+          "bg-admin-100 text-admin-900 hover:bg-admin-200 hover:text-admin-950 border-none dark:bg-admin-800 dark:text-admin-100 dark:hover:bg-admin-850 dark:hover:text-admin-50",
         destructive: "bg-admin-error text-admin-0 hover:bg-admin-error/90 shadow-sm",
         success: "bg-admin-success text-admin-0 hover:bg-admin-success/90 shadow-sm",
         warning: "bg-admin-warning text-admin-0 hover:bg-admin-warning/90 shadow-sm",
