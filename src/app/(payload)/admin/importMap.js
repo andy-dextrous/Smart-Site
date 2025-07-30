@@ -1,3 +1,4 @@
+import { SlugComponent as SlugComponent_6c420b1b8714748be3eba61478399bf0 } from '@/admin/payload/fields/slug/slug-component'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -23,7 +24,6 @@ import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b99
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_d1988c653dbb7de5dc8bb77db36a0ffc } from '@/admin/payload/components/backend/assign-template'
-import { SlugComponent as SlugComponent_6c420b1b8714748be3eba61478399bf0 } from '@/admin/payload/fields/slug/slug-component'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { RowLabel as RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6 } from '@/admin/payload/globals/header/row-label'
@@ -42,6 +42,7 @@ import { default as default_9ee648b3974452a71d896ede05001fcf } from '@/admin/pay
 import { Dashboard as Dashboard_2318927de43c97f7df38b2e062d88eaf } from '@/admin/payload/components/backend/dashboard'
 
 export const importMap = {
+  "@/admin/payload/fields/slug/slug-component#SlugComponent": SlugComponent_6c420b1b8714748be3eba61478399bf0,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -67,7 +68,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/admin/payload/components/backend/assign-template#default": default_d1988c653dbb7de5dc8bb77db36a0ffc,
-  "@/admin/payload/fields/slug/slug-component#SlugComponent": SlugComponent_6c420b1b8714748be3eba61478399bf0,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@/admin/payload/globals/header/row-label#RowLabel": RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6,

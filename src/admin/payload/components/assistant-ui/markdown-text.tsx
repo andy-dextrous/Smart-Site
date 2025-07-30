@@ -12,7 +12,7 @@ import remarkGfm from "remark-gfm"
 import { type FC, memo, useState } from "react"
 import { CheckIcon, CopyIcon } from "lucide-react"
 
-import { TooltipIconButton } from "@/admin/payload/components/providers/layout-provider/assistant-ui/tooltip-icon-button"
+import { TooltipIconButton } from "@/admin/payload/components/assistant-ui/tooltip-icon-button"
 import { cn } from "@/admin/utilities/ui"
 
 const MarkdownTextImpl = () => {
@@ -35,7 +35,7 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
   }
 
   return (
-    <div className="mt-4 flex items-center justify-between gap-4 rounded-t-lg bg-admin-950 px-4 py-2 text-sm font-semibold text-admin-100">
+    <div className="bg-admin-950 text-admin-100 mt-4 flex items-center justify-between gap-4 rounded-t-lg px-4 py-2 text-sm font-semibold">
       <span className="lowercase [&>span]:text-xs">{language}</span>
       <TooltipIconButton tooltip="Copy" onClick={onCopy}>
         {!isCopied && <CopyIcon />}
@@ -115,12 +115,18 @@ const defaultComponents = memoizeMarkdownComponents({
   ),
   a: ({ className, ...props }) => (
     <a
-      className={cn("text-admin-accent font-medium underline underline-offset-4", className)}
+      className={cn(
+        "text-admin-accent font-medium underline underline-offset-4",
+        className
+      )}
       {...props}
     />
   ),
   blockquote: ({ className, ...props }) => (
-    <blockquote className={cn("border-l-2 border-admin-700 pl-6 italic", className)} {...props} />
+    <blockquote
+      className={cn("border-admin-700 border-l-2 pl-6 italic", className)}
+      {...props}
+    />
   ),
   ul: ({ className, ...props }) => (
     <ul className={cn("my-5 ml-6 list-disc [&>li]:mt-2", className)} {...props} />
@@ -152,7 +158,7 @@ const defaultComponents = memoizeMarkdownComponents({
   td: ({ className, ...props }) => (
     <td
       className={cn(
-        "border-b border-l border-admin-700 px-4 py-2 text-left last:border-r [&[align=center]]:text-center [&[align=right]]:text-right",
+        "border-admin-700 border-b border-l px-4 py-2 text-left last:border-r [&[align=center]]:text-center [&[align=right]]:text-right",
         className
       )}
       {...props}
@@ -161,7 +167,7 @@ const defaultComponents = memoizeMarkdownComponents({
   tr: ({ className, ...props }) => (
     <tr
       className={cn(
-        "m-0 border-b border-admin-700 p-0 first:border-t [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg",
+        "border-admin-700 m-0 border-b p-0 first:border-t [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg",
         className
       )}
       {...props}
@@ -173,7 +179,7 @@ const defaultComponents = memoizeMarkdownComponents({
   pre: ({ className, ...props }) => (
     <pre
       className={cn(
-        "overflow-x-auto !rounded-t-none rounded-b-lg bg-admin-950 p-4 text-admin-100",
+        "bg-admin-950 text-admin-100 overflow-x-auto !rounded-t-none rounded-b-lg p-4",
         className
       )}
       {...props}
@@ -183,7 +189,10 @@ const defaultComponents = memoizeMarkdownComponents({
     const isCodeBlock = useIsMarkdownCodeBlock()
     return (
       <code
-        className={cn(!isCodeBlock && "bg-admin-800 rounded border-admin-700 border font-semibold", className)}
+        className={cn(
+          !isCodeBlock && "bg-admin-800 border-admin-700 rounded border font-semibold",
+          className
+        )}
         {...props}
       />
     )

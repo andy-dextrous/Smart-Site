@@ -39,7 +39,7 @@ function NavItem({
     >
       {Icon && <Icon className="h-5 w-5 flex-shrink-0" />}
       {!isCollapsed && (
-        <span className="animate-in fade-in-0 slide-in-from-left-2 truncate font-medium opacity-0 delay-100 duration-300 group-hover:opacity-100 lg:opacity-100">
+        <span className="truncate font-medium opacity-0 transition-opacity delay-100 duration-300 group-hover:opacity-100 lg:opacity-100">
           {label}
         </span>
       )}
@@ -89,7 +89,7 @@ function NavGroup({
       {Icon && <Icon className="h-5 w-5 flex-shrink-0" />}
       {!isCollapsed && (
         <>
-          <span className="fade-in-0 flex-1 truncate text-left font-medium opacity-0 delay-100 duration-300 group-hover:opacity-100 lg:opacity-100">
+          <span className="flex-1 truncate text-left font-medium opacity-0 transition-opacity delay-100 duration-300 group-hover:opacity-100 lg:opacity-100">
             {label}
           </span>
           <ChevronDown
@@ -145,7 +145,7 @@ export function AppSidebar() {
 
   const [isCollapsed, setIsCollapsed] = useState(true)
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    business: false,
+    business: true,
     forms: false,
     settings: false,
   })
@@ -221,7 +221,7 @@ export function AppSidebar() {
 
   const groups = {
     business: {
-      label: "Business",
+      label: "Your Business",
       icon: getNavIcon("services"), // Using services icon for business group
       items: ["team", "services", "testimonials"],
     },
@@ -240,10 +240,22 @@ export function AppSidebar() {
   // Categorize items
   const mainItems = [
     { type: "global", slug: "dashboard", href: "/admin", icon: Home, label: "Dashboard" },
+    // Pages collection first
+    ...visibleCollections
+      .filter(col => col.slug === "pages")
+      .map(col => ({
+        type: "collection",
+        slug: col.slug,
+        href: formatAdminURL({ adminRoute, path: `/collections/${col.slug}` }),
+        label: getTranslation(col.labels?.plural || col.slug, i18n),
+        icon: getNavIcon(col.slug),
+      })),
+    // Other collections (excluding pages since it's already above)
     ...visibleCollections
       .filter(
         col =>
           ![
+            "pages",
             "team",
             "services",
             "testimonials",
@@ -252,6 +264,7 @@ export function AppSidebar() {
             "templates",
             "redirects",
             "categories",
+            "users",
           ].includes(col.slug)
       )
       .map(col => ({

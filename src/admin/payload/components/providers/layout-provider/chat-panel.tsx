@@ -27,8 +27,8 @@ import {
 import { cn } from "@/admin/utilities/ui"
 import { Button } from "@/admin/payload/components/ui/button"
 import { Sheet, SheetContent, SheetHeader } from "@/admin/payload/components/ui/sheet"
-import { AssistantModal } from "@/admin/payload/components/providers/layout-provider/assistant-ui/assistant-modal"
-import { TooltipIconButton } from "@/admin/payload/components/providers/layout-provider/assistant-ui/tooltip-icon-button"
+
+import { TooltipIconButton } from "@/admin/payload/components/assistant-ui/tooltip-icon-button"
 import { useAIContext } from "../ai-provider"
 import { DialogTitle } from "@/components/ui/dialog"
 

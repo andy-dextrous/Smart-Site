@@ -1,8 +1,8 @@
 import { Link, List, LucideProps } from "lucide-react"
 import { ExoticComponent } from "react"
-import { FaFileAlt, FaSearch, FaUserAlt, FaWpforms } from "react-icons/fa"
+import { FaFileAlt, FaRss, FaSearch, FaUserAlt, FaWpforms } from "react-icons/fa"
 import { IoIosDocument } from "react-icons/io"
-import { IoDocumentsSharp, IoSettings } from "react-icons/io5"
+import { IoSettings } from "react-icons/io5"
 import { HiTemplate } from "react-icons/hi"
 import { IconType } from "react-icons/lib"
 
@@ -21,7 +21,7 @@ export const navIconMap: Partial<
   categories: List,
   media: MdOutlinePermMedia,
   pages: IoIosDocument,
-  posts: IoDocumentsSharp,
+  posts: FaRss,
   users: FaUserAlt,
   redirects: Link,
   forms: FaWpforms,

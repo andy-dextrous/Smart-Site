@@ -9,50 +9,31 @@ import {
   DropdownMenuTrigger,
 } from "@/admin/payload/components/ui/dropdown-menu"
 import { User, Settings, LogOut } from "lucide-react"
-import { useEffect, useState } from "react"
 import { getClientSideURL } from "@/admin/utilities/get-url"
+import { useAuth } from "@payloadcms/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@/admin/payload/components/ui/avatar"
 
 /*************************************************************************/
 /*  USER DROPDOWN COMPONENT
 /*************************************************************************/
 
 export default function UserDropdown() {
-  const [user, setUser] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const cmsURL = getClientSideURL()
+  const { user, logOut } = useAuth()
 
   /*************************************************************************/
-  /*  FETCH USER DATA
+  /*  LOGOUT HANDLER
   /*************************************************************************/
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`${cmsURL}/api/users/me`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setUser(data.user)
-        } else {
-          setUser(null)
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error)
-        setUser(null)
-      } finally {
-        setIsLoading(false)
-      }
+  async function handleLogout() {
+    try {
+      await logOut()
+    } catch (error) {
+      console.error("Failed to logout:", error)
     }
+  }
 
-    fetchUser()
-  }, [cmsURL])
-
-  if (isLoading || !user) {
+  if (!user) {
     return (
       <Button
         size="icon-round"
@@ -67,32 +48,41 @@ export default function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon-lg" className="rounded-full">
-          <User />
+        <Button size="icon-lg" className="overflow-hidden rounded-full p-0">
+          <Avatar>
+            {user.avatar?.url ? (
+              <AvatarImage src={user.avatar.url} />
+            ) : (
+              <AvatarFallback>
+                {user.name?.charAt(0) || user.email?.charAt(0)}
+              </AvatarFallback>
+            )}
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
         className="bg-admin-850 border-admin-700 text-admin-100 min-w-[200px]"
       >
-        <DropdownMenuItem asChild className="text-base py-2.5 px-4">
+        <DropdownMenuItem asChild className="px-4 py-2.5 text-base">
           <a href={`${cmsURL}/admin/collections/users/${user.id}`}>
             <User className="size-5" />
             Profile
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="text-base py-2.5 px-4">
+        <DropdownMenuItem asChild className="px-4 py-2.5 text-base">
           <a href={`${cmsURL}/admin/globals/settings`}>
             <Settings className="size-5" />
             Settings
           </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="text-base py-2.5 px-4">
-          <a href={`${cmsURL}/admin/logout`}>
-            <LogOut className="size-5" />
-            Logout
-          </a>
+        <DropdownMenuItem
+          className="cursor-pointer px-4 py-2.5 text-base"
+          onClick={handleLogout}
+        >
+          <LogOut className="size-5" />
+          Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,9 +1,10 @@
 "use client"
 
-import { ExternalLink, MessageSquare, Sparkles } from "lucide-react"
+import { ExternalLink, MessageSquare, Sparkles, Moon, Sun } from "lucide-react"
 import React from "react"
 import { Button } from "@/admin/payload/components/ui/button"
 import { useAIContext } from "../ai-provider"
+import { useTheme } from "@payloadcms/ui"
 import UserDropdown from "./user-dropdown"
 import Link from "next/link"
 
@@ -13,6 +14,15 @@ import Link from "next/link"
 
 export function TopNavigation() {
   const { toggleChat } = useAIContext()
+  const { theme, setTheme } = useTheme()
+
+  /*************************************************************************/
+  /*  THEME TOGGLE HANDLER
+  /*************************************************************************/
+
+  function handleThemeToggle() {
+    setTheme(theme === "light" ? "dark" : "light")
+  }
 
   return (
     <nav className="bg-admin-950 border-admin-800 h-nav flex items-center justify-between border-b px-6">
@@ -32,6 +42,10 @@ export function TopNavigation() {
             <ExternalLink />
             <span>View Site</span>
           </Link>
+        </Button>
+
+        <Button size="icon-round" onClick={handleThemeToggle}>
+          {theme === "light" ? <Moon /> : <Sun />}
         </Button>
 
         <Button size="icon-round" onClick={toggleChat}>

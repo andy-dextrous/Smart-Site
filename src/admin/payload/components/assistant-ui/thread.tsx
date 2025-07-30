@@ -20,8 +20,8 @@ import {
 import { cn } from "@/admin/utilities/ui"
 
 import { Button } from "@/components/ui/button"
-import { MarkdownText } from "@/admin/payload/components/providers/layout-provider/assistant-ui/markdown-text"
-import { TooltipIconButton } from "@/admin/payload/components/providers/layout-provider/assistant-ui/tooltip-icon-button"
+import { MarkdownText } from "@/admin/payload/components/assistant-ui/markdown-text"
+import { TooltipIconButton } from "@/admin/payload/components/assistant-ui/tooltip-icon-button"
 
 export const Thread: FC = () => {
   return (
