@@ -1,4 +1,4 @@
-# CLAUDE.md - Smart Site
+# CLAUDE.md - Smart Site Application
 
 This file provides guidance for Claude Code when working specifically within the `apps/smart-site/` application.
 
@@ -6,235 +6,147 @@ This file provides guidance for Claude Code when working specifically within the
 
 This is a **section-first, field-driven website builder** using Next.js 15, Payload CMS, Tailwind v4, and GSAP. The architecture is designed for 90% of development time to be spent building reusable sections from designs.
 
-### Core Architecture
+## 🚨 CRITICAL - Admin Folder Protection
 
-**Route Groups**:
-- `(frontend)/` - Public website routes, CSS, and frontend logic
-- `(payload)/` - CMS admin dashboard routes and API endpoints
+**NEVER modify files in `src/admin/`** when working on client sites:
 
-**Key Directories**:
-- `src/components/sections/` - All page sections (primary development area)
-- `src/admin/payload/` - CMS configuration separated from frontend
-- `src/admin/lib/` - Admin server actions, routing, and caching utilities
-- `src/utilities/` - Frontend utilities
-- `src/admin/utilities/` - Admin-specific utilities
+- **Admin folder is core product code** - only modify when developing the master branch
+- **ALL admin customizations** must go through `smartsite.config.ts` configuration
+- **Admin updates override local changes** - use config system to preserve customizations
 
-### Admin/Frontend Separation
+## Smart Site Architecture
 
-**Critical**: Admin and frontend code are completely separated:
-- **Admin Layer**: `src/admin/` contains all Payload CMS, server actions, routing logic
-- **Frontend Layer**: `src/components/`, `src/app/(frontend)/` contains public website code
-- **Never mix**: Admin components shouldn't be used in frontend routes
+### Route Groups Structure
 
-## Sections Config System
+**Critical separation pattern**:
 
-**Unified Configuration**: Sections use a centralized registration system:
+- **`(frontend)/`** - Public website routes, CSS, and frontend logic
+- **`(payload)/`** - CMS admin dashboard routes and API endpoints
 
-1. **Config Registration**: `src/components/sections/config.ts` exports `sectionBlocks` array
-2. **Component Mapping**: `src/components/sections/sections-map.tsx` maps block types to React components  
-3. **Rendering**: `src/admin/components/render-sections.tsx` handles server-side rendering
+### Directory Organization
 
-This replaces the old pattern of importing into separate files.
+**Admin Layer** (`src/admin/`):
+- `payload/` - Complete CMS configuration separated from frontend
+- `lib/` - Admin server actions, routing, and caching utilities  
+- `utilities/` - Admin-specific utility functions
+- `components/` - Admin dashboard components
 
-## Tailwind v4 Implementation
+**Frontend Layer**:
+- `src/components/` - Public website components → [See CLAUDE.md](./src/components/CLAUDE.md)
+- `src/components/sections/` - All page sections (primary development area) → [See CLAUDE.md](./src/components/sections/CLAUDE.md)
+- `src/app/(frontend)/` - Public routes and pages
+- `src/utilities/` - Frontend-only utilities
 
-### CSS-First Configuration
+### Admin/Frontend Separation Rules
 
-All Tailwind config is in CSS files, not JavaScript:
-- `src/app/(frontend)/css/globals.css` - Entry point
-- `src/app/(frontend)/css/theme.css` - Colors and design tokens
-- `src/app/(frontend)/css/typography.css` - Site-wide typography
-- `src/app/(frontend)/css/components.css` - Custom component classes
+**CRITICAL - Never mix these layers**:
 
-### Typography Rules
+- **Admin components** should NEVER be used in frontend routes
+- **Frontend components** should NEVER be used in admin routes
+- **Utilities are separated** - check the correct folder before importing
+- **Updates override warning**: When updating smart-site, the entire `/admin` folder gets replaced - use `smartsite.config.ts` for customizations
 
-**NEVER apply typography styles directly to components**:
-- ❌ `className="text-2xl font-bold leading-tight"`
-- ✅ Use design system classes or let typography.css handle defaults
+## SmartSite Configuration System
 
-### Key Tailwind v4 Features
+The `smartsite.config.ts` provides a powerful override system for customizing Payload collections, globals, and blocks without modifying core files.
 
-- **CSS Import**: `@import "tailwindcss"` (not `@tailwind` directives)
-- **Theme Variables**: `--color-blue-500`, `--font-sans` etc.
-- **Container Queries**: `@container`, `@sm:`, `@md:` etc.
-- **3D Transforms**: `transform-3d`, `rotate-x-*`, `perspective-*`
-- **Gradient Syntax**: `bg-linear-45`, `bg-conic`, `bg-radial-[at_25%_25%]`
+### Boolean Override Pattern
 
-## GSAP Animation Integration
+**Disable default features**:
 
-### Setup Requirements
-
-1. **Config**: Set `gsap: true` in `src/smartsite.config.ts`
-2. **Provider**: Import from `@/providers/gsap` (not node_modules)
-3. **Client Component**: Add `"use client"` to animated components
-
-### Animation Pattern
-
-```typescript
-import { useGSAP, gsap } from "@/providers/gsap"
-import { useRef } from "react"
-
-const sectionRef = useRef<HTMLDivElement>(null)
-
-useGSAP(
-  () => {
-    gsap.fromTo(
-      "h1",
-      { opacity: 0, y: 100 },
-      { opacity: 1, y: 0, duration: 1, ease: "power2.inOut" }
-    )
-  },
-  { scope: sectionRef }
-)
-```
-
-**Key Rules**:
-- Always use `useGSAP` hook
-- Use refs for scoping to avoid class/attribute conflicts
-- Scope allows simple selectors without affecting other elements
-
-## Payload CMS Integration
-
-### SmartSite Configuration System
-
-The `smartsite.config.ts` uses a powerful override system for Payload collections, globals, and blocks:
-
-**Boolean Override System**:
 ```typescript
 // smartsite.config.ts
 const smartSiteConfig = defineConfig({
-  // Disable default collections with boolean flags
+  // Disable unwanted default collections
   collections: [
-    { services: false, team: false }, // Disable services & team
-    CustomProducts,                   // Add custom collection
+    { services: false, team: false }, // Remove services & team collections
+    CustomProducts, // Add your custom collection
   ],
-  
-  // Same pattern for globals and blocks
-  globals: [{ footer: false }],       // Disable footer
-  blocks: [{ form: false }],          // Disable form block
-  
-  // Other Payload config goes here
+
+  // Disable default globals  
+  globals: [
+    { footer: false }, // Remove footer global
+    CustomSettings,    // Add custom global
+  ],
+
+  // Disable default blocks
+  blocks: [
+    { form: false },     // Remove form block
+    { hero: false },     // Remove default hero
+    CustomHeroBlock,     // Add custom hero
+  ],
+})
+```
+
+### Enhanced Configuration Options
+
+**Advanced Payload configuration**:
+
+```typescript
+const smartSiteConfig = defineConfig({
+  // Payload-specific config
   payload: {
-    cors: ['https://mydomain.com'],
-  }
+    cors: ["https://yourdomain.com"],
+    rateLimit: {
+      trustProxy: true,
+      window: 900000, // 15 minutes
+      max: 1000,
+    },
+    csrf: ["https://yourdomain.com"],
+  },
+
+  // Media storage options
+  media: {
+    storage: "vercel-blob", // or "local", "s3", "cloudinary"
+    collections: ["media", "documents"],
+  },
+
+  // Frontend options
+  frontend: {
+    enableFrontend: true, // Enable public routes
+    revalidation: 60,     // ISR revalidation time
+  },
 })
 ```
 
-**Benefits**:
-- **Type Safe**: `collections: (CollectionConfig | {services: false})[]`
-- **Clean API**: Easy boolean flags for disabling defaults
-- **Flexible**: Mix custom configs with boolean overrides
-- **No Conflicts**: Separate from main Payload config typing
+### Configuration Integration
 
-### Collections Structure
+**How the config system works**:
 
-**Default Collections** (can be disabled with boolean flags):
-- **Pages**: Main page content with flexible sections
-- **Posts**: Blog/article content  
-- **Services**: Service-specific pages
-- **Team**: Team member profiles
-- **Templates**: Reusable page templates
-- **URI Index**: URL routing and management
-- **Media**: File/image management
-- **Categories**: Content categorization
-- **Users**: Admin user management
+1. **Smart-site core** provides default collections, globals, and blocks
+2. **Your config** overrides/extends these defaults using boolean flags
+3. **System merges** your customizations with core functionality
+4. **Updates preserve** your customizations by keeping config separate
 
-### Field-to-Component Architecture
+## Smart Site Patterns
 
-**Reusable Field Functions** (`src/admin/payload/fields/`) map 1:1 to React components:
+### Server Actions Architecture
 
-- `sectionIntro()` → `<SectionIntro />` - Standard heading + description
-- `sectionCta()` → `<SectionCta />` - Call-to-action with button
-- `button()` → `<CMSLink />` - Single button with variants
-- `link()` → `<CMSLink />` - Internal references or external URLs
-- `content()` → `<RichText />` - Rich text content fields
+**Admin server actions** (`src/admin/lib/`):
+- Handle all database operations via Payload Local API
+- Manage authentication and authorization
+- Process form submissions and data mutations
+- Cache management and revalidation
 
-### Layout Components (`src/components/layout/`)
-
-Pre-built components that consume field data directly:
-
-```typescript
-<SectionIntro heading={heading} description={description} align="center" />
-<SectionCta text={ctaText} button={ctaButton} />
-```
-
-### Data Fetching Patterns
-
-```typescript
-// Server components (preferred)
-import { getPayload } from "payload"
-
-const data = await getPayload().findByID({
-  collection: "pages",
-  id: params.id,
-})
-
-// Client components (when needed)  
-import { useFetch } from "@/hooks/useFetch"
-
-const { data } = useFetch(`/api/pages/${id}`)
-```
-
-## Development Guidelines
+**Frontend utilities** (`src/utilities/`):
+- Client-side helper functions only
+- No database access or server operations
+- UI utilities and formatting functions
 
 ### Type Generation
 
-If types are missing, run:
-```bash
-npm run generate:types
-```
-
-**NEVER create manual types** - always wait for Payload generation.
-
-### Design System Integration
-
-- **Check existing patterns** before creating new components
-- **Use typography.css** for text styling
-- **Follow Tailwind v4 syntax** for modern features
-- **Leverage layout components** for consistent spacing/structure
-
-## Testing & Quality
+**Payload automatically generates types** - never create them manually:
 
 ```bash
-# Before committing any changes
-pnpm lint          # ESLint validation
-pnpm type-check    # TypeScript validation
-pnpm format        # Prettier formatting
+# Types are generated automatically when Payload starts
+# Access them via:
+import type { Page, Post } from "@/admin/payload/payload-types"
 ```
 
-### Database Seeding
+### Integration with Monorepo
 
-After schema changes:
-```bash
-pnpm seed          # Repopulate with sample data
-```
-
-## Common Patterns
-
-### Rich Text Handling
-
-```typescript
-import RichText from "@/admin/payload/components/frontend/rich-text"
-
-<div className="prose max-w-none">
-  <RichText data={content} />
-</div>
-```
-
-### Media Handling
-
-```typescript
-import { Media } from "@/admin/payload/components/frontend/media"
-
-<Media resource={image} className="aspect-video object-cover" />
-```
-
-### Link Handling
-
-```typescript
-import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
-
-<CMSLink {...button} appearance={button?.variant || "default"} />
-```
-
-This architecture ensures consistent, maintainable code that scales across different website projects while maintaining design system integrity.
+This app integrates with the broader monorepo structure:
+- **Shared packages** are automatically linked via pnpm workspace
+- **CLI tool** can install components from blocks-library into this app
+- **AI agents** in smart-site-ai can interact with this app's content
+- **Deployment** is handled independently from other apps
