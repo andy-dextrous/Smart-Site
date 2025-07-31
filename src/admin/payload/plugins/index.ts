@@ -13,6 +13,7 @@ import { Plugin } from "payload"
 import { markAsReadAfterRead } from "@/admin/payload/hooks/form-submissions"
 import { beforeSyncWithSearch } from "@/admin/payload/search/beforeSync"
 import { searchFields } from "@/admin/payload/search/fieldOverrides"
+import smartSiteConfig from "@/smartsite.config"
 
 /*************************************************************************/
 /*  REDIRECTS PLUGIN
@@ -218,16 +219,52 @@ const search = searchPlugin({
 })
 
 /*************************************************************************/
-/*  BLOB STORAGE PLUGIN
+/*  STORAGE PLUGINS
 /*************************************************************************/
 
-const blob = vercelBlobStorage({
-  cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year
-  collections: {
-    media: true,
-  },
-  token: process.env.BLOB_READ_WRITE_TOKEN,
-})
+// Conditionally create storage plugins based on config
+const createStoragePlugins = (): Plugin[] => {
+  const storagePlugins: Plugin[] = []
+  const mediaConfig = smartSiteConfig.settings.media
+  
+  switch (mediaConfig.storage) {
+    case "vercel":
+      const vercelToken = mediaConfig.vercel?.token || process.env.BLOB_READ_WRITE_TOKEN
+      if (vercelToken) {
+        storagePlugins.push(
+          vercelBlobStorage({
+            cacheControlMaxAge: mediaConfig.vercel?.cacheControlMaxAge || 60 * 60 * 24 * 365, // 1 year default
+            collections: {
+              media: true,
+            },
+            token: vercelToken,
+          })
+        )
+      } else {
+        console.warn("Vercel blob storage configured but no token found. Falling back to local storage.")
+      }
+      break
+    
+    case "s3":
+      // TODO: Add S3 storage plugin when available
+      // Example configuration would use mediaConfig.s3 options
+      console.warn("S3 storage not yet implemented. Using local storage.")
+      break
+    
+    case "uploadThing":
+      // TODO: Add UploadThing storage plugin when available  
+      // Example configuration would use mediaConfig.uploadThing options
+      console.warn("UploadThing storage not yet implemented. Using local storage.")
+      break
+    
+    case "local":
+    default:
+      // Local storage uses the staticDir in the media collection, no plugin needed
+      break
+  }
+  
+  return storagePlugins
+}
 
 /*************************************************************************/
 /*  NESTED DOCS PLUGIN
@@ -250,4 +287,10 @@ const nestedDocs = nestedDocsPlugin({
 /*  PLUGINS
 /*************************************************************************/
 
-export const plugins: Plugin[] = [redirects, forms, search, /*blob,*/ nestedDocs]
+export const plugins: Plugin[] = [
+  redirects, 
+  forms, 
+  search, 
+  ...createStoragePlugins(), 
+  nestedDocs
+]

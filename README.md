@@ -686,51 +686,206 @@ These rules transform Cursor into a **smart development assistant** that underst
 
 ### SmartSite Config (`src/smartsite.config.ts`)
 
-> **🚨 CRITICAL**: All configuration changes must be made through `smartsite.config.ts`. Never directly modify files in the `src/admin/` directory as this breaks the admin/frontend separation and can cause deployment issues.
+> **🚨 CRITICAL**: All configuration changes must be made through `smartsite.config.ts`. Never directly modify files in the `src/admin/` directory as this breaks the admin/frontend separation. All changes insie /admin will be overwritten each update..
 
 ```typescript
 import { defineConfig } from "@/admin/config"
 
 const smartSiteConfig = defineConfig({
   settings: {
+    // Core Features
     gsap: true, // Enable GSAP animations
     smoothScroll: true, // Enable smooth scrolling
     themeToggle: false, // Enable dark/light mode toggle
-    i18n: false, // Enable internationalization
     gsapDevTools: true, // GSAP dev tools in development
+
+    // Internationalization
+    i18n: false, // Enable internationalization
+    // i18n: {                     // Or configure i18n options
+    //   prefixDefaultLocale: false,
+    //   defaultLocale: "en",
+    //   locales: ["en", "es", "fr"],
+    //   localeCookie: "NEXT_LOCALE",
+    // },
+
+    // AI Integration
     ai: {
-      enabled: true, // Enable AI integration
-      url: process.env.NEXT_PUBLIC_AI_URL,
+      enabled: true, // Enable AI features
+      url: process.env.NEXT_PUBLIC_AI_URL, // AI backend URL
     },
+    // ai: false,                  // Or disable completely
+
+    // Content & SEO
     search: true, // Enable search functionality
-    analytics: true, // Enable analytics
+    analytics: true, // Enable analytics tracking
     templateSupport: true, // Enable page templates
+    sitemaps: true, // Generate XML sitemaps
+
+    // Media Storage Configuration
+    media: {
+      storage: "local", // "local" | "vercel" | "s3" | "uploadThing"
+      // Vercel Blob Storage (requires BLOB_READ_WRITE_TOKEN)
+      vercel: {
+        token: process.env.BLOB_READ_WRITE_TOKEN, // Optional, falls back to env
+        cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year cache
+      },
+      // AWS S3 Storage (not yet implemented)
+      s3: {
+        bucket: "my-bucket",
+        region: "us-east-1",
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        endpoint: "https://s3.amazonaws.com", // Optional
+      },
+      // UploadThing Storage (not yet implemented)
+      uploadThing: {
+        secret: process.env.UPLOADTHING_SECRET,
+        appId: process.env.UPLOADTHING_APP_ID,
+      },
+    },
   },
 
-  // Disable default collections with boolean flags
+  // Collection Management
   collections: [
-    // { services: false },        // Disable services collection
-    // CustomProducts,             // Add custom collections
+    // Boolean flags to disable defaults
+    // { services: false, team: false },    // Disable multiple collections
+    // Add custom collections
+    // CustomProducts,                      // Your custom collection config
   ],
 
-  // Disable default globals
+  // Global Configuration
   globals: [
-    // { footer: false },          // Disable footer global
+    // { footer: false },                   // Disable footer global
+    // CustomSettings,                      // Add custom globals
   ],
 
-  // Disable default blocks
+  // Block Configuration
   blocks: [
-    // { form: false },            // Disable form block
+    // { form: false, "media-block": false }, // Disable default blocks
+    // CustomBlock,                         // Add custom blocks
   ],
 
-  // Additional Payload configuration
+  // Raw Payload Configuration
   payload: {
-    // Custom admin settings, plugins, etc.
+    // Direct Payload config (advanced usage)
+    // admin: { meta: { title: "Custom Admin" } },
+    // plugins: [ customPlugin() ],
   },
 })
 
 export default smartSiteConfig
 ```
+
+### 📋 Complete Settings Reference
+
+#### Core Features
+
+| Setting        | Type      | Default | Description                          |
+| -------------- | --------- | ------- | ------------------------------------ |
+| `gsap`         | `boolean` | `true`  | Enable GSAP animations and providers |
+| `smoothScroll` | `boolean` | `true`  | Enable smooth scrolling behavior     |
+| `themeToggle`  | `boolean` | `false` | Enable dark/light mode toggle        |
+| `gsapDevTools` | `boolean` | `true`  | Show GSAP dev tools in development   |
+
+#### Internationalization (i18n)
+
+| Setting                    | Type                    | Default         | Description                                 |
+| -------------------------- | ----------------------- | --------------- | ------------------------------------------- |
+| `i18n`                     | `boolean \| i18nConfig` | `false`         | Simple enable/disable or full configuration |
+| `i18n.prefixDefaultLocale` | `boolean`               | `false`         | Add locale prefix to default locale URLs    |
+| `i18n.defaultLocale`       | `string`                | `"en"`          | Default site language                       |
+| `i18n.locales`             | `string[]`              | `["en"]`        | Available languages                         |
+| `i18n.localeCookie`        | `string`                | `"NEXT_LOCALE"` | Cookie name for locale preference           |
+
+#### AI Integration
+
+| Setting      | Type                  | Default                   | Description                                 |
+| ------------ | --------------------- | ------------------------- | ------------------------------------------- |
+| `ai`         | `boolean \| aiConfig` | `{ enabled: true }`       | Simple enable/disable or full configuration |
+| `ai.enabled` | `boolean`             | `true`                    | Enable AI features in admin                 |
+| `ai.url`     | `string`              | `"http://localhost:4112"` | AI backend service URL                      |
+
+#### Content & SEO
+
+| Setting           | Type      | Default | Description                 |
+| ----------------- | --------- | ------- | --------------------------- |
+| `search`          | `boolean` | `true`  | Enable search functionality |
+| `analytics`       | `boolean` | `true`  | Enable analytics tracking   |
+| `templateSupport` | `boolean` | `true`  | Enable page templates       |
+| `sitemaps`        | `boolean` | `true`  | Generate XML sitemaps       |
+
+#### Media Storage
+
+| Setting                           | Type                                           | Default                             | Description             |
+| --------------------------------- | ---------------------------------------------- | ----------------------------------- | ----------------------- |
+| `media.storage`                   | `"local" \| "vercel" \| "s3" \| "uploadThing"` | `"local"`                           | Storage provider        |
+| `media.vercel.token`              | `string`                                       | `process.env.BLOB_READ_WRITE_TOKEN` | Vercel blob token       |
+| `media.vercel.cacheControlMaxAge` | `number`                                       | `31536000`                          | Cache duration (1 year) |
+| `media.s3.bucket`                 | `string`                                       | -                                   | S3 bucket name          |
+| `media.s3.region`                 | `string`                                       | -                                   | AWS region              |
+| `media.s3.accessKeyId`            | `string`                                       | -                                   | AWS access key          |
+| `media.s3.secretAccessKey`        | `string`                                       | -                                   | AWS secret key          |
+| `media.s3.endpoint`               | `string`                                       | -                                   | Custom S3 endpoint      |
+| `media.uploadThing.secret`        | `string`                                       | -                                   | UploadThing secret      |
+| `media.uploadThing.appId`         | `string`                                       | -                                   | UploadThing app ID      |
+
+#### Collection Management
+
+Configure which default collections are enabled:
+
+```typescript
+collections: [
+  { services: false, team: false }, // Disable specific collections
+  CustomProducts, // Add custom collections
+]
+```
+
+**Available Default Collections:**
+
+- `pages` - Main page content
+- `posts` - Blog/article content
+- `services` - Service-specific pages
+- `team` - Team member profiles
+- `testimonials` - Customer testimonials
+- `templates` - Reusable page templates
+- `media` - File/image management
+- `categories` - Content categorization
+- `users` - Admin user management
+- `uri-index` - URL routing management
+
+#### Global Management
+
+Configure global settings and navigation:
+
+```typescript
+globals: [
+  { footer: false }, // Disable footer global
+  CustomSettings, // Add custom globals
+]
+```
+
+**Available Default Globals:**
+
+- `header` - Site navigation and header
+- `footer` - Footer content and links
+- `settings` - Site-wide settings
+
+#### Block Management
+
+Configure available section blocks:
+
+```typescript
+blocks: [
+  { form: false, "media-block": false }, // Disable specific blocks
+  CustomBlock, // Add custom blocks
+]
+```
+
+**Available Default Blocks:**
+
+- `code` - Code syntax highlighting
+- `form` - Contact/lead capture forms
+- `media-block` - Rich media content blocks
 
 ### ⚠️ Admin Directory Warning
 

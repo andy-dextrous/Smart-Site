@@ -18,6 +18,9 @@ const smartSiteConfig = defineConfig({
     search: true,
     analytics: true,
     templateSupport: true,
+    media: {
+      storage: "local", // "local" | "vercel" | "s3" | "uploadThing" <=== All have options
+    },
   },
 
   /*
@@ -49,7 +52,7 @@ const smartSiteConfig = defineConfig({
   ],
 
   /*
-    Other payload config goes here such as plugins, email extensions, etc.
+    Other payload config goes here such as plugins, email extensions, etc. Use it for extensions or complete overrides of all smart site defaults.
 
     Example:
       payload: {

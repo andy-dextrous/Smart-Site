@@ -47,6 +47,7 @@ export interface SmartSiteSettings {
   analytics: boolean
   templateSupport: boolean
   sitemaps: boolean
+  media: mediaConfig
 }
 
 export interface i18nConfig {
@@ -59,6 +60,26 @@ export interface i18nConfig {
 export interface aiConfig {
   enabled?: boolean
   url?: string // Full URL: "http://localhost:4112" or "https://my-ai-backend.vercel.app"
+}
+
+export interface mediaConfig {
+  storage: "local" | "vercel" | "s3" | "uploadThing"
+  // Provider-specific configuration options
+  vercel?: {
+    token?: string
+    cacheControlMaxAge?: number
+  }
+  s3?: {
+    bucket?: string
+    region?: string
+    accessKeyId?: string
+    secretAccessKey?: string
+    endpoint?: string
+  }
+  uploadThing?: {
+    secret?: string
+    appId?: string
+  }
 }
 
 export interface SmartSiteConfig {
@@ -105,6 +126,9 @@ const adminDefaults: Partial<SmartSiteConfig> = {
     analytics: true,
     templateSupport: true,
     sitemaps: true,
+    media: {
+      storage: "local",
+    },
   },
 }
 

@@ -31,6 +31,11 @@ export type FrontendCollection = {
   hasSEO?: boolean
 }
 
+export type EnableFrontendOptions = {
+  label?: string
+  seoSchemaType?: SEOSchemaType
+}
+
 type CollectionStructure = {
   hasTitle: boolean
   hasCustomSEO: boolean
@@ -55,9 +60,9 @@ let frontendCollectionsData: FrontendCollection[] = []
 
 export function enableFrontend<TSlug extends CollectionSlug>(
   config: CollectionConfig<TSlug>,
-  label?: string,
-  seoSchemaType?: SEOSchemaType
+  options?: EnableFrontendOptions
 ): CollectionConfig<TSlug> {
+  const { label, seoSchemaType } = options || {}
   const structure = analyzeCollectionStructure(config)
   const enhancedFields = buildEnhancedFields(config, structure, seoSchemaType)
   const collection = createFrontendCollection(config, label, structure)
