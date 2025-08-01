@@ -817,16 +817,16 @@ export interface HeroPrimaryBlock {
             newTab?: boolean | null;
             reference?:
               | ({
+                  relationTo: 'team';
+                  value: string | Team;
+                } | null)
+              | ({
                   relationTo: 'pages';
                   value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
                   value: string | Post;
-                } | null)
-              | ({
-                  relationTo: 'team';
-                  value: string | Team;
                 } | null)
               | ({
                   relationTo: 'services';
@@ -1045,16 +1045,16 @@ export interface HeroFullBlock {
             newTab?: boolean | null;
             reference?:
               | ({
+                  relationTo: 'team';
+                  value: string | Team;
+                } | null)
+              | ({
                   relationTo: 'pages';
                   value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
                   value: string | Post;
-                } | null)
-              | ({
-                  relationTo: 'team';
-                  value: string | Team;
                 } | null)
               | ({
                   relationTo: 'services';
@@ -1306,16 +1306,16 @@ export interface TextImageBlock {
           newTab?: boolean | null;
           reference?:
             | ({
+                relationTo: 'team';
+                value: string | Team;
+              } | null)
+            | ({
                 relationTo: 'pages';
                 value: string | Page;
               } | null)
             | ({
                 relationTo: 'posts';
                 value: string | Post;
-              } | null)
-            | ({
-                relationTo: 'team';
-                value: string | Team;
               } | null)
             | ({
                 relationTo: 'services';
@@ -1446,16 +1446,16 @@ export interface ServiceCardsListBlock {
       newTab?: boolean | null;
       reference?:
         | ({
+            relationTo: 'team';
+            value: string | Team;
+          } | null)
+        | ({
             relationTo: 'pages';
             value: string | Page;
           } | null)
         | ({
             relationTo: 'posts';
             value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'team';
-            value: string | Team;
           } | null)
         | ({
             relationTo: 'services';
@@ -1655,16 +1655,16 @@ export interface LatestArticlesBlock {
       newTab?: boolean | null;
       reference?:
         | ({
+            relationTo: 'team';
+            value: string | Team;
+          } | null)
+        | ({
             relationTo: 'pages';
             value: string | Page;
           } | null)
         | ({
             relationTo: 'posts';
             value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'team';
-            value: string | Team;
           } | null)
         | ({
             relationTo: 'services';
@@ -1741,16 +1741,16 @@ export interface FullwidthCtaBlock {
       newTab?: boolean | null;
       reference?:
         | ({
+            relationTo: 'team';
+            value: string | Team;
+          } | null)
+        | ({
             relationTo: 'pages';
             value: string | Page;
           } | null)
         | ({
             relationTo: 'posts';
             value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'team';
-            value: string | Team;
           } | null)
         | ({
             relationTo: 'services';
@@ -2147,16 +2147,16 @@ export interface UriIndex {
    */
   document:
     | {
+        relationTo: 'team';
+        value: string | Team;
+      }
+    | {
         relationTo: 'pages';
         value: string | Page;
       }
     | {
         relationTo: 'posts';
         value: string | Post;
-      }
-    | {
-        relationTo: 'team';
-        value: string | Team;
       }
     | {
         relationTo: 'services';
@@ -3645,16 +3645,16 @@ export interface Header {
             newTab?: boolean | null;
             reference?:
               | ({
+                  relationTo: 'team';
+                  value: string | Team;
+                } | null)
+              | ({
                   relationTo: 'pages';
                   value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
                   value: string | Post;
-                } | null)
-              | ({
-                  relationTo: 'team';
-                  value: string | Team;
                 } | null)
               | ({
                   relationTo: 'services';
@@ -3672,16 +3672,16 @@ export interface Header {
                     newTab?: boolean | null;
                     reference?:
                       | ({
+                          relationTo: 'team';
+                          value: string | Team;
+                        } | null)
+                      | ({
                           relationTo: 'pages';
                           value: string | Page;
                         } | null)
                       | ({
                           relationTo: 'posts';
                           value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'team';
-                          value: string | Team;
                         } | null)
                       | ({
                           relationTo: 'services';
@@ -3698,16 +3698,16 @@ export interface Header {
                           newTab?: boolean | null;
                           reference?:
                             | ({
+                                relationTo: 'team';
+                                value: string | Team;
+                              } | null)
+                            | ({
                                 relationTo: 'pages';
                                 value: string | Page;
                               } | null)
                             | ({
                                 relationTo: 'posts';
                                 value: string | Post;
-                              } | null)
-                            | ({
-                                relationTo: 'team';
-                                value: string | Team;
                               } | null)
                             | ({
                                 relationTo: 'services';
@@ -3746,16 +3746,16 @@ export interface Footer {
                 newTab?: boolean | null;
                 reference?:
                   | ({
+                      relationTo: 'team';
+                      value: string | Team;
+                    } | null)
+                  | ({
                       relationTo: 'pages';
                       value: string | Page;
                     } | null)
                   | ({
                       relationTo: 'posts';
                       value: string | Post;
-                    } | null)
-                  | ({
-                      relationTo: 'team';
-                      value: string | Team;
                     } | null)
                   | ({
                       relationTo: 'services';
@@ -3777,16 +3777,16 @@ export interface Footer {
           newTab?: boolean | null;
           reference?:
             | ({
+                relationTo: 'team';
+                value: string | Team;
+              } | null)
+            | ({
                 relationTo: 'pages';
                 value: string | Page;
               } | null)
             | ({
                 relationTo: 'posts';
                 value: string | Post;
-              } | null)
-            | ({
-                relationTo: 'team';
-                value: string | Team;
               } | null)
             | ({
                 relationTo: 'services';
@@ -3872,12 +3872,12 @@ export interface Setting {
      * Default template for new pages (if no template is specified)
      */
     pagesDefaultTemplate?: (string | null) | Template;
-    postsCollectionLabel?: string | null;
-    postsArchivePage?: (string | null) | Page;
-    postsSingleTemplate?: (string | null) | Template;
     teamCollectionLabel?: string | null;
     teamArchivePage?: (string | null) | Page;
     teamSingleTemplate?: (string | null) | Template;
+    postsCollectionLabel?: string | null;
+    postsArchivePage?: (string | null) | Page;
+    postsSingleTemplate?: (string | null) | Template;
     servicesCollectionLabel?: string | null;
     servicesArchivePage?: (string | null) | Page;
     servicesSingleTemplate?: (string | null) | Template;
@@ -4130,12 +4130,12 @@ export interface SettingsSelect<T extends boolean = true> {
     | {
         homepage?: T;
         pagesDefaultTemplate?: T;
-        postsCollectionLabel?: T;
-        postsArchivePage?: T;
-        postsSingleTemplate?: T;
         teamCollectionLabel?: T;
         teamArchivePage?: T;
         teamSingleTemplate?: T;
+        postsCollectionLabel?: T;
+        postsArchivePage?: T;
+        postsSingleTemplate?: T;
         servicesCollectionLabel?: T;
         servicesArchivePage?: T;
         servicesSingleTemplate?: T;
