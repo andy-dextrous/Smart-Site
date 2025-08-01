@@ -32,8 +32,8 @@
       "@payload-styles": ["./src/app/(payload)/css/admin.scss"]
     },
     "target": "ES2022",
-    "types": ["react/jsx-runtime"]
+    "types": ["react/jsx-runtime", "jest", "node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "demos"]
+  "exclude": ["node_modules", "demos", "tests"]
 }
