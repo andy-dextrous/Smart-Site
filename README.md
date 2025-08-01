@@ -72,9 +72,147 @@ PAYLOAD_ADMIN_PASSWORD=your-strong-password        # Will be created during seed
 
 #### Option A: MongoDB (Recommended)
 
-1. Set up MongoDB (local or Atlas)
-2. Set `DATABASE_PROVIDER=mongoose`
-3. Add your `DATABASE_URI` to `.env.local`
+**Cloud MongoDB (MongoDB Atlas)**
+1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a cluster and database
+3. Get connection string from Atlas dashboard
+4. Set `DATABASE_PROVIDER=mongoose`
+5. Add your `DATABASE_URL` to `.env`
+
+**Local MongoDB Development**
+
+**Initial Setup:**
+1. Install MongoDB locally:
+
+   **macOS:**
+   ```bash
+   # Using Homebrew (recommended)
+   brew tap mongodb/brew
+   brew install mongodb-community
+   brew services start mongodb/brew/mongodb-community
+   ```
+
+   **Windows:**
+   ```powershell
+   # Using Chocolatey (recommended)
+   choco install mongodb
+   
+   # Or using winget
+   winget install MongoDB.Server
+   
+   # Or download installer from https://www.mongodb.com/try/download/community
+   # Follow the installation wizard and select "Install MongoDB as a Service"
+   ```
+
+   **Manual Download (both platforms):**
+   - Visit https://www.mongodb.com/try/download/community
+   - Choose your OS and follow installation instructions
+
+2. Install MongoDB Shell for database interaction:
+
+   **macOS:**
+   ```bash
+   brew install mongodb/brew/mongodb-community-shell
+   ```
+
+   **Windows:**
+   ```powershell
+   # Using Chocolatey
+   choco install mongodb-shell
+   
+   # Or download from https://www.mongodb.com/try/download/shell
+   ```
+
+3. Configure environment:
+   ```bash
+   DATABASE_PROVIDER=mongoose
+   DATABASE_URL=mongodb://localhost:27017/smart-site-dev
+   ```
+
+**Understanding Your Local MongoDB:**
+- **Location**: Your MongoDB data lives in `~/mongodb/data/`
+- **Status**: MongoDB runs as a background daemon (survives terminal closes/computer sleep)
+- **Port**: Default port 27017
+- **Multiple projects**: Same MongoDB server, different database names
+
+**Daily Development Workflow:**
+
+**Using project scripts (works on all platforms):**
+```bash
+# 1. Check if MongoDB is running
+pnpm mongo:status
+
+# 2. Start MongoDB (only if not running)
+pnpm mongo:start
+
+# 3. Stop MongoDB (when needed)
+pnpm mongo:stop
+```
+
+**Direct shell commands:**
+
+**macOS/Linux:**
+```bash
+# 4. View databases via shell
+mongo --eval "db.adminCommand('listDatabases')"
+
+# 5. View collections in your project
+mongo smart-site-dev --eval "db.getCollectionNames()"
+```
+
+**Windows:**
+```powershell
+# 4. View databases via shell
+mongo --eval "db.adminCommand('listDatabases')"
+
+# 5. View collections in your project
+mongo smart-site-dev --eval "db.getCollectionNames()"
+
+# Alternative: Start MongoDB service manually if needed
+net start MongoDB
+
+# Stop MongoDB service
+net stop MongoDB
+```
+
+**GUI Access (Recommended):**
+- **MongoDB Compass**: Download from https://www.mongodb.com/products/compass
+- **Connection**: `mongodb://localhost:27017`
+- **Benefits**: Visual database browser, query builder, real-time monitoring
+
+**Multiple Project Setup:**
+```bash
+# Each project uses different database name:
+# Project 1: DATABASE_URL=mongodb://localhost:27017/smart-site-dev
+# Project 2: DATABASE_URL=mongodb://localhost:27017/smart-site-client2
+# Project 3: DATABASE_URL=mongodb://localhost:27017/smart-site-ecommerce
+```
+
+**Create new database for second project (all platforms):**
+
+**Interactive shell:**
+```bash
+mongo
+> use smart-site-client2
+> db.setup.insertOne({project: "client2", created: new Date()})
+> exit
+```
+
+**One-liner (macOS/Linux):**
+```bash
+mongo smart-site-client2 --eval 'db.setup.insertOne({project: "client2", created: new Date()})'
+```
+
+**One-liner (Windows):**
+```powershell
+mongo smart-site-client2 --eval "db.setup.insertOne({project: 'client2', created: new Date()})"
+```
+
+**Important Notes:**
+- MongoDB creates databases lazily (only after inserting data)
+- GUI clients like Compass **cannot** start MongoDB - server must be running first
+- MongoDB shell connection fails if server is stopped - always check `pnpm mongo:status` first
+- One MongoDB server can host multiple project databases
 
 #### Option B: Vercel PostgreSQL
 
@@ -157,6 +295,11 @@ pnpm regenerate-uris  # Regenerate URI index for routing
 # Payload CMS Commands
 pnpm payload          # Access Payload CLI
 pnpm generate:types   # Generate TypeScript types from Payload
+
+# MongoDB Management (Local Development)
+pnpm mongo:start      # Start local MongoDB server
+pnpm mongo:stop       # Stop local MongoDB server
+pnpm mongo:status     # Check MongoDB status
 ```
 
 ## 📁 Repository Overview
