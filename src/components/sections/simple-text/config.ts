@@ -1,5 +1,5 @@
 import type { Block } from "payload"
-import { defaultLexical } from "@/admin/payload/fields/default-lexical"
+import { defaultLexical } from "@/components/fields/rich-text/default-lexical"
 
 export const SimpleText: Block = {
   slug: "simple-text",

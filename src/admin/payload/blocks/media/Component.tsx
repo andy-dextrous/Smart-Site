@@ -5,7 +5,7 @@ import React from "react"
 
 import type { MediaBlock as MediaBlockProps } from "@/admin/payload/payload-types"
 
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 
 type Props = MediaBlockProps & {
   breakout?: boolean

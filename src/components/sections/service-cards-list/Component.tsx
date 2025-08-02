@@ -2,8 +2,8 @@
 
 import MinusIcon from "@/components/icons/minus"
 import PlusIcon from "@/components/icons/plus"
-import { SectionCta } from "@/components/layout/section-cta"
-import { SectionIntro } from "@/components/layout/section-intro"
+import { SectionCta } from "@/components/fields/section-cta"
+import { SectionIntro } from "@/components/fields/section-intro"
 import {
   Accordion,
   AccordionContent,

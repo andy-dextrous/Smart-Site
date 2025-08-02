@@ -1,6 +1,6 @@
 "use client"
 
-import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
+import { CMSLink } from "@/components/fields/link"
 import type { Header as HeaderType } from "@/admin/payload/payload-types"
 import { SearchIcon, ChevronDown, ChevronRight } from "lucide-react"
 import Link from "next/link"

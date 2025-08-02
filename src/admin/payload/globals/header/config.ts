@@ -1,6 +1,6 @@
 import type { GlobalConfig } from "payload"
 
-import { link } from "@/admin/payload/fields/link"
+import { link } from "@/components/fields/link/link"
 import { afterHeaderChange } from "@/admin/payload/hooks/globals/header/after-change"
 
 export const Header: GlobalConfig = {

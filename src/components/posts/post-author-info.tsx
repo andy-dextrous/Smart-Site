@@ -1,6 +1,6 @@
 "use client"
 
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 import { Post, User } from "@/admin/payload/payload-types"
 import { FaFacebook, FaTwitter, FaPinterest } from "react-icons/fa"
 import { Button } from "@/components/ui/button"

@@ -239,7 +239,7 @@ useGSAP(
 **ALWAYS use RichText for Payload CMS content**:
 
 ```typescript
-import RichText from "@/admin/payload/components/frontend/rich-text"
+import RichText from "@/components/fields/rich-text"
 
 // Basic usage
 <div className="prose max-w-none">
@@ -257,7 +257,7 @@ import RichText from "@/admin/payload/components/frontend/rich-text"
 **ALWAYS use Media component for Payload CMS images**:
 
 ```typescript
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 
 // Basic usage
 <Media resource={image} alt={image?.alt || ""} fill imgClassName="object-cover" />
@@ -271,7 +271,7 @@ import { Media } from "@/admin/payload/components/frontend/media"
 **ALWAYS use CMSLink for Payload CMS links**:
 
 ```typescript
-import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
+import { CMSLink } from "@/components/fields/link"
 
 // Button styling
 <CMSLink {...linkData} appearance="default" size="lg">

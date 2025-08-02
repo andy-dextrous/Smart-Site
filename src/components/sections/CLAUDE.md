@@ -239,7 +239,7 @@ Create the component using props from config. The `interfaceName` from your conf
 import { cn } from "@/utilities/ui"
 import { SectionIntro } from "@/components/layout/section-intro"
 import { SectionCta } from "@/components/layout/section-cta"
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 import type { NewSectionNameBlock } from "@/admin/payload/payload-types"
 
 export const NewSectionNameComponent: React.FC<NewSectionNameBlock> = props => {

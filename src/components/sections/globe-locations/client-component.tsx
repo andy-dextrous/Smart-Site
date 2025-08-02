@@ -1,6 +1,6 @@
 "use client"
 
-import { SectionIntro } from "@/components/layout/section-intro"
+import { SectionIntro } from "@/components/fields/section-intro"
 import { cn } from "@/utilities/ui"
 import dynamic from "next/dynamic"
 import { useEffect, useState, useRef, useImperativeHandle } from "react"

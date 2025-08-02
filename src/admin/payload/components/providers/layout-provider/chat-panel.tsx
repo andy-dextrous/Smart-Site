@@ -24,10 +24,10 @@ import {
   XIcon,
 } from "lucide-react"
 import { cn } from "@/admin/utilities/ui"
-import { Button } from "@/admin/payload/components/ui/button"
-import { Sheet, SheetContent, SheetHeader } from "@/admin/payload/components/ui/sheet"
+import { Button } from "@/admin/components/ui/button"
+import { Sheet, SheetContent, SheetHeader } from "@/admin/components/ui/sheet"
 
-import { TooltipIconButton } from "@/admin/payload/components/assistant-ui/tooltip-icon-button"
+import { TooltipIconButton } from "@/admin/components/assistant-ui/tooltip-icon-button"
 import { useAIContext } from "../ai-provider"
 import { DialogTitle } from "@/components/ui/dialog"
 

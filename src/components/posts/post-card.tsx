@@ -2,7 +2,7 @@ import type { Post, Media } from "@/admin/payload/payload-types"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import ArrowRightIcon from "@/components/icons/arrow-right"
-import { Media as PayloadMedia } from "@/admin/payload/components/frontend/media"
+import { Media as PayloadMedia } from "@/components/fields/media"
 import { cn } from "@/utilities/ui"
 
 /*************************************************************************/

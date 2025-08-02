@@ -2,9 +2,9 @@
 
 import ArrowRightIcon from "@/components/icons/arrow-right"
 import Quotation from "@/components/icons/quotation"
-import { SectionIntro } from "@/components/layout/section-intro"
+import { SectionIntro } from "@/components/fields/section-intro"
 import { Button } from "@/components/ui/button"
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 import type { TestimonialsBlock } from "@/admin/payload/payload-types"
 import { Autoplay, Navigation } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"

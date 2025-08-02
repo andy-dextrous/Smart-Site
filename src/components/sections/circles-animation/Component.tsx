@@ -1,6 +1,6 @@
 "use client"
 
-import RichText from "@/admin/payload/components/frontend/rich-text"
+import RichText from "@/components/fields/rich-text"
 import type { CirclesAnimationBlock } from "@/admin/payload/payload-types"
 import { gsap, useGSAP } from "@/providers/gsap"
 import { SplitText } from "gsap/SplitText"

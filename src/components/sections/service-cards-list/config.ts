@@ -1,6 +1,6 @@
 import type { Block } from "payload"
-import { sectionIntro } from "@/admin/payload/fields/section-intro"
-import { sectionCta } from "@/admin/payload/fields/section-cta"
+import { sectionIntro } from "@/components/fields/section-intro/section-intro"
+import { sectionCta } from "@/components/fields/section-cta/section-cta"
 
 export const ServiceCardsList: Block = {
   slug: "service-cards-list",

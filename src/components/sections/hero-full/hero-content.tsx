@@ -1,5 +1,5 @@
 import ArrowRightIcon from "@/components/icons/arrow-right"
-import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
+import { CMSLink } from "@/components/fields/link"
 import type { HeroFullBlock as HeroProps } from "@/admin/payload/payload-types"
 import { cn } from "@/utilities/ui"
 import { tv } from "tailwind-variants"

@@ -1,7 +1,7 @@
 "use client"
 
 import { Grid, GridLines } from "@/components/layout/grid"
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 import type {
   Post,
   Media as MediaType,

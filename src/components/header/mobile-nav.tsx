@@ -7,8 +7,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
-import { SocialLinks } from "@/admin/payload/components/frontend/social-links"
+import { CMSLink } from "@/components/fields/link"
+import { SocialLinks } from "@/components/fields/social-links"
 import type { Header as HeaderType, Setting } from "@/admin/payload/payload-types"
 import Link from "next/link"
 import * as React from "react"

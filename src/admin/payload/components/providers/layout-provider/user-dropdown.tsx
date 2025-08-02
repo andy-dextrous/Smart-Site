@@ -1,17 +1,17 @@
 "use client"
 
-import { Button } from "@/admin/payload/components/ui/button"
+import { Button } from "@/admin/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/admin/payload/components/ui/dropdown-menu"
+} from "@/admin/components/ui/dropdown-menu"
 import { User, Settings, LogOut } from "lucide-react"
 import { getClientSideURL } from "@/admin/utilities/get-url"
 import { useAuth } from "@payloadcms/ui"
-import { Avatar, AvatarFallback, AvatarImage } from "@/admin/payload/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/admin/components/ui/avatar"
 
 /*************************************************************************/
 /*  USER DROPDOWN COMPONENT

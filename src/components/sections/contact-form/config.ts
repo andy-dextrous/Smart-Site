@@ -1,6 +1,6 @@
 import type { Block } from "payload"
-import { sectionIntro } from "@/admin/payload/fields/section-intro"
-import { formVariant } from "@/admin/payload/fields/form"
+import { sectionIntro } from "@/components/fields/section-intro/section-intro"
+import { formVariant } from "@/components/fields/form/form"
 
 export const ContactForm: Block = {
   slug: "contact-form",

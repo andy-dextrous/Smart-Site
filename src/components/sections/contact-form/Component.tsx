@@ -1,6 +1,6 @@
 import type { ContactFormBlock } from "@/admin/payload/payload-types"
-import { SectionIntro } from "@/components/layout/section-intro"
-import { CMSForm } from "@/admin/payload/components/frontend/cms-form"
+import { SectionIntro } from "@/components/fields/section-intro"
+import { CMSForm } from "@/components/fields/form"
 
 export const ContactFormComponent: React.FC<ContactFormBlock> = ({
   heading,

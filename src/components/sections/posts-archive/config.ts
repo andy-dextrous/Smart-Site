@@ -1,5 +1,5 @@
 import type { Block } from "payload"
-import { sectionIntro } from "@/admin/payload/fields/section-intro"
+import { sectionIntro } from "@/components/fields/section-intro/section-intro"
 
 export const PostsArchive: Block = {
   slug: "posts-archive",

@@ -10,7 +10,7 @@ import { formatAdminURL } from "@payloadcms/ui/shared"
 import { getTranslation } from "@payloadcms/translations"
 import { usePathname } from "next/navigation"
 import { getNavIcon } from "@/admin/payload/components/backend/nav/navIconMap"
-import { Button } from "@/admin/payload/components/ui/button"
+import { Button } from "@/admin/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 /*************************************************************************/

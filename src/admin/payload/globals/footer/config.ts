@@ -1,6 +1,6 @@
 import type { GlobalConfig } from "payload"
 
-import { link } from "@/admin/payload/fields/link"
+import { link } from "@/components/fields/link/link"
 import { afterFooterChange } from "@/admin/payload/hooks/globals/footer/after-change"
 
 export const Footer: GlobalConfig = {

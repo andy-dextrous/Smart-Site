@@ -1,4 +1,4 @@
-import { Button } from "@/admin/payload/components/ui/button"
+import { Button } from "@/admin/components/ui/button"
 import { HiOutlineExternalLink } from "react-icons/hi"
 import Link from "next/link"
 

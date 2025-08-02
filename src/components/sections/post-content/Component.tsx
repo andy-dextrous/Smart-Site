@@ -1,4 +1,4 @@
-import RichText from "@/admin/payload/components/frontend/rich-text"
+import RichText from "@/components/fields/rich-text"
 import type { PostContentBlock } from "@/admin/payload/payload-types"
 import { PostAuthorInfo } from "@/components/posts/post-author-info"
 import { DocumentBreadcrumbs } from "@/components/ui/breadcrumbs"

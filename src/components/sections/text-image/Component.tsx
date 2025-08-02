@@ -1,9 +1,9 @@
 "use client"
 
-import RichText from "@/admin/payload/components/frontend/rich-text"
+import RichText from "@/components/fields/rich-text"
 import { cn } from "@/utilities/ui"
-import { CMSLink } from "@/admin/payload/components/frontend/cms-link"
-import { Media as PayloadMedia } from "@/admin/payload/components/frontend/media"
+import { CMSLink } from "@/components/fields/link"
+import { Media as PayloadMedia } from "@/components/fields/media"
 import { Button } from "@/components/ui/button"
 import type {
   Media,
