@@ -1,4 +1,4 @@
-import { FormBlock, type FormVariant } from "@/admin/payload/blocks/form/component"
+import { FormBlock, type FormVariant } from "@/components/blocks/form/component"
 import type { Form } from "@/admin/payload/payload-types"
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical"
 import React from "react"

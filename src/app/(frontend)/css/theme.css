@@ -59,6 +59,7 @@
   /* Brand Color Shades - get from https://www.tailwindshades.com */
 
   @theme {
+    /* Primary - Brand Color 1 - Dominant */
     --color-primary: oklch(50.49% 0.171 302.71);
     --color-primary-50: oklch(92.71% 0.02428 306.95);
     --color-primary-100: oklch(88.858% 0.03907 307.2);
@@ -68,6 +69,7 @@
     --color-primary-500: oklch(57.734% 0.15374 304.17);
     --color-primary-600: oklch(50.49% 0.17053 302.71);
 
+    /* Secondary - Brand Color 2 - Secondary */
     --color-secondary: oklch(47.642% 0.29956 274.94);
     --color-secondary-50: oklch(92.323% 0.04273 298.82);
     --color-secondary-100: oklch(87.316% 0.07112 297.48);
@@ -78,8 +80,10 @@
     --color-secondary-600: oklch(39.675% 0.24803 275.67);
     --color-secondary-700: oklch(0.4683 0.2511 283.09);
 
+    /* Neutral - Gray shade */
     --color-neutral: oklch(96.23% 0.005 286.3);
 
+    /* Dark - Black shade */
     --color-dark: oklch(14.557% 0.00884 273.86);
     --color-dark-50: oklch(96.23% 0.005 286.3);
     --color-dark-100: oklch(96.23% 0.005 286.3);
@@ -88,6 +92,9 @@
     --color-dark-800: oklch(25.96% 0.027 275.01);
     --color-dark-900: oklch(22.097% 0.02176 276.465);
     --color-dark-950: oklch(14.557% 0.00884 273.86);
+
+    /* White - White shade */
+    --color-white: oklch(100% 0 0);
   }
 
   /* Role-based Colors */

@@ -2,11 +2,11 @@
 
 @layer frontend-base-custom {
   * {
-    @apply border-border selection:bg-primary selection:text-white;
+    @apply border-dark-border selection:bg-primary selection:text-white;
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-white text-dark font-sans;
   }
 
   /* Not Toaster from sonner */

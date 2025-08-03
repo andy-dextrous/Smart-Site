@@ -1,4 +1,4 @@
-import { MediaBlock } from "@/admin/payload/blocks/media/Component"
+import { MediaBlock } from "@/components/blocks/media/Component"
 import {
   DefaultNodeTypes,
   SerializedBlockNode,
@@ -11,7 +11,7 @@ import {
   RichText as ConvertRichText,
 } from "@payloadcms/richtext-lexical/react"
 
-import { CodeBlock, CodeBlockProps } from "@/admin/payload/blocks/code/Component"
+import { CodeBlock, CodeBlockProps } from "@/components/blocks/code/Component"
 
 import { cn } from "@/utilities/ui"
 

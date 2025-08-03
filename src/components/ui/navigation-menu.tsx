@@ -77,17 +77,17 @@ const navigationMenu = tv({
   variants: {
     theme: {
       light: {
-        trigger: "focus:text-primary text-foreground hover:text-primary font-normal",
-        chevronIcon: "text-foreground",
-        indicatorArrow: "bg-background",
-        content: "bg-background text-foreground",
+        trigger: "focus:text-primary text-dark hover:text-primary font-normal",
+        chevronIcon: "text-dark",
+        indicatorArrow: "bg-white",
+        content: "bg-white text-dark",
       },
       dark: {
         trigger:
-          "text-background hover:text-primary-foreground focus:text-primary-foreground cursor-pointer bg-transparent font-normal",
-        chevronIcon: "text-primary-foreground",
-        indicatorArrow: "bg-primary-foreground",
-        content: "bg-foreground text-background",
+          "text-white hover:text-white focus:text-white cursor-pointer bg-transparent font-normal",
+        chevronIcon: "text-white",
+        indicatorArrow: "bg-white",
+        content: "bg-dark text-white",
       },
     },
   },

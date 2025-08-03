@@ -1,5 +1,5 @@
 import { SectionIntro } from "@/components/fields/section-intro"
-import { RelatedPosts as RelatedPostsBlock } from "@/admin/payload/blocks/related-posts/Component"
+import { RelatedPosts as RelatedPostsBlock } from "@/components/blocks/related-posts/Component"
 import { getRelatedPosts } from "@/admin/lib/data/posts"
 import type { RelatedPostsBlock as RelatedPostsBlockType } from "@/admin/payload/payload-types"
 import { PageData } from "@/admin/components/render-sections"

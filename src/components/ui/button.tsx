@@ -11,7 +11,7 @@ const buttonVariants = tv({
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:pointer-events-none",
     "shrink-0 outline-none [&_svg]:shrink-0",
-    "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+    "focus-visible:border-ring focus-visible:ring-primary/50 focus-visible:ring-[3px]",
     "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
     "aria-invalid:border-destructive",
     "[&>svg]:ml-auto [&>svg]:flex-none",
@@ -42,11 +42,11 @@ const buttonVariants = tv({
         "focus-visible:ring-white/50",
       ],
       phoneSelect: [
-        "border-input bg-background hover:bg-accent hover:text-accent-foreground border",
-        "text-foreground font-medium",
+        "border-form-light-border bg-white hover:bg-secondary hover:text-white border",
+        "text-dark font-medium",
       ],
       secondary: [
-        "bg-secondary text-secondary-foreground shadow-xs",
+        "bg-secondary text-white shadow-xs",
         "hover:bg-secondary/80",
       ],
       white: ["text-dark bg-white", "hover:bg-white/90"],

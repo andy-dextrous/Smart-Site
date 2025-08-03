@@ -1,4 +1,4 @@
-import { RelatedPosts } from "@/admin/payload/blocks/related-posts/Component"
+import { RelatedPosts } from "@/components/blocks/related-posts/Component"
 import RichText from "@/components/fields/rich-text"
 import { Post } from "@/admin/payload/payload-types"
 import { SectionIntro } from "../fields/section-intro"

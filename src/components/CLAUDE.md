@@ -156,7 +156,7 @@ useGSAP(
 }
 
 .card-elevated {
-  @apply bg-surface-elevated p-content rounded-lg shadow-lg;
+  @apply bg-white p-content rounded-lg shadow-lg;
 }
 ```
 
