@@ -22,16 +22,13 @@ const admin = {
   importMap: {
     baseDir: path.resolve(dirname),
   },
-  // autoLogin:
-  //   process.env.NODE_ENV === "development" &&
-  //   process.env.PAYLOAD_ADMIN_EMAIL &&
-  //   process.env.PAYLOAD_ADMIN_PASSWORD
-  //     ? {
-  //         email: process.env.PAYLOAD_ADMIN_EMAIL,
-  //         password: process.env.PAYLOAD_ADMIN_PASSWORD,
-  //         prefillOnly: true,
-  //       }
-  //     : false,
+  autoLogin:
+    process.env.NODE_ENV === "development"
+      ? {
+          email: process.env.PAYLOAD_ADMIN_EMAIL,
+          password: process.env.PAYLOAD_ADMIN_PASSWORD,
+        }
+      : false,
   components,
   meta: {
     title: "Admin | smart site",

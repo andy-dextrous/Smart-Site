@@ -24,9 +24,12 @@
     "db:schema": "cross-env NODE_OPTIONS=--no-deprecation payload generate:db-schema",
     "db:reset": "pnpm db:schema && pnpm seed",
     "dev:fresh": "pnpm db:reset && pnpm dev",
+    "test:ui": "NO_BUILD=true USE_DEV=true playwright test --config=tests/e2e/playwright.config.ts",
+    "test:prod": "playwright test --config=tests/e2e/playwright.config.ts",
     "mongo:start": "export PATH=\"$HOME/mongodb/bin:$PATH\" && mongod --dbpath ~/mongodb/data --logpath ~/mongodb/mongodb.log --fork",
     "mongo:stop": "pkill mongod || echo 'MongoDB is not running'",
-    "mongo:status": "ps aux | grep mongod | grep -v grep || echo 'MongoDB is not running'"
+    "mongo:status": "ps aux | grep mongod | grep -v grep || echo 'MongoDB is not running'",
+    "kill": "npx kill-port 3000"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.23",

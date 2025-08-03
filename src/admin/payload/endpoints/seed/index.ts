@@ -101,10 +101,10 @@ class DynamicSeedManager {
       disableSyncHooks(this.payload, this.context)
 
       /**
-       * Step 2: Clean existing data (but preserve users)
+       * Step 2: Clean existing data (including users to fix password hash issues)
        */
-      this.payload.logger.info("Cleaning existing data...")
-      const deleteResult = await this.deleteData(true, false) // Pass false to prevent hook management inside deleteData
+      this.payload.logger.info("Cleaning existing data (including users)...")
+      const deleteResult = await this.deleteData(false, false) // Pass false to prevent hook management inside deleteData
 
       // Don't fail the entire seeding if deletion fails on empty database
       if (!deleteResult.success) {
@@ -114,37 +114,11 @@ class DynamicSeedManager {
       }
 
       /**
-       * Step 3: Seed users (only if none exist)
+       * Step 3: Always create fresh users to ensure proper password hashing
        */
-      this.payload.logger.info("Checking for existing users...")
-      let existingUsers: { docs: any[] } = { docs: [] }
-
-      try {
-        existingUsers = await this.payload.find({
-          collection: "users",
-          limit: 10,
-          context: this.context,
-        })
-      } catch (error) {
-        this.payload.logger.info(
-          "Users table doesn't exist yet, will create during seeding"
-        )
-      }
-
-      let seededUsers = []
-      let usersCreated = 0
-
-      if (existingUsers.docs.length > 0) {
-        this.payload.logger.info(
-          `Found ${existingUsers.docs.length} existing users, skipping user creation`
-        )
-        seededUsers = existingUsers.docs
-        usersCreated = 0
-      } else {
-        this.payload.logger.info("No existing users found, creating seed users...")
-        seededUsers = await this.seedUsers()
-        usersCreated = seededUsers.length
-      }
+      this.payload.logger.info("Creating fresh admin user...")
+      const seededUsers = await this.seedUsers()
+      const usersCreated = seededUsers.length
 
       /**
        * Step 4: Seed all content
@@ -252,44 +226,18 @@ class DynamicSeedManager {
   /*************************************************************************/
 
   private async seedUsers(): Promise<any[]> {
-    this.payload.logger.info("Seeding users...")
+    this.payload.logger.info("Creating fresh admin user...")
 
     const userData = seedUser()
 
-    // Check for existing user, but handle missing table gracefully
-    let existingUser: { docs: any[] } = { docs: [] }
-    try {
-      existingUser = await this.payload.find({
-        collection: "users",
-        where: {
-          username: {
-            equals: userData.username,
-          },
-        },
-        limit: 1,
-        context: this.context,
-      })
-    } catch (error) {
-      this.payload.logger.info(
-        "Users table doesn't exist yet, proceeding with user creation"
-      )
-    }
-
-    if (existingUser.docs.length > 0) {
-      this.payload.logger.info(
-        `User with username '${userData.username}' already exists, skipping creation`
-      )
-      return existingUser.docs
-    }
-
-    // Create user if doesn't exist
+    // Always create a fresh user to ensure proper password hashing
     const user = await this.payload.create({
       collection: "users",
       data: userData,
       context: this.context,
     })
 
-    this.payload.logger.info(`Created user: ${userData.username}`)
+    this.payload.logger.info(`Created fresh user: ${userData.username}`)
     return [user]
   }
 

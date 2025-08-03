@@ -20,11 +20,11 @@ export const Users: CollectionConfig = {
   auth: {
     tokenExpiration: 604800000, // 7 days
     // verify: true, // Require email verification before being allowed to authenticate
-    maxLoginAttempts: 5,
+    maxLoginAttempts: process.env.NODE_ENV === "production" ? 5 : 100,
     lockTime: 600 * 1000, // 10 minutes
     loginWithUsername: {
       allowEmailLogin: true,
-      requireEmail: true,
+      requireEmail: false,
     },
   },
   fields: [
