@@ -32,7 +32,7 @@ function generateSitemapIndex(siteUrl, collections) {
   const sitemapEntries = collections
     .map(
       collection => `  <sitemap>
-    <loc>${siteUrl}/sitemap/${collection.slug}-sitemap.xml</loc>
+    <loc>${siteUrl}/sitemap/${collection.slug}.xml</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>`
     )
