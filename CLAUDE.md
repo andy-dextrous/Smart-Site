@@ -26,12 +26,14 @@ This is a **section-first, field-driven website builder** using Next.js 15, Payl
 ### Directory Organization
 
 **Admin Layer** (`src/admin/`):
+
 - `payload/` - Complete CMS configuration separated from frontend
-- `lib/` - Admin server actions, routing, and caching utilities  
+- `lib/` - Admin server actions, routing, and caching utilities
 - `utilities/` - Admin-specific utility functions
 - `components/` - Admin dashboard components
 
 **Frontend Layer**:
+
 - `src/components/` - Public website components → [See CLAUDE.md](./src/components/CLAUDE.md)
 - `src/components/sections/` - All page sections (primary development area) → [See CLAUDE.md](./src/components/sections/CLAUDE.md)
 - `src/app/(frontend)/` - Public routes and pages
@@ -63,17 +65,17 @@ const smartSiteConfig = defineConfig({
     CustomProducts, // Add your custom collection
   ],
 
-  // Disable default globals  
+  // Disable default globals
   globals: [
     { footer: false }, // Remove footer global
-    CustomSettings,    // Add custom global
+    CustomSettings, // Add custom global
   ],
 
   // Disable default blocks
   blocks: [
-    { form: false },     // Remove form block
-    { hero: false },     // Remove default hero
-    CustomHeroBlock,     // Add custom hero
+    { form: false }, // Remove form block
+    { hero: false }, // Remove default hero
+    CustomHeroBlock, // Add custom hero
   ],
 })
 ```
@@ -104,7 +106,7 @@ const smartSiteConfig = defineConfig({
   // Frontend options
   frontend: {
     enableFrontend: true, // Enable public routes
-    revalidation: 60,     // ISR revalidation time
+    revalidation: 60, // ISR revalidation time
   },
 })
 ```
@@ -123,12 +125,14 @@ const smartSiteConfig = defineConfig({
 ### Server Actions Architecture
 
 **Admin server actions** (`src/admin/lib/`):
+
 - Handle all database operations via Payload Local API
 - Manage authentication and authorization
 - Process form submissions and data mutations
 - Cache management and revalidation
 
 **Frontend utilities** (`src/utilities/`):
+
 - Client-side helper functions only
 - No database access or server operations
 - UI utilities and formatting functions
@@ -142,11 +146,3 @@ const smartSiteConfig = defineConfig({
 # Access them via:
 import type { Page, Post } from "@/admin/payload/payload-types"
 ```
-
-### Integration with Monorepo
-
-This app integrates with the broader monorepo structure:
-- **Shared packages** are automatically linked via pnpm workspace
-- **CLI tool** can install components from blocks-library into this app
-- **AI agents** in smart-site-ai can interact with this app's content
-- **Deployment** is handled independently from other apps
