@@ -1,6 +1,6 @@
 import type { Block } from "payload"
 import { sectionIntro } from "@/components/fields/section-intro/section-intro"
-import { infoGridDefault } from "@/components/fields/default-values/info-grid"
+import { infoGridDefault } from "./defaults"
 
 export const InfoGrid: Block = {
   slug: "info-grid",

@@ -1,6 +1,6 @@
 import type { Block } from "payload"
 import { button } from "@/components/fields/buttons/buttons"
-import { fullwidthCtaDefault } from "@/components/fields/default-values/fullwidth-cta"
+import { fullwidthCtaDefault } from "./defaults"
 
 export const FullwidthCta: Block = {
   slug: "fullwidth-cta",

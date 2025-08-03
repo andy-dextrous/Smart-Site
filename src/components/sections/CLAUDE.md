@@ -139,6 +139,105 @@ Every section follows a strict **two-file pattern** that creates predictable, ma
 
 **Core Principle**: Sections are **architectural layouts**, not content-specific implementations. Name them for their structure, not their content.
 
+## When to Use Fields, Blocks, or Sections
+
+### Use Fields When:
+- **You need consistent data structures** - Same heading format everywhere
+- **Building reusable patterns** - Buttons, links, CTAs that appear in multiple places
+- **Enforcing data consistency** - Ensure all team member cards have the same fields
+- **Creating composite patterns** - Group related fields together (e.g., sectionIntro = heading + description)
+
+**Field Best Practices**:
+```typescript
+// ✅ ALWAYS prefer field functions over manual field definitions
+fields: [
+  sectionIntro(),      // Consistent heading + description
+  sectionCta(),        // Reusable CTA pattern
+  button(),            // Standard button configuration
+]
+
+// ❌ AVOID recreating common patterns manually
+fields: [
+  { name: "heading", type: "text" },        // Use sectionIntro() instead
+  { name: "description", type: "textarea" }, // This is what fields prevent
+]
+```
+
+### Use Blocks When:
+- **Content needs to be embedded in rich text** - Forms within blog posts
+- **Building dynamic article content** - Code snippets, media embeds, quotes
+- **Creating reusable content widgets** - That aren't full-width sections
+- **Enhancing long-form content** - Adding structure within posts/pages
+
+**Block Examples**:
+- Form embedded in a blog post about contact methods
+- Image gallery within an article about architecture
+- Code snippet in a technical tutorial
+- Related posts widget at the end of an article
+
+### Use Sections When:
+- **Building page layouts** - The primary way to construct pages
+- **Need full-width architectural elements** - Heroes, feature grids, testimonials
+- **Creating visual page structure** - Sections stack to form complete pages
+- **Implementing design system patterns** - Pre-designed layouts from mockups
+
+**Section Principles**:
+- Sections are 90% of your development work
+- Always leverage field functions for consistency
+- Name for structure, not content
+- Think architecturally - how does this layout work?
+
+## Field-First Development
+
+**CRITICAL**: Sections should heavily leverage field functions. This creates the consistent, predictable data structures that make smart-site powerful.
+
+```typescript
+// ✅ CORRECT - Field-first approach
+export const NewSection: Block = {
+  fields: [
+    sectionIntro({               // Reusable field function
+      headingRequired: true,
+      collapsibleLabel: "Hero Content"
+    }),
+    {
+      name: "layout",            // Custom field for this section
+      type: "select",
+      options: ["left", "right", "center"]
+    },
+    sectionCta(),                // Another reusable field
+    linkGroup({                  // Reusable link patterns
+      collapsibleLabel: "Navigation Links"
+    })
+  ]
+}
+
+// ❌ WRONG - Recreating field patterns
+export const NewSection: Block = {
+  fields: [
+    {
+      name: "heading",           // Don't recreate sectionIntro!
+      type: "text"
+    },
+    {
+      name: "description",       // This is what fields prevent
+      type: "textarea"
+    }
+  ]
+}
+```
+
+**The 1:1 Mapping Principle**:
+- `sectionIntro()` field → `<SectionIntro />` component
+- `sectionCta()` field → `<SectionCta />` component
+- `button()` field → `<CMSLink />` component
+- `content()` field → `<RichText />` component
+
+This consistent mapping means:
+1. Editors know what to expect in the CMS
+2. Developers know what props components receive
+3. Designs are implemented consistently
+4. Changes propagate everywhere automatically
+
 ## Creating New Sections - Step-by-Step Process
 
 When a user asks to "create a new section", follow this exact process in order:

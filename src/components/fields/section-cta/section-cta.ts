@@ -1,6 +1,6 @@
 import type { Field } from "payload"
 import { button } from "../buttons/buttons"
-import { sectionCtaDefault } from "../default-values/section-cta"
+import { sectionCtaDefault } from "./defaults"
 
 /*************************************************************************/
 /*  SECTION CTA FIELD CONFIGURATION

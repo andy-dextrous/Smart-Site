@@ -1,6 +1,6 @@
 import deepMerge from "@/admin/utilities/deep-merge"
 import type { Field } from "payload"
-import { socialLinksDefault } from "../default-values/social-links"
+import { socialLinksDefault } from "./defaults"
 
 /*************************************************************************/
 /*  SOCIAL PLATFORM OPTIONS

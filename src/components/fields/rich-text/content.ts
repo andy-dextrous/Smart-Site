@@ -1,6 +1,6 @@
 import { FixedToolbarFeature, InlineToolbarFeature } from "@payloadcms/richtext-lexical"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
-import { richTextDefault } from "../default-values/rich-text"
+import { richTextDefault } from "./defaults"
 import deepMerge from "@/admin/utilities/deep-merge"
 import type { Field } from "payload"
 

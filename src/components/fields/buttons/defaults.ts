@@ -1,4 +1,4 @@
-import { createDefaultButton } from "@/components/fields/buttons/button-variants"
+import { createDefaultButton } from "./button-variants"
 
 export const buttonsDefault = [
   createDefaultButton({

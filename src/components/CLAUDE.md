@@ -647,6 +647,67 @@ const navigation = await cache.getCollection("pages", {
 
 Remember: The admin data access layer provides optimized, cached access to all CMS content. Always use these functions instead of bypassing to Payload directly.
 
+## Understanding Fields, Blocks, and Sections
+
+Smart-site uses three distinct component types that work together to create a powerful, consistent content management system:
+
+### Fields (`/components/fields/`)
+
+**Purpose**: Reusable configuration functions that create consistent data structures across the CMS.
+
+**Key Insight**: Fields establish a **1:1 mapping between CMS configuration and React components**. Every field configuration function has a corresponding React component for rendering.
+
+**Examples**:
+- `sectionIntro()` → `<SectionIntro />` - Heading + description
+- `sectionCta()` → `<SectionCta />` - Text + button call-to-action
+- `button()` → `<CMSLink />` - Button with variants
+- `link()` → `<CMSLink />` - Internal/external links
+- `content()` → `<RichText />` - Rich text content
+
+**Why Fields Matter**:
+- **Consistency**: Same field structure everywhere means predictable data
+- **Reusability**: Define once, use in sections, blocks, collections
+- **Type Safety**: Payload generates types from field configs automatically
+- **Developer Speed**: No need to recreate common patterns
+
+### Blocks (`/components/blocks/`)
+
+**Purpose**: Self-contained content elements that can be embedded within rich text fields or used as page building blocks.
+
+**Characteristics**:
+- Insertable within posts, pages, or any rich text field
+- Smaller scope than sections (not full-width)
+- Perfect for dynamic content within articles
+
+**Examples**:
+- `FormBlock` - Embed forms from the forms collection
+- `MediaBlock` - Images/videos with captions
+- `CodeBlock` - Syntax-highlighted code snippets
+
+**When to Use**: When content needs to be inserted flexibly within text or when building rich content experiences.
+
+### Sections (`/components/sections/`)
+
+**Purpose**: Full-width architectural layouts that stack vertically to create complete pages.
+
+**Key Principles**:
+- Named for structure, not content (`hero-split` not `about-hero`)
+- Always render as `<section>` elements
+- Compose multiple fields for maximum flexibility
+- Receive page context props automatically
+
+**Field Integration**: Sections heavily leverage field functions:
+```typescript
+fields: [
+  sectionIntro(),      // Reusable heading + description
+  content(),           // Rich text field
+  sectionCta(),        // Call-to-action with button
+  // Custom fields as needed
+]
+```
+
+**The Big Picture**: 90% of development is building sections from designs, leveraging consistent field patterns throughout.
+
 ## Section Development
 
 For detailed section creation workflows, see [sections CLAUDE.md](./sections/CLAUDE.md). This includes:
