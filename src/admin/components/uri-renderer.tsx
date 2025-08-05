@@ -2,8 +2,8 @@ import { cache } from "@/admin/lib/cache"
 import { getDraftModeData } from "@/admin/lib/data/draft"
 import { RenderSections } from "@/admin/components/render-sections"
 import { LivePreviewListener } from "@/admin/payload/components/frontend/live-preview-listener"
-import { PayloadRedirects } from "@/admin/payload/components/frontend/payload-redirects"
 import { routingEngine } from "@/admin/lib/routing"
+import { handleURIRedirect } from "@/admin/lib/redirects"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { generateMeta } from "@/admin/utilities/generate-meta"
@@ -31,6 +31,8 @@ export async function SmartSiteURIRenderer({
 
   const URI = routingEngine.slugToURI(uri)
 
+  await handleURIRedirect(URI)
+
   const routeResponse = isPreview
     ? await getDraftModeData(URI)
     : await cache.getByURI(URI)
@@ -44,7 +46,6 @@ export async function SmartSiteURIRenderer({
 
   return (
     <main data-collection={collection} data-id={document.id}>
-      <PayloadRedirects disableNotFound url={URI} />
       {isPreview && <LivePreviewListener />}
       <RenderSections
         sections={document.sections}

@@ -625,4 +625,80 @@ export const cache = {
       { tags }
     )()
   },
+
+  /**
+   * Get redirect by URI with caching
+   */
+  getRedirect: async (uri: string): Promise<any | null> => {
+    const cacheKey = generateCacheKey({ 
+      collection: "redirects", 
+      type: "redirect-lookup",
+      params: [uri]
+    })
+    const tags = generateCacheTags({ collection: "redirects" })
+    // Also tag with the specific URI for surgical invalidation
+    tags.push(`redirect:${uri}`)
+
+    const timestamp = new Date().toISOString()
+    logCacheEvent({
+      operation: `getRedirect("${uri}")`,
+      cacheKey,
+      tags,
+      timestamp,
+    })
+
+    return unstable_cache(
+      async () => {
+        const payload = await getPayload({ config: configPromise })
+
+        // Priority-based redirect lookup: Manual redirects win over automatic ones
+        const manualRedirect = await payload.find({
+          collection: "redirects",
+          where: {
+            and: [
+              { from: { equals: uri } },
+              { type: { equals: "manual" } }
+            ]
+          },
+          limit: 1,
+          depth: 2,
+        })
+
+        if (manualRedirect.docs.length > 0) {
+          return manualRedirect.docs[0]
+        }
+
+        // If no manual redirect found, look for automatic redirect
+        const automaticRedirect = await payload.find({
+          collection: "redirects",
+          where: {
+            and: [
+              { from: { equals: uri } },
+              { type: { equals: "automatic" } }
+            ]
+          },
+          limit: 1,
+          depth: 2,
+        })
+
+        if (automaticRedirect.docs.length > 0) {
+          return automaticRedirect.docs[0]
+        }
+
+        // Fallback to any redirect if type field doesn't exist (backward compatibility)
+        const anyRedirect = await payload.find({
+          collection: "redirects",
+          where: {
+            from: { equals: uri }
+          },
+          limit: 1,
+          depth: 2,
+        })
+
+        return anyRedirect.docs.length > 0 ? anyRedirect.docs[0] : null
+      },
+      cacheKey,
+      { tags }
+    )()
+  },
 }

@@ -14,24 +14,8 @@ interface Props {
 
 /* This component helps us with SSR based dynamic redirects */
 export const PayloadRedirects: React.FC<Props> = async ({ disableNotFound, url }) => {
-  const redirects = await cache.getCollection("redirects")
-
-  // Priority-based redirect lookup: Manual redirects win over automatic ones
-  let redirectItem = redirects.find(
-    (redirect: any) => redirect.from === url && redirect.type === "manual"
-  )
-
-  // If no manual redirect found, look for automatic redirect
-  if (!redirectItem) {
-    redirectItem = redirects.find(
-      (redirect: any) => redirect.from === url && redirect.type === "automatic"
-    )
-  }
-
-  // Fallback to any redirect if type field doesn't exist (backward compatibility)
-  if (!redirectItem) {
-    redirectItem = redirects.find((redirect: any) => redirect.from === url)
-  }
+  // Use the new cached redirect lookup for optimal performance
+  const redirectItem = await cache.getRedirect(url)
 
   if (redirectItem) {
     // Log redirect type for debugging (only in development)

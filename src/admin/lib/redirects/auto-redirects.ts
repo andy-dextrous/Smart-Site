@@ -16,6 +16,8 @@ export async function createAutomaticRedirect(
   oldURI: string,
   newURI: string
 ): Promise<{ success: boolean; message: string }> {
+  const startTime = Date.now()
+  
   try {
     const payload = await getPayload({ config: configPromise })
 
@@ -75,9 +77,14 @@ export async function createAutomaticRedirect(
       payload.logger.info(`Created automatic redirect: ${oldURI} → ${newURI}`)
     }
 
-    // Ensure the PayloadRedirects component gets fresh redirect data
+    // Ensure the redirect caches are properly invalidated
     revalidateTag("collection:redirects")
-    payload.logger.info("Invalidated redirects cache after automatic redirect update")
+    revalidateTag(`redirect:${oldURI}`) // Invalidate specific URI redirect cache
+    
+    const executionTime = Date.now() - startTime
+    payload.logger.info(
+      `Automatic redirect ${existingAutoRedirect.docs.length > 0 ? "updated" : "created"}: ${oldURI} → ${newURI} (${executionTime}ms)`
+    )
 
     return {
       success: true,
@@ -146,6 +153,7 @@ export async function cleanupAutomaticRedirect(uri: string): Promise<void> {
       })
 
       revalidateTag("collection:redirects")
+      revalidateTag(`redirect:${uri}`) // Invalidate specific URI redirect cache
 
       payload.logger.info(`Cleaned up automatic redirect for deleted content: ${uri}`)
     }
@@ -175,6 +183,13 @@ async function cleanupConflictingRedirects(targetURI: string): Promise<void> {
       },
       limit: 5,
     })
+    
+    // Log potential redirect chain detection
+    if (conflictingRedirects.docs.length > 0) {
+      payload.logger.warn(
+        `⚠️ Detected potential redirect chain: Found ${conflictingRedirects.docs.length} redirects starting from ${targetURI}`
+      )
+    }
 
     if (conflictingRedirects.docs.length > 0) {
       const deletePromises = conflictingRedirects.docs.map(async redirect => {

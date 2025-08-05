@@ -130,15 +130,15 @@ export async function updateURI({
     }
 
     /**
-     * TEMPORARILY DISABLED: After successfully updating the URI index, create an automatic redirect
+     * After successfully updating the URI index, create an automatic redirect
      */
     if (previousURI && previousURI !== uri) {
-      // const redirectResult = await createAutomaticRedirect(previousURI, uri)
-      // if (redirectResult.success) {
-      //   payload.logger.info(`✅ Automatic redirect created: ${previousURI} → ${uri}`)
-      // } else {
-      //   payload.logger.warn(`⚠️ Automatic redirect skipped: ${redirectResult.message}`)
-      // }
+      const redirectResult = await createAutomaticRedirect(previousURI, uri)
+      if (redirectResult.success) {
+        payload.logger.info(`✅ Automatic redirect created: ${previousURI} → ${uri}`)
+      } else {
+        payload.logger.warn(`⚠️ Automatic redirect skipped: ${redirectResult.message}`)
+      }
     }
   } catch (error) {
     const payload = await getPayload({ config: configPromise })

@@ -2,6 +2,7 @@ import type { StaticImageData } from "next/image"
 
 import { cn } from "@/utilities/ui"
 import React from "react"
+import DOMPurify from "isomorphic-dompurify"
 
 import type { MediaBlock as MediaBlockProps } from "@/admin/payload/payload-types"
 
@@ -58,7 +59,7 @@ export const MediaBlock: React.FC<Props> = props => {
             captionClassName
           )}
         >
-          <div dangerouslySetInnerHTML={{ __html: caption }} />
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(caption) }} />
         </div>
       )}
     </div>
