@@ -10,7 +10,10 @@ import {
   MessagePrimitive,
   ThreadPrimitive,
 } from "@assistant-ui/react"
+import { MarkdownTextPrimitive } from "@assistant-ui/react-markdown"
 import type { FC } from "react"
+import { useState, useEffect, useCallback } from "react"
+import { ResizableBox } from "react-resizable"
 import {
   ArrowDownIcon,
   CheckIcon,
@@ -22,37 +25,92 @@ import {
   SendHorizontalIcon,
   SparklesIcon,
   XIcon,
+  GripVertical,
 } from "lucide-react"
 import { cn } from "@/admin/utilities/ui"
 import { Button } from "@/admin/components/ui/button"
-import { Sheet, SheetContent, SheetHeader } from "@/admin/components/ui/sheet"
-
 import { TooltipIconButton } from "@/admin/components/assistant-ui/tooltip-icon-button"
 import { useAIContext } from "../ai-provider"
-import { DialogTitle } from "@/components/ui/dialog"
+import "react-resizable/css/styles.css"
 
 /*************************************************************************/
 /*  CHAT PANEL COMPONENT
 /*************************************************************************/
 
+const STORAGE_KEY = "smart-site-chat-width"
+const DEFAULT_WIDTH = 620
+const MIN_WIDTH = 400
+const MAX_WIDTH = 1200
+
 export function ChatPanel() {
   const { isChatOpen, closeChat } = useAIContext()
+  const [width, setWidth] = useState(DEFAULT_WIDTH)
+  const [isResizing, setIsResizing] = useState(false)
+
+  useEffect(() => {
+    const savedWidth = localStorage.getItem(STORAGE_KEY)
+    if (savedWidth) {
+      const parsedWidth = parseInt(savedWidth, 10)
+      if (!isNaN(parsedWidth) && parsedWidth >= MIN_WIDTH && parsedWidth <= MAX_WIDTH) {
+        setWidth(parsedWidth)
+      }
+    }
+  }, [])
+
+  const handleResize = useCallback((e: any, { size }: any) => {
+    setWidth(size.width)
+    localStorage.setItem(STORAGE_KEY, size.width.toString())
+  }, [])
+
+  const handleResizeStart = useCallback(() => {
+    setIsResizing(true)
+  }, [])
+
+  const handleResizeStop = useCallback(() => {
+    setIsResizing(false)
+  }, [])
 
   const runtime = useChatRuntime({
     api: "/api/ai/chat",
   })
 
+  if (!isChatOpen) return null
+
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <Sheet open={isChatOpen} onOpenChange={open => !open && closeChat()}>
-        <SheetContent
-          side="right"
-          className="bg-admin-50 border-admin-200 dark:bg-admin-950 dark:border-admin-800 flex w-[620px] max-w-[620px] flex-col overflow-hidden p-0 sm:max-w-[480px]"
+      <div className="fixed inset-0 z-50 flex justify-end">
+        {/* Overlay */}
+        <div
+          className="animate-in fade-in-0 absolute inset-0 bg-black/50"
+          onClick={closeChat}
+        />
+
+        {/* Resizable Chat Panel */}
+        <ResizableBox
+          width={width}
+          height={Infinity}
+          minConstraints={[MIN_WIDTH, Infinity]}
+          maxConstraints={[MAX_WIDTH, Infinity]}
+          onResize={handleResize}
+          onResizeStart={handleResizeStart}
+          onResizeStop={handleResizeStop}
+          axis="x"
+          resizeHandles={["w"]}
+          handle={
+            <div className="hover:bg-admin-accent/10 group absolute top-0 bottom-0 left-0 -ml-1 flex w-3 cursor-ew-resize items-center justify-center transition-colors">
+              <div className="bg-admin-300 dark:bg-admin-700 group-hover:bg-admin-accent h-16 w-1.5 rounded-full opacity-50 transition-all group-hover:opacity-100" />
+            </div>
+          }
+          className={cn(
+            "bg-admin-50 border-admin-200 dark:bg-admin-950 dark:border-admin-800 relative flex h-screen flex-col overflow-hidden border-l shadow-xl",
+            // "animate-in slide-in-from-right duration-300", // Disabled - causes lag with resizing
+            isResizing && "select-none"
+          )}
         >
           <ChatHeader />
           <ChatThread />
-        </SheetContent>
-      </Sheet>
+        </ResizableBox>
+      </div>
     </AssistantRuntimeProvider>
   )
 }
@@ -62,17 +120,27 @@ export function ChatPanel() {
 /*************************************************************************/
 
 function ChatHeader() {
+  const { closeChat } = useAIContext()
+
   return (
-    <SheetHeader className="border-admin-200 bg-admin-100 dark:border-admin-850 dark:bg-admin-900 border-b p-4">
+    <div className="border-admin-200 bg-admin-100 dark:border-admin-850 dark:bg-admin-900 flex items-center justify-between border-b p-4">
       <div className="flex items-center gap-3">
         <div className="bg-admin-accent/30 flex h-8 w-8 items-center justify-center rounded-full">
           <SparklesIcon className="text-admin-accent-light h-4 w-4" />
         </div>
         <div className="flex flex-col">
-          <DialogTitle>Smart Site Assistant</DialogTitle>
+          <h2 className="text-lg font-semibold">Smart Site Assistant</h2>
         </div>
       </div>
-    </SheetHeader>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={closeChat}
+        className="bg-admin-200 hover:bg-admin-300 dark:bg-admin-200 dark:hover:bg-admin-300 text-admin-850 dark:text-admin-850 size-10 p-2.5"
+      >
+        <XIcon className="h-6 w-6" />
+      </Button>
+    </div>
   )
 }
 
@@ -208,11 +276,11 @@ const ComposerAddAttachment: FC = () => {
   return (
     <ComposerPrimitive.AddAttachment asChild>
       <TooltipIconButton
-        className="my-2.5 size-8 p-2 transition-opacity ease-in-out"
+        className="my-3 size-10 p-2.5 transition-opacity ease-in-out bg-admin-200 hover:bg-admin-300 dark:bg-admin-200 dark:hover:bg-admin-300 text-admin-850 dark:text-admin-850"
         tooltip="Add Attachment"
         variant="ghost"
       >
-        <PaperclipIcon className="h-4 w-4" />
+        <PaperclipIcon className="h-8 w-8" />
       </TooltipIconButton>
     </ComposerPrimitive.AddAttachment>
   )
@@ -224,14 +292,14 @@ const ComposerAddAttachment: FC = () => {
 
 const Composer: FC = () => {
   return (
-    <ComposerPrimitive.Root className="focus-within:ring-admin-accent/20 border-admin-300 bg-admin-100/80 hover:border-admin-400 dark:border-admin-700 dark:bg-admin-900/80 dark:hover:border-admin-600 flex w-full flex-wrap items-end rounded-xl border px-2.5 shadow-sm backdrop-blur-sm transition-all ease-in-out focus-within:ring-2">
+    <ComposerPrimitive.Root className="focus-within:ring-admin-accent/20 border-admin-300 bg-admin-100/80 hover:border-admin-400 dark:border-admin-700 dark:bg-admin-900/80 dark:hover:border-admin-600 flex w-full flex-wrap items-end rounded-xl border px-3 shadow-sm backdrop-blur-sm transition-all ease-in-out focus-within:ring-2">
       <ComposerAttachments />
       <ComposerAddAttachment />
       <ComposerPrimitive.Input
         rows={1}
         autoFocus
         placeholder="Type your message..."
-        className="text-admin-900 placeholder:text-admin-500 dark:text-admin-100 dark:placeholder:text-admin-500 max-h-40 flex-grow resize-none border-none bg-transparent px-2 py-4 text-sm outline-none focus:ring-0 disabled:cursor-not-allowed"
+        className="text-admin-900 placeholder:text-admin-500 dark:text-admin-100 dark:placeholder:text-admin-500 max-h-48 flex-grow resize-none border-none bg-transparent px-4 py-5 text-lg font-sans outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
     </ComposerPrimitive.Root>
@@ -244,17 +312,17 @@ const ComposerAction: FC = () => {
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
           <Button
-            variant="default"
-            size="sm"
-            className="bg-admin-accent text-admin-0 hover:bg-admin-accent/90 my-2.5 h-8 w-8 rounded-full p-2 transition-all duration-100 hover:scale-105"
+            variant="secondary"
+            size="default"
+            className="my-3 h-10 px-3 transition-all duration-100 hover:scale-105"
           >
-            <SendHorizontalIcon className="h-4 w-4" />
+            <SendHorizontalIcon className="h-5 w-5" />
           </Button>
         </ComposerPrimitive.Send>
       </ThreadPrimitive.If>
       <ThreadPrimitive.If running>
         <ComposerPrimitive.Cancel asChild>
-          <Button variant="outline" size="sm" className="my-2.5 h-8 w-8 rounded-full p-2">
+          <Button variant="outline" size="default" className="my-3 h-10 px-3">
             <CircleStopIcon />
           </Button>
         </ComposerPrimitive.Cancel>
@@ -267,8 +335,8 @@ const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root className="mb-4 grid grid-cols-[minmax(72px,1fr)_auto] gap-2 [&>*]:col-start-2">
       <UserMessageAttachments />
-      <div className="bg-admin-accent text-admin-0 max-w-64 rounded-[20px_20px_4px_20px] px-4 py-3 text-lg leading-snug break-words">
-        <MessagePrimitive.Content />
+      <div className="bg-admin-accent text-admin-0 rounded-[20px_20px_4px_20px] px-4 py-3 text-lg leading-snug break-words">
+        <MessagePrimitive.Parts components={{ Text: MarkdownTextPrimitive }} />
       </div>
       <BranchPicker className="text-admin-600 dark:text-admin-400 col-start-1 -mr-1 inline-flex items-center justify-end gap-1 text-xs" />
     </MessagePrimitive.Root>
@@ -299,17 +367,21 @@ const EditComposer: FC = () => {
 
 const AssistantMessage: FC = () => {
   return (
-    <MessagePrimitive.Root className="mb-4 grid grid-cols-[auto_1fr_auto] grid-rows-[auto_1fr] gap-2">
-      <div className="col-span-2 flex items-start gap-3">
+    <MessagePrimitive.Root className="mb-4 flex flex-col gap-2">
+      <div className="flex items-start gap-3">
         <div className="from-admin-accent/20 to-admin-accent/5 border-admin-accent/10 mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border bg-gradient-to-br">
           <SparklesIcon className="text-admin-accent h-4 w-4" />
         </div>
-        <div className="text-admin-900 dark:text-admin-100 max-w-64 text-lg leading-relaxed break-words">
-          <MessagePrimitive.Content />
+        <div className="flex-1">
+          <div className="text-admin-900 dark:text-admin-100 text-lg leading-relaxed break-words">
+            <MessagePrimitive.Parts components={{ Text: MarkdownTextPrimitive }} />
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <AssistantActionBar />
+            <BranchPicker className="text-admin-600 dark:text-admin-400 inline-flex items-center gap-1 text-xs" />
+          </div>
         </div>
       </div>
-      <AssistantActionBar />
-      <BranchPicker className="text-admin-600 dark:text-admin-400 col-start-2 ml-11 inline-flex items-center justify-end gap-1 text-xs" />
     </MessagePrimitive.Root>
   )
 }
@@ -319,8 +391,7 @@ const AssistantActionBar: FC = () => {
     <ActionBarPrimitive.Root
       hideWhenRunning
       autohide="not-last"
-      autohideFloat="single-branch"
-      className="text-admin-600 data-[floating]:bg-admin-100 data-[floating]:border-admin-300 dark:text-admin-400 dark:data-[floating]:bg-admin-900 dark:data-[floating]:border-admin-700 col-start-3 mt-1 flex gap-1 data-[floating]:absolute data-[floating]:rounded-md data-[floating]:border data-[floating]:p-1 data-[floating]:shadow-lg"
+      className="text-admin-600 dark:text-admin-400 flex gap-1"
     >
       <ActionBarPrimitive.Copy asChild>
         <Button variant="ghost" size="sm">

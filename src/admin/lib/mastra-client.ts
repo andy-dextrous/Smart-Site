@@ -27,12 +27,17 @@ export function getMastraClient(): MastraClient | null {
     serverUrl = ai.url
   }
 
-  // Prepare headers with JWT authentication
+  // Prepare headers with JWT authentication and site identification
   const headers: Record<string, string> = {}
   
   // Include JWT token if available
   if (process.env.MASTRA_JWT_TOKEN) {
     headers.Authorization = `Bearer ${process.env.MASTRA_JWT_TOKEN}`
+  }
+  
+  // Include Site ID for multi-tenant data isolation
+  if (process.env.SMART_SITE_ID) {
+    headers["X-Site-ID"] = process.env.SMART_SITE_ID
   }
 
   // Initialize client
@@ -81,4 +86,13 @@ export function getAIServerUrl(): string | null {
   }
 
   return "http://localhost:4112"
+}
+
+/*************************************************************************/
+/*  HELPER TO GET SITE ID FOR MULTI-TENANCY
+/*************************************************************************/
+
+export function getSiteId(): string {
+  // Return site ID from environment, or generate a default
+  return process.env.SMART_SITE_ID || `site_${process.env.NEXT_PUBLIC_URL?.replace(/https?:\/\//, '').replace(/[^\w]/g, '_') || 'default'}`
 }

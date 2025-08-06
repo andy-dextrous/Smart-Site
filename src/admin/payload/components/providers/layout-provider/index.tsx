@@ -5,6 +5,9 @@ import React from "react"
 import { ChatPanel } from "./chat-panel"
 import { AppSidebar } from "./app-sidebar"
 import { TopNavigation } from "./top-navigation"
+import { useAIContext } from "../ai-provider"
+import { Button } from "@/admin/components/ui/button"
+import { Sparkles } from "lucide-react"
 
 /*************************************************************************/
 /*  AI LAYOUT PROVIDER - CLIENT COMPONENT WITH CHAT STATE
@@ -12,6 +15,7 @@ import { TopNavigation } from "./top-navigation"
 
 export function AILayoutProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const { toggleChat, isChatOpen } = useAIContext()
 
   const isLogin = pathname === "/admin/login"
 
@@ -23,6 +27,19 @@ export function AILayoutProvider({ children }: { children: React.ReactNode }) {
         <main className="bg-admin-900 h-full flex-1 overflow-y-auto">{children}</main>
       </div>
       <ChatPanel />
+      
+      {/* Floating Chat Toggle Button */}
+      {!isChatOpen && (
+        <Button
+          variant="secondary"
+          size="icon-round-lg"
+          onClick={toggleChat}
+          className="fixed bottom-6 right-6 z-40 shadow-lg hover:shadow-xl transition-shadow"
+          title="Smart Site Assistant (⌘L)"
+        >
+          <Sparkles />
+        </Button>
+      )}
     </div>
   ) : (
     <>{children}</>

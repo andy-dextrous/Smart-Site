@@ -1,4 +1,4 @@
-import { getMastraClient, isAIEnabled } from "@/admin/lib/mastra-client"
+import { getMastraClient, isAIEnabled, getSiteId } from "@/admin/lib/mastra-client"
 import { NextRequest } from "next/server"
 
 export const runtime = "edge"
@@ -22,13 +22,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const { messages, agentId = "orchestrator" } = await req.json()
+    const siteId = getSiteId()
 
     // Get agent from remote server
     const agent = client.getAgent(agentId)
 
-    // Stream response (this returns a Response object with streaming body)
+    // Stream response - Mastra handles thread persistence automatically
     const result = await agent.stream({
       messages,
+      threadId: siteId, // Use site ID as the thread ID for single persistent thread
+      resourceId: siteId, // Site ID for multi-tenant data isolation
     })
 
     // Return the streaming response directly

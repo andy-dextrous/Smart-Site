@@ -1,9 +1,8 @@
 "use client"
 
-import { ExternalLink, MessageSquare, Sparkles, Moon, Sun } from "lucide-react"
+import { ExternalLink, Moon, Sun, Sparkles } from "lucide-react"
 import React from "react"
 import { Button } from "@/admin/components/ui/button"
-import { useAIContext } from "../ai-provider"
 import { useTheme } from "@payloadcms/ui"
 import UserDropdown from "./user-dropdown"
 import Link from "next/link"
@@ -13,7 +12,6 @@ import Link from "next/link"
 /*************************************************************************/
 
 export function TopNavigation() {
-  const { toggleChat } = useAIContext()
   const { theme, setTheme } = useTheme()
 
   /*************************************************************************/
@@ -49,10 +47,6 @@ export function TopNavigation() {
 
         <Button size="icon-round" onClick={handleThemeToggle}>
           {theme === "light" ? <Moon /> : <Sun />}
-        </Button>
-
-        <Button size="icon-round" onClick={toggleChat}>
-          <Sparkles />
         </Button>
 
         <UserDropdown />
