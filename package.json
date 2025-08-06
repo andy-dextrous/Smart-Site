@@ -42,6 +42,7 @@
     "@gsap/react": "latest",
     "@libsql/client": "^0.15.9",
     "@mastra/client-js": "^0.10.16",
+    "@mastra/core": "^0.13.1",
     "@next/third-parties": "^15.3.0",
     "@payloadcms/admin-bar": "latest",
     "@payloadcms/db-mongodb": "latest",

@@ -12,8 +12,12 @@ import {
 } from "@assistant-ui/react"
 import { MarkdownTextPrimitive } from "@assistant-ui/react-markdown"
 import type { FC } from "react"
+import type { TextContentPartComponent } from "@assistant-ui/react"
 import { useState, useEffect, useCallback } from "react"
 import { ResizableBox } from "react-resizable"
+// import { TestFrontendTool } from "@/admin/components/ai/tools/test-frontend-tool"
+import { TestBackendToolUI, TestFrontendToolUI } from "@/admin/components/ai/tool-uis"
+import { TestFrontendTool } from "@/admin/components/ai/tools/test-frontend-tool"
 import {
   ArrowDownIcon,
   CheckIcon,
@@ -32,6 +36,14 @@ import { Button } from "@/admin/components/ui/button"
 import { TooltipIconButton } from "@/admin/components/assistant-ui/tooltip-icon-button"
 import { useAIContext } from "../ai-provider"
 import "react-resizable/css/styles.css"
+
+/*************************************************************************/
+/*  MARKDOWN TEXT COMPONENT
+/*************************************************************************/
+
+const MarkdownText: TextContentPartComponent = () => {
+  return <MarkdownTextPrimitive />
+}
 
 /*************************************************************************/
 /*  CHAT PANEL COMPONENT
@@ -78,6 +90,11 @@ export function ChatPanel() {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
+      {/* Register tools */}
+      <TestFrontendTool />
+      <TestBackendToolUI />
+      <TestFrontendToolUI />
+
       <div className="fixed inset-0 z-50 flex justify-end">
         {/* Overlay */}
         <div
@@ -276,7 +293,7 @@ const ComposerAddAttachment: FC = () => {
   return (
     <ComposerPrimitive.AddAttachment asChild>
       <TooltipIconButton
-        className="my-3 size-10 p-2.5 transition-opacity ease-in-out bg-admin-200 hover:bg-admin-300 dark:bg-admin-200 dark:hover:bg-admin-300 text-admin-850 dark:text-admin-850"
+        className="bg-admin-200 hover:bg-admin-300 dark:bg-admin-200 dark:hover:bg-admin-300 text-admin-850 dark:text-admin-850 my-3 size-10 p-2.5 transition-opacity ease-in-out"
         tooltip="Add Attachment"
         variant="ghost"
       >
@@ -299,7 +316,7 @@ const Composer: FC = () => {
         rows={1}
         autoFocus
         placeholder="Type your message..."
-        className="text-admin-900 placeholder:text-admin-500 dark:text-admin-100 dark:placeholder:text-admin-500 max-h-48 flex-grow resize-none border-none bg-transparent px-4 py-5 text-lg font-sans outline-none focus:ring-0 disabled:cursor-not-allowed"
+        className="text-admin-900 placeholder:text-admin-500 dark:text-admin-100 dark:placeholder:text-admin-500 max-h-48 flex-grow resize-none border-none bg-transparent px-4 py-5 font-sans text-lg outline-none focus:ring-0 disabled:cursor-not-allowed"
       />
       <ComposerAction />
     </ComposerPrimitive.Root>
@@ -336,7 +353,7 @@ const UserMessage: FC = () => {
     <MessagePrimitive.Root className="mb-4 grid grid-cols-[minmax(72px,1fr)_auto] gap-2 [&>*]:col-start-2">
       <UserMessageAttachments />
       <div className="bg-admin-accent text-admin-0 rounded-[20px_20px_4px_20px] px-4 py-3 text-lg leading-snug break-words">
-        <MessagePrimitive.Parts components={{ Text: MarkdownTextPrimitive }} />
+        <MessagePrimitive.Parts components={{ Text: MarkdownText }} />
       </div>
       <BranchPicker className="text-admin-600 dark:text-admin-400 col-start-1 -mr-1 inline-flex items-center justify-end gap-1 text-xs" />
     </MessagePrimitive.Root>
@@ -374,9 +391,9 @@ const AssistantMessage: FC = () => {
         </div>
         <div className="flex-1">
           <div className="text-admin-900 dark:text-admin-100 text-lg leading-relaxed break-words">
-            <MessagePrimitive.Parts components={{ Text: MarkdownTextPrimitive }} />
+            <MessagePrimitive.Parts components={{ Text: MarkdownText }} />
           </div>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="mt-2 flex items-center gap-2">
             <AssistantActionBar />
             <BranchPicker className="text-admin-600 dark:text-admin-400 inline-flex items-center gap-1 text-xs" />
           </div>
