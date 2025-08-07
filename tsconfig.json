@@ -28,6 +28,7 @@
       "@admin-components": ["./src/admin/components"],
       "@admin-styles": ["./src/admin/css/admin.scss"],
       "@admin-utilities": ["./src/admin/utilities"],
+      "@smart-site-ai/*": ["../smart-site-ai/src/*"],
       "@payload-components": ["./src/admin/payload/components"],
       "@payload-styles": ["./src/app/(payload)/css/admin.scss"]
     },

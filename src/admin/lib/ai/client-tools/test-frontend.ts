@@ -1,20 +1,22 @@
 import { z } from "zod"
+import { TOOL_REGISTRY } from "@smart-site-ai/mastra/tools/registry"
 
 /*************************************************************************/
-/*  CONSOLE LOG CLIENT TOOL - CORE LOGIC
+/*  TEST FRONTEND TOOL - CLIENT EXECUTION
 /*************************************************************************/
 
-export const consoleLogToolSchema = z.object({
+export const testFrontendToolSchema = z.object({
 	message: z.string().optional().describe("Optional message to include"),
 })
 
-export type ConsoleLogInput = z.infer<typeof consoleLogToolSchema>
+export type TestFrontendInput = z.infer<typeof testFrontendToolSchema>
 
-export const consoleLogTool = {
-	id: "consoleLog",
+// Named to match TOOL_REGISTRY.testFrontend for type safety
+export const testFrontendTool = {
+	id: TOOL_REGISTRY.testFrontend,
 	description: "A simple test tool that runs in the browser and logs to console",
-	inputSchema: consoleLogToolSchema,
-	execute: async ({ message }: ConsoleLogInput) => {
+	inputSchema: testFrontendToolSchema,
+	execute: async ({ message }: TestFrontendInput) => {
 		console.log("🎯 FRONTEND TOOL EXECUTED IN BROWSER!")
 		console.log("Message received:", message || "No message provided")
 		console.log("Window location:", window.location.href)

@@ -90,8 +90,10 @@ export function ChatPanel() {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      {/* Register tools */}
+      {/* Client-side tools */}
       <TestFrontendTool />
+
+      {/* Tool UI components */}
       <TestBackendToolUI />
       <TestFrontendToolUI />
 

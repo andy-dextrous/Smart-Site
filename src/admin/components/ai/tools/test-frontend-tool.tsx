@@ -1,21 +1,22 @@
 "use client"
 
 import { makeAssistantTool, tool } from "@assistant-ui/react"
-import { consoleLogTool } from "@/admin/lib/ai/client-tools/dom-manipulation/console-log"
+import { testFrontendTool } from "@/admin/lib/ai/client-tools/test-frontend"
+import { TOOL_REGISTRY } from "@smart-site-ai/mastra/tools/registry"
 
 /*************************************************************************/
-/*  ASSISTANT UI WRAPPER FOR CONSOLE LOG TOOL
+/*  ASSISTANT UI WRAPPER FOR TEST FRONTEND TOOL
 /*************************************************************************/
 
 // Create Assistant UI tool from the core logic
-const testFrontendTool = tool({
-  description: consoleLogTool.description,
-  parameters: consoleLogTool.inputSchema,
-  execute: consoleLogTool.execute,
+const assistantTestFrontendTool = tool({
+  description: testFrontendTool.description,
+  parameters: testFrontendTool.inputSchema,
+  execute: testFrontendTool.execute,
 })
 
 // Create the Assistant UI tool component
 export const TestFrontendTool = makeAssistantTool({
-  ...testFrontendTool,
-  toolName: "testFrontend", // Must match the server-side tool name
+  ...assistantTestFrontendTool,
+  toolName: TOOL_REGISTRY.testFrontend, // Type-safe name from registry!
 })
