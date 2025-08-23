@@ -1,5 +1,3 @@
-import { Page, Post, Service, Team } from "@/admin/payload/payload-types"
-
 /*************************************************************************/
 /*  SEO SCORING TYPES
 /*************************************************************************/
@@ -54,10 +52,7 @@ export interface SEOAnalysisOptions {
 /*  MAIN SEO ANALYSIS FUNCTION
 /*************************************************************************/
 
-export function analyzeSEO(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions = {}
-): SEOScore {
+export function analyzeSEO(doc: any, options: SEOAnalysisOptions = {}): SEOScore {
   const components = {
     title: analyzeTitle(doc, options),
     description: analyzeDescription(doc, options),
@@ -85,10 +80,7 @@ export function analyzeSEO(
 /*  COMPONENT ANALYSIS FUNCTIONS
 /*************************************************************************/
 
-function analyzeTitle(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeTitle(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -168,10 +160,7 @@ function analyzeTitle(
   return { score, weight: 20, status, issues, suggestions }
 }
 
-function analyzeDescription(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeDescription(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -239,10 +228,7 @@ function analyzeDescription(
   return { score, weight: 15, status, issues, suggestions }
 }
 
-function analyzeKeywords(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeKeywords(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -338,10 +324,7 @@ function analyzeKeywords(
   return { score, weight: 18, status, issues, suggestions }
 }
 
-function analyzeContent(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeContent(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -462,10 +445,7 @@ function analyzeContent(
   return { score, weight: 15, status, issues, suggestions }
 }
 
-function analyzeImages(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeImages(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -526,10 +506,7 @@ function analyzeImages(
   return { score, weight: 10, status, issues, suggestions }
 }
 
-function analyzeStructure(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeStructure(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -543,7 +520,7 @@ function analyzeStructure(
     score += 15
 
     // URL best practices
-    const urlParts = uri.split("/").filter(part => part.length > 0)
+    const urlParts = uri.split("/").filter((part: string) => part.length > 0)
     const isShort = urlParts.length <= 3
     const hasKeywords = (doc.seo as any)?.meta?.focusKeywords
       ?.split(",")
@@ -601,10 +578,7 @@ function analyzeStructure(
   return { score, weight: 12, status, issues, suggestions }
 }
 
-function analyzeSocial(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeSocial(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0
@@ -661,10 +635,7 @@ function analyzeSocial(
   return { score, weight: 8, status, issues, suggestions }
 }
 
-function analyzeTechnical(
-  doc: Page | Post | Service | Team,
-  options: SEOAnalysisOptions
-): SEOComponentScore {
+function analyzeTechnical(doc: any, options: SEOAnalysisOptions): SEOComponentScore {
   const issues: string[] = []
   const suggestions: string[] = []
   let score = 0

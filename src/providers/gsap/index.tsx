@@ -1,7 +1,7 @@
 "use client"
 
 import canUseDOM from "@/admin/utilities/can-use-dom"
-import smartSiteConfig from "@/smartsite.config"
+
 import { useGSAP } from "@gsap/react"
 import { gsap } from "gsap"
 
@@ -29,7 +29,7 @@ import "./effects"
  * Setup GSAP Plugins and Defaults
  ****************************************************/
 
-if (canUseDOM && smartSiteConfig.settings.gsap) {
+if (canUseDOM && process.env.NEXT_PUBLIC_GSAP === "true") {
   gsap.registerPlugin(
     useGSAP,
     DrawSVGPlugin,
@@ -90,7 +90,10 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
 
   useGSAP(
     () => {
-      if (smartSiteConfig.settings.smoothScroll && !omittedPaths.includes(pathname)) {
+      if (
+        process.env.NEXT_PUBLIC_SMOOTH_SCROLL === "true" &&
+        !omittedPaths.includes(pathname)
+      ) {
         const smoother = ScrollSmoother.create({
           smooth: 1.8,
           effects: true,
@@ -129,7 +132,7 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
     }
   )
 
-  return smartSiteConfig.settings.smoothScroll ? (
+  return process.env.NEXT_PUBLIC_SMOOTH_SCROLL === "true" ? (
     <GSAPContext.Provider value={{ smootherInstance, scrollToTop }}>
       {children}
     </GSAPContext.Provider>

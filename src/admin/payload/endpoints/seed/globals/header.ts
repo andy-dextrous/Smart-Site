@@ -1,11 +1,9 @@
-import type { Header } from "@/admin/payload/payload-types"
-
 type HeaderArgs = {
   services?: any[]
 }
 
 export const headerGlobal = ({ services = [] }: HeaderArgs = {}): Omit<
-  Header,
+  any,
   "updatedAt" | "id" | "createdAt"
 > => {
   const strategyService = services.find(s => s.slug === "strategy")

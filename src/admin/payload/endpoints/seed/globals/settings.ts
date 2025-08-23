@@ -14,7 +14,7 @@ export const settingsGlobal = ({
   insightsPage,
   aboutUsPage,
   templates = [],
-}: SettingsArgs): Omit<Setting, "updatedAt" | "id" | "createdAt"> => {
+}: SettingsArgs): any => {
   // Find templates by name and safely extract IDs
   const postTemplate = templates.find(t => t.name === "Post Template")
   const serviceTemplate = templates.find(t => t.name === "Service Page Template")

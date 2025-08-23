@@ -1,11 +1,9 @@
-import type { Footer } from "@/admin/payload/payload-types"
-
 type FooterArgs = {
   services?: any[]
 }
 
 export const footerGlobal = ({ services = [] }: FooterArgs = {}): Omit<
-  Footer,
+  any,
   "updatedAt" | "id" | "createdAt"
 > => {
   // Find specific services by slug for reference links

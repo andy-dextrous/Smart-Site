@@ -37,12 +37,7 @@ export type BlockOverride = {
 }
 
 export interface SmartSiteSettings {
-  gsap: boolean
-  smoothScroll: boolean
-  themeToggle: boolean
   i18n: boolean | i18nConfig
-  gsapDevTools: boolean
-  ai: boolean | aiConfig
   search: boolean
   analytics: boolean
   templateSupport: boolean
@@ -57,10 +52,6 @@ export interface i18nConfig {
   localeCookie: string
 }
 
-export interface aiConfig {
-  enabled?: boolean
-  url?: string // Full URL: "http://localhost:4112" or "https://my-ai-backend.vercel.app"
-}
 
 export interface mediaConfig {
   storage: "local" | "vercel" | "s3" | "uploadThing"
@@ -113,15 +104,7 @@ export interface SmartSiteClientConfig {
 
 const adminDefaults: Partial<SmartSiteConfig> = {
   settings: {
-    gsap: true,
-    smoothScroll: true,
-    themeToggle: false,
     i18n: false,
-    gsapDevTools: true,
-    ai: {
-      enabled: true,
-      url: "http://localhost:4112",
-    },
     search: true,
     analytics: true,
     templateSupport: true,

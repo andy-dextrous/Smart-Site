@@ -9,7 +9,7 @@ import { enableFrontend } from "@/admin/payload/collections/frontend"
 
 const applyDefaultTemplate = createApplyDefaultTemplateHook("services")
 
-const servicesConfig: CollectionConfig<"services"> = {
+const servicesConfig: CollectionConfig = {
   slug: "services",
   access: {
     create: authenticated,
@@ -103,7 +103,7 @@ const servicesConfig: CollectionConfig<"services"> = {
   },
 }
 
-export const Services: CollectionConfig<"services"> = enableFrontend(servicesConfig, {
+export const Services: CollectionConfig = enableFrontend(servicesConfig, {
   label: "Service Offerings",
   seoSchemaType: "Service",
 })

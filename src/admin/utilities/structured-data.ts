@@ -1,4 +1,3 @@
-import { Page, Post, Service, Team, Setting } from "@/admin/payload/payload-types"
 import { getServerSideURL } from "./get-url"
 
 /*************************************************************************/
@@ -79,10 +78,7 @@ export interface ServiceSchema extends BaseSchema {
 /**
  * Generate structured data for a document based on its type and settings
  */
-export function generateStructuredData(
-  doc: Page | Post | Service | Team,
-  globalSettings?: Setting
-): object[] {
+export function generateStructuredData(doc: any, globalSettings?: any): object[] {
   const schemas: object[] = []
   const baseURL = getServerSideURL()
 
@@ -105,19 +101,19 @@ export function generateStructuredData(
   switch (schemaType) {
     case "Article":
       if ("content" in doc || "sections" in doc) {
-        schemas.push(generateArticleSchema(doc as Post, baseURL, organizationSchema))
+        schemas.push(generateArticleSchema(doc as any, baseURL, organizationSchema))
       }
       break
 
     case "Person":
       if ("name" in doc && "email" in doc) {
-        schemas.push(generatePersonSchema(doc as Team, baseURL, organizationSchema))
+        schemas.push(generatePersonSchema(doc as any, baseURL, organizationSchema))
       }
       break
 
     case "Service":
       if ("description" in doc) {
-        schemas.push(generateServiceSchema(doc as Service, baseURL, organizationSchema))
+        schemas.push(generateServiceSchema(doc as any, baseURL, organizationSchema))
       }
       break
 
@@ -151,7 +147,7 @@ export function generateStructuredData(
 /*  SCHEMA GENERATORS
 /*************************************************************************/
 
-function generateOrganizationSchema(settings?: Setting): OrganizationSchema | null {
+function generateOrganizationSchema(settings?: any): OrganizationSchema | null {
   const seoSettings = (settings as any)?.seo
   if (!seoSettings?.organization?.name) {
     return null
@@ -205,7 +201,7 @@ function generateOrganizationSchema(settings?: Setting): OrganizationSchema | nu
 }
 
 function generateArticleSchema(
-  doc: Post,
+  doc: any,
   baseURL: string,
   organization?: OrganizationSchema | null
 ): ArticleSchema {
@@ -239,7 +235,7 @@ function generateArticleSchema(
 
   // Add authors if available
   if (doc.populatedAuthors && doc.populatedAuthors.length > 0) {
-    schema.author = doc.populatedAuthors.map(author => ({
+    schema.author = doc.populatedAuthors.map((author: any) => ({
       "@type": "Person" as const,
       name: author.name || "Anonymous",
     }))
@@ -253,7 +249,7 @@ function generateArticleSchema(
 }
 
 function generatePersonSchema(
-  doc: Team,
+  doc: any,
   baseURL: string,
   organization?: OrganizationSchema | null
 ): PersonSchema {
@@ -291,15 +287,15 @@ function generatePersonSchema(
   // Add social media links
   if (doc.content?.socialLinks && doc.content.socialLinks.length > 0) {
     schema.sameAs = doc.content.socialLinks
-      .filter(link => link.url)
-      .map(link => link.url!)
+      .filter((link: any) => link.url)
+      .map((link: any) => link.url!)
   }
 
   return schema
 }
 
 function generateServiceSchema(
-  doc: Service,
+  doc: any,
   baseURL: string,
   organization?: OrganizationSchema | null
 ): ServiceSchema {
@@ -331,10 +327,7 @@ function generateServiceSchema(
   return schema
 }
 
-function generateWebPageSchema(
-  doc: Page | Post | Service | Team,
-  baseURL: string
-): WebPageSchema {
+function generateWebPageSchema(doc: any, baseURL: string): WebPageSchema {
   const schema: WebPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -360,7 +353,7 @@ function generateWebPageSchema(
   if ("breadcrumbs" in doc && doc.breadcrumbs && doc.breadcrumbs.length > 0) {
     schema.breadcrumb = {
       "@type": "BreadcrumbList",
-      itemListElement: doc.breadcrumbs.map((crumb, index) => ({
+      itemListElement: doc.breadcrumbs.map((crumb: any, index: number) => ({
         "@type": "ListItem" as const,
         position: index + 1,
         name: crumb.label || "Page",
@@ -395,8 +388,8 @@ ${JSON.stringify(jsonLd, null, 2)}
  * Generate all structured data for a document
  */
 export async function getDocumentStructuredData(
-  doc: Page | Post | Service | Team,
-  globalSettings?: Setting
+  doc: any,
+  globalSettings?: any
 ): Promise<string> {
   const schemas = generateStructuredData(doc, globalSettings)
   return structuredDataToJsonLd(schemas)

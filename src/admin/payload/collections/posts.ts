@@ -13,7 +13,7 @@ import { populateAuthors } from "@/admin/payload/hooks/collections/posts/populat
 import { enableFrontend } from "@/admin/payload/collections/frontend"
 import { anyone } from "@/admin/payload/access/anyone"
 
-const postsConfig: CollectionConfig<"posts"> = {
+const postsConfig: CollectionConfig = {
   slug: "posts",
   access: {
     create: authenticated,
@@ -202,7 +202,7 @@ const postsConfig: CollectionConfig<"posts"> = {
   },
 }
 
-export const Posts: CollectionConfig<"posts"> = enableFrontend(postsConfig, {
+export const Posts: CollectionConfig = enableFrontend(postsConfig, {
   label: "Posts",
   seoSchemaType: "Article",
 })

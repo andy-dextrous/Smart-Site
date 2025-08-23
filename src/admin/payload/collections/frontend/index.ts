@@ -318,8 +318,15 @@ function createFrontendCollection(
 /*  PAYLOAD ONINITINIT SYNC FUNCTION
 /*************************************************************************/
 
-export function syncFrontendCollectionsOnInit() {
-  const actualCollections = Array.from(registeredCollections.values())
+export function syncFrontendCollectionsOnInit(enabledCollections?: CollectionConfig[]) {
+  // If collections are provided, filter registered collections to only include enabled ones
+  let actualCollections = Array.from(registeredCollections.values())
+  
+  if (enabledCollections) {
+    const enabledSlugs = new Set(enabledCollections.map(c => c.slug))
+    actualCollections = actualCollections.filter(c => enabledSlugs.has(c.slug))
+  }
+  
   frontendCollectionsData = actualCollections
 
   try {

@@ -37,12 +37,14 @@ const baseConfig = {
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
-  onInit: async () => {
-    syncFrontendCollectionsOnInit()
-  },
 }
 
 // Intelligently merge client config with base config
 const mergedConfig = mergePayloadConfig(baseConfig, smartSiteConfig)
+
+// Add onInit after merging to have access to merged collections
+mergedConfig.onInit = async () => {
+  syncFrontendCollectionsOnInit(mergedConfig.collections)
+}
 
 export default buildConfig(mergedConfig)

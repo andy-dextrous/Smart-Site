@@ -81,6 +81,7 @@ export interface Config {
     media: Media;
     users: User;
     'uri-index': UriIndex;
+    projects: Project;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -102,6 +103,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'uri-index': UriIndexSelect<false> | UriIndexSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -817,6 +819,10 @@ export interface HeroPrimaryBlock {
             newTab?: boolean | null;
             reference?:
               | ({
+                  relationTo: 'projects';
+                  value: string | Project;
+                } | null)
+              | ({
                   relationTo: 'pages';
                   value: string | Page;
                 } | null)
@@ -827,10 +833,6 @@ export interface HeroPrimaryBlock {
               | ({
                   relationTo: 'team';
                   value: string | Team;
-                } | null)
-              | ({
-                  relationTo: 'services';
-                  value: string | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -842,6 +844,135 @@ export interface HeroPrimaryBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero-primary';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: string;
+  title: string;
+  content?: {};
+  seo?: {
+    meta?: {
+      /**
+       * Custom title for search engines (50-60 characters recommended)
+       */
+      title?: string | null;
+      /**
+       * Image for search results and social media sharing (1200x630px recommended)
+       */
+      image?: (string | null) | Media;
+      /**
+       * Custom description for search engines (150-160 characters recommended)
+       */
+      description?: string | null;
+      /**
+       * Prevent this content from appearing in search engines
+       */
+      noIndex?: boolean | null;
+      /**
+       * Override the default canonical URL for this content
+       */
+      canonicalUrl?: string | null;
+      /**
+       * Primary keywords for this content (comma-separated)
+       */
+      focusKeywords?: string | null;
+      /**
+       * Advanced robots directives for search engines
+       */
+      metaRobots?:
+        | (
+            | 'nofollow'
+            | 'noarchive'
+            | 'nosnippet'
+            | 'noimageindex'
+            | 'nocache'
+            | 'nositelinkssearchbox'
+            | 'notranslate'
+            | 'max-snippet'
+            | 'max-image-preview'
+            | 'max-video-preview'
+          )[]
+        | null;
+    };
+    socialMedia?: {
+      openGraph?: {
+        /**
+         * Override title for Facebook/Open Graph sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Facebook/Open Graph sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Facebook/Open Graph sharing (1200x630px recommended)
+         */
+        image?: (string | null) | Media;
+        type?: ('website' | 'article' | 'product' | 'video' | 'music' | 'book' | 'profile') | null;
+      };
+      twitter?: {
+        /**
+         * Override title for Twitter sharing
+         */
+        title?: string | null;
+        /**
+         * Override description for Twitter sharing
+         */
+        description?: string | null;
+        /**
+         * Custom image for Twitter sharing (1200x675px recommended)
+         */
+        image?: (string | null) | Media;
+        cardType?: ('summary' | 'summary_large_image' | 'app' | 'player') | null;
+      };
+    };
+    structuredData?: {
+      /**
+       * Generate schema.org structured data for this content
+       */
+      enableStructuredData?: boolean | null;
+      /**
+       * Choose the appropriate schema.org type for this content
+       */
+      schemaType?:
+        | (
+            | 'WebPage'
+            | 'Article'
+            | 'Service'
+            | 'Person'
+            | 'Organization'
+            | 'LocalBusiness'
+            | 'Product'
+            | 'Event'
+            | 'FAQPage'
+            | 'HowTo'
+          )
+        | null;
+      /**
+       * Additional JSON properties to include in structured data (optional)
+       */
+      customSchemaProperties?:
+        | {
+            [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    };
+  };
+  slug?: string | null;
+  /**
+   * Auto-generated on publish based on slug and routing settings
+   */
+  uri?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1045,6 +1176,10 @@ export interface HeroFullBlock {
             newTab?: boolean | null;
             reference?:
               | ({
+                  relationTo: 'projects';
+                  value: string | Project;
+                } | null)
+              | ({
                   relationTo: 'pages';
                   value: string | Page;
                 } | null)
@@ -1055,10 +1190,6 @@ export interface HeroFullBlock {
               | ({
                   relationTo: 'team';
                   value: string | Team;
-                } | null)
-              | ({
-                  relationTo: 'services';
-                  value: string | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -1306,6 +1437,10 @@ export interface TextImageBlock {
           newTab?: boolean | null;
           reference?:
             | ({
+                relationTo: 'projects';
+                value: string | Project;
+              } | null)
+            | ({
                 relationTo: 'pages';
                 value: string | Page;
               } | null)
@@ -1316,10 +1451,6 @@ export interface TextImageBlock {
             | ({
                 relationTo: 'team';
                 value: string | Team;
-              } | null)
-            | ({
-                relationTo: 'services';
-                value: string | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -1446,6 +1577,10 @@ export interface ServiceCardsListBlock {
       newTab?: boolean | null;
       reference?:
         | ({
+            relationTo: 'projects';
+            value: string | Project;
+          } | null)
+        | ({
             relationTo: 'pages';
             value: string | Page;
           } | null)
@@ -1456,10 +1591,6 @@ export interface ServiceCardsListBlock {
         | ({
             relationTo: 'team';
             value: string | Team;
-          } | null)
-        | ({
-            relationTo: 'services';
-            value: string | Service;
           } | null);
       url?: string | null;
       label: string;
@@ -1655,6 +1786,10 @@ export interface LatestArticlesBlock {
       newTab?: boolean | null;
       reference?:
         | ({
+            relationTo: 'projects';
+            value: string | Project;
+          } | null)
+        | ({
             relationTo: 'pages';
             value: string | Page;
           } | null)
@@ -1665,10 +1800,6 @@ export interface LatestArticlesBlock {
         | ({
             relationTo: 'team';
             value: string | Team;
-          } | null)
-        | ({
-            relationTo: 'services';
-            value: string | Service;
           } | null);
       url?: string | null;
       label: string;
@@ -1741,6 +1872,10 @@ export interface FullwidthCtaBlock {
       newTab?: boolean | null;
       reference?:
         | ({
+            relationTo: 'projects';
+            value: string | Project;
+          } | null)
+        | ({
             relationTo: 'pages';
             value: string | Page;
           } | null)
@@ -1751,10 +1886,6 @@ export interface FullwidthCtaBlock {
         | ({
             relationTo: 'team';
             value: string | Team;
-          } | null)
-        | ({
-            relationTo: 'services';
-            value: string | Service;
           } | null);
       url?: string | null;
       label: string;
@@ -2147,6 +2278,10 @@ export interface UriIndex {
    */
   document:
     | {
+        relationTo: 'projects';
+        value: string | Project;
+      }
+    | {
         relationTo: 'pages';
         value: string | Page;
       }
@@ -2157,10 +2292,6 @@ export interface UriIndex {
     | {
         relationTo: 'team';
         value: string | Team;
-      }
-    | {
-        relationTo: 'services';
-        value: string | Service;
       };
   /**
    * Publication status of the source document
@@ -2431,6 +2562,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'uri-index';
         value: string | UriIndex;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: string | Project;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -3365,6 +3500,61 @@ export interface UriIndexSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T | {};
+  seo?:
+    | T
+    | {
+        meta?:
+          | T
+          | {
+              title?: T;
+              image?: T;
+              description?: T;
+              noIndex?: T;
+              canonicalUrl?: T;
+              focusKeywords?: T;
+              metaRobots?: T;
+            };
+        socialMedia?:
+          | T
+          | {
+              openGraph?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    type?: T;
+                  };
+              twitter?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    cardType?: T;
+                  };
+            };
+        structuredData?:
+          | T
+          | {
+              enableStructuredData?: T;
+              schemaType?: T;
+              customSchemaProperties?: T;
+            };
+      };
+  slug?: T;
+  uri?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -3645,6 +3835,10 @@ export interface Header {
             newTab?: boolean | null;
             reference?:
               | ({
+                  relationTo: 'projects';
+                  value: string | Project;
+                } | null)
+              | ({
                   relationTo: 'pages';
                   value: string | Page;
                 } | null)
@@ -3655,10 +3849,6 @@ export interface Header {
               | ({
                   relationTo: 'team';
                   value: string | Team;
-                } | null)
-              | ({
-                  relationTo: 'services';
-                  value: string | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -3672,6 +3862,10 @@ export interface Header {
                     newTab?: boolean | null;
                     reference?:
                       | ({
+                          relationTo: 'projects';
+                          value: string | Project;
+                        } | null)
+                      | ({
                           relationTo: 'pages';
                           value: string | Page;
                         } | null)
@@ -3682,10 +3876,6 @@ export interface Header {
                       | ({
                           relationTo: 'team';
                           value: string | Team;
-                        } | null)
-                      | ({
-                          relationTo: 'services';
-                          value: string | Service;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -3698,6 +3888,10 @@ export interface Header {
                           newTab?: boolean | null;
                           reference?:
                             | ({
+                                relationTo: 'projects';
+                                value: string | Project;
+                              } | null)
+                            | ({
                                 relationTo: 'pages';
                                 value: string | Page;
                               } | null)
@@ -3708,10 +3902,6 @@ export interface Header {
                             | ({
                                 relationTo: 'team';
                                 value: string | Team;
-                              } | null)
-                            | ({
-                                relationTo: 'services';
-                                value: string | Service;
                               } | null);
                           url?: string | null;
                           label: string;
@@ -3746,6 +3936,10 @@ export interface Footer {
                 newTab?: boolean | null;
                 reference?:
                   | ({
+                      relationTo: 'projects';
+                      value: string | Project;
+                    } | null)
+                  | ({
                       relationTo: 'pages';
                       value: string | Page;
                     } | null)
@@ -3756,10 +3950,6 @@ export interface Footer {
                   | ({
                       relationTo: 'team';
                       value: string | Team;
-                    } | null)
-                  | ({
-                      relationTo: 'services';
-                      value: string | Service;
                     } | null);
                 url?: string | null;
                 label: string;
@@ -3777,6 +3967,10 @@ export interface Footer {
           newTab?: boolean | null;
           reference?:
             | ({
+                relationTo: 'projects';
+                value: string | Project;
+              } | null)
+            | ({
                 relationTo: 'pages';
                 value: string | Page;
               } | null)
@@ -3787,10 +3981,6 @@ export interface Footer {
             | ({
                 relationTo: 'team';
                 value: string | Team;
-              } | null)
-            | ({
-                relationTo: 'services';
-                value: string | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -3872,15 +4062,15 @@ export interface Setting {
      * Default template for new pages (if no template is specified)
      */
     pagesDefaultTemplate?: (string | null) | Template;
+    projectsCollectionLabel?: string | null;
+    projectsArchivePage?: (string | null) | Page;
+    projectsSingleTemplate?: (string | null) | Template;
     postsCollectionLabel?: string | null;
     postsArchivePage?: (string | null) | Page;
     postsSingleTemplate?: (string | null) | Template;
     teamCollectionLabel?: string | null;
     teamArchivePage?: (string | null) | Page;
     teamSingleTemplate?: (string | null) | Template;
-    servicesCollectionLabel?: string | null;
-    servicesArchivePage?: (string | null) | Page;
-    servicesSingleTemplate?: (string | null) | Template;
   };
   seo?: {
     /**
@@ -4130,15 +4320,15 @@ export interface SettingsSelect<T extends boolean = true> {
     | {
         homepage?: T;
         pagesDefaultTemplate?: T;
+        projectsCollectionLabel?: T;
+        projectsArchivePage?: T;
+        projectsSingleTemplate?: T;
         postsCollectionLabel?: T;
         postsArchivePage?: T;
         postsSingleTemplate?: T;
         teamCollectionLabel?: T;
         teamArchivePage?: T;
         teamSingleTemplate?: T;
-        servicesCollectionLabel?: T;
-        servicesArchivePage?: T;
-        servicesSingleTemplate?: T;
       };
   seo?:
     | T

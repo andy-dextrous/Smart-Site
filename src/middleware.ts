@@ -1,7 +1,4 @@
-import { i18nRouter } from "next-i18n-router"
 import { NextRequest, NextResponse } from "next/server"
-
-import smartSiteConfig from "@/smartsite.config"
 
 /*************************************************************************/
 /*  MIDDLEWARE - DRAFT MODE ROUTING & I18N
@@ -24,10 +21,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(previewUrl)
   }
 
-  return smartSiteConfig.settings.i18n &&
-    typeof smartSiteConfig.settings.i18n === "object"
-    ? i18nRouter(request as any, smartSiteConfig.settings.i18n)
-    : NextResponse.next()
+  return NextResponse.next()
 }
 
 export const config = {

@@ -9,7 +9,7 @@ import { beforePageChange } from "@/admin/payload/hooks/collections/pages/before
 import { afterPageChange } from "@/admin/payload/hooks/collections/pages/after-change"
 import { enableFrontend } from "@/admin/payload/collections/frontend"
 
-const pageConfig: CollectionConfig<"pages"> = {
+const pageConfig: CollectionConfig = {
   slug: "pages",
   access: {
     create: authenticated,
@@ -113,7 +113,7 @@ const pageConfig: CollectionConfig<"pages"> = {
   },
 }
 
-export const Pages: CollectionConfig<"pages"> = enableFrontend(pageConfig, {
+export const Pages: CollectionConfig = enableFrontend(pageConfig, {
   label: "Pages",
   seoSchemaType: "WebPage",
 })

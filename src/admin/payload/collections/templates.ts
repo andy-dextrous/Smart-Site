@@ -6,7 +6,7 @@ import { authenticatedOrPublished } from "@/admin/payload/access/authenticatedOr
 import { afterTemplateChange } from "@/admin/payload/hooks/collections/templates/after-change"
 import { afterUniversalDelete } from "@/admin/payload/hooks/collections/universal/after-delete"
 
-export const Templates: CollectionConfig<"templates"> = {
+export const Templates: CollectionConfig = {
   slug: "templates",
   access: {
     create: authenticated,

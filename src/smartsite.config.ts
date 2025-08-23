@@ -1,4 +1,5 @@
 import { defineConfig } from "@/admin/config"
+import { enableFrontend } from "./admin/payload/collections/frontend"
 
 /*************************************************************************/
 /*  SMART SITE CONFIG - CLIENT CONFIG
@@ -6,15 +7,6 @@ import { defineConfig } from "@/admin/config"
 
 const smartSiteConfig = defineConfig({
   settings: {
-    gsap: true,
-    smoothScroll: true,
-    themeToggle: false,
-    i18n: false,
-    gsapDevTools: true,
-    ai: {
-      enabled: true,
-      url: process.env.NEXT_PUBLIC_AI_URL,
-    },
     search: true,
     analytics: true,
     templateSupport: true,
@@ -39,8 +31,22 @@ const smartSiteConfig = defineConfig({
    */
 
   collections: [
-    // { services: false }, Disable services collection
-    // CustomProducts,      Add custom collection
+    enableFrontend(
+      {
+        slug: "projects",
+        fields: [
+          {
+            name: "title",
+            type: "text",
+            required: true,
+          },
+        ],
+      },
+      {
+        label: "Projects",
+        seoSchemaType: "WebPage",
+      }
+    ),
   ],
 
   globals: [
