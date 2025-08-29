@@ -1,10 +1,5 @@
 [
   {
-    "slug": "projects",
-    "label": "Projects",
-    "hasSEO": true
-  },
-  {
     "slug": "pages",
     "label": "Pages",
     "hasSEO": true

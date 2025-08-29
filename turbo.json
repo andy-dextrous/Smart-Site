@@ -1,0 +1,26 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "env": [
+        "DATABASE_PROVIDER",
+        "DATABASE_URL",
+        "PAYLOAD_*",
+        "NEXT_PUBLIC_*",
+        "BLOB_READ_WRITE_TOKEN",
+        "RESEND_API_KEY"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "templates/**"]
+    },
+    "seed": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "inputs": ["src/admin/payload/collections/**", "src/admin/payload/globals/**"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["tests/**", "src/**", "!src/**/*.md"],
+      "outputs": ["test-results/**"]
+    }
+  }
+}

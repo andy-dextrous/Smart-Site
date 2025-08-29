@@ -17,5 +17,62 @@
 	},
 	"tailwindCSS.experimental.classRegex": [
 		["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
-	]
+	],
+
+	// Performance optimizations for monorepo
+	"files.watcherExclude": {
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/node_modules/**": true,
+		"**/.pnpm/**": true,
+		"**/.next/**": true,
+		"**/.turbo/**": true,
+		"**/dist/**": true,
+		"**/build/**": true,
+		"**/.vercel/**": true
+	},
+	
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/.pnpm": true,
+		"**/bower_components": true,
+		"**/*.code-search": true,
+		"**/.next": true,
+		"**/.turbo": true,
+		"**/dist": true,
+		"**/build": true
+	},
+	
+	"typescript.tsserver.watchOptions": {
+		"watchFile": "useFsEvents",
+		"watchDirectory": "useFsEvents",
+		"excludeDirectories": [
+			"**/node_modules",
+			"**/.pnpm",
+			"**/dist",
+			"**/build",
+			"**/.next",
+			"**/.turbo"
+		]
+	},
+	
+	"eslint.workingDirectories": [
+		{ "mode": "auto" }
+	],
+	
+	"prettier.ignorePath": ".prettierignore",
+	
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"node_modules/.pnpm": true
+	},
+	
+	"typescript.preferences.includePackageJsonAutoImports": "off",
+	"typescript.tsserver.maxTsServerMemory": 4096,
+	"typescript.tsserver.experimental.enableProjectDiagnostics": false
 }

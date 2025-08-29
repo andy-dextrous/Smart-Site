@@ -30,24 +30,7 @@ const smartSiteConfig = defineConfig({
 
    */
 
-  collections: [
-    enableFrontend(
-      {
-        slug: "projects",
-        fields: [
-          {
-            name: "title",
-            type: "text",
-            required: true,
-          },
-        ],
-      },
-      {
-        label: "Projects",
-        seoSchemaType: "WebPage",
-      }
-    ),
-  ],
+  collections: [],
 
   globals: [
     // { footer: false },   Disable footer global

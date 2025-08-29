@@ -21,7 +21,6 @@
     "type-check": "tsc --noEmit",
     "seed": "curl -X POST \"http://localhost:3000/api/seed\" -H \"Content-Type: application/json\" -d '{}'",
     "regenerate-uris": "curl -X GET \"http://localhost:3000/api/regenerate-uris\"",
-    "sync-collections": "curl -X GET \"http://localhost:3000/api/sync-frontend-collections\"",
     "db:schema": "cross-env NODE_OPTIONS=--no-deprecation payload generate:db-schema",
     "db:reset": "pnpm db:schema && pnpm seed",
     "dev:fresh": "pnpm db:reset && pnpm dev",

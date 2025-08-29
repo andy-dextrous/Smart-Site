@@ -833,6 +833,10 @@ export interface HeroPrimaryBlock {
               | ({
                   relationTo: 'team';
                   value: string | Team;
+                } | null)
+              | ({
+                  relationTo: 'services';
+                  value: string | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -1190,6 +1194,10 @@ export interface HeroFullBlock {
               | ({
                   relationTo: 'team';
                   value: string | Team;
+                } | null)
+              | ({
+                  relationTo: 'services';
+                  value: string | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -1451,6 +1459,10 @@ export interface TextImageBlock {
             | ({
                 relationTo: 'team';
                 value: string | Team;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: string | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -1591,6 +1603,10 @@ export interface ServiceCardsListBlock {
         | ({
             relationTo: 'team';
             value: string | Team;
+          } | null)
+        | ({
+            relationTo: 'services';
+            value: string | Service;
           } | null);
       url?: string | null;
       label: string;
@@ -1800,6 +1816,10 @@ export interface LatestArticlesBlock {
         | ({
             relationTo: 'team';
             value: string | Team;
+          } | null)
+        | ({
+            relationTo: 'services';
+            value: string | Service;
           } | null);
       url?: string | null;
       label: string;
@@ -1886,6 +1906,10 @@ export interface FullwidthCtaBlock {
         | ({
             relationTo: 'team';
             value: string | Team;
+          } | null)
+        | ({
+            relationTo: 'services';
+            value: string | Service;
           } | null);
       url?: string | null;
       label: string;
@@ -2292,6 +2316,10 @@ export interface UriIndex {
     | {
         relationTo: 'team';
         value: string | Team;
+      }
+    | {
+        relationTo: 'services';
+        value: string | Service;
       };
   /**
    * Publication status of the source document
@@ -3849,6 +3877,10 @@ export interface Header {
               | ({
                   relationTo: 'team';
                   value: string | Team;
+                } | null)
+              | ({
+                  relationTo: 'services';
+                  value: string | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -3876,6 +3908,10 @@ export interface Header {
                       | ({
                           relationTo: 'team';
                           value: string | Team;
+                        } | null)
+                      | ({
+                          relationTo: 'services';
+                          value: string | Service;
                         } | null);
                     url?: string | null;
                     label: string;
@@ -3902,6 +3938,10 @@ export interface Header {
                             | ({
                                 relationTo: 'team';
                                 value: string | Team;
+                              } | null)
+                            | ({
+                                relationTo: 'services';
+                                value: string | Service;
                               } | null);
                           url?: string | null;
                           label: string;
@@ -3950,6 +3990,10 @@ export interface Footer {
                   | ({
                       relationTo: 'team';
                       value: string | Team;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: string | Service;
                     } | null);
                 url?: string | null;
                 label: string;
@@ -3981,6 +4025,10 @@ export interface Footer {
             | ({
                 relationTo: 'team';
                 value: string | Team;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: string | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -4071,6 +4119,9 @@ export interface Setting {
     teamCollectionLabel?: string | null;
     teamArchivePage?: (string | null) | Page;
     teamSingleTemplate?: (string | null) | Template;
+    servicesCollectionLabel?: string | null;
+    servicesArchivePage?: (string | null) | Page;
+    servicesSingleTemplate?: (string | null) | Template;
   };
   seo?: {
     /**
@@ -4329,6 +4380,9 @@ export interface SettingsSelect<T extends boolean = true> {
         teamCollectionLabel?: T;
         teamArchivePage?: T;
         teamSingleTemplate?: T;
+        servicesCollectionLabel?: T;
+        servicesArchivePage?: T;
+        servicesSingleTemplate?: T;
       };
   seo?:
     | T

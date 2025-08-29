@@ -1,0 +1,34 @@
+{
+  "cursor.chat.defaultNoContext": [
+    "node_modules/**",
+    ".pnpm/**",
+    ".next/**",
+    ".turbo/**",
+    "dist/**",
+    "build/**",
+    "**/public/media/**",
+    "**/*.pdf",
+    "**/payload-types.ts"
+  ],
+  
+  "cursor.cpp.disableIndexing": [
+    "node_modules",
+    ".pnpm",
+    ".next",
+    ".turbo",
+    "dist",
+    "build"
+  ],
+  
+  "cursor.general.gitignore": true,
+  
+  "cursor.indexing.exclude": [
+    "**/node_modules/**",
+    "**/.pnpm/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/public/media/**"
+  ]
+}
