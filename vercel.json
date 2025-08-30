@@ -3,5 +3,13 @@
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": ".next",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ../packages apps/smart-site"
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ../packages apps/smart-site",
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "main": true,
+      "master": true,
+      "staging": true
+    }
+  }
 }

@@ -59,17 +59,23 @@ async function updateURIIndex(doc: any, previousDoc: any, collection: any, paylo
   const templateId = await getTemplateIdForCollection(collection.slug, payload)
 
   try {
-    await updateURI({
-      uri: doc.uri,
-      collection: collection.slug,
-      documentId: doc.id,
-      status: doc._status,
-      previousURI: previousDoc?.uri,
-      templateId: templateId || undefined,
-      data: doc,
-      originalDoc: previousDoc,
-    })
-    payload.logger.info(`Updated URI index for ${collection.slug}/${doc.id}`)
+    // Only update URI index if this is the published version
+    // Draft saves should not affect the URI index status
+    const shouldUpdateIndex = doc._status === "published"
+    
+    if (shouldUpdateIndex) {
+      await updateURI({
+        uri: doc.uri,
+        collection: collection.slug,
+        documentId: doc.id,
+        status: "published", // Always use published for URI index
+        previousURI: previousDoc?.uri,
+        templateId: templateId || undefined,
+        data: doc,
+        originalDoc: previousDoc,
+      })
+      payload.logger.info(`Updated URI index for ${collection.slug}/${doc.id}`)
+    }
   } catch (error) {
     payload.logger.error(
       `URI index update failed for ${collection.slug}/${doc.id}:`,
