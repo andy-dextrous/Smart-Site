@@ -2,18 +2,18 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>http://localhost:3000/sitemap/pages.xml</loc>
-    <lastmod>2025-08-29T21:43:15.606Z</lastmod>
+    <lastmod>2025-08-30T00:58:08.495Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>http://localhost:3000/sitemap/posts.xml</loc>
-    <lastmod>2025-08-29T21:43:15.607Z</lastmod>
+    <lastmod>2025-08-30T00:58:08.497Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>http://localhost:3000/sitemap/team.xml</loc>
-    <lastmod>2025-08-29T21:43:15.607Z</lastmod>
+    <lastmod>2025-08-30T00:58:08.497Z</lastmod>
   </sitemap>
   <sitemap>
     <loc>http://localhost:3000/sitemap/services.xml</loc>
-    <lastmod>2025-08-29T21:43:15.607Z</lastmod>
+    <lastmod>2025-08-30T00:58:08.497Z</lastmod>
   </sitemap>
 </sitemapindex>
