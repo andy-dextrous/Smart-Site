@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload"
 import { isAdmin } from "@/admin/payload/access/admin"
-import { frontendCollections } from "@/admin/payload/collections/frontend"
+import { frontendCollections } from "@/admin/config/frontend"
 import { CollectionSlug } from "payload"
 
 export const URIIndex: CollectionConfig = {

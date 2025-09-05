@@ -7,7 +7,8 @@ import { populatePublishedAt } from "@/admin/payload/hooks/populate-published-at
 import { applyDefaultTemplate } from "@/admin/payload/hooks/collections/pages/apply-default-template"
 import { beforePageChange } from "@/admin/payload/hooks/collections/pages/before-change"
 import { afterPageChange } from "@/admin/payload/hooks/collections/pages/after-change"
-import { enableFrontend } from "@/admin/payload/collections/frontend"
+// Frontend wrapper is now applied dynamically via resolver
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const pageConfig: CollectionConfig = {
   slug: "pages",
@@ -35,6 +36,12 @@ const pageConfig: CollectionConfig = {
     ],
     hideAPIURL: process.env.NODE_ENV === "production",
     useAsTitle: "title",
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "io/IoIosDocument",
+      },
+    } as CollectionCustomMetadata,
   },
   fields: [
     {
@@ -77,7 +84,8 @@ const pageConfig: CollectionConfig = {
               label: "Sections",
               type: "blocks",
               blocks: sections.sectionBlocks,
-              required: true,
+              required: false,
+              minRows: 0,
               admin: {
                 initCollapsed: false,
               },
@@ -113,7 +121,5 @@ const pageConfig: CollectionConfig = {
   },
 }
 
-export const Pages: CollectionConfig = enableFrontend(pageConfig, {
-  label: "Pages",
-  seoSchemaType: "WebPage",
-})
+// Frontend wrapper is now applied dynamically via resolver based on config
+export const Pages: CollectionConfig = pageConfig

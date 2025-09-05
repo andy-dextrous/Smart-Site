@@ -10,8 +10,9 @@ import {
 
 import { authenticated } from "@/admin/payload/access/authenticated"
 import { populateAuthors } from "@/admin/payload/hooks/collections/posts/populate-authors"
-import { enableFrontend } from "@/admin/payload/collections/frontend"
+// Frontend wrapper is now applied dynamically via resolver
 import { anyone } from "@/admin/payload/access/anyone"
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const postsConfig: CollectionConfig = {
   slug: "posts",
@@ -38,6 +39,12 @@ const postsConfig: CollectionConfig = {
     ],
     hideAPIURL: process.env.NODE_ENV === "production",
     useAsTitle: "title",
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "fa/FaRss",
+      },
+    } as CollectionCustomMetadata,
   },
   fields: [
     {
@@ -202,7 +209,5 @@ const postsConfig: CollectionConfig = {
   },
 }
 
-export const Posts: CollectionConfig = enableFrontend(postsConfig, {
-  label: "Posts",
-  seoSchemaType: "Article",
-})
+// Frontend wrapper is now applied dynamically via resolver based on config
+export const Posts: CollectionConfig = postsConfig

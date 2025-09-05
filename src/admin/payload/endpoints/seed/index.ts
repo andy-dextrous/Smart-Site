@@ -2,8 +2,17 @@ import { promises as fs } from "fs"
 import path from "path"
 import type { Payload } from "payload"
 
+// Import profile system
+import { 
+  type SeedProfile, 
+  type ProfileName,
+  minimalProfile, 
+  demoProfile, 
+  defaultProfile 
+} from "./profiles"
+
 // Import all data functions
-import { regenerateURIs } from "@/admin/lib/routing/index-manager"
+import { regenerateURIs } from "@/admin/routing/index-manager"
 import { disableSyncHooks, enableSyncHooks } from "@/admin/utilities/prevent-hooks"
 import { formatIdForText, formatIdForRelationship } from "@/admin/payload/db/id-utils"
 import { technologyCategory } from "./categories/technology"
@@ -11,11 +20,17 @@ import { primaryContactForm } from "./forms/primary-contact"
 import { footerGlobal } from "./globals/footer"
 import { headerGlobal } from "./globals/header"
 import { settingsGlobal } from "./globals/settings"
+import { 
+  minimalHeaderGlobal, 
+  minimalFooterGlobal, 
+  minimalSettingsGlobal 
+} from "./globals/minimal-globals"
 import { aboutUsPage } from "./pages/about-us"
 import { contactPage } from "./pages/contact"
 import { homePage } from "./pages/home"
 import { insightsPage } from "./pages/insights"
 import { servicesPage } from "./pages/services"
+import { minimalPages } from "./pages/minimal-pages"
 import { analyticsStrategyPost } from "./posts/analytics-strategy"
 import { digitalTransformationPost } from "./posts/digital-transformation"
 import { scalingInfrastructurePost } from "./posts/scaling-infrastructure"
@@ -63,16 +78,25 @@ class DynamicSeedManager {
   private payload: Payload
   private mediaFiles: Map<string, any> = new Map()
   private context: any = {}
+  private profile: SeedProfile
 
   constructor(payload: Payload) {
     this.payload = payload
+    this.profile = defaultProfile // Default to minimal
   }
 
   /*************************************************************************/
   /*  MAIN SEED DATABASE METHOD
+  /*
+  /*  Accepts optional profile parameter to control what gets seeded
+  /*  Defaults to minimal profile if not specified
   /*************************************************************************/
 
-  async seedDatabase(): Promise<SeedResult> {
+  async seedDatabase(profileName?: ProfileName): Promise<SeedResult> {
+    // Select profile based on parameter or use default (minimal)
+    this.profile = profileName === "demo" ? demoProfile : minimalProfile
+    
+    this.payload.logger.info(`Using seed profile: ${this.profile.name} - ${this.profile.description}`)
     const startTime = Date.now()
     const stats = { created: {} as Record<string, number>, errors: [] as string[] }
 
@@ -121,17 +145,55 @@ class DynamicSeedManager {
       const usersCreated = seededUsers.length
 
       /**
-       * Step 4: Seed all content
+       * Step 4: Seed content based on profile
        */
-      const seededCategories = await this.seedCategories()
-      const seededForms = await this.seedForms()
-      const seededTemplates = await this.seedTemplates()
-      const seededMedia = await this.seedMedia()
-      const seededTestimonials = await this.seedTestimonials()
-      const seededPages = await this.seedPages(seededForms)
-      const seededServices = await this.seedServices()
+      let seededCategories: any[] = []
+      let seededForms: any[] = []
+      let seededTemplates: any[] = []
+      let seededMedia: any[] = []
+      let seededTestimonials: any[] = []
+      let seededPages: any[] = []
+      let seededServices: any[] = []
+      let seededPosts: any[] = []
+      
+      // Only seed if profile allows
+      if (this.profile.seedFunctions.categories) {
+        seededCategories = await this.seedCategories()
+      }
+      
+      if (this.profile.seedFunctions.forms) {
+        seededForms = await this.seedForms()
+      }
+      
+      if (this.profile.seedFunctions.templates) {
+        seededTemplates = await this.seedTemplates()
+      }
+      
+      if (this.profile.seedFunctions.media) {
+        seededMedia = await this.seedMedia()
+      }
+      
+      if (this.profile.seedFunctions.testimonials) {
+        seededTestimonials = await this.seedTestimonials()
+      }
+      
+      // Pages - handle minimal vs demo
+      if (this.profile.seedFunctions.pages === "minimal") {
+        seededPages = await this.seedMinimalPages()
+      } else if (this.profile.seedFunctions.pages === "demo") {
+        seededPages = await this.seedPages(seededForms)
+      }
+      
+      if (this.profile.seedFunctions.services) {
+        seededServices = await this.seedServices()
+      }
+      
+      if (this.profile.seedFunctions.posts && seededCategories.length > 0) {
+        seededPosts = await this.seedPosts(seededUsers, seededCategories)
+      }
+      
+      // Globals - handle minimal vs full
       const seededGlobals = await this.seedGlobals(seededPages, seededTemplates)
-      const seededPosts = await this.seedPosts(seededUsers, seededCategories)
 
       /**
        * Step 5: Create settings global FIRST to establish routing configuration
@@ -164,8 +226,11 @@ class DynamicSeedManager {
       /**
        * Step 7: Update header and footer globals with services for proper reference links
        * Keep hooks disabled during this step to prevent revalidation errors on archive pages
+       * Only needed for demo profile
        */
-      await this.updateNavigationGlobals(seededServices)
+      if (this.profile.name === "demo" && seededServices.length > 0) {
+        await this.updateNavigationGlobals(seededServices)
+      }
 
       // Update stats
       stats.created.users = usersCreated
@@ -435,7 +500,33 @@ class DynamicSeedManager {
   }
 
   /*************************************************************************/
-  /*  CREATE PAGES
+  /*  CREATE MINIMAL PAGES
+  /*************************************************************************/
+
+  private async seedMinimalPages(): Promise<any[]> {
+    this.payload.logger.info("Seeding minimal pages (blank pages)...")
+    const pages = []
+    
+    const pageData = await minimalPages(this.payload, this.context)
+    
+    for (const data of pageData) {
+      try {
+        const page = await this.payload.create({
+          collection: "pages",
+          data,
+          context: this.context,
+        })
+        pages.push(page)
+      } catch (error) {
+        this.payload.logger.error("Error creating minimal page:", error)
+      }
+    }
+    
+    return pages
+  }
+
+  /*************************************************************************/
+  /*  CREATE PAGES (DEMO)
   /*************************************************************************/
 
   private async seedPages(forms: any[]): Promise<any[]> {
@@ -485,13 +576,18 @@ class DynamicSeedManager {
   /*************************************************************************/
 
   private async seedGlobals(pages: any[], templates: any[]): Promise<any[]> {
-    this.payload.logger.info("Seeding initial navigation globals...")
+    this.payload.logger.info(`Seeding navigation globals (${this.profile.name} profile)...`)
     const globals = []
 
     try {
+      // Use minimal or full header based on profile
+      const headerData = this.profile.seedFunctions.globals.header === "minimal" 
+        ? minimalHeaderGlobal()
+        : headerGlobal({ services: [] })
+        
       const header = await this.payload.updateGlobal({
         slug: "header",
-        data: headerGlobal({ services: [] }),
+        data: headerData,
         context: this.context,
       })
       globals.push(header)
@@ -500,9 +596,14 @@ class DynamicSeedManager {
     }
 
     try {
+      // Use minimal or full footer based on profile
+      const footerData = this.profile.seedFunctions.globals.footer === "minimal"
+        ? minimalFooterGlobal()
+        : footerGlobal({ services: [] })
+        
       const footer = await this.payload.updateGlobal({
         slug: "footer",
-        data: footerGlobal({ services: [] }),
+        data: footerData,
         context: this.context,
       })
       globals.push(footer)
@@ -518,26 +619,38 @@ class DynamicSeedManager {
   /*************************************************************************/
 
   private async createSettingsGlobal(pages: any[], templates: any[]): Promise<void> {
-    this.payload.logger.info("Creating settings global with routing configuration...")
+    this.payload.logger.info(`Creating settings global (${this.profile.name} profile)...`)
 
     try {
       // Find the required pages from the created pages
       const homePage = pages.find(p => p.slug === "home") || pages[0]
-      const servicesPage = pages.find(p => p.slug === "services")
-      const insightsPage = pages.find(p => p.slug === "insights")
-      const aboutUsPage = pages.find(p => p.slug === "about-us")
+      
+      // Use minimal or full settings based on profile
+      if (this.profile.seedFunctions.globals.settings === "minimal") {
+        await this.payload.updateGlobal({
+          slug: "settings",
+          data: minimalSettingsGlobal(homePage),
+          context: this.context,
+        })
+      } else {
+        // Full settings for demo profile
+        const servicesPage = pages.find(p => p.slug === "services")
+        const insightsPage = pages.find(p => p.slug === "insights")
+        const aboutUsPage = pages.find(p => p.slug === "about-us")
 
-      await this.payload.updateGlobal({
-        slug: "settings",
-        data: settingsGlobal({
-          homePage: homePage,
-          servicesPage: servicesPage,
-          insightsPage: insightsPage,
-          aboutUsPage: aboutUsPage,
-          templates: templates,
-        }),
-        context: this.context,
-      })
+        await this.payload.updateGlobal({
+          slug: "settings",
+          data: settingsGlobal({
+            homePage: homePage,
+            servicesPage: servicesPage,
+            insightsPage: insightsPage,
+            aboutUsPage: aboutUsPage,
+            templates: templates,
+          }),
+          context: this.context,
+        })
+      }
+      
       this.payload.logger.info("Settings global created with routing configuration")
     } catch (error) {
       this.payload.logger.error("Error creating settings global:", error)
@@ -861,26 +974,12 @@ class DynamicSeedManager {
         }
 
         for (const mediaItem of mediaItems.docs) {
-          // Skip known problematic media items that consistently fail with empty errors
-          const problematicFilenames = [
-            "datadriven-logo-",
-            "innovatetech-logo-",
-            "techflow-logo-",
-            "template-cta-bg-",
-          ]
-
-          if (
-            problematicFilenames.some(pattern => mediaItem.filename?.includes(pattern))
-          ) {
-            continue
-          }
-
           try {
             this.payload.logger.info(
               `Attempting to delete media item ${mediaItem.id}: ${mediaItem.filename}`
             )
 
-            const deleteResult = await this.payload.delete({
+            await this.payload.delete({
               collection: "media",
               id: mediaItem.id,
               context: this.context,

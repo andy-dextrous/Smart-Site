@@ -1,9 +1,9 @@
-import { cache } from "@/admin/lib/cache"
-import { getDraftModeData } from "@/admin/lib/data/draft"
+import { cache } from "@/admin/cache"
+import { getDraftModeData } from "@/admin/data/draft"
 import { RenderSections } from "@/admin/components/render-sections"
 import { LivePreviewListener } from "@/admin/payload/components/frontend/live-preview-listener"
-import { routingEngine } from "@/admin/lib/routing"
-import { handleURIRedirect } from "@/admin/lib/redirects"
+import { routingEngine } from "@/admin/routing"
+import { handleURIRedirect } from "@/admin/redirects"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { generateMeta } from "@/admin/utilities/generate-meta"
@@ -52,6 +52,8 @@ export async function SmartSiteURIRenderer({
         document={document}
         collection={collection}
         breadcrumbs={uriIndex.breadcrumbs}
+        searchParams={searchParams}
+        params={{ uri }}
       />
     </main>
   )

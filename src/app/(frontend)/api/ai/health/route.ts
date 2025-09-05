@@ -1,4 +1,4 @@
-import { getMastraClient, isAIEnabled } from "@/admin/lib/mastra-client"
+import { getMastraClient, isAIEnabled } from "@/admin/ai/mastra-client"
 
 export const runtime = "edge"
 

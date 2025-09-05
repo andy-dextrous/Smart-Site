@@ -2,10 +2,6 @@ const components = {
   Nav: "@/admin/payload/components/backend/nav",
   actions: ["@/admin/payload/components/backend/actions"],
   views: {
-    myCustomView: {
-      Component: "@/admin/payload/components/backend/views/my-custom-view",
-      path: "/my-custom-view" as const,
-    },
     dashboard: {
       Component: "@/admin/payload/components/backend/dashboard#Dashboard",
     },

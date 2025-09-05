@@ -1,23 +1,15 @@
 import type { CollectionSlug, PayloadRequest } from "payload"
 import { getPayload } from "payload"
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
 import configPromise from "@payload-config"
 
 /*************************************************************************/
 /*  PREVIEW API ROUTE - OPTIMIZED FOR STATIC GENERATION
 /*************************************************************************/
 
-export async function GET(
-  req: {
-    cookies: {
-      get: (name: string) => {
-        value: string
-      }
-    }
-  } & Request
-): Promise<Response> {
+export async function GET(request: NextRequest): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = request.nextUrl
 
   const path = searchParams.get("path")
   const collection = searchParams.get("collection") as CollectionSlug
@@ -42,8 +34,8 @@ export async function GET(
   let user
   try {
     user = await payload.auth({
-      req: req as unknown as PayloadRequest,
-      headers: req.headers,
+      req: request as unknown as PayloadRequest,
+      headers: request.headers,
     })
   } catch (error) {
     payload.logger.error({ err: error }, "Error verifying token for live preview")
@@ -58,7 +50,7 @@ export async function GET(
   // This keeps the response cacheable while enabling preview mode
   const previewUrl = `${path}?preview=true`
 
-  const response = NextResponse.redirect(new URL(previewUrl, req.url), 307)
+  const response = NextResponse.redirect(new URL(previewUrl, request.url), 307)
   response.cookies.set("__prerender_bypass", "true", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

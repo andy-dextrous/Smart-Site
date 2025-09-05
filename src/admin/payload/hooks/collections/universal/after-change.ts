@@ -1,6 +1,6 @@
-import { revalidateDocument } from "@/admin/lib/cache/revalidation"
-import { updateURI, getTemplateIdForCollection } from "@/admin/lib/routing/index-manager"
-import { isFrontendCollection } from "@/admin/payload/collections/frontend"
+import { revalidateDocument } from "@/admin/cache/revalidation"
+import { updateURI, getTemplateIdForCollection } from "@/admin/routing/index-manager"
+import { isFrontendCollection } from "@/admin/config/frontend"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
 import type { CollectionAfterChangeHook } from "payload"
 
@@ -62,7 +62,7 @@ async function updateURIIndex(doc: any, previousDoc: any, collection: any, paylo
     // Only update URI index if this is the published version
     // Draft saves should not affect the URI index status
     const shouldUpdateIndex = doc._status === "published"
-    
+
     if (shouldUpdateIndex) {
       await updateURI({
         uri: doc.uri,

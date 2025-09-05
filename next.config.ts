@@ -37,6 +37,7 @@ const nextConfig = {
     silenceDeprecations: ["import", "global-builtin", "legacy-js-api"],
   },
   turbopack: {
+    root: "/Users/Scriviante/Local Web Development/ai-product-studio",
     resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
     rules: {
       "*.svg": {

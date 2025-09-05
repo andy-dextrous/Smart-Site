@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { cn } from "@/utilities/ui"
-import { BreadcrumbItem as BreadcrumbItemType } from "@/admin/lib/routing/uri-engine"
+import { BreadcrumbItem as BreadcrumbItemType } from "@/admin/routing/uri-engine"
+import { getSmartSiteConfig } from "@/admin/config"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,8 +23,19 @@ import {
     - Handles edge cases like empty breadcrumbs or missing URIs
     - Maintains consistent styling with existing breadcrumb patterns
     - Always includes Home link as the root breadcrumb
+    - Configurable via smartsite.config.ts breadcrumbs settings
 
 /*************************************************************************/
+
+const config = getSmartSiteConfig()
+const breadcrumbConfig = config.breadcrumbs
+
+const separators = {
+  slash: "/",
+  chevron: ">",
+  arrow: "→",
+  dot: "•",
+}
 
 interface BreadcrumbsProps {
   breadcrumbs?: BreadcrumbItemType[]
@@ -36,6 +48,11 @@ export function Breadcrumbs({
   className,
   showHome = true,
 }: BreadcrumbsProps) {
+  // Check if breadcrumbs are enabled in config
+  if (!breadcrumbConfig.enabled) {
+    return null
+  }
+
   // If no breadcrumbs provided, don't render anything
   if (!breadcrumbs || breadcrumbs.length === 0) {
     return null
@@ -48,15 +65,25 @@ export function Breadcrumbs({
     return null
   }
 
+  // Apply max depth if configured
+  const depthLimitedBreadcrumbs = breadcrumbConfig.maxDepth && breadcrumbConfig.maxDepth > 0
+    ? validBreadcrumbs.slice(-breadcrumbConfig.maxDepth)
+    : validBreadcrumbs
+
+  // Filter out current page if configured
+  const processedBreadcrumbs = breadcrumbConfig.showCurrent
+    ? depthLimitedBreadcrumbs
+    : depthLimitedBreadcrumbs.filter(crumb => !crumb.isCurrentPage)
+
   // Add Home breadcrumb if requested and not already present
   const finalBreadcrumbs =
-    showHome && !validBreadcrumbs.some(crumb => crumb.uri === "/")
-      ? [{ label: "Home", uri: "/", isCurrentPage: false }, ...validBreadcrumbs]
-      : validBreadcrumbs
+    showHome && !processedBreadcrumbs.some(crumb => crumb.uri === "/")
+      ? [{ label: breadcrumbConfig.homeLabel, uri: "/", isCurrentPage: false }, ...processedBreadcrumbs]
+      : processedBreadcrumbs
 
   return (
-    <Breadcrumb className={cn("mb-20", className)}>
-      <BreadcrumbList className="text-sm text-white/70">
+    <Breadcrumb className={cn("mb-20", breadcrumbConfig.className, className)}>
+      <BreadcrumbList className={cn("text-sm text-white/70", breadcrumbConfig.className)}>
         {finalBreadcrumbs.map((crumb, index) => (
           <div key={`${crumb.uri}-${index}`} className="flex items-center">
             <BreadcrumbItem>
@@ -76,7 +103,9 @@ export function Breadcrumbs({
               )}
             </BreadcrumbItem>
             {index < finalBreadcrumbs.length - 1 && (
-              <BreadcrumbSeparator className="text-white/50" />
+              <BreadcrumbSeparator className="text-white/50">
+                {separators[breadcrumbConfig.separator]}
+              </BreadcrumbSeparator>
             )}
           </div>
         ))}

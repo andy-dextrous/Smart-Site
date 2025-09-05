@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
-import { getMastraClient, isAIEnabled } from "@/admin/lib/mastra-client"
+import { getMastraClient, isAIEnabled } from "@/admin/ai/mastra-client"
 import type { MastraClient } from "@mastra/client-js"
 
 /*************************************************************************/
@@ -35,28 +35,35 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
   const enabled = isAIEnabled()
 
   const toggleChat = useCallback(() => {
+    if (!enabled) return // Prevent toggling when disabled
     setIsChatOpen(prev => !prev)
-  }, [])
+  }, [enabled])
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false)
   }, [])
 
   const openChat = useCallback(() => {
+    if (!enabled) return // Prevent opening when disabled
     setIsChatOpen(true)
-  }, [])
+  }, [enabled])
 
-  const getAgent = useCallback((agentId: string) => {
-    if (!enabled || !client) {
-      return null
-    }
-    return client.getAgent(agentId)
-  }, [client, enabled])
+  const getAgent = useCallback(
+    (agentId: string) => {
+      if (!enabled || !client) {
+        return null
+      }
+      return client.getAgent(agentId)
+    },
+    [client, enabled]
+  )
 
+  // Only register hotkeys when AI is enabled
   useHotkeys("meta+l", toggleChat, {
     preventDefault: true,
     enableOnFormTags: true,
     enableOnContentEditable: true,
+    enabled: enabled, // Disable hotkey when AI is disabled
   })
 
   const contextValue: AIContextType = {

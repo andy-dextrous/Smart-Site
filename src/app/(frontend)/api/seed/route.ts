@@ -1,42 +1,72 @@
 import { createLocalReq, getPayload } from "payload"
 import { DynamicSeedManager } from "@/admin/payload/endpoints/seed"
+import { type ProfileName } from "@/admin/payload/endpoints/seed/profiles"
 import config from "@payload-config"
 import { headers } from "next/headers"
 
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
 
 /*************************************************************************/
-/*  SIMPLIFIED SEED API ENDPOINT
+/*  SEED API ENDPOINT WITH PROFILE SUPPORT
 /*
-/*  This endpoint follows a simple pattern:
-/*  1. Always clean existing data (but preserve users)
-/*  2. Seed fresh content
-/*  3. Only create users if none exist
+/*  This endpoint accepts an optional profile parameter:
+/*  - "minimal" (default): Clean start with essentials only
+/*  - "demo": Full showcase with all features
+/*
+/*  Usage:
+/*  POST /api/seed                  - Uses minimal profile
+/*  POST /api/seed { "profile": "demo" } - Uses demo profile
 /*************************************************************************/
 
 export async function POST(request: Request): Promise<Response> {
   const payload = await getPayload({ config })
   const requestHeaders = await headers()
 
+  // Check if database has any users
+  const userCount = await payload.count({
+    collection: "users",
+  })
+
   // Authenticate by passing request headers
   const { user } = await payload.auth({ headers: requestHeaders })
 
-  // TEMPORARY: Disable auth for final test
-  // if (!user) {
-  //   return Response.json(
-  //     { error: "You must be logged in to perform this action" },
-  //     { status: 401 }
-  //   )
-  // }
+  // Allow seed without auth only if database is completely empty (first-time setup)
+  if (!user && userCount.totalDocs > 0) {
+    return Response.json(
+      { error: "You must be logged in to perform this action" },
+      { status: 401 }
+    )
+  }
+  
+  // If no users exist, this is initial setup - allow seed to create first admin
+  if (userCount.totalDocs === 0) {
+    payload.logger.info("No users found - allowing initial seed to create first admin")
+  }
 
   try {
-    payload.logger.info("Starting simplified seed operation...")
+    // Parse request body for profile parameter
+    let profile: ProfileName | undefined
+    try {
+      const body = await request.json()
+      profile = body.profile as ProfileName
+      
+      // Validate profile if provided
+      if (profile && profile !== "minimal" && profile !== "demo") {
+        payload.logger.warn(`Invalid profile "${profile}" provided, using default`)
+        profile = undefined
+      }
+    } catch {
+      // No body or invalid JSON - use default profile
+      profile = undefined
+    }
+
+    payload.logger.info(`Starting seed operation with profile: ${profile || "minimal (default)"}`)
 
     const seedManager = new DynamicSeedManager(payload)
     const startTime = Date.now()
 
-    // Simple one-step operation: clean data (preserve users) and seed everything
-    const result = await seedManager.seedDatabase()
+    // Seed with specified profile (defaults to minimal if not provided)
+    const result = await seedManager.seedDatabase(profile)
 
     if (!result.success) {
       throw new Error(`Seed operation failed: ${result.message}`)
@@ -48,7 +78,8 @@ export async function POST(request: Request): Promise<Response> {
 
     return Response.json({
       success: true,
-      message: "Database seeded successfully",
+      message: `Database seeded successfully with ${profile || "minimal"} profile`,
+      profile: profile || "minimal",
       stats: result.stats,
       timestamp: new Date().toISOString(),
       duration: totalDuration,

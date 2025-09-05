@@ -1,18 +1,51 @@
-# Smart Site - Modern Website Starter
+# Smart Site - Enterprise Website Builder
 
-A powerful website starter built with **Next.js 15+**, **Payload CMS**, **Tailwind CSS v4**, **GSAP**, and **AI integration via remote Mastra backend**, designed for rapid development of section-based websites with enterprise-grade routing and caching.
+A **field-driven, section-first website builder** powered by **Next.js 15**, **Payload CMS 3**, **Tailwind CSS v4**, **GSAP**, and **AI integration via Mastra**, designed for rapid development of dynamic websites with enterprise-grade features.
 
 ## 📋 Table of Contents
 
+- [Core Features](#core-features)
 - [Installation & Getting Started](#installation--getting-started)
-- [Repository Overview](#repository-overview)
-- [AI Backend Integration](#ai-backend-integration)
-- [Building a Website](#building-a-website)
-- [How Routing Works](#how-routing-works)
-- [Lib Folder Structure](#lib-folder-structure)
-- [Cursor Rules](#cursor-rules)
-- [Configuration](#configuration)
+- [Architecture Overview](#architecture-overview)
+- [Admin Layer System](#admin-layer-system)
+- [Building Sections](#building-sections)
+- [Configuration System](#configuration-system)
+- [Routing & Caching](#routing--caching)
+- [AI Integration](#ai-integration)
+- [Development Workflow](#development-workflow)
 - [Deployment](#deployment)
+
+## ⚡ Core Features
+
+### Field-Driven Architecture
+- **Reusable field patterns** - Pre-built field groups (`sectionIntro`, `sectionCta`, `button`, etc.)
+- **Type-safe components** - Automatic TypeScript generation from Payload schemas
+- **Visual field editor** - Admin UI adapts to your field configurations
+- **Smart defaults** - Sensible field defaults for rapid development
+
+### Section-First Development
+- **20+ pre-built sections** - Hero, CTA, forms, grids, testimonials, and more
+- **Component isolation** - Each section is self-contained with config + component
+- **Drag-and-drop builder** - Arrange sections visually in Payload admin
+- **Responsive by default** - All sections mobile-optimized with Tailwind v4
+
+### Enterprise Features
+- **O(1) URI resolution** - Instant page loading regardless of site size
+- **Smart caching** - Intelligent cache invalidation and dependency tracking
+- **SEO automation** - Meta tags, structured data, and sitemaps generated
+- **Multi-language ready** - i18n support built into the architecture
+
+### Admin/Frontend Separation
+- **Protected admin layer** - Core CMS logic isolated from frontend code
+- **Safe updates** - Admin updates won't break your customizations
+- **Configuration-driven** - All customizations via `smartsite.config.ts`
+- **Clean architecture** - Clear separation of concerns
+
+### AI-Powered Features
+- **Content assistant** - AI chat in admin panel for content creation
+- **SEO suggestions** - Automated SEO improvements and scoring
+- **Smart search** - AI-enhanced search functionality
+- **Remote backend** - Secure AI processing via Mastra framework
 
 ## 🚀 Installation & Getting Started
 
@@ -40,32 +73,38 @@ cp .env.example .env.local
 
 ### 2. Environment Configuration
 
-Configure your `.env.local` file with the following variables:
+Configure your `.env.local` file with these required variables:
 
 ```bash
-# Database Configuration (choose one)
-# FOR MONGODB:
-DATABASE_PROVIDER=mongoose
-DATABASE_URL=mongodb+srv://...
-
-# FOR POSTGRES:
-DATABASE_PROVIDER=postgres
-DATABASE_URL="postgres://..."
-
-# Payload CMS Configuration
-PAYLOAD_SECRET=your-unique-secret-key              # Create any random secret string
-PREVIEW_SECRET=your-preview-secret                 # Create any short nanoid string
-BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...           # Vercel Blob storage token
-RESEND_API_KEY=re_...                             # Resend email service API key
-
-# Payload Config Path
-PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts
+# Core Configuration
+NODE_ENV=development
 NEXT_PUBLIC_URL=http://localhost:3000
-NEXT_PUBLIC_AI_URL=http://localhost:4112           # AI backend URL
+PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts
 
-# Admin User (for seeding)
-PAYLOAD_ADMIN_EMAIL="user@example.com"
-PAYLOAD_ADMIN_PASSWORD=your-strong-password        # Will be created during seeding
+# Database (Choose MongoDB or PostgreSQL)
+DATABASE_PROVIDER=mongoose                         # or "postgres"
+DATABASE_URL=mongodb://localhost:27017/smart-site  # or PostgreSQL URL
+
+# Security
+PAYLOAD_SECRET=<generate-random-32-char-string>    # openssl rand -hex 32
+PREVIEW_SECRET=<generate-random-16-char-string>    # openssl rand -hex 16
+
+# Storage (Optional - defaults to local)
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...          # Vercel Blob storage
+# S3_ACCESS_KEY=...                               # AWS S3 (future)
+# CLOUDINARY_URL=...                              # Cloudinary (future)
+
+# Email (Optional - for forms)
+RESEND_API_KEY=re_...                             # Resend.com API key
+RESEND_DEFAULT_FROM=noreply@example.com
+
+# AI Backend (Optional)
+NEXT_PUBLIC_AI_URL=http://localhost:4112          # Smart Site AI URL
+# OPENAI_API_KEY=sk-...                           # If using AI features
+
+# Admin Seeding (Development)
+PAYLOAD_ADMIN_EMAIL=admin@example.com
+PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 ```
 
 ### 3. Database Setup
@@ -302,71 +341,200 @@ pnpm mongo:stop       # Stop local MongoDB server
 pnpm mongo:status     # Check MongoDB status
 ```
 
-## 📁 Repository Overview
+## 🏗 Architecture Overview
 
-### Architecture Philosophy
+### Design Philosophy
 
-Smart Site uses a **section-first approach** to website building, where every page is composed of reusable section blocks managed through Payload CMS. The AI functionality is provided by a separate backend service, ensuring clean separation of concerns and scalable architecture.
+Smart Site follows a **field-driven, section-first architecture** where:
+- **Fields drive everything** - CMS fields automatically generate admin UI and component props
+- **Sections are self-contained** - Each section has its own config and component
+- **Admin layer is protected** - Core CMS logic is isolated from frontend customizations
+- **Configuration over modification** - All customizations via `smartsite.config.ts`
 
-> **🎯 Cursor AI Tip:** The cursor rule `smart-site/adding-new-sections` automates the entire section creation process - just tell your AI agent "create a new section" and it handles the rest!
+### Technology Stack
 
-### Key Technologies
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Framework** | Next.js 15 App Router | React framework with server components |
+| **CMS** | Payload CMS 3 | Headless CMS with visual editor |
+| **Styling** | Tailwind CSS v4 | Utility-first CSS with design tokens |
+| **Animation** | GSAP + ScrollTrigger | Professional animations |
+| **AI** | Mastra Framework | Remote AI backend integration |
+| **Database** | MongoDB/PostgreSQL | Content storage |
+| **Storage** | Vercel Blob/S3 | Media file storage |
+| **Language** | TypeScript | Type safety throughout |
 
-- **Next.js 15+**: React framework with App Router
-- **Payload CMS**: Headless CMS with block-based content management
-- **Tailwind CSS v4**: Utility-first CSS framework with design system
-- **GSAP**: Professional-grade animations
-- **@mastra/client-js**: AI integration via remote Mastra backend
-- **TypeScript**: Type safety throughout the application
-
-### Directory Structure (Frontend-Focused)
-
-> **⚠️ IMPORTANT**: Never directly modify files in the `src/admin/` directory. All customizations should be done through `smartsite.config.ts` to maintain clean separation between admin/frontend code.
+### Directory Structure
 
 ```
-src/
-├── app/                          # Next.js App Router
-│   ├── (frontend)/              # 🎯 PUBLIC WEBSITE - Your main development area
-│   │   ├── [[...uri]]/          # Dynamic routing for all pages
-│   │   ├── css/                 # Tailwind v4 configuration
-│   │   └── api/                 # Frontend API routes (AI, preview, etc.)
-│   └── (payload)/               # CMS admin routes (don't modify)
-├── components/                   # 🎯 FRONTEND COMPONENTS - Primary development area
-│   ├── sections/                # 📍 Section blocks (90% of development time)
-│   │   ├── config.ts            # Section registration
-│   │   ├── sections-map.tsx     # Component mapping
-│   │   └── [section-name]/      # Individual section folders
-│   │       ├── Component.tsx    # React component
-│   │       └── config.ts        # CMS fields configuration
-│   ├── layout/                  # Reusable layout components (SectionIntro, etc.)
-│   ├── ui/                      # ShadCN UI components
-│   ├── header/                  # Header components
-│   ├── footer/                  # Footer components
-│   └── posts/                   # Blog/post components
-├── providers/                   # React context providers
-│   └── gsap/                    # GSAP animation setup
-├── utilities/                   # Frontend utility functions
-├── hooks/                       # Custom React hooks
-├── types/                       # TypeScript type definitions
-├── middleware.ts                # Next.js middleware
-├── smartsite.config.ts          # 🎯 MAIN CONFIG - All customizations go here
-└── admin/                       # ⛔ PROTECTED - Don't modify directly
-    ├── config.ts                # Base admin configuration
-    ├── payload/                 # Complete CMS setup
-    │   ├── collections/         # Content types (Pages, Posts, etc.)
-    │   ├── fields/              # Reusable field patterns
-    │   ├── blocks/              # Available section blocks
-    │   └── payload.config.ts    # Generated from smartsite.config.ts
-    └── lib/                     # Admin business logic
+apps/smart-site/
+├── src/
+│   ├── app/                              # Next.js App Router
+│   │   ├── (frontend)/                   # 🌐 Public website routes
+│   │   │   ├── [[...uri]]/               # Dynamic catch-all routing
+│   │   │   │   └── page.tsx               # Main page renderer
+│   │   │   ├── api/                      # Frontend API endpoints
+│   │   │   │   ├── ai/                   # AI chat endpoint
+│   │   │   │   ├── preview/              # Preview mode
+│   │   │   │   └── seed/                 # Database seeding
+│   │   │   └── css/                      # Tailwind v4 styles
+│   │   │       ├── globals.css           # Main entry point
+│   │   │       ├── theme.css             # Design tokens
+│   │   │       └── typography.css        # Typography system
+│   │   └── (payload)/                    # 🔐 Admin panel routes
+│   │       ├── admin/                    # Payload admin UI
+│   │       └── api/                      # CMS API endpoints
+│   │
+│   ├── components/                       # 🎨 Frontend components
+│   │   ├── sections/                     # 📦 Content sections (main dev area)
+│   │   │   ├── config.ts                 # Section registry
+│   │   │   ├── sections-map.tsx          # Component mapping
+│   │   │   ├── CLAUDE.md                 # Section dev guide
+│   │   │   └── [section-name]/           # Individual sections
+│   │   │       ├── config.ts             # Payload fields
+│   │   │       └── Component.tsx         # React component
+│   │   ├── blocks/                       # Reusable content blocks
+│   │   │   ├── form/                     # Form builder blocks
+│   │   │   ├── media/                    # Media blocks
+│   │   │   └── code/                     # Code blocks
+│   │   ├── fields/                       # Field components
+│   │   ├── layout/                       # Layout components
+│   │   │   ├── section-intro.tsx         # Heading + description
+│   │   │   ├── section-cta.tsx           # Call-to-action
+│   │   │   └── button.tsx                # Button component
+│   │   ├── ui/                           # Base UI components
+│   │   ├── header/                       # Site header
+│   │   ├── footer/                       # Site footer
+│   │   └── posts/                        # Blog components
+│   │
+│   ├── admin/                            # ⚠️ PROTECTED ADMIN LAYER
+│   │   ├── config/                       # Configuration system
+│   │   │   ├── index.ts                  # Config loader
+│   │   │   ├── defaults.ts               # Default settings
+│   │   │   ├── resolver.ts               # Config resolver
+│   │   │   └── frontend.ts               # Frontend config
+│   │   ├── payload/                      # Payload CMS core
+│   │   │   ├── payload.config.ts         # Main config
+│   │   │   ├── collections/              # Content types
+│   │   │   │   ├── pages.ts              # Page collection
+│   │   │   │   ├── posts.ts              # Blog posts
+│   │   │   │   ├── media.ts              # Media library
+│   │   │   │   └── uri-index.ts          # URI routing
+│   │   │   ├── globals/                  # Global configs
+│   │   │   ├── fields/                   # Field patterns
+│   │   │   ├── blocks/                   # Admin blocks
+│   │   │   ├── hooks/                    # Lifecycle hooks
+│   │   │   └── components/               # Admin components
+│   │   ├── cache/                        # Caching system
+│   │   ├── routing/                      # URI engine
+│   │   ├── data/                         # Data access
+│   │   ├── ai/                           # AI integration
+│   │   └── utilities/                    # Admin utilities
+│   │
+│   ├── extensions/                       # User extensions
+│   │   ├── blocks/                       # Custom blocks
+│   │   ├── components/                   # Custom components
+│   │   └── globals/                      # Custom globals
+│   │
+│   ├── providers/                        # React providers
+│   │   └── gsap/                         # GSAP setup
+│   │
+│   ├── utilities/                        # Frontend utilities
+│   ├── types/                            # TypeScript types
+│   └── smartsite.config.ts               # 🎯 USER CONFIG
+│
+├── public/                               # Static assets
+├── package.json                          # Dependencies
+└── next.config.ts                        # Next.js config
 ```
 
-> **🏗️ HTML Structure Tip:** Use the cursor rule `smart-site/html-structure` to understand how semantic HTML should be structured throughout the application.
+### Layer Separation
 
-## 🤖 AI Backend Integration
+| Layer | Location | Purpose | Modify? |
+|-------|----------|---------|---------|
+| **Frontend** | `src/components/`, `src/app/(frontend)/` | Public website | ✅ Yes |
+| **Admin** | `src/admin/` | CMS core system | ❌ No (use config) |
+| **Extensions** | `src/extensions/` | User customizations | ✅ Yes |
+| **Config** | `src/smartsite.config.ts` | System configuration | ✅ Yes |
 
-Smart Site integrates with AI functionality via a separate **Smart Site AI** backend service, ensuring clean architecture and IP protection.
+## 🔒 Admin Layer System
 
-### Architecture Overview
+The `src/admin/` directory contains the **protected core system** that powers Smart Site. This layer is:
+
+### Key Characteristics
+
+- **⚠️ Never modify directly** - Changes are lost during updates
+- **🔄 Automatically updated** - Entire folder replaced during updates
+- **🎯 Configuration-driven** - Customize via `smartsite.config.ts`
+- **🏗 Complete backend** - Contains all CMS, routing, and caching logic
+- **📦 Self-contained manifest** - Has its own package.json for dependency management
+
+### What's Inside Admin
+
+| Directory | Purpose | Key Files |
+|-----------|---------|-----------|
+| `config/` | Configuration system | `defaults.ts`, `resolver.ts`, `frontend.ts` |
+| `payload/` | Payload CMS setup | `payload.config.ts`, collections, globals |
+| `cache/` | Caching & revalidation | O(1) lookups, smart invalidation |
+| `routing/` | URI engine | Route resolution, dependency tracking |
+| `data/` | Data access layer | Posts, drafts, user management |
+| `ai/` | AI integration | Mastra client configuration |
+| `utilities/` | Helper functions | SEO, formatting, validation |
+
+### Admin Package.json Manifest
+
+The admin layer includes its own `package.json` at `src/admin/package.json` which serves as a **dependency manifest**:
+
+```json
+{
+  "name": "@smartsite/admin-layer",
+  "version": "1.1.1",
+  "sharedDependencies": {
+    // Dependencies that admin needs in the main package.json
+    "@payloadcms/next": "latest",
+    "@assistant-ui/react": "^0.10.25",
+    // ... other required packages
+  },
+  "peerDependencies": {
+    // Framework versions required
+    "next": "^15.5.2",
+    "payload": "latest"
+  },
+  "adminMetadata": {
+    // Admin layer requirements
+  }
+}
+```
+
+**Key Features:**
+- **Version tracking** - Identifies admin layer version
+- **Shared dependencies** - Packages needed by both admin and frontend
+- **Peer dependencies** - Framework version requirements
+- **Auto-sync** - CLI automatically syncs dependencies during updates
+
+**How It Works:**
+1. Admin declares its package requirements in `sharedDependencies`
+2. During updates, the CLI reads this manifest
+3. Required packages are automatically added to your main `package.json`
+4. Framework compatibility is checked via `peerDependencies`
+5. You run `pnpm install` once to get all new packages
+
+This ensures your site always has the packages the admin layer needs without manual dependency management.
+
+### How Updates Work
+
+1. **Download** - Latest admin layer from GitHub
+2. **Check compatibility** - Verify framework versions via admin package.json
+3. **Replace** - Entire `src/admin/` folder replaced
+4. **Sync dependencies** - Add required packages from admin manifest
+5. **Preserve** - Your `smartsite.config.ts` untouched
+6. **Merge** - Config merged with new admin features
+
+## 🤖 AI Integration
+
+Smart Site includes powerful AI features via the **Mastra framework**, with processing handled by a remote backend for security and scalability.
+
+### Architecture
 
 ```
 ┌─────────────────┐     HTTP API     ┌─────────────────┐
@@ -375,691 +543,628 @@ Smart Site integrates with AI functionality via a separate **Smart Site AI** bac
 │                 │                  │                 │
 │ • Next.js       │                  │ • Mastra Core   │
 │ • Payload CMS   │                  │ • AI Agents     │
-│ • UI Components │                  │ • Workflows     │
-│ • Client SDK    │                  │ • LibSQL Store  │
+│ • Assistant UI  │                  │ • Workflows     │
+│ • Admin Chat    │                  │ • Vector Store  │
 └─────────────────┘                  └─────────────────┘
 ```
 
-### Client Configuration
+### Features
 
-AI integration is configured in `src/smartsite.config.ts`:
+- **Admin Chat Assistant** - AI-powered chat panel in admin interface
+- **Content Generation** - Generate SEO-optimized content
+- **Smart Search** - AI-enhanced content discovery
+- **SEO Scoring** - Real-time SEO analysis and suggestions
+- **Content Analysis** - Readability and quality checks
+
+### Configuration
+
+Configure AI in `src/smartsite.config.ts`:
 
 ```typescript
-export default defineConfig({
-  settings: {
+const config: UserConfig = {
+  frontend: {
     ai: {
       enabled: true,
-      url: "http://localhost:4112", // Development
-      // url: "https://your-ai-backend.vercel.app", // Production
+      url: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:4112",
     },
   },
-})
-```
-
-### AI Features Available
-
-- **Chat Assistant**: AI-powered chat in the admin panel
-- **Content Generation**: AI-assisted content creation
-- **SEO Optimization**: Automated SEO suggestions
-- **Content Analysis**: Smart content analysis and recommendations
-
-### Production Deployment
-
-For production, deploy the AI backend separately and update the URL in your config:
-
-```typescript
-ai: {
-  enabled: true,
-  url: "https://your-ai-backend.vercel.app",
 }
 ```
 
-## 🏗️ Building a Website
+### Backend Setup
 
-### Understanding the Section System
-
-Smart Site is built around the concept of **sections** - reusable content blocks that can be combined to create pages. Each section consists of:
-
-1. **Configuration** (`config.ts`) - Defines CMS fields and admin interface
-2. **Component** (`Component.tsx`) - React component that renders the section
-
-> **⚡ Quick Start:** Use the cursor rule `smart-site/adding-new-sections` - your AI agent will guide you through creating sections with proper patterns automatically!
-
-### Section Creation Workflow
-
-> **🤖 AI-Powered Section Creation:** Just tell your AI agent "create a new section called hero-banner" and the `smart-site/adding-new-sections` rule will handle the entire process including proper field configuration and component setup.
-
-**Every section follows the mandatory two-file pattern**:
-
-1. **`config.ts`** - Payload CMS field configuration
-2. **`Component.tsx`** - React component implementation
-
-#### Step 1: Create Section Directory
+The AI backend (`apps/smart-site-ai`) runs separately:
 
 ```bash
-# Always use kebab-case naming
-mkdir src/components/sections/hero-banner
+# Development
+cd apps/smart-site-ai
+pnpm dev  # Runs on port 4112
+
+# Production - Deploy to Vercel/Railway
+# Update NEXT_PUBLIC_AI_URL in frontend
 ```
 
-#### Step 2: Create Config First (Always start here)
+## 📦 Building Sections
 
-**`src/components/sections/hero-banner/config.ts`**
+Sections are the **core building blocks** of Smart Site. Each section is a self-contained unit with its own fields and component.
+
+### Section Architecture
+
+Every section consists of two required files:
+
+| File | Purpose | Location |
+|------|---------|----------|
+| `config.ts` | Payload fields definition | `sections/[name]/config.ts` |
+| `Component.tsx` | React component | `sections/[name]/Component.tsx` |
+
+### Quick Start
+
+```bash
+# 1. Create section folder (kebab-case)
+mkdir src/components/sections/hero-banner
+
+# 2. Create config.ts and Component.tsx
+touch src/components/sections/hero-banner/{config.ts,Component.tsx}
+```
+
+### Step 1: Define Fields (config.ts)
 
 ```typescript
 import type { Block } from "payload"
-import { sectionIntro, sectionCta } from "@/admin/payload/fields"
+import { sectionIntro, sectionCta } from "@/components/fields"
 
 export const HeroBanner: Block = {
-  slug: "hero-banner", // MUST match folder name
-  admin: {
-    group: "Hero Sections",
-  },
-  interfaceName: "HeroBannerBlock", // Payload generates types from this
+  slug: "hero-banner",
+  interfaceName: "HeroBannerBlock",
   fields: [
-    sectionIntro({
-      collapsibleLabel: "Hero Content",
-      headingDescription: "Main hero heading - use <span> tags for gradient text",
-    }),
-    sectionCta({
-      collapsibleLabel: "Call to Action",
-    }),
+    sectionIntro(),  // Reusable field group
+    sectionCta(),     // Call-to-action fields
     {
       name: "backgroundImage",
       type: "upload",
       relationTo: "media",
-      required: false,
-      admin: {
-        description: "Background image for the hero section",
-      },
     },
   ],
 }
 ```
 
-#### Step 3: Register the Section (Required for CMS)
-
-**A. Export in `src/components/sections/config.ts`:**
+### Step 2: Build Component (Component.tsx)
 
 ```typescript
-export { HeroBanner } from "./hero-banner/config"
-
-// Add to sectionBlocks array
-export const sections = {
-  sectionBlocks: [
-    // ... existing sections
-    HeroBanner,
-  ],
-}
-```
-
-**B. Map component in `src/components/sections/sections-map.tsx`:**
-
-```typescript
-import { HeroBannerComponent } from "./hero-banner/Component"
-
-export const sectionsMap: Record<string, React.ComponentType<any>> = {
-  // ... existing sections
-  "hero-banner": HeroBannerComponent,
-}
-```
-
-#### Step 4: Build the Component
-
-**`src/components/sections/hero-banner/Component.tsx`**
-
-```typescript
-import { cn } from "@/utilities/ui"
 import { SectionIntro, SectionCta } from "@/components/layout"
 import { Media } from "@/admin/payload/components/frontend/media"
 import type { HeroBannerBlock } from "@/admin/payload/payload-types"
 
-/*************************************************************************/
-/*  HERO BANNER COMPONENT
-/*************************************************************************/
-
-export const HeroBannerComponent: React.FC<HeroBannerBlock> = props => {
-  const { sectionIntro, sectionCta, backgroundImage } = props
-
+export function HeroBannerComponent({ 
+  sectionIntro, 
+  sectionCta, 
+  backgroundImage 
+}: HeroBannerBlock) {
   return (
-    <section className="relative min-h-screen flex items-center">
-      {backgroundImage && (
-        <div className="absolute inset-0 -z-10">
-          <Media
-            resource={backgroundImage}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
-      <div className="container">
-        <div className="max-w-3xl">
-          <SectionIntro {...sectionIntro} />
-          <SectionCta {...sectionCta} />
-        </div>
-      </div>
+    <section className="relative min-h-screen">
+      {backgroundImage && <Media resource={backgroundImage} />}
+      <SectionIntro {...sectionIntro} />
+      <SectionCta {...sectionCta} />
     </section>
   )
 }
 ```
 
-#### Step 5: Use in CMS
+### Step 3: Register Section
 
-1. **Start dev server**: `pnpm dev`
-2. **Access admin**: `http://localhost:3000/admin`
-3. **Create/edit page**: Add your new "Hero Banner" section
-4. **Configure content**: Fill in fields and save
+```typescript
+// src/components/sections/config.ts
+export { HeroBanner } from "./hero-banner/config"
 
-### Section Naming Rules
-
-**✅ Use Architectural Names**:
-
-- `hero-split` - Hero with content/image split
-- `card-grid` - Grid of cards
-- `text-image` - Text with image
-- `stats-row` - Statistics in a row
-- `cta-centered` - Centered call-to-action
-
-**❌ Avoid Content-Specific Names**:
-
-- `services-hero` - Too specific to services
-- `about-section` - Page-specific
-- `pricing-cards` - Business logic in name
-
-### Reusable Field System
-
-Smart Site includes pre-built field configurations for common patterns:
-
-- **`sectionIntro()`** - Heading + description pattern
-- **`sectionCta()`** - Call-to-action with button
-- **`button()` / `buttonsGroup()`** - Button configurations
-- **`link()`** - Internal/external link handling
-
-This ensures consistency across sections and reduces development time.
-
-> **🔧 Advanced Configuration:** The cursor rule `smart-site/payload-config` explains the complete field-to-component mapping system and how to create your own reusable patterns.
-
-### Converting Static Components to CMS-Powered
-
-> **🔄 Static to Dynamic:** Use the cursor rule `smart-site/converting-static-to-payload` when you need to convert existing static components to work with Payload CMS data.
-
-### Working with Screenshots and Designs
-
-> **📸 Design Implementation:** When recreating sections from screenshots or designs, use the cursor rule `smart-site/screenshots` - your AI agent will know how to properly implement our design system and component patterns.
-
-## 🗺️ How Routing Works
-
-Smart Site implements a sophisticated routing system with O(1) URI resolution and automatic dependency management.
-
-## 0(1) Resolution System Explained
-
-O(1) URI resolution in this app refers to a constant-time URL lookup system that resolves any URI in a single database query, regardless of site size.
-
-The system uses a centralized URI Index Collection (`src/admin/payload/collections/uri-index.ts`) that maintains a pre-computed mapping between URIs and their source documents. When a request comes for `/about/team`, the system performs one indexed database lookup instead of traversing hierarchies or performing complex queries.
-
-Key features:
-
-- **Single Query Resolution**: Any URI resolves in one database hit
-- **Automatic Index Maintenance**: URIs are generated and cached via Payload hooks
-- **Redirect Management**: Automatic 301 redirects when URIs change
-- **Dependency Tracking**: When parent pages or archive pages change, all dependent URIs update automatically via background jobs
-
-This provides instant page resolution at scale, unlike traditional CMS systems that perform multiple queries to resolve hierarchical URLs.
-
-### URI Index System
-
-Every piece of frontend content gets a unique URI stored in the **URI Index Collection**:
-
-```
-/                    → Homepage
-/about               → About page
-/services            → Services page
-/services/consulting → Service detail page
-/blog                → Blog archive
-/blog/my-post        → Blog post
+// src/components/sections/sections-map.tsx
+import { HeroBannerComponent } from "./hero-banner/Component"
+export const sectionsMap = {
+  "hero-banner": HeroBannerComponent,
+}
 ```
 
-### Dynamic Route Resolution
+### Reusable Field Patterns
 
-The `[[...uri]]` catch-all route handles **all** requests:
+Smart Site provides **pre-built field groups** that ensure consistency:
 
-1. **URI Lookup**: Single database query against URI Index
-2. **Content Resolution**: Direct fetch of the matched document
-3. **Template Rendering**: Automatic template selection based on content type
+| Field Group | Purpose | Includes |
+|-------------|---------|----------|
+| `sectionIntro()` | Section header | Heading, description, alignment |
+| `sectionCta()` | Call-to-action | Button text, link, style |
+| `button()` | Single button | Label, URL, variant |
+| `buttonsGroup()` | Multiple buttons | Array of buttons |
+| `link()` | Smart linking | Internal/external/anchor |
+| `mediaWithOptions()` | Enhanced media | Image + alt text + caption |
 
-### Automatic Features
+### Section Best Practices
 
-- **301 Redirects**: When content URIs change, automatic redirects are created
-- **Archive Integration**: Archive pages automatically list their child content
-- **Hierarchy Support**: Nested page structures with automatic URI generation
-- **Draft Mode**: Preview unpublished content with authentication
+✅ **DO:**
+- Use kebab-case folder names (`hero-banner`)
+- Leverage reusable field patterns
+- Keep sections generic and reusable
+- Use architectural names (`card-grid`, `text-image`)
+
+❌ **DON'T:**
+- Create page-specific sections (`about-hero`)
+- Hardcode content in components
+- Mix admin and frontend imports
+- Skip type safety
+
+## ⚡ Routing & Caching
+
+### O(1) URI Resolution
+
+Smart Site uses a **URI Index** for instant page resolution:
+
+```
+Database Query Performance:
+Traditional CMS: /blog/2024/my-post → 3-4 queries (hierarchy traversal)
+Smart Site: /blog/2024/my-post → 1 query (direct index lookup)
+```
+
+### How It Works
+
+1. **URI Index Collection** - Pre-computed URI → Document mapping
+2. **Single Query** - Any URL resolves in one database hit
+3. **Automatic Updates** - URIs regenerate when content changes
+4. **Smart Redirects** - 301s created when URLs change
+
+### Route Examples
+
+```
+/                    → Homepage (page:home)
+/about               → Page (page:about)
+/services            → Archive (page:services + children)
+/services/web-dev    → Service (service:web-dev)
+/blog                → Archive (page:blog + posts)
+/blog/my-post        → Post (post:my-post)
+```
+
+### Caching Strategy
+
+| Cache Type | Duration | Invalidation |
+|------------|----------|--------------|
+| **Pages** | Until edited | On save |
+| **Archives** | Until child changes | On child update |
+| **Media** | 1 year | On replacement |
+| **API** | 60 seconds | Time-based |
 
 ### Static Generation
 
 ```typescript
-// All routes are pre-generated at build time
+// Next.js static params generation
 export async function generateStaticParams() {
-  const allURIs = await routingEngine.getAllURIs()
-  return allURIs.map(uri => ({ slug: uri.split("/").filter(Boolean) }))
+  const uris = await cache.getAllURIs()
+  return uris.map(uri => ({ 
+    slug: uri.split("/").filter(Boolean) 
+  }))
 }
 ```
 
-## 📚 Admin Lib Structure
+## ⚙️ Configuration System
 
-The `src/admin/lib/` directory contains the core business logic organized by functionality:
+Smart Site uses a **comprehensive configuration system** via `src/smartsite.config.ts` that controls all aspects without modifying core files.
 
-### `/cache` - Intelligent Caching System
-
-- **`cache.ts`** - Universal cache API with O(1) lookups
-- **`revalidation.ts`** - Smart cache invalidation
-- **`config.ts`** - Cache configuration and settings
+### Configuration Structure
 
 ```typescript
-import { cache } from "@/admin/lib/cache"
+import type { UserConfig } from "@/admin/config/defaults"
 
-// Get any document by URI (O(1) lookup)
-const page = await cache.getByURI("/about")
+const config: UserConfig = {
+  // Collections configuration
+  collections: {
+    pages: { enabled: true, frontend: true },
+    posts: { enabled: true, frontend: true },
+    services: { enabled: false },  // Disable unwanted
+    // ... configure each collection
+  },
+  
+  // Feature flags
+  features: {
+    ai: { enabled: true, endpoint: "http://localhost:4112" },
+    darkMode: false,
+    i18n: false,
+    analytics: true,
+    search: true,
+    sitemaps: true,
+  },
+  
+  // Admin configuration
+  admin: {
+    theme: {
+      colors: { accent: "#4f37fb" },
+      layout: { sidebarWidth: "240px" },
+    },
+    meta: {
+      title: "Admin | Smart Site",
+      description: "Advanced admin panel",
+      favicon: "/favicon.png",
+    },
+  },
+  
+  // Image optimization
+  images: {
+    quality: {
+      default: 85,
+      thumbnail: 75,
+      hero: 90,
+    },
+    sizes: [
+      { name: "thumbnail", width: 300 },
+      { name: "medium", width: 900 },
+      { name: "large", width: 1400 },
+    ],
+    breakpoints: {
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+    },
+  },
+  
+  // GSAP configuration
+  gsap: {
+    scrollTrigger: true,
+    scrollSmoother: true,
+    // ... other GSAP plugins
+  },
+  
+  // Extensions
+  extensions: {
+    collections: [],  // Custom collections
+    blocks: [],       // Custom blocks
+    globals: [],      // Custom globals
+    plugins: [],      // Payload plugins
+  },
+}
 
-// Get documents by collection and slug
-const post = await cache.getBySlug("posts", "my-blog-post")
-
-// Smart cache invalidation
-await revalidate({ collection: "pages", doc: updatedPage, action: "update" })
+export default config
 ```
 
-### `/routing` - URI Engine & Dependencies
+### Complete Configuration Options
 
-- **`uri-engine.ts`** - Core URI generation and conflict detection
-- **`index-manager.ts`** - URI Index management and bulk operations
-- **`dependency-detection.ts`** - Archive and hierarchy dependency tracking
+#### Collections Configuration
 
-### `/data` - Data Access Layer
+| Collection | Settings | Purpose |
+|------------|----------|---------|
+| `pages` | `enabled`, `frontend`, `seo`, `sitemap` | Main website pages |
+| `posts` | `enabled`, `frontend`, `seo`, `sitemap` | Blog articles |
+| `services` | `enabled`, `frontend`, `seo`, `sitemap` | Service pages |
+| `team` | `enabled`, `frontend`, `seo`, `sitemap` | Team members |
+| `categories` | `enabled`, `frontend: false` | Content categorization |
+| `testimonials` | `enabled`, `frontend: false` | Customer feedback |
+| `templates` | `enabled`, `frontend: false` | Page templates |
+| `media` | `enabled`, `provider`, `config` | File storage |
 
-- **`posts.ts`** - Blog post queries and operations
-- **`draft.ts`** - Draft mode and preview functionality
-- **`globals.ts`** - Global settings access
-- **`user.ts`** - User authentication helpers
+Each collection supports:
+- `enabled`: Turn on/off
+- `frontend`: Enable frontend features (SEO, preview)
+- `seo`: Add SEO fields
+- `frontendOptions.seoSchemaType`: Schema.org type
+- `sitemap`: Include in sitemap
 
-### `/sitemaps` - SEO & Discovery
+#### Feature Flags
 
-- **`generate.ts`** - Dynamic sitemap generation
-- **`config.ts`** - Sitemap configuration
+| Feature | Options | Default | Purpose |
+|---------|---------|---------|---------|
+| `ai.enabled` | `boolean` | `true` | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
+| `ai.endpoint` | `string` | `localhost:4112` | AI backend URL (only used when ai.enabled is true) |
+| `darkMode` | `boolean` | `false` | Dark/light theme toggle |
+| `i18n` | `boolean` | `false` | Internationalization |
+| `analytics` | `boolean` | `true` | Analytics tracking |
+| `search` | `boolean` | `true` | Search functionality |
+| `sitemaps` | `boolean` | `true` | XML sitemap generation |
 
-### `/redirects` - URL Management
+**AI Configuration Details:**
 
-- **`legacy.ts`** - Legacy URL redirect mapping
-- **`automatic.ts`** - System-generated redirects
-
-### AI Client Integration
-
-- **`mastra-client.ts`** - Remote AI backend client configuration
-
-### Server Actions Pattern
-
-All admin lib modules export async functions marked with `"use server"`:
+When `ai.enabled` is set to `false`:
+- No connection to the AI backend is attempted
+- Chat panel UI is completely removed from the DOM
+- Keyboard shortcuts (Cmd+L) are disabled
+- No AI-related API calls or network requests are made
+- Zero performance impact from AI features
 
 ```typescript
-// ✅ Correct: Server action file in admin/lib/
-"use server"
-
-export async function getPageBySlug(slug: string) {
-  // Server-only logic
+// Disable AI completely
+features: {
+  ai: { 
+    enabled: false  // Bypasses entire AI layer
+  }
 }
 
-export async function updatePageContent(data: PageData) {
-  // Server-only logic
+// Enable AI with custom backend
+features: {
+  ai: { 
+    enabled: true,
+    endpoint: "https://your-ai-backend.vercel.app"
+  }
 }
-
-// ❌ Don't export utilities from server action files
-// export const formatDate = (date: Date) => { ... } // This breaks the server action
 ```
 
-Utilities should live in `/utilities` or `/admin/utilities` depending on scope.
+#### GSAP Plugins
 
-## 🎯 Cursor Rules
+| Plugin | Default | Purpose |
+|--------|---------|---------|
+| `scrollTrigger` | `true` | Scroll-based animations |
+| `scrollSmoother` | `true` | Smooth scrolling |
+| `flip` | `false` | State transitions |
+| `draggable` | `false` | Drag interactions |
+| `morphSVG` | `false` | SVG morphing |
+| `splitText` | `false` | Text animations |
 
-This project includes comprehensive **Cursor Rules** that provide AI-powered development guidance directly in your Cursor editor. These rules ensure consistent code patterns, proper architecture, and adherence to best practices.
+#### Admin Configuration
 
-> **🤖 AI-Powered Development:** All cursor rules are designed to work seamlessly with AI agents. Simply reference the appropriate rule name when asking your AI assistant to help with specific tasks!
+Customize the admin panel appearance and metadata:
 
-### 📂 Available Rule Categories
+```typescript
+admin: {
+  // Visual theme
+  theme: {
+    colors: {
+      accent: "#4f37fb",        // Primary brand color
+      error: "#dc2626",          // Error states
+      success: "#16a34a",        // Success states
+      grayscale: { /* 0-1000 scale */ }
+    },
+    layout: {
+      sidebarWidth: "240px",
+      headerHeight: "60px",
+      borderRadius: "0.375rem",
+    },
+    typography: {
+      fontFamily: "Inter, system-ui, sans-serif",
+      fontSize: "14px",
+    },
+  },
+  
+  // Page metadata
+  meta: {
+    title: "Admin | Smart Site",        // Browser title
+    description: "Admin panel",         // Meta description
+    favicon: "/favicon.png",            // Optional favicon path
+  },
+}
+```
 
-The `.cursor/rules/` folder contains organized development guidelines:
+#### Image Optimization
 
-#### **Smart Site Rules** (`smart-site/`)
+Control image quality, sizes, and responsive behavior:
 
-- **`adding-new-sections.mdc`** - Step-by-step guide for creating new website sections
-- **`payload-config.mdc`** - Payload CMS field and component mapping patterns
-- **`tailwind.mdc`** - Tailwind v4 configuration and best practices
-- **`adding-animations.mdc`** - GSAP animation implementation guide
-- **`converting-static-to-payload.mdc`** - Converting static components to CMS-powered
-- **`application-overview.mdc`** - High-level architecture understanding
-- **`html-structure.mdc`** - Semantic HTML layout patterns
-- **`screenshots.mdc`** - Converting designs/screenshots to components
-- **`styling-rich-text.mdc`** - Rich text field styling guidelines
+```typescript
+images: {
+  // Quality settings by context
+  quality: {
+    default: 85,         // Default quality (1-100)
+    thumbnail: 75,       // Lower for thumbnails
+    hero: 90,           // Higher for hero images
+  },
+  
+  // Image size variations generated by Payload
+  sizes: [
+    { name: "thumbnail", width: 300 },
+    { name: "square", width: 500, height: 500 },
+    { name: "small", width: 600 },
+    { name: "medium", width: 900 },
+    { name: "large", width: 1400 },
+    { name: "xlarge", width: 1920 },
+    { name: "og", width: 1200, height: 630, crop: "center" },
+  ],
+  
+  // Responsive breakpoints for srcSet calculation
+  breakpoints: {
+    "3xl": 1920,
+    "2xl": 1536,
+    "xl": 1280,
+    "lg": 1024,
+    "md": 768,
+    "sm": 640,
+  },
+}
+```
 
-> **✍️ Rich Text Styling:** Use the cursor rule `smart-site/styling-rich-text` when you need to apply custom styles to rich text content.
-
-#### **Behavioral Rules** (`behaviour/`)
-
-- **`coding-rules.mdc`** - Code style, patterns, and conventions
-- **`architecture.mdc`** - Project architecture principles
-
-#### **Integration Rules** (`mastra/`, `architecture/`)
-
-- Mastra AI framework integration patterns
-- Proof-of-concept development guidelines
-
-### 🚀 Activating Cursor Rules
-
-#### **Automatic Activation** (Recommended)
-
-Cursor automatically detects and applies rules based on:
-
-- **File patterns** - Rules trigger when editing matching files
-- **Context awareness** - Rules activate based on your current task
-
-#### **Manual Triggering**
-
-1. **Open Command Palette**: `Cmd/Ctrl + Shift + P`
-2. **Search for**: "Rules: Apply Rule"
-3. **Select rule**: Choose specific rule to apply
-4. **Browse available**: Use "Rules: Show All Rules" to see all available guidance
-
-#### **Rule-Specific Triggers**
-
-- **Sections**: Work in `src/components/sections/` to trigger section creation rules
-- **Payload**: Edit config files to activate CMS integration guidance
-- **Animations**: Add GSAP imports to trigger animation rules
-- **Styling**: Edit CSS/Tailwind files for styling guidance
-
-### 💡 How Rules Enhance Development
-
-#### **Smart Code Suggestions**
+**Override at Component Level:**
 
 ```tsx
-// When creating a new section, rules guide you through:
-// 1. ✅ Proper file structure (config.ts + Component.tsx)
-// 2. ✅ Payload field configuration
-// 3. ✅ Component type safety
-// 4. ✅ Design system compliance
+// Use default quality (85)
+<Media resource={image} alt="Product" />
+
+// Override quality for this image
+<Media resource={image} alt="Hero" quality={95} />
+
+// Override breakpoints
+<Media resource={image} breakpoints={{ mobile: 480, tablet: 768 }} />
 ```
 
-#### **Architecture Enforcement**
+#### Breadcrumb Configuration
 
-- **Consistent patterns** across all sections
-- **Proper separation** of CMS config and React components
-- **Type safety** with Payload-generated interfaces
-- **Performance optimization** with caching patterns
-
-#### **Onboarding Acceleration**
-
-- **New developers** get instant context about project patterns
-- **Design decisions** are documented and enforced
-- **Best practices** are automatically suggested
-
-### 🔧 Customizing Rules
-
-Rules are designed to be **project-specific** and can be modified:
-
-1. **Edit existing rules** in `.cursor/rules/`
-2. **Add new rules** for project-specific patterns
-3. **Adjust glob patterns** to target specific file types
-4. **Modify descriptions** to match your team's terminology
-
-### 📚 Rule Documentation Format
-
-Each rule file uses this structure:
-
-```markdown
----
-description: Brief explanation of when this rule applies
-globs: **/*.tsx  # File patterns that trigger this rule
-alwaysApply: false
----
-
-# Rule Content
-
-Detailed guidance and examples...
-```
-
-These rules transform Cursor into a **smart development assistant** that understands your project's specific architecture, patterns, and requirements.
-
-## ⚙️ Configuration
-
-### SmartSite Config (`src/smartsite.config.ts`)
-
-> **🚨 CRITICAL**: All configuration changes must be made through `smartsite.config.ts`. Never directly modify files in the `src/admin/` directory as this breaks the admin/frontend separation. All changes insie /admin will be overwritten each update..
+Control breadcrumb display, labels, and behavior:
 
 ```typescript
-import { defineConfig } from "@/admin/config"
+breadcrumbs: {
+  enabled: true,                  // Enable/disable globally
+  homeLabel: "Home",              // Customize home link text
+  separator: "slash",             // Options: "slash", "chevron", "arrow", "dot"
+  maxDepth: 0,                    // Limit depth (0 = unlimited)
+  showCurrent: true,              // Show current page in trail
+  className: "text-sm text-white/70", // Default styling
+}
+```
 
-const smartSiteConfig = defineConfig({
-  settings: {
-    // Core Features
-    gsap: true, // Enable GSAP animations
-    smoothScroll: true, // Enable smooth scrolling
-    themeToggle: false, // Enable dark/light mode toggle
-    gsapDevTools: true, // GSAP dev tools in development
+**Example Configurations:**
 
-    // Internationalization
-    i18n: false, // Enable internationalization
-    // i18n: {                     // Or configure i18n options
-    //   prefixDefaultLocale: false,
-    //   defaultLocale: "en",
-    //   locales: ["en", "es", "fr"],
-    //   localeCookie: "NEXT_LOCALE",
-    // },
+```typescript
+// Simple customization
+breadcrumbs: {
+  homeLabel: "Start",
+  separator: "chevron",
+}
 
-    // AI Integration
-    ai: {
-      enabled: true, // Enable AI features
-      url: process.env.NEXT_PUBLIC_AI_URL, // AI backend URL
-    },
-    // ai: false,                  // Or disable completely
+// Limited depth for deep hierarchies
+breadcrumbs: {
+  maxDepth: 3,                   // Show: Home > Parent > Current
+  showCurrent: false,            // Hide current page
+}
 
-    // Content & SEO
-    search: true, // Enable search functionality
-    analytics: true, // Enable analytics tracking
-    templateSupport: true, // Enable page templates
-    sitemaps: true, // Generate XML sitemaps
+// Localized breadcrumbs
+breadcrumbs: {
+  homeLabel: "Inicio",           // Spanish home label
+  separator: "arrow",
+}
+```
 
-    // Media Storage Configuration
-    media: {
-      storage: "local", // "local" | "vercel" | "s3" | "uploadThing"
-      // Vercel Blob Storage (requires BLOB_READ_WRITE_TOKEN)
-      vercel: {
-        token: process.env.BLOB_READ_WRITE_TOKEN, // Optional, falls back to env
-        cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year cache
-      },
-      // AWS S3 Storage (not yet implemented)
-      s3: {
-        bucket: "my-bucket",
-        region: "us-east-1",
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        endpoint: "https://s3.amazonaws.com", // Optional
-      },
-      // UploadThing Storage (not yet implemented)
-      uploadThing: {
-        secret: process.env.UPLOADTHING_SECRET,
-        appId: process.env.UPLOADTHING_APP_ID,
-      },
-    },
+**Component Overrides:**
+
+```tsx
+// Use default configuration
+<Breadcrumbs breadcrumbs={document.breadcrumbs} />
+
+// Override styles (replaces config className)
+<Breadcrumbs 
+  breadcrumbs={document.breadcrumbs}
+  className="text-lg text-gray-600"
+/>
+
+// Hide home link for specific instance
+<Breadcrumbs 
+  breadcrumbs={document.breadcrumbs}
+  showHome={false}
+/>
+```
+
+### Media Storage Providers
+
+Configure file storage based on your infrastructure:
+
+```typescript
+// Local storage (development)
+media: {
+  enabled: true,
+  provider: "local",
+}
+
+// Vercel Blob (production)
+media: {
+  enabled: true,
+  provider: "vercel-blob",
+  config: {
+    token: process.env.BLOB_READ_WRITE_TOKEN,
   },
+}
 
-  // Collection Management
-  collections: [
-    // Boolean flags to disable defaults
-    // { services: false, team: false },    // Disable multiple collections
-    // Add custom collections
-    // CustomProducts,                      // Your custom collection config
-  ],
-
-  // Global Configuration
-  globals: [
-    // { footer: false },                   // Disable footer global
-    // CustomSettings,                      // Add custom globals
-  ],
-
-  // Block Configuration
-  blocks: [
-    // { form: false, "media-block": false }, // Disable default blocks
-    // CustomBlock,                         // Add custom blocks
-  ],
-
-  // Raw Payload Configuration
-  payload: {
-    // Direct Payload config (advanced usage)
-    // admin: { meta: { title: "Custom Admin" } },
-    // plugins: [ customPlugin() ],
+// AWS S3 (enterprise)
+media: {
+  enabled: true,
+  provider: "s3",
+  config: {
+    bucket: "my-bucket",
+    region: "us-east-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
-})
-
-export default smartSiteConfig
+}
 ```
 
-### 📋 Complete Settings Reference
+## 🛠 Development Workflow
 
-#### Core Features
+### Recommended Development Process
 
-| Setting        | Type      | Default | Description                          |
-| -------------- | --------- | ------- | ------------------------------------ |
-| `gsap`         | `boolean` | `true`  | Enable GSAP animations and providers |
-| `smoothScroll` | `boolean` | `true`  | Enable smooth scrolling behavior     |
-| `themeToggle`  | `boolean` | `false` | Enable dark/light mode toggle        |
-| `gsapDevTools` | `boolean` | `true`  | Show GSAP dev tools in development   |
+1. **Start with sections** - 90% of development is building sections
+2. **Use reusable fields** - Leverage pre-built field patterns
+3. **Test in admin** - Verify fields work in Payload admin
+4. **Style with Tailwind v4** - Use design tokens from `theme.css`
+5. **Add animations** - GSAP for professional polish
 
-#### Internationalization (i18n)
+### Common Tasks
 
-| Setting                    | Type                    | Default         | Description                                 |
-| -------------------------- | ----------------------- | --------------- | ------------------------------------------- |
-| `i18n`                     | `boolean \| i18nConfig` | `false`         | Simple enable/disable or full configuration |
-| `i18n.prefixDefaultLocale` | `boolean`               | `false`         | Add locale prefix to default locale URLs    |
-| `i18n.defaultLocale`       | `string`                | `"en"`          | Default site language                       |
-| `i18n.locales`             | `string[]`              | `["en"]`        | Available languages                         |
-| `i18n.localeCookie`        | `string`                | `"NEXT_LOCALE"` | Cookie name for locale preference           |
+| Task | Command/Location | Notes |
+|------|------------------|-------|
+| **Create section** | `src/components/sections/` | config.ts + Component.tsx |
+| **Add field pattern** | `src/components/fields/` | Reusable field groups |
+| **Customize admin** | `src/smartsite.config.ts` | Never edit /admin directly |
+| **Add collection** | `extensions.collections` | In config file |
+| **Style frontend** | `app/(frontend)/css/` | Tailwind v4 styles |
+| **Add API route** | `app/(frontend)/api/` | Frontend endpoints |
 
-#### AI Integration
+### Development Commands
 
-| Setting      | Type                  | Default                   | Description                                 |
-| ------------ | --------------------- | ------------------------- | ------------------------------------------- |
-| `ai`         | `boolean \| aiConfig` | `{ enabled: true }`       | Simple enable/disable or full configuration |
-| `ai.enabled` | `boolean`             | `true`                    | Enable AI features in admin                 |
-| `ai.url`     | `string`              | `"http://localhost:4112"` | AI backend service URL                      |
+```bash
+# Start development
+pnpm dev                # Main dev server
 
-#### Content & SEO
+# Database management
+pnpm seed              # Seed with sample data
+pnpm db:reset          # Reset and reseed
 
-| Setting           | Type      | Default | Description                 |
-| ----------------- | --------- | ------- | --------------------------- |
-| `search`          | `boolean` | `true`  | Enable search functionality |
-| `analytics`       | `boolean` | `true`  | Enable analytics tracking   |
-| `templateSupport` | `boolean` | `true`  | Enable page templates       |
-| `sitemaps`        | `boolean` | `true`  | Generate XML sitemaps       |
+# Type generation
+pnpm generate:types    # Generate TypeScript types
 
-#### Media Storage
-
-| Setting                           | Type                                           | Default                             | Description             |
-| --------------------------------- | ---------------------------------------------- | ----------------------------------- | ----------------------- |
-| `media.storage`                   | `"local" \| "vercel" \| "s3" \| "uploadThing"` | `"local"`                           | Storage provider        |
-| `media.vercel.token`              | `string`                                       | `process.env.BLOB_READ_WRITE_TOKEN` | Vercel blob token       |
-| `media.vercel.cacheControlMaxAge` | `number`                                       | `31536000`                          | Cache duration (1 year) |
-| `media.s3.bucket`                 | `string`                                       | -                                   | S3 bucket name          |
-| `media.s3.region`                 | `string`                                       | -                                   | AWS region              |
-| `media.s3.accessKeyId`            | `string`                                       | -                                   | AWS access key          |
-| `media.s3.secretAccessKey`        | `string`                                       | -                                   | AWS secret key          |
-| `media.s3.endpoint`               | `string`                                       | -                                   | Custom S3 endpoint      |
-| `media.uploadThing.secret`        | `string`                                       | -                                   | UploadThing secret      |
-| `media.uploadThing.appId`         | `string`                                       | -                                   | UploadThing app ID      |
-
-#### Collection Management
-
-Configure which default collections are enabled:
-
-```typescript
-collections: [
-  { services: false, team: false }, // Disable specific collections
-  CustomProducts, // Add custom collections
-]
+# Code quality
+pnpm lint              # Run linter
+pnpm type-check        # TypeScript checks
 ```
 
-**Available Default Collections:**
+### File Naming Conventions
 
-- `pages` - Main page content
-- `posts` - Blog/article content
-- `services` - Service-specific pages
-- `team` - Team member profiles
-- `testimonials` - Customer testimonials
-- `templates` - Reusable page templates
-- `media` - File/image management
-- `categories` - Content categorization
-- `users` - Admin user management
-- `uri-index` - URL routing management
+- **Components**: PascalCase (`HeroSection.tsx`)
+- **Folders**: kebab-case (`hero-section/`)
+- **Config files**: lowercase (`config.ts`)
+- **Utilities**: camelCase functions (`formatDate.ts`)
 
-#### Global Management
+## 📚 Cursor Rules
 
-Configure global settings and navigation:
+Smart Site includes **AI-powered development rules** in `.cursor/rules/` that guide consistent development:
 
-```typescript
-globals: [
-  { footer: false }, // Disable footer global
-  CustomSettings, // Add custom globals
-]
+### Available Rules
+
+| Rule | Purpose | Trigger |
+|------|---------|---------|
+| `adding-new-sections` | Section creation guide | Working in `/sections/` |
+| `payload-config` | Field configuration | Editing config files |
+| `tailwind` | Tailwind v4 patterns | CSS files |
+| `adding-animations` | GSAP implementation | Animation code |
+| `screenshots` | Design to code | Image implementation |
+| `html-structure` | Semantic HTML | Component markup |
+
+### Using Rules
+
+**Automatic**: Rules activate based on file context
+**Manual**: `Cmd/Ctrl + Shift + P` → "Rules: Apply Rule"
+
+### AI Development
+
+Tell your AI assistant to use specific rules:
+- *"Create a new section using the adding-new-sections rule"*
+- *"Convert this design using the screenshots rule"*
+- *"Add animations following the GSAP rule"*
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| **Types not generating** | Run `pnpm generate:types` |
+| **Sections not appearing** | Check registration in `sections-map.tsx` |
+| **Admin changes lost** | Use `smartsite.config.ts` instead |
+| **MongoDB connection fails** | Verify MongoDB is running: `pnpm mongo:status` |
+| **Build fails** | Run `pnpm type-check` and fix errors |
+| **AI chat not working** | Check AI backend is running on port 4112 |
+
+### Debug Commands
+
+```bash
+# Check database connection
+pnpm payload migrate:status
+
+# Regenerate URI index
+pnpm regenerate-uris
+
+# Reset everything
+pnpm db:reset
+
+# View MongoDB databases
+mongo --eval "db.adminCommand('listDatabases')"
 ```
-
-**Available Default Globals:**
-
-- `header` - Site navigation and header
-- `footer` - Footer content and links
-- `settings` - Site-wide settings
-
-#### Block Management
-
-Configure available section blocks:
-
-```typescript
-blocks: [
-  { form: false, "media-block": false }, // Disable specific blocks
-  CustomBlock, // Add custom blocks
-]
-```
-
-**Available Default Blocks:**
-
-- `code` - Code syntax highlighting
-- `form` - Contact/lead capture forms
-- `media-block` - Rich media content blocks
-
-### ⚠️ Admin Directory Warning
-
-**DO NOT MODIFY ANYTHING IN `src/admin/`**:
-
-- ❌ Don't edit `src/admin/payload/payload.config.ts`
-- ❌ Don't modify collection configs directly
-- ❌ Don't change admin utilities
-- ✅ Instead, use the override system in `smartsite.config.ts`
-
-The admin directory is designed to be **framework code** that remains untouched. All site-specific customizations flow through the `smartsite.config.ts` file using the boolean override system.
-
-### Tailwind CSS v4 Configuration
-
-Configuration is handled through CSS files in `src/app/(frontend)/css/`:
-
-- **`globals.css`** - Entry point importing all styles
-- **`theme.css`** - Design system tokens and brand colors
-- **`base.css`** - Element-level base styles
-- **`typography.css`** - Typography system and variables
-- **`components.css`** - Complex reusable CSS classes
-- **`utilities.css`** - Custom utility classes
-
-### Payload CMS Configuration
-
-Core CMS settings in `src/admin/payload/payload.config.ts`:
-
-- **Collections**: Pages, Posts, Services, Team, Media, Forms
-- **Globals**: Settings, Navigation, Footer
-- **Plugins**: SEO, Redirects, Form Builder, Search
-- **Admin**: Custom dashboard styling and user experience
 
 ## 🚀 Deployment
 

@@ -9,15 +9,12 @@ import React from "react"
 import type { Props as MediaProps } from "../types"
 
 import { getClientSideURL } from "@/admin/utilities/get-url"
+import { getSmartSiteConfig } from "@/admin/config"
 
-const breakpoints = {
-  "3xl": 1920,
-  "2xl": 1536,
-  xl: 1280,
-  lg: 1024,
-  md: 768,
-  sm: 640,
-}
+// Get config at module level (it's frozen/cached)
+const config = getSmartSiteConfig()
+const defaultBreakpoints = config.images.breakpoints
+const defaultQuality = config.images.quality.default
 
 // A base64 encoded image to use as a placeholder while the image is loading
 const placeholderBlur =
@@ -34,6 +31,8 @@ export const ImageMedia: React.FC<MediaProps> = props => {
     size: sizeFromProps,
     src: srcFromProps,
     loading: loadingFromProps,
+    quality: qualityFromProps,
+    breakpoints: breakpointsFromProps,
   } = props
 
   let width: number | undefined
@@ -59,6 +58,12 @@ export const ImageMedia: React.FC<MediaProps> = props => {
   }
 
   const loading = loadingFromProps || (!priority ? "lazy" : undefined)
+  
+  // Use breakpoints from props or fall back to config
+  const breakpoints = breakpointsFromProps || defaultBreakpoints
+  
+  // Determine quality based on context or props
+  const quality = qualityFromProps || defaultQuality
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes = sizeFromProps
@@ -77,7 +82,7 @@ export const ImageMedia: React.FC<MediaProps> = props => {
         placeholder="blur"
         blurDataURL={placeholderBlur}
         priority={priority}
-        quality={100}
+        quality={quality}
         loading={loading}
         sizes={sizes}
         src={src}

@@ -1,5 +1,5 @@
 import { getServerSideURL } from "./get-url"
-import { routingEngine } from "@/admin/lib/routing"
+import { routingEngine } from "@/admin/routing"
 
 /*************************************************************************/
 /*  URL VALIDATION UTILITIES

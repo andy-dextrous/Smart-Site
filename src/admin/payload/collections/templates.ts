@@ -5,6 +5,7 @@ import { authenticated } from "@/admin/payload/access/authenticated"
 import { authenticatedOrPublished } from "@/admin/payload/access/authenticatedOrPublished"
 import { afterTemplateChange } from "@/admin/payload/hooks/collections/templates/after-change"
 import { afterUniversalDelete } from "@/admin/payload/hooks/collections/universal/after-delete"
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 export const Templates: CollectionConfig = {
   slug: "templates",
@@ -17,6 +18,12 @@ export const Templates: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "description", "updatedAt"],
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "hi/HiTemplate"
+      }
+    } as CollectionCustomMetadata,
   },
   hooks: {
     afterChange: [afterTemplateChange],

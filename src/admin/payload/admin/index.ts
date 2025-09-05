@@ -2,8 +2,9 @@ import path from "path"
 import { fileURLToPath } from "url"
 import { Users } from "@/admin/payload/collections/users"
 import components from "@/admin/payload/components/config"
-import { frontendCollections } from "../collections/frontend"
+import { frontendCollections } from "@/admin/config/frontend"
 import { generatePreviewPath } from "@/admin/utilities/generate-preview-path"
+import { getSmartSiteConfig } from "@/admin/config"
 import type {
   CollectionSlug,
   PayloadRequest,
@@ -16,30 +17,40 @@ import type {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const config = getSmartSiteConfig()
+
 const admin = {
   user: Users.slug,
   suppressHydrationWarning: true,
   importMap: {
     baseDir: path.resolve(dirname),
   },
-  autoLogin:
-    process.env.NODE_ENV === "development"
-      ? {
-          email: process.env.PAYLOAD_ADMIN_EMAIL,
-          password: process.env.PAYLOAD_ADMIN_PASSWORD,
-        }
-      : false,
+  autoLogin: (() => {
+    if (
+      process.env.NODE_ENV === "development" &&
+      process.env.PAYLOAD_ADMIN_EMAIL &&
+      process.env.PAYLOAD_ADMIN_PASSWORD
+    ) {
+      return {
+        email: process.env.PAYLOAD_ADMIN_EMAIL,
+        password: process.env.PAYLOAD_ADMIN_PASSWORD,
+      }
+    }
+    return false as const
+  })(),
   components,
   meta: {
-    title: "Admin | smart site",
-    description: "Advanced admin panel for high-performance websites",
-    icons: [
-      {
-        rel: "icon",
-        type: "image/png",
-        url: "/favicon.png",
-      },
-    ],
+    title: config.admin.meta.title,
+    description: config.admin.meta.description,
+    icons: config.admin.meta.favicon
+      ? [
+          {
+            rel: "icon",
+            type: "image/png",
+            url: config.admin.meta.favicon,
+          },
+        ]
+      : [],
   },
   livePreview: {
     collections: frontendCollections.map(collection => collection.slug),

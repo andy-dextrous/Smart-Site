@@ -1,0 +1,103 @@
+{
+  "name": "@smartsite/admin-layer",
+  "version": "2.0.0",
+  "private": true,
+  "description": "SmartSite Admin Layer - Core CMS Backend Infrastructure",
+  "author": "SmartSite Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andy-dextrous/Smart-Site.git"
+  },
+  "releaseDate": "2025-01-05",
+  "gitCommit": "pending",
+  "changelog": "https://github.com/andy-dextrous/Smart-Site/releases/tag/v2.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "dependencies": {},
+  "sharedDependencies": {
+    "@ai-sdk/openai": "^1.3.23",
+    "@assistant-ui/react": "^0.10.25",
+    "@assistant-ui/react-ai-sdk": "^0.10.14",
+    "@assistant-ui/react-markdown": "^0.10.6",
+    "@libsql/client": "^0.15.9",
+    "@mastra/client-js": "^0.10.16",
+    "@mastra/core": "^0.13.1",
+    "@payloadcms/admin-bar": "latest",
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/db-postgres": "^3.47.0",
+    "@payloadcms/db-vercel-postgres": "^3.45.0",
+    "@payloadcms/email-resend": "latest",
+    "@payloadcms/live-preview-react": "latest",
+    "@payloadcms/next": "latest",
+    "@payloadcms/plugin-form-builder": "latest",
+    "@payloadcms/plugin-nested-docs": "latest",
+    "@payloadcms/plugin-redirects": "latest",
+    "@payloadcms/plugin-search": "latest",
+    "@payloadcms/plugin-seo": "latest",
+    "@payloadcms/richtext-lexical": "latest",
+    "@payloadcms/storage-vercel-blob": "latest",
+    "@payloadcms/translations": "latest",
+    "@payloadcms/ui": "latest",
+    "@radix-ui/react-accordion": "^1.2.11",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-checkbox": "^1.3.2",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-navigation-menu": "^1.2.6",
+    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-scroll-area": "^1.2.9",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.7",
+    "ai": "^4.3.19",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "graphql": "^16.10.0",
+    "html-react-parser": "^5.2.3",
+    "isomorphic-dompurify": "^2.26.0",
+    "lodash.merge": "^4.6.2",
+    "nanoid": "^5.1.5",
+    "nodemailer-mailgun-transport": "^2.1.5",
+    "prism-react-renderer": "^2.4.1",
+    "react-hook-form": "^7.55.0",
+    "react-hotkeys-hook": "^5.1.0",
+    "react-resizable": "^3.0.5",
+    "remark-gfm": "^4.0.1",
+    "sonner": "^2.0.3",
+    "tailwind-merge": "^3.0.2",
+    "zod": "^3.24.2"
+  },
+  "peerDependencies": {
+    "next": "^15.5.2",
+    "payload": "latest",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react-resizable": "^3.0.8"
+  },
+  "adminMetadata": {
+    "requiredFeatures": [
+      "payload-cms",
+      "next-app-router",
+      "tailwind-v4"
+    ],
+    "compatibleWith": {
+      "smartsite": ">=1.0.0"
+    },
+    "adminFolders": [
+      "payload",
+      "lib",
+      "components",
+      "utilities",
+      "css"
+    ]
+  }
+}

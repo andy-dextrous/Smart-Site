@@ -1,6 +1,6 @@
 import type { CollectionSlug, Field, GroupField } from "payload"
 import deepMerge from "@/admin/utilities/deep-merge"
-import { getFrontendCollections } from "@/admin/payload/collections/frontend"
+import { getFrontendCollections } from "@/admin/config/frontend"
 
 type LinkType = (options?: {
   disableLabel?: boolean

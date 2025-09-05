@@ -3,7 +3,7 @@ import {
   shouldTriggerHierarchyDependentUpdates,
   getArchiveChildCollections,
   detectHierarchyChanges,
-} from "@/admin/lib/routing/dependency-detection"
+} from "@/admin/routing/dependency-detection"
 import { getDependentUpdatesContext } from "@/admin/payload/hooks/utilities/context-management"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
 import type { CollectionBeforeChangeHook } from "payload"

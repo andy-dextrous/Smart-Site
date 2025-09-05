@@ -4,7 +4,7 @@ import { Post } from "@/admin/payload/payload-types"
 import { SectionIntro } from "../fields/section-intro"
 import { PostAuthorInfo } from "./post-author-info"
 import { DocumentBreadcrumbs } from "@/components/ui/breadcrumbs"
-import { BreadcrumbItem } from "@/admin/lib/routing/uri-engine"
+import { BreadcrumbItem } from "@/admin/routing/uri-engine"
 
 /*************************************************************************/
 /*  POST BODY COMPONENT

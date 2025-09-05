@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload"
 
 import { authenticated } from "@/admin/payload/access/authenticated"
 import { isAdmin, isAdminOrSelf } from "@/admin/payload/access/admin"
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -16,6 +17,12 @@ export const Users: CollectionConfig = {
     defaultColumns: ["username", "name", "lastName", "email", "role"],
     useAsTitle: "email",
     hideAPIURL: process.env.NODE_ENV === "production",
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "fa/FaUserAlt"
+      }
+    } as CollectionCustomMetadata,
   },
   auth: {
     tokenExpiration: 604800000, // 7 days

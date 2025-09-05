@@ -1,8 +1,8 @@
-import { revalidateDocument, revalidateCollection } from "@/admin/lib/cache/revalidation"
+import { revalidateDocument, revalidateCollection } from "@/admin/cache/revalidation"
 import {
   detectAllSettingsChanges,
   detectHomepageChange,
-} from "@/admin/lib/routing/dependency-detection"
+} from "@/admin/routing/dependency-detection"
 import {
   getDependentUpdatesContext,
   clearDependentUpdatesContext,
@@ -167,7 +167,7 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({
       settingsChanges.locationChanges
     ) {
       try {
-        const { revalidateAll } = await import("@/admin/lib/cache/revalidation")
+        const { revalidateAll } = await import("@/admin/cache/revalidation")
         await revalidateAll()
         payload.logger.info(
           "📋 Non-routing settings changed - full cache refresh triggered"

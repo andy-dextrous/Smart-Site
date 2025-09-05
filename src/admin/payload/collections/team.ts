@@ -1,7 +1,8 @@
 import { CollectionConfig } from "payload"
 import { anyone } from "@/admin/payload/access/anyone"
 import { canEditContent } from "@/admin/payload/access/editor"
-import { enableFrontend } from "@/admin/payload/collections/frontend"
+// Frontend wrapper is now applied dynamically via resolver
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const teamConfig: CollectionConfig = {
   slug: "team",
@@ -19,6 +20,12 @@ const teamConfig: CollectionConfig = {
     useAsTitle: "name",
     description:
       "Team members are used to display the team on the website. They are different to users, which are used for the admin panel.",
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "ri/RiTeamFill",
+      },
+    } as CollectionCustomMetadata,
   },
   fields: [
     {
@@ -86,7 +93,5 @@ const teamConfig: CollectionConfig = {
   hooks: {},
 }
 
-export const Team: CollectionConfig = enableFrontend(teamConfig, {
-  label: "Team",
-  seoSchemaType: "Person",
-})
+// Frontend wrapper is now applied dynamically via resolver based on config
+export const Team: CollectionConfig = teamConfig

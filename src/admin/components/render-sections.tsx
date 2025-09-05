@@ -9,6 +9,8 @@ export interface PageData {
   document?: any
   collection?: string
   breadcrumbs?: any[]
+  searchParams?: { [key: string]: string | string[] | undefined }
+  params?: { uri?: string[] }
 }
 
 /*************************************************************************/
@@ -24,7 +26,7 @@ export const RenderSections: React.FC<
     sections: any[]
   } & PageData
 > = props => {
-  const { sections, document, collection, breadcrumbs } = props
+  const { sections, document, collection, breadcrumbs, searchParams, params } = props
 
   const hasSections = sections && Array.isArray(sections) && sections.length > 0
 
@@ -38,12 +40,14 @@ export const RenderSections: React.FC<
             const Section = sectionsMap[blockType]
 
             if (Section) {
-              // Pass document, collection, and breadcrumbs to ALL sections as optional props
+              // Pass document, collection, breadcrumbs, and Next.js page props to ALL sections as optional props
               const sectionProps = {
                 ...section,
                 document,
                 collection,
                 breadcrumbs,
+                searchParams,
+                params,
               }
 
               return <Section {...sectionProps} key={index} />

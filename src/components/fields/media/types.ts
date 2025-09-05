@@ -12,6 +12,8 @@ export interface Props {
 	onLoad?: () => void
 	loading?: "lazy" | "eager" // for NextImage only
 	priority?: boolean // for NextImage only
+	quality?: number // Override quality setting
+	breakpoints?: Record<string, number> // Override breakpoint calculation
 	ref?: Ref<HTMLImageElement | HTMLVideoElement | null>
 	resource?: any | string | number | null // for Payload media
 	size?: string // for NextImage only

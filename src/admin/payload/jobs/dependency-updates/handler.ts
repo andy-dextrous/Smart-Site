@@ -1,4 +1,4 @@
-import { getDependentUpdatesImpactSize } from "@/admin/lib/routing/dependency-detection"
+import { getDependentUpdatesImpactSize } from "@/admin/routing/dependency-detection"
 import {
   processArchivePageUpdate,
   processPageHierarchyUpdate,
@@ -8,9 +8,9 @@ import {
   processTemplateContentChange,
   type DependentUpdatesResult,
 } from "./update-functions"
-import { updateURI } from "@/admin/lib/routing/index-manager"
-import { routingEngine } from "@/admin/lib/routing/uri-engine"
-import { detectChanges } from "@/admin/lib/cache/change-detection"
+import { updateURI } from "@/admin/routing/index-manager"
+import { routingEngine } from "@/admin/routing/uri-engine"
+import { detectChanges } from "@/admin/cache/change-detection"
 
 /*************************************************************************/
 /*  DEPENDENT UPDATES JOB TYPES
@@ -216,7 +216,7 @@ export async function uriDependentUpdatesHandler({
           action: "update" as const,
         }))
 
-        const { batchRevalidate } = await import("@/admin/lib/cache")
+        const { batchRevalidate } = await import("@/admin/cache")
         const invalidationResults = await batchRevalidate({ operations })
         result.cacheEntriesCleared = invalidationResults.operations.reduce(
           (total: number, res: any) => total + (res.tagsInvalidated?.length || 0),
@@ -262,7 +262,7 @@ async function getDocumentUpdatesForOperation(
     getArchiveChildCollections,
     getCollectionItemsForArchive,
     findDescendantPages,
-  } = await import("@/admin/lib/routing/dependency-detection")
+  } = await import("@/admin/routing/dependency-detection")
 
   switch (operation.operation) {
     case "archive-page-update": {

@@ -2,11 +2,11 @@ import {
   getArchiveChildCollections,
   getCollectionItemsForArchive,
   findDescendantPages,
-} from "@/admin/lib/routing/dependency-detection"
-import { updateURI } from "@/admin/lib/routing/index-manager"
-import { routingEngine } from "@/admin/lib/routing/uri-engine"
-import { batchRevalidate } from "@/admin/lib/cache"
-import { detectChanges } from "@/admin/lib/cache/change-detection"
+} from "@/admin/routing/dependency-detection"
+import { updateURI } from "@/admin/routing/index-manager"
+import { routingEngine } from "@/admin/routing/uri-engine"
+import { batchRevalidate } from "@/admin/cache"
+import { detectChanges } from "@/admin/cache/change-detection"
 import configPromise from "@payload-config"
 import { getPayload } from "payload"
 

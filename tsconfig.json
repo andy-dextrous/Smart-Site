@@ -23,22 +23,15 @@
       "@/*": ["./src/*"],
       "@payload-config": ["./src/admin/payload/payload.config.ts"],
       "@payload-types": ["./src/admin/payload/types"],
-      "@smartsite-config": ["src/smartsite.config.ts"],
-      "@admin-lib": ["./src/admin/lib"],
-      "@admin-components": ["./src/admin/components"],
-      "@admin-styles": ["./src/admin/css/admin.scss"],
-      "@admin-utilities": ["./src/admin/utilities"],
-      "@smart-site-ai/*": ["../smart-site-ai/src/*"],
-      "@payload-components": ["./src/admin/payload/components"],
-      "@payload-styles": ["./src/app/(payload)/css/admin.scss"]
+      "@smartsite-config": ["src/smartsite.config.ts"]
     },
     "target": "ES2022",
-    "types": ["react/jsx-runtime", "jest", "node"]
+    "types": ["react/jsx-runtime", "node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": [
-    "node_modules", 
-    "tests", 
+    "node_modules",
+    "tests",
     "src/admin/payload/endpoints/seed/**/*",
     "src/admin/payload/endpoints/seed"
   ]

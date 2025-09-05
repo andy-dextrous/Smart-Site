@@ -4,7 +4,7 @@ import { ChevronDown, PlusIcon, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link.js"
 import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,17 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu"
 import { Toaster } from "../../../../components/ui/sonner"
+import { getSmartSiteConfig } from "@/admin/config"
+import type { Setting, User as PayloadUser } from "@/admin/payload/payload-types"
 import ClearCache from "./clear-cache"
 import EditCurrentPage from "./edit-current-page"
 import ExitPreview from "./exit-preview"
 import "./styles.scss"
 
 interface AdminBarProps {
-  settings?: any
+  settings?: Setting
 }
 
 const cmsURL = process.env.NEXT_PUBLIC_URL
 export const revalidate = 0
+
+// Get config once at module level for client component
+const smartSiteConfig = getSmartSiteConfig()
 
 /*************************************************************************/
 /*  smart site ADMIN BAR - CLIENT-SIDE AUTH & PREVIEW DETECTION
@@ -31,7 +36,7 @@ export const revalidate = 0
 export function SmartSiteAdminBar({ settings }: AdminBarProps) {
   const [isPreview, setIsPreview] = useState(false)
   const [isLivePreview, setIsLivePreview] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<PayloadUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -134,21 +139,21 @@ export function SmartSiteAdminBar({ settings }: AdminBarProps) {
 /*  INTERNAL COMPONENTS - NOW CLIENT-SIDE (NO ASYNC)
 /*************************************************************************/
 
-function UserDropdown({ user }: { user?: any }) {
+function UserDropdown({ user }: { user?: PayloadUser | null }) {
   if (!user) {
     return null
   }
 
-  const { id: userID, email, firstName, lastName } = user
+  const { id: userID, email, name, lastName } = user
   const cmsURL = process.env.NEXT_PUBLIC_URL
-  const displayName = firstName ? `${firstName}${lastName ? ` ${lastName}` : ""}` : email
+  const displayName = name ? `${name}${lastName ? ` ${lastName}` : ""}` : email
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="admin-bar__dropdown-trigger">
         <div className="admin-bar__dropdown-trigger">
           <div className="admin-bar__avatar-container--small">
-            {user.avatar?.url && typeof user.avatar?.url === "string" ? (
+            {user.avatar && typeof user.avatar === "object" && "url" in user.avatar && user.avatar.url ? (
               <Image
                 src={user.avatar.url}
                 alt={displayName || ""}
@@ -160,16 +165,16 @@ function UserDropdown({ user }: { user?: any }) {
               <User className="admin-bar__user-icon--small" />
             )}
           </div>
-          <span>Howdy, {firstName || email?.split("@")[0]}</span>
+          <span>Howdy, {name || email?.split("@")[0]}</span>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="admin-bar__dropdown-content admin-bar__dropdown-content--user">
         <div className="admin-bar__user-container">
           <div className="admin-bar__user-info">
             <div className="admin-bar__avatar-container">
-              {user.avatar?.url && typeof user.avatar.url === "string" ? (
+              {user.avatar && typeof user.avatar === "object" && "url" in user.avatar && user.avatar.url ? (
                 <Image
-                  src={user.avatar?.url}
+                  src={user.avatar.url}
                   alt={displayName || ""}
                   width={64}
                   height={64}
@@ -208,33 +213,47 @@ function DashboardLink() {
   )
 }
 
-function SystemDropdown({ settings }: { settings?: any }) {
+function SystemDropdown({ settings }: { settings?: Setting }) {
+  // Build system items dynamically from config
+  const systemItems = useMemo(() => {
+    const items = []
+    
+    // Add enabled collections
+    for (const [slug, collection] of Object.entries(smartSiteConfig.collections)) {
+      if (collection.enabled) {
+        items.push({
+          label: collection.label,
+          href: `${cmsURL}/admin/collections/${slug}`,
+          type: 'collection' as const,
+        })
+      }
+    }
+    
+    // Add globals (always enabled in smart-site)
+    items.push(
+      {
+        label: "Header",
+        href: `${cmsURL}/admin/globals/header`,
+        type: 'global' as const,
+      },
+      {
+        label: "Footer",
+        href: `${cmsURL}/admin/globals/footer`,
+        type: 'global' as const,
+      },
+      {
+        label: "Settings",
+        href: `${cmsURL}/admin/globals/settings`,
+        type: 'global' as const,
+      }
+    )
+    
+    return items
+  }, [])
+
   if (!settings) return null
 
   const siteName = settings?.general?.siteName || "My Site"
-
-  const systemItems = [
-    {
-      label: "Pages",
-      href: `${cmsURL}/admin/collections/pages`,
-    },
-    {
-      label: "Posts",
-      href: `${cmsURL}/admin/collections/posts`,
-    },
-    {
-      label: "Header",
-      href: `${cmsURL}/admin/globals/header`,
-    },
-    {
-      label: "Footer",
-      href: `${cmsURL}/admin/globals/footer`,
-    },
-    {
-      label: "Settings",
-      href: `${cmsURL}/admin/globals/settings`,
-    },
-  ]
 
   return (
     <DropdownMenu>
@@ -258,20 +277,26 @@ function SystemDropdown({ settings }: { settings?: any }) {
 }
 
 function NewItemDropdown() {
-  const collections = [
-    {
-      slug: "pages",
-      labels: {
-        singular: "Page",
-      },
-    },
-    {
-      slug: "posts",
-      labels: {
-        singular: "Post",
-      },
-    },
-  ]
+  // Get all frontend-enabled collections dynamically
+  const collections = useMemo(() => {
+    const frontendCollections = []
+    
+    for (const [slug, collection] of Object.entries(smartSiteConfig.collections)) {
+      if (collection.enabled && collection.frontend) {
+        frontendCollections.push({
+          slug,
+          labels: {
+            singular: getSingularLabel(collection.label),
+          },
+        })
+      }
+    }
+    
+    return frontendCollections
+  }, [])
+  
+  // If no frontend collections, don't render the dropdown
+  if (collections.length === 0) return null
 
   return (
     <DropdownMenu>
@@ -293,4 +318,26 @@ function NewItemDropdown() {
       </DropdownMenuContent>
     </DropdownMenu>
   )
+}
+
+/*************************************************************************/
+/*  UTILITY FUNCTIONS
+/*************************************************************************/
+
+function getSingularLabel(pluralLabel: string): string {
+  // Handle special cases first
+  if (pluralLabel === "Categories") return "Category"
+  if (pluralLabel === "Services") return "Service"
+  
+  // Handle common patterns
+  if (pluralLabel.endsWith("ies")) {
+    return pluralLabel.slice(0, -3) + "y"
+  }
+  if (pluralLabel.endsWith("ses") || pluralLabel.endsWith("xes") || pluralLabel.endsWith("zes")) {
+    return pluralLabel.slice(0, -2)
+  }
+  if (pluralLabel.endsWith("s")) {
+    return pluralLabel.slice(0, -1)
+  }
+  return pluralLabel
 }

@@ -9,9 +9,11 @@ import { useConfig, useTranslation, usePreferences } from "@payloadcms/ui"
 import { formatAdminURL } from "@payloadcms/ui/shared"
 import { getTranslation } from "@payloadcms/translations"
 import { usePathname } from "next/navigation"
+import { CollectionIcon } from "@/admin/components/collection-icon"
 import { getNavIcon } from "@/admin/payload/components/backend/nav/navIconMap"
 import { Button } from "@/admin/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+
 
 /*************************************************************************/
 /*  NAV ITEM COMPONENT WITH TOOLTIP AND ANIMATION
@@ -227,6 +229,7 @@ export function AppSidebar() {
     "payload-jobs",
     "payload-locked-documents",
     "search",
+    "payload-folders",
   ]
 
   const visibleCollections = collections.filter(
@@ -267,7 +270,7 @@ export function AppSidebar() {
         slug: col.slug,
         href: formatAdminURL({ adminRoute, path: `/collections/${col.slug}` }),
         label: getTranslation(col.labels?.plural || col.slug, i18n),
-        icon: getNavIcon(col.slug),
+        icon: (props: any) => <CollectionIcon item={col} slug={col.slug} {...props} />,
       })),
     // Other collections (excluding pages since it's already above)
     ...visibleCollections
@@ -292,7 +295,7 @@ export function AppSidebar() {
         slug: col.slug,
         href: formatAdminURL({ adminRoute, path: `/collections/${col.slug}` }),
         label: getTranslation(col.labels?.plural || col.slug, i18n),
-        icon: getNavIcon(col.slug),
+        icon: (props: any) => <CollectionIcon item={col} slug={col.slug} {...props} />,
       })),
     ...visibleGlobals
       .filter(glob => !["header", "footer", "settings"].includes(glob.slug))
@@ -301,7 +304,7 @@ export function AppSidebar() {
         slug: glob.slug,
         href: formatAdminURL({ adminRoute, path: `/globals/${glob.slug}` }),
         label: getTranslation(glob.label || glob.slug, i18n),
-        icon: getNavIcon(glob.slug),
+        icon: (props: any) => <CollectionIcon item={glob} slug={glob.slug} {...props} />,
       })),
   ]
 
@@ -350,7 +353,7 @@ export function AppSidebar() {
               const label = isCollection
                 ? getTranslation(item.labels?.plural || item.slug, i18n)
                 : getTranslation(item.label || item.slug, i18n)
-              const Icon = getNavIcon(item.slug)
+              const Icon = (props: any) => <CollectionIcon item={item} slug={item.slug} {...props} />
               const isActive =
                 pathname.startsWith(href) &&
                 ["/", undefined].includes(pathname[href.length])
@@ -376,7 +379,7 @@ export function AppSidebar() {
               adminRoute,
               path: `/collections/${collection.slug}`,
             })
-            const Icon = getNavIcon(collection.slug)
+            const Icon = (props: any) => <CollectionIcon item={collection} slug={collection.slug} {...props} />
             const isActive =
               pathname.startsWith(href) &&
               ["/", undefined].includes(pathname[href.length])
@@ -401,7 +404,7 @@ export function AppSidebar() {
               adminRoute,
               path: `/collections/${collection.slug}`,
             })
-            const Icon = getNavIcon(collection.slug)
+            const Icon = (props: any) => <CollectionIcon item={collection} slug={collection.slug} {...props} />
             const isActive =
               pathname.startsWith(href) &&
               ["/", undefined].includes(pathname[href.length])
@@ -433,7 +436,7 @@ export function AppSidebar() {
                 adminRoute,
                 path: `/collections/${collection.slug}`,
               })
-              const Icon = getNavIcon(collection.slug)
+              const Icon = (props: any) => <CollectionIcon item={collection} slug={collection.slug} {...props} />
               const isActive =
                 pathname.startsWith(href) &&
                 ["/", undefined].includes(pathname[href.length])
@@ -475,7 +478,7 @@ export function AppSidebar() {
               const label = isCollection
                 ? getTranslation(item.labels?.plural || item.slug, i18n)
                 : getTranslation(item.label || item.slug, i18n)
-              const Icon = getNavIcon(item.slug)
+              const Icon = (props: any) => <CollectionIcon item={item} slug={item.slug} {...props} />
               const isActive =
                 pathname.startsWith(href) &&
                 ["/", undefined].includes(pathname[href.length])

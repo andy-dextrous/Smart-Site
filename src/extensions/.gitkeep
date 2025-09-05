@@ -1,0 +1,9 @@
+# Extensions Directory
+
+This directory contains project-specific extensions to Smart-Site.
+
+- collections/ - Custom Payload collections
+- blocks/ - Custom content blocks  
+- globals/ - Custom global configs
+- plugins/ - Custom plugins
+- components/ - Custom UI components

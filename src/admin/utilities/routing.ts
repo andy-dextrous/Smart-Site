@@ -1,4 +1,4 @@
-import { frontendCollections } from "@/admin/payload/collections/frontend"
+import { frontendCollections } from "@/admin/config/frontend"
 import type { Field } from "payload"
 
 /*************************************************************************/

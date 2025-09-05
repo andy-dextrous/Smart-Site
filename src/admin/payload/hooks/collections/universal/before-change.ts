@@ -1,5 +1,5 @@
-import { routingEngine } from "@/admin/lib/routing"
-import { isFrontendCollection } from "@/admin/payload/collections/frontend"
+import { routingEngine } from "@/admin/routing"
+import { isFrontendCollection } from "@/admin/config/frontend"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
 import type { CollectionBeforeChangeHook } from "payload"
 

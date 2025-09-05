@@ -1,4 +1,4 @@
-import { getMastraClient, isAIEnabled, getSiteId } from "@/admin/lib/mastra-client"
+import { getMastraClient, isAIEnabled, getSiteId } from "@/admin/ai/mastra-client"
 import { NextRequest } from "next/server"
 
 export const runtime = "edge"

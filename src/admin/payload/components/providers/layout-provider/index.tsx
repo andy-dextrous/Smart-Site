@@ -15,7 +15,7 @@ import { Sparkles } from "lucide-react"
 
 export function AILayoutProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const { toggleChat, isChatOpen } = useAIContext()
+  const { toggleChat, isChatOpen, isEnabled } = useAIContext()
 
   const isLogin = pathname === "/admin/login"
 
@@ -26,10 +26,11 @@ export function AILayoutProvider({ children }: { children: React.ReactNode }) {
         <AppSidebar />
         <main className="bg-admin-900 h-full flex-1 overflow-y-auto">{children}</main>
       </div>
-      <ChatPanel />
+      {/* Only render chat panel if AI is enabled */}
+      {isEnabled && <ChatPanel />}
       
-      {/* Floating Chat Toggle Button */}
-      {!isChatOpen && (
+      {/* Only show chat button if AI is enabled and chat is closed */}
+      {isEnabled && !isChatOpen && (
         <Button
           variant="secondary"
           size="icon-round-lg"

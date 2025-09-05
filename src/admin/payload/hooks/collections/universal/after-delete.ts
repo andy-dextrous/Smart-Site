@@ -1,7 +1,7 @@
-import { revalidateDocument } from "@/admin/lib/cache/revalidation"
-import { deleteURI } from "@/admin/lib/routing/index-manager"
-import { cleanupAutomaticRedirect } from "@/admin/lib/redirects/auto-redirects"
-import { isFrontendCollection } from "@/admin/payload/collections/frontend"
+import { revalidateDocument } from "@/admin/cache/revalidation"
+import { deleteURI } from "@/admin/routing/index-manager"
+import { cleanupAutomaticRedirect } from "@/admin/redirects/auto-redirects"
+import { isFrontendCollection } from "@/admin/config/frontend"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
 import type { CollectionAfterDeleteHook } from "payload"
 

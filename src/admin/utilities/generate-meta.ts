@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import type { Media, Config } from "@/admin/payload/payload-types"
-import { getFrontendCollections } from "@/admin/payload/collections/frontend"
+import { getFrontendCollections } from "@/admin/config/frontend"
 import { mergeOpenGraph } from "./merge-og"
 import { getServerSideURL } from "./get-url"
-import { getSettings } from "@/admin/lib/data/globals"
+import { getSettings } from "@/admin/data/globals"
 import { isExternalUrl } from "./url-helpers"
 
 /*************************************************************************/

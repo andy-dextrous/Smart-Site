@@ -1,6 +1,7 @@
 import { CollectionConfig } from "payload"
 import { anyone } from "@/admin/payload/access/anyone"
 import { canEditContent } from "@/admin/payload/access/editor"
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 export const Testimonials: CollectionConfig = {
   slug: "testimonials",
@@ -18,6 +19,12 @@ export const Testimonials: CollectionConfig = {
     useAsTitle: "name",
     description:
       "Client testimonials displayed on the website. Each testimonial includes a quote, client information, and company logo.",
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "md/MdReviews"
+      }
+    } as CollectionCustomMetadata,
   },
   fields: [
     {

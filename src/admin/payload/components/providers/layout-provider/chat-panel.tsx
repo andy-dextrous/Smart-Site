@@ -15,9 +15,6 @@ import type { FC } from "react"
 import type { TextContentPartComponent } from "@assistant-ui/react"
 import { useState, useEffect, useCallback } from "react"
 import { ResizableBox } from "react-resizable"
-// import { TestFrontendTool } from "@/admin/components/ai/tools/test-frontend-tool"
-import { TestBackendToolUI, TestFrontendToolUI } from "@/admin/components/ai/tool-uis"
-import { TestFrontendTool } from "@/admin/components/ai/tools/test-frontend-tool"
 import {
   ArrowDownIcon,
   CheckIcon,
@@ -90,13 +87,6 @@ export function ChatPanel() {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      {/* Client-side tools */}
-      <TestFrontendTool />
-
-      {/* Tool UI components */}
-      <TestBackendToolUI />
-      <TestFrontendToolUI />
-
       <div className="fixed inset-0 z-50 flex justify-end">
         {/* Overlay */}
         <div

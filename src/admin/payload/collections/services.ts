@@ -5,7 +5,8 @@ import { authenticated } from "@/admin/payload/access/authenticated"
 import { authenticatedOrPublished } from "@/admin/payload/access/authenticatedOrPublished"
 import { createApplyDefaultTemplateHook } from "@/admin/payload/hooks/collections/pages/apply-default-template"
 import { populatePublishedAt } from "@/admin/payload/hooks/populate-published-at"
-import { enableFrontend } from "@/admin/payload/collections/frontend"
+// Frontend wrapper is now applied dynamically via resolver
+import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const applyDefaultTemplate = createApplyDefaultTemplateHook("services")
 
@@ -28,6 +29,12 @@ const servicesConfig: CollectionConfig = {
       "Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.",
     hideAPIURL: process.env.NODE_ENV === "production",
     useAsTitle: "title",
+    custom: {
+      icon: {
+        type: "react-icons",
+        name: "md/MdBusinessCenter",
+      },
+    } as CollectionCustomMetadata,
   },
   fields: [
     {
@@ -103,7 +110,5 @@ const servicesConfig: CollectionConfig = {
   },
 }
 
-export const Services: CollectionConfig = enableFrontend(servicesConfig, {
-  label: "Service Offerings",
-  seoSchemaType: "Service",
-})
+// Frontend wrapper is now applied dynamically via resolver based on config
+export const Services: CollectionConfig = servicesConfig

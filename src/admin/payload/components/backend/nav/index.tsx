@@ -2,7 +2,7 @@ import { EntityToGroup, EntityType, groupNavItems } from "@payloadcms/ui/shared"
 import { ServerProps } from "payload"
 import { FC } from "react"
 
-import { getUnreadFormSubmissionsCount } from "@/admin/lib/data/form-submissions"
+import { getUnreadFormSubmissionsCount } from "@/admin/data/form-submissions"
 import { getNavPrefs } from "./getNavPrefs"
 import { NavClient } from "./nav-client"
 import { NavWrapper } from "./nav-wrapper"

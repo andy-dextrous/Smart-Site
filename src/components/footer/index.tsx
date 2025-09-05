@@ -1,5 +1,5 @@
 import LogoPrimaryLight from "@/components/logos/logo-light"
-import { getGlobal, getSettings } from "@/admin/lib/data/globals"
+import { getGlobal, getSettings } from "@/admin/data/globals"
 import { CMSLink } from "@/components/fields/link"
 import { SocialLinks } from "@/components/fields/social-links"
 import type { Footer as FooterType, Setting } from "@/admin/payload/payload-types"
@@ -160,8 +160,8 @@ export async function Footer() {
           {/* Center - Copyright */}
           <div className="text-center">
             <p className="text-sm text-white/60">
-              © {new Date().getFullYear()} {settings?.general?.siteName || "smart-site.info"}{" "}
-              | All Rights Reserved
+              © {new Date().getFullYear()}{" "}
+              {settings?.general?.siteName || "smart-site.info"} | All Rights Reserved
             </p>
           </div>
 

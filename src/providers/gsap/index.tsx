@@ -1,26 +1,14 @@
 "use client"
 
 import canUseDOM from "@/admin/utilities/can-use-dom"
-
+import { getSmartSiteConfig } from "@/admin/config"
 import { useGSAP } from "@gsap/react"
 import { gsap } from "gsap"
-
-import { CustomBounce } from "gsap/CustomBounce"
-import { CustomEase } from "gsap/CustomEase"
-
-import { DrawSVGPlugin } from "gsap/DrawSVGPlugin"
-import { Flip } from "gsap/Flip"
-import { GSDevTools } from "gsap/GSDevTools"
-import { MorphSVGPlugin } from "gsap/MorphSVGPlugin"
-import { MotionPathPlugin } from "gsap/MotionPathPlugin"
-import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 import { ScrollSmoother } from "gsap/ScrollSmoother"
-import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { SplitText } from "gsap/SplitText"
-import { TextPlugin } from "gsap/TextPlugin"
 import { usePathname } from "next/navigation"
 import { createContext, useContext, useEffect, useState } from "react"
+import { initializeGSAP } from "@/providers/gsap/gsap-loader"
 
 // Import effects to register them
 import "./effects"
@@ -29,27 +17,8 @@ import "./effects"
  * Setup GSAP Plugins and Defaults
  ****************************************************/
 
-if (canUseDOM && process.env.NEXT_PUBLIC_GSAP === "true") {
-  gsap.registerPlugin(
-    useGSAP,
-    DrawSVGPlugin,
-    Flip,
-    MotionPathPlugin,
-    MorphSVGPlugin,
-    ScrambleTextPlugin,
-    ScrollTrigger,
-    ScrollSmoother,
-    ScrollToPlugin,
-    SplitText,
-    TextPlugin,
-    CustomEase,
-    CustomBounce,
-    GSDevTools
-  )
-  gsap.defaults({
-    ease: "power2.inOut",
-    duration: 0.3,
-  })
+if (canUseDOM) {
+  initializeGSAP()
 }
 
 /****************************************************
@@ -90,10 +59,8 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
 
   useGSAP(
     () => {
-      if (
-        process.env.NEXT_PUBLIC_SMOOTH_SCROLL === "true" &&
-        !omittedPaths.includes(pathname)
-      ) {
+      const config = getSmartSiteConfig()
+      if (config.gsap.scrollSmoother && !omittedPaths.includes(pathname)) {
         const smoother = ScrollSmoother.create({
           smooth: 1.8,
           effects: true,
@@ -132,7 +99,8 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
     }
   )
 
-  return process.env.NEXT_PUBLIC_SMOOTH_SCROLL === "true" ? (
+  const config = getSmartSiteConfig()
+  return config.gsap.scrollSmoother ? (
     <GSAPContext.Provider value={{ smootherInstance, scrollToTop }}>
       {children}
     </GSAPContext.Provider>
