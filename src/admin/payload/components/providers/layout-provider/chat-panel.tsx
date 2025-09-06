@@ -345,7 +345,7 @@ const UserMessage: FC = () => {
     <MessagePrimitive.Root className="mb-4 grid grid-cols-[minmax(72px,1fr)_auto] gap-2 [&>*]:col-start-2">
       <UserMessageAttachments />
       <div className="bg-admin-accent text-admin-0 rounded-[20px_20px_4px_20px] px-4 py-3 text-lg leading-snug break-words">
-        <MessagePrimitive.Parts components={{ Text: MarkdownText }} />
+        <MessagePrimitive.Content components={{ Text: MarkdownText }} />
       </div>
       <BranchPicker className="text-admin-600 dark:text-admin-400 col-start-1 -mr-1 inline-flex items-center justify-end gap-1 text-xs" />
     </MessagePrimitive.Root>
@@ -383,7 +383,7 @@ const AssistantMessage: FC = () => {
         </div>
         <div className="flex-1">
           <div className="text-admin-900 dark:text-admin-100 text-lg leading-relaxed break-words">
-            <MessagePrimitive.Parts components={{ Text: MarkdownText }} />
+            <MessagePrimitive.Content components={{ Text: MarkdownText }} />
           </div>
           <div className="mt-2 flex items-center gap-2">
             <AssistantActionBar />
