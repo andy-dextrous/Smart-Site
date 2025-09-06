@@ -459,15 +459,15 @@ apps/smart-site/
 
 ## 🔒 Admin Layer System
 
-The `src/admin/` directory contains the **protected core system** that powers Smart Site. This layer is:
+The `src/admin/` directory contains the **core system** that powers Smart Site. In the master development environment, this layer is actively developed and maintained.
 
 ### Key Characteristics
 
-- **⚠️ Never modify directly** - Changes are lost during updates
-- **🔄 Automatically updated** - Entire folder replaced during updates
-- **🎯 Configuration-driven** - Customize via `smartsite.config.ts`
-- **🏗 Complete backend** - Contains all CMS, routing, and caching logic
+- **🚀 Active development** - New features are built here in master
 - **📦 Self-contained manifest** - Has its own package.json for dependency management
+- **🔄 Source of updates** - Changes here flow to starter and client sites
+- **🎯 Configuration-driven** - Provides config system for customization
+- **🏗 Complete backend** - Contains all CMS, routing, and caching logic
 
 ### What's Inside Admin
 
@@ -480,6 +480,7 @@ The `src/admin/` directory contains the **protected core system** that powers Sm
 | `data/` | Data access layer | Posts, drafts, user management |
 | `ai/` | AI integration | Mastra client configuration |
 | `utilities/` | Helper functions | SEO, formatting, validation |
+| `package.json` | Dependency manifest | Version tracking, shared dependencies |
 
 ### Admin Package.json Manifest
 
@@ -507,7 +508,7 @@ The admin layer includes its own `package.json` at `src/admin/package.json` whic
 ```
 
 **Key Features:**
-- **Version tracking** - Identifies admin layer version
+- **Version tracking** - Identifies admin layer version for releases
 - **Shared dependencies** - Packages needed by both admin and frontend
 - **Peer dependencies** - Framework version requirements
 - **Auto-sync** - CLI automatically syncs dependencies during updates
@@ -515,20 +516,54 @@ The admin layer includes its own `package.json` at `src/admin/package.json` whic
 **How It Works:**
 1. Admin declares its package requirements in `sharedDependencies`
 2. During updates, the CLI reads this manifest
-3. Required packages are automatically added to your main `package.json`
+3. Required packages are automatically added to client's main `package.json`
 4. Framework compatibility is checked via `peerDependencies`
-5. You run `pnpm install` once to get all new packages
+5. Client runs `pnpm install` once to get all new packages
 
-This ensures your site always has the packages the admin layer needs without manual dependency management.
+This ensures client sites always have the packages the admin layer needs without manual dependency management.
 
-### How Updates Work
+### ⚠️ IMPORTANT: Updating Admin Package.json
 
-1. **Download** - Latest admin layer from GitHub
-2. **Check compatibility** - Verify framework versions via admin package.json
-3. **Replace** - Entire `src/admin/` folder replaced
-4. **Sync dependencies** - Add required packages from admin manifest
-5. **Preserve** - Your `smartsite.config.ts` untouched
-6. **Merge** - Config merged with new admin features
+**When making changes to the admin layer, you MUST update `src/admin/package.json`:**
+
+```bash
+# Before making admin changes:
+1. Edit src/admin/package.json
+2. Increment version (e.g., 1.1.1 → 1.1.2)
+3. Update releaseDate
+4. Add any new packages to sharedDependencies
+5. Make your admin changes
+6. Run: pnpm sync:to-starter
+```
+
+Example:
+```json
+{
+  "version": "1.1.2",  // ← ALWAYS INCREMENT THIS
+  "releaseDate": "2025-01-05",  // ← UPDATE DATE
+  "sharedDependencies": {
+    // Add any new packages the admin needs:
+    "@new-package": "^1.0.0"
+  }
+}
+```
+
+**This is CRITICAL because:**
+- The version identifies each admin release
+- The CLI uses this for compatibility checks
+- sharedDependencies ensures client sites get required packages
+- GitHub workflows read the version for releases
+
+### How Updates Flow to Client Sites
+
+1. **Development** - New features built in this master environment
+2. **Version bump** - Update version in `src/admin/package.json`
+3. **Test** - Features tested with demo data
+4. **Sync** - Admin folder synced to smart-site-starter: `pnpm sync:to-starter`
+5. **Release** - Tagged release created with version from admin package.json
+6. **Update** - Client sites pull updates via SmartSite CLI
+7. **Dependencies** - CLI auto-syncs required packages from manifest
+8. **Install** - Clients run `pnpm install` to get new packages
 
 ## 🤖 AI Integration
 

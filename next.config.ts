@@ -1,11 +1,23 @@
 import { withPayload } from "@payloadcms/next/withPayload"
-
+import path from "path"
+import { fileURLToPath } from "url"
 import redirects from "./redirects.js"
 import { NextConfig } from "next"
 
 const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
 
+// Get monorepo root dynamically
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const monorepoRoot = path.resolve(__dirname, "../..")
+
 const nextConfig = {
+  productionBrowserSourceMaps: false,
+  experimental: {
+    serverSourceMaps: false,
+    webpackBuildWorker: true,
+    webpackMemoryOptimizations: true,
+  },
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_URL].map(item => {
@@ -36,8 +48,9 @@ const nextConfig = {
   sassOptions: {
     silenceDeprecations: ["import", "global-builtin", "legacy-js-api"],
   },
+  outputFileTracingRoot: monorepoRoot,
   turbopack: {
-    root: "/Users/Scriviante/Local Web Development/ai-product-studio",
+    root: monorepoRoot,
     resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
     rules: {
       "*.svg": {
@@ -55,7 +68,7 @@ const nextConfig = {
 
     return config
   },
-  serverExternalPackages: ["@mastra/*"],
+  serverExternalPackages: ["@mastra/*", "sharp"],
 } as NextConfig
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

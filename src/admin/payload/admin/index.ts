@@ -102,9 +102,6 @@ const admin = {
       },
     ],
   },
-  avatar: {
-    Component: "@/admin/payload/components/backend/avatar#Avatar",
-  },
 }
 
 export default admin

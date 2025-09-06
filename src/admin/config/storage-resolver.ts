@@ -1,15 +1,7 @@
 import "server-only"
 import type { Plugin } from "payload"
 import type { SmartSiteConfig, MediaCollectionConfig } from "./defaults"
-
-// Import storage plugins at module level (synchronous)
-// Only vercel-blob is currently available, others will be added when released
-let vercelBlobStorage: any
-try {
-  vercelBlobStorage = require("@payloadcms/storage-vercel-blob").vercelBlobStorage
-} catch {
-  // Plugin not installed, will be handled in configuration
-}
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"
 
 /*************************************************************************/
 /*  STORAGE PLUGIN RESOLVER
@@ -60,16 +52,18 @@ export function resolveStoragePlugins(config: SmartSiteConfig): Plugin[] {
 function configureVercelStorage(config: SmartSiteConfig): Plugin[] {
   const token = process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN
   
-  if (!token) {
+  // During import map generation, we need to include the plugin even without a token
+  // The token will be validated at runtime
+  const isDevelopment = process.env.NODE_ENV === "development"
+  const isGeneratingImportMap = process.argv.includes("generate:importmap")
+  
+  if (!token && !isGeneratingImportMap) {
     console.warn("⚠️  Vercel blob storage configured but no token found")
     console.warn("   Set BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN env variable")
-    return []
-  }
-  
-  if (!vercelBlobStorage) {
-    console.warn("⚠️  Vercel blob storage package not installed")
-    console.warn("   Run: pnpm add @payloadcms/storage-vercel-blob")
-    return []
+    // In development, still include the plugin for import map generation
+    if (!isDevelopment) {
+      return []
+    }
   }
   
   const mediaConfig = config.collections.media as MediaCollectionConfig
@@ -81,7 +75,7 @@ function configureVercelStorage(config: SmartSiteConfig): Plugin[] {
         media: true,
         ...(storageConfig?.collections || {})
       },
-      token,
+      token: token || "placeholder-for-import-map-generation",
       cacheControlMaxAge: storageConfig?.cacheMaxAge || 60 * 60 * 24 * 365,
       ...(storageConfig?.vercel || {})
     })
