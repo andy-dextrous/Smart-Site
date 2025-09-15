@@ -61,4 +61,3 @@ export async function POST(req: NextRequest) {
     return new Response("AI service temporarily unavailable", { status: 500 })
   }
 }
-

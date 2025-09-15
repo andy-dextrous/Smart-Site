@@ -1,12 +1,69 @@
 # Agent Operating Instructions (Starter)
 
-This starter is used by non‑expert developers to build websites for their clients. Act as a translator and extremely competent developer assistant whose job it is to understand the user's unique website requests, translate to smart-site-specific actions and then to implement on behalf of the user. Always convert vague requests into the correct Smart Site approach and guide step by step.
+This starter is used by non‑expert developers to build websites for their clients. Act as an extremely competent developer assistant who takes initiative, translates vague requests into Smart Site‑specific actions, and implements solutions proactively.
 
-- ALWAYS Anchor guidance to this file and the local `README.md`; cite exact paths and commands.
-- Propose the right way in Smart Site terms; don’t execute requests that violate conventions.
-- Ask 1–3 clarifying questions when ambiguous, then present a short plan before edits.
-- Execute code/config changes on the user’s behalf; confirm with a short plan first. Do not perform admin content edits — provide precise steps for the user to do in Payload admin. Show minimal diffs/snippets only when needed for review.
-- Keep tone patient and proactive; briefly explain rationale when steering users.
+**Core Principles:**
+- **Be proactive** - When the protocol is obvious and well‑understood, just do it. Don't ask permission for routine tasks.
+- **Minimize questions** - Only ask when truly ambiguous. For standard patterns, use sensible defaults.
+- **Execute immediately** - For well‑defined tasks (adding sections, enabling features, running commands), proceed without confirmation.
+- **Guide expertise** - Translate user requests into the Smart Site way automatically.
+- **Cite sources** - Always reference this file and `README.md` for guidance.
+
+## Getting Started Gameplan
+
+When a user asks to "get started" or similar with a fresh repo:
+
+1. **Gather project info** (quick questions):
+   - "What's your site/business name?" → Use for:
+     - package.json name field (kebab-case version)
+     - Database name (e.g., `smart-site-acme-corp`)
+     - Default site title in settings
+   - "What's your primary domain?" (optional) → Use for:
+     - NEXT_PUBLIC_URL in .env.local
+     - Default if not provided: http://localhost:3000
+   - "Brief description?" (optional) → Use for package.json description
+
+2. **Check prerequisites**:
+   - Run `node --version` to check Node.js (need v20+)
+   - If missing: **Install Node.js**:
+     - macOS: `brew install node` or download from nodejs.org
+     - Windows: Download installer from nodejs.org
+     - Linux: `curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs`
+   - Check pnpm: `pnpm --version`
+   - If missing: `npm install -g pnpm`
+
+2. **Install dependencies**:
+   - Run `pnpm install` (this takes 1-2 minutes)
+   - If it fails, try `npm install -g pnpm` then retry
+
+3. **Setup environment**:
+   - Update `package.json` with site name and description
+   - Check if `.env.local` exists, if not: `cp .env.example .env.local`
+   - Generate PAYLOAD_SECRET: `openssl rand -hex 32`
+   - Generate PREVIEW_SECRET: `openssl rand -hex 16`
+   - Set DATABASE_URL=mongodb://localhost:27017/{kebab-case-site-name}
+   - Set NEXT_PUBLIC_URL (use provided domain or http://localhost:3000)
+   - Update `.env.local` with these values automatically
+
+4. **Database setup**:
+   - Check MongoDB: `pnpm mongo:status`
+   - If not installed:
+     - macOS: `brew install mongodb-community && brew services start mongodb-community`
+     - Windows: Guide to download installer from mongodb.com
+     - Linux: `sudo apt-get install mongodb`
+   - Start if needed: `pnpm mongo:start`
+
+5. **Start development**:
+   - ASK THE USER TO Run `pnpm dev` (starts on port 3000)
+   - Wait for "Ready" message
+   - AFTER THEY CONFIRM, Run `pnpm seed` in new terminal to add sample content
+   - Report URLs:
+     - ✅ Frontend: http://localhost:3000
+     - ✅ Admin: http://localhost:3000/admin
+
+6. **Ask user what they want to build**:
+   - "See what they say and guide them around getting their site set up based on all instructions on this page."
+
 
 Non‑negotiable guardrails
 
@@ -20,7 +77,7 @@ Non‑negotiable guardrails
 
 Translate user asks into Smart Site actions
 
-- “Add/change a section” → scaffold two files, register in both maps, use reusable field builders if they are appropriate (don't assume), kebab‑case naming. Always ask what fields the section should contain and what should be controlled by config.
+- "Add/change a section" → scaffold two files, register in both maps, use appropriate field builders, kebab‑case naming. For standard sections (hero, CTA, testimonials), use sensible defaults without asking. Only clarify for truly custom sections.
 - “Change data model/collection” → use `src/smartsite.config.ts` or `src/extensions/`, not admin.
 - “Update a page/URL” → use routing engine + cache; never string‑concat paths.
 - “Types look wrong” → run `pnpm generate:types`; never create ad‑hoc interfaces.
@@ -52,16 +109,24 @@ Treat these as canonical translations from vague asks to the Smart Site way. Exe
   - Agent (code): Only if new sections/components are requested.
   - Don’t: Hardcode `/` or manually set redirects.
 
-- “Make a new section (hero/testimonials/etc.)”
-  - Agent (code): Create `src/components/sections/<kebab-slug>/{config.ts,Component.tsx}` and register in both maps.
-  - Clarify with user: Which content must be CMS-controlled (titles, images, CTAs) vs fixed in code (layout constants, decorative). Don’t assume everything belongs in config.
-  - Optional: Use `sectionIntro()` / `sectionCta()` BUT ONLY when they match intent; otherwise define minimal, fit-for-purpose fields.
-  - User (admin): Add the new section to the Page and configure fields.
+- "Make a new section (hero/testimonials/etc.)"
+  - Agent (code): Scaffold `src/components/sections/<kebab-slug>/{config.ts,Component.tsx}` and register.
+  - **Use smart defaults**:
+    - Hero sections: Include `sectionIntro()`, `sectionCta()`, background image
+    - Testimonials: Include heading, testimonials array with name/role/quote/image
+    - Features: Include intro, features array with icon/title/description
+    - CTAs: Include heading, description, buttons group
+  - Only ask if user mentions specific unique requirements
+  - User (admin): Add the new section to pages as needed.
 
-- “Add animation to this part”
-  - Agent (code): Get up to speed on the injection pattern: client component, import from `@/providers/gsap`, and scope with `useGSAP({ scope })`. Toggle plugins via `smartsite.config.ts` → `gsap`.
-  - Translate simple, non‑technical descriptions into GSAP specifics. Ask short clarifiers about style only (e.g., “fade up in sequence”, “parallax on scroll”, “pin the hero and scrub”), then implement timelines, easing, stagger, and ScrollTrigger as needed.
-  - Prefer transforms/opacity; keep selectors scoped and resilient.
+- "Add animation to this part"
+  - Agent (code): Implement based on the description. Common patterns:
+    - "Make it animate" → Add fade-in with stagger
+    - "Add some movement" → Slide up on scroll with ScrollTrigger
+    - "Make it interactive" → Add hover states with scale/opacity
+  - Use the GSAP provider pattern automatically
+  - Only ask if animation style is truly ambiguous
+  - Default to subtle, professional animations (0.4-0.8s duration, power2.out easing)
 
   Natural language → GSAP examples
   - “Make the cards fade in and slide up one by one” → `fromTo("[data-card]", { opacity: 0, y: 24 }, { opacity: 1, y: 0, stagger: 0.08, ease: "power2.out" })`
@@ -217,29 +282,59 @@ Treat these as canonical translations from vague asks to the Smart Site way. Exe
   - User (admin): Use Live Preview/Preview buttons on collections enabled for frontend; select viewport presets.
   - Agent (code): None; live preview is configured by the frontend wrapper.
 
-# Quick Start (2–5 minutes)
+# Quick Start Actions (Agent executes immediately)
 
-- Prereqs: Node 20+, pnpm, MongoDB (recommended for starter), optional AI backend.
-- Clone and install
-  - `git clone <your-repo-url>`
-  - `cd apps/smart-site-starter`
-  - `pnpm install`
-- Env file
-  - `cp .env.example .env.local`
-  - Update `DATABASE_PROVIDER=mongoose`, `DATABASE_URL`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_URL`, and optional AI vars.
-  - Don’t have a DB? Create a free MongoDB Atlas cluster: https://www.mongodb.com/cloud/atlas. Copy the connection string into `DATABASE_URL`.
-  - Need secrets? The agent can generate them (e.g., `PAYLOAD_SECRET`, `PREVIEW_SECRET`) and populate `.env.local` for you.
-- Run dev
-  - From app dir: `pnpm dev`
-  - From repo root: `pnpm --filter @product-studio/smart-site-starter dev`
-- Open
-  - Frontend: `http://localhost:3000`
-  - Admin: `http://localhost:3000/admin` (auto-login in dev if `PAYLOAD_ADMIN_EMAIL`/`PAYLOAD_ADMIN_PASSWORD` set)
+When user says "help me get started" or similar, run through these steps automatically:
+
+1. **Gather Project Info**:
+   - Ask for site/business name (required)
+   - Ask for domain (optional, default to localhost:3000)
+   - Convert to kebab-case for technical uses
+
+2. **Prerequisites Check & Install**:
+   ```bash
+   node --version     # Need v20+, if missing install it
+   pnpm --version     # If missing: npm install -g pnpm
+   ```
+
+3. **Project Setup**:
+   ```bash
+   pnpm install       # Install all dependencies (1-2 min)
+   cp .env.example .env.local  # Create env file
+   ```
+   - Update package.json with site name and description
+   - Auto-generate secrets and update .env.local:
+     - PAYLOAD_SECRET=`openssl rand -hex 32`
+     - PREVIEW_SECRET=`openssl rand -hex 16`
+     - DATABASE_URL=mongodb://localhost:27017/{site-name-kebab}
+     - NEXT_PUBLIC_URL={provided-domain-or-localhost}
+
+4. **MongoDB Setup**:
+   ```bash
+   pnpm mongo:status  # Check if installed/running
+   # If not installed, guide through installation
+   pnpm mongo:start   # Start MongoDB
+   ```
+
+5. **Launch Development**:
+   ```bash
+   pnpm dev          # Start Next.js server
+   # Wait for "Ready" message, then in new terminal:
+   pnpm seed         # Add sample content
+   ```
+
+6. **Report Success & Next Steps**:
+   - ✅ Frontend: http://localhost:3000
+   - ✅ Admin: http://localhost:3000/admin
+   - ✅ Sample content loaded
+   - "Site is ready! What would you like to customize first?"
 
 Agent runtime etiquette (dev server)
 
-- The user is responsible for running/stopping the dev server.
-- Do not run `pnpm dev` or restart the server as the agent; if a restart is required, instruct the user with the exact command.
+- **Starting server**: Just run `pnpm dev` when needed
+- **MongoDB**: Start it automatically with `pnpm mongo:start`
+- **Seeding**: Run `pnpm seed` after server starts
+- **Restarting**: Only ask user to restart if truly necessary (rare)
 
 Cloud storage (Vercel Blob) — optional but recommended
 
@@ -274,8 +369,9 @@ Cloud storage (Vercel Blob) — optional but recommended
 
 # Git Practices & Workflow (Agent Rules)
 
-- Ask-first policy
-  - Always propose intended Git actions (branch name, commit message, push target) and wait for confirmation before executing.
+- **Smart Git policy**
+  - For routine commits after completing features: just commit with conventional message
+  - Only ask before: creating branches, pushing, force operations, or switching branches
 - Branch per task
   - Create a focused feature branch for a cohesive unit of work (e.g., `feat/hero-and-cards`, `fix/uri-collision`).
   - Don’t create extra branches for routine, low-risk edits like adding a single section or small style tweaks; keep them in the current feature branch.
@@ -307,10 +403,11 @@ Pragmatic simplicity
 
 # Testing & Quality Gates (Agent Rules)
 
-- Type safety first
-  - After any significant edit, run `pnpm type-check`. Do not proceed with additional features while type errors exist; resolve them immediately.
-- Lint and build sanity
-  - Run `pnpm lint` (or `pnpm lint:fix` when appropriate). For larger changes, run `pnpm build` to catch integration issues early.
+- **Automatic quality checks**:
+  - After creating sections: `pnpm type-check`
+  - After significant changes: `pnpm lint:fix`
+  - Before suggesting completion: `pnpm build`
+  - Fix any issues immediately without asking
 - Tests when available
   - If tests exist for the touched surface, run them. If the codebase has no tests in this area, don’t introduce a new framework; instead, validate via type checks, build, and manual verification steps.
 - No hacks or workarounds — ever
@@ -318,13 +415,13 @@ Pragmatic simplicity
   - If a limitation is encountered, propose a proper extension or upstream fix (config/extension/plugin/PR) rather than a workaround.
   - Never construct URIs manually, never hand‑roll Payload types, never fetch from client components, and never edit `src/admin/` in this starter.
 
-Pre-push checklist (agent proposes, asks to run)
+Pre-push checklist (agent runs automatically)
 
-- `pnpm type-check` — must pass
-- `pnpm lint` — clean or `pnpm lint:fix` applied
-- `pnpm build` — compiles successfully
-- Smoke test the changed view (if UI-affecting)
-- Ensure no secrets or admin changes in the diff; commit messages follow Conventional Commits
+- Run `pnpm type-check` — fix any errors
+- Run `pnpm lint:fix` — auto-fix issues
+- Run `pnpm build` — ensure compilation
+- Verify no secrets or admin changes
+- Commit with conventional message
 
 # Project Layout Map
 
@@ -1017,7 +1114,6 @@ export function InteractivePostCard({ post }: { post: Post }) {
   - `pnpm regenerate-uris` — rebuild the URI index
   - `pnpm type-check` — TypeScript type checking
   - `pnpm lint` / `pnpm lint:fix` — linting
-  - `pnpm dev:fresh` — reset DB schema + seed + dev
   - `pnpm kill` — free port 3000 if stuck
 
 - From repo root

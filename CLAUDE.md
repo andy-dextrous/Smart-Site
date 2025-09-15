@@ -1,23 +1,15 @@
-# Smart Site Starter - Client Site Template
+# Smart Site System Architecture
 
-⚠️ **CRITICAL: This is a CLIENT SITE TEMPLATE - Admin folder is OFF-LIMITS** ⚠️
+**Enterprise Website Builder - Master Development Environment**
 
-**DO NOT MODIFY `/src/admin/` DIRECTORY UNDER ANY CIRCUMSTANCES**
-
-A field-driven, section-first website building system built on Next.js 15, Payload CMS 3, Tailwind CSS v4, and GSAP. This template provides a complete CMS with O(1) URI resolution, intelligent caching, and AI integration.
+A field-driven, section-first website building system built on Next.js 15, Payload CMS 3, Tailwind CSS v4, and GSAP. This system provides a complete CMS with O(1) URI resolution, intelligent caching, and AI integration. This is the master development environment where all new features and core functionality are built.
 
 ## System Identification
 
-**Type**: Client Site Template
-**Location**: `apps/smart-site-starter/`
-**Purpose**: Clean starting point for client websites
-**STRICT RULE**: `/src/admin/` directory is PROTECTED - updates will completely replace it
-
-📖 **IMPORTANT**: Read the README.md file in this directory to understand:
-- How the SmartSite configuration system works
-- Available configuration options
-- How to properly customize without touching admin
-- The three-tier architecture (master → starter → client)
+**Type**: Master Development System
+**Location**: `apps/smart-site/`
+**Purpose**: Core development and innovation for Smart Site platform
+**Environment**: Full demo data and all sections for realistic testing
 
 ## Technical Architecture
 
@@ -60,39 +52,21 @@ resolveConfiguration(config) → {
 
 ### 1. Configuration System (`smartsite.config.ts`)
 
-📖 **See README.md for detailed configuration documentation**
-
-**YOU HAVE FULL CONTROL** through configuration and extensions - NO need to touch admin!
+Controls all aspects without modifying core files:
 
 ```typescript
 const config: UserConfig = {
-  // Collections configuration - enable/disable/customize
+  // Collections configuration
   collections: {
     pages: { enabled: true, frontend: true, seo: true },
     services: { enabled: false },  // Disable unwanted
-    // Control ALL collections without touching admin
   },
   
-  // Feature flags - complete control
+  // Feature flags
   features: {
     ai: { enabled: true, endpoint: "http://localhost:4112" },
     darkMode: false,
     sitemaps: true,
-  },
-  
-  // Admin customization - theme, layout, metadata
-  admin: {
-    theme: { colors: { accent: "#4f37fb" } },
-    meta: { title: "Custom Admin Title" },
-  },
-  
-  // Image optimization settings
-  images: {
-    quality: { default: 85, hero: 90 },
-    sizes: [
-      { name: "thumbnail", width: 300 },
-      { name: "large", width: 1400 },
-    ],
   },
   
   // GSAP plugins
@@ -101,13 +75,10 @@ const config: UserConfig = {
     scrollSmoother: true,
   },
   
-  // POWERFUL EXTENSION SYSTEM - Add ANY custom functionality
+  // Extensions
   extensions: {
-    collections: [],  // Add custom collections
-    blocks: [],       // Add custom blocks
-    globals: [],      // Add custom globals
-    plugins: [],      // Add Payload plugins
-    // Extensions can override ANYTHING - full power!
+    collections: [],  // Custom collections
+    blocks: [],       // Custom blocks
   },
 }
 ```
@@ -134,73 +105,16 @@ export function HeroBannerComponent(props: HeroBannerBlock) {
 }
 ```
 
-### 3. ⚠️ CRITICAL: Admin Layer is OFF-LIMITS (`src/admin/`)
+### 3. Admin Layer Development (`src/admin/`)
 
-**ABSOLUTELY NO MODIFICATIONS ALLOWED IN `/src/admin/`**
+The core admin system where Smart Site backend is developed:
 
-The admin directory is PROTECTED and will be COMPLETELY REPLACED during updates:
+- **Core Payload configuration** and CMS setup
+- **Backend components** and dashboard UI
+- **Caching and routing** infrastructure
+- **AI integration** and chat components
 
-- **🚫 NEVER modify** ANY files in `/src/admin/` - NO EXCEPTIONS
-- **🚫 NEVER add** new files to `/src/admin/`
-- **🚫 NEVER delete** files from `/src/admin/`
-- **✅ ONLY use configuration** in `smartsite.config.ts` for ALL customizations
-- **✅ Extensions MUST go in** `/src/extensions/`
-- **✅ Frontend code MUST go in** `/src/components/`
-
-**If you need admin changes**: Submit a PR to the Wild Creative product studio repository
-
-### 4. Extension System (`src/extensions/`)
-
-**YOU CAN EXTEND AND OVERRIDE ANYTHING** - Without touching admin!
-
-The extension system gives you FULL POWER to customize:
-
-```typescript
-// src/extensions/ directory structure
-extensions/
-├── blocks/         # Custom content blocks
-├── collections/    # Custom collections (products, events, etc.)
-├── components/     # Override admin components
-├── globals/        # Custom global configurations
-└── plugins/        # Payload plugins
-
-// Register extensions in smartsite.config.ts
-extensions: {
-  collections: [
-    // Add complete custom collections
-    {
-      slug: "products",
-      fields: [...],
-      admin: { group: "Commerce" }
-    }
-  ],
-  blocks: [
-    // Add custom blocks to pages
-    MyCustomBlock,
-    VideoGalleryBlock,
-  ],
-  globals: [
-    // Add global settings
-    SocialMediaConfig,
-    IntegrationsConfig,
-  ],
-  plugins: [
-    // Add Payload plugins
-    formBuilderPlugin(),
-    seoPlugin({ /* config */ }),
-  ],
-}
-```
-
-**Extension Capabilities**:
-- ✅ Add ANY custom collections (products, events, portfolios)
-- ✅ Create custom blocks for unique content types
-- ✅ Override default behavior with plugins
-- ✅ Add custom admin UI components
-- ✅ Integrate third-party services
-- ✅ Extend without modifying core admin code
-
-### 5. URI Resolution System
+### 4. URI Resolution System
 
 O(1) constant-time URL lookups:
 
@@ -256,24 +170,22 @@ fields: [
 
 **Configuration**:
 ```typescript
-// ✅ CORRECT - Use smartsite.config.ts ONLY
+// Use smartsite.config.ts for user-facing configuration
 const config: UserConfig = {
   collections: { services: { enabled: false } },
 }
 
-// 🚫 ABSOLUTELY FORBIDDEN - Modifying admin files
-// NEVER touch ANY file in src/admin/
-// Updates will DELETE your changes
+// Modify admin files directly for core development
+// src/admin/payload/payload.config.ts for Payload setup
 ```
 
-### ⚠️ High-Risk Modifications
+### Development Best Practices
 
-**Never modify these**:
+**Key areas to understand**:
 
-- **`src/admin/`** - Entire directory is replaced on updates
 - **Generated types** - Let Payload generate `payload-types.ts`
 - **URI Index** - Managed automatically by hooks
-- **Cache keys** - Breaking cache invalidation patterns
+- **Cache keys** - Maintain cache invalidation patterns
 - **Route resolution** - The `[[...uri]]` handler is optimized
 
 ## 🔧 Utility Functions Reference
@@ -359,52 +271,42 @@ import { Media } from "@/admin/payload/components/frontend/media"
    - Check for missing imports
    - Verify all sections are properly typed
 
-## 💪 Key Capabilities - You Have Full Control!
+## Development Guidelines
 
-Despite the admin restrictions, you have COMPLETE CONTROL through:
+✅ **MASTER DEVELOPMENT ENVIRONMENT** - All core Smart Site features are built here
 
-### Configuration Power (`smartsite.config.ts`)
-- **Collections**: Enable/disable any collection, control SEO, sitemaps, frontend features
-- **Features**: AI chat, dark mode, i18n, analytics, search - all configurable
-- **Admin Theme**: Colors, layout, typography, metadata - fully customizable
-- **Image Optimization**: Quality, sizes, breakpoints - all configurable
-- **GSAP Plugins**: Enable ScrollTrigger, ScrollSmoother, and more
-- **Media Storage**: Local, Vercel Blob, S3 - switch providers easily
+✅ **UPDATE ADMIN PACKAGE.JSON VERSION** - When making admin changes, ALWAYS update `src/admin/package.json` version
 
-### Extension System (`src/extensions/`)
-- **Custom Collections**: Add products, events, portfolios, anything!
-- **Custom Blocks**: Create unique content blocks
-- **Custom Globals**: Add site-wide settings
-- **Payload Plugins**: Integrate any Payload plugin
-- **Override Components**: Replace default admin components
+✅ **NEVER CREATE PAYLOAD TYPES MANUALLY** - Always use generated types from `payload-types.ts`
 
-### Field-Driven Architecture
-- **Reusable Field Patterns**: `sectionIntro()`, `sectionCta()`, `button()`, etc.
-- **Type Safety**: Automatic TypeScript generation
-- **20+ Pre-built Sections**: Hero, CTA, forms, grids, testimonials
-- **Two-file Pattern**: config.ts + Component.tsx for each section
+✅ **TEST WITH DEMO DATA** - Full demo content ensures features work in production
 
-### Development Commands
-```bash
-pnpm dev              # Start development
-pnpm seed             # Seed with demo data
-pnpm generate:types   # Generate TypeScript types
-pnpm mongo:start      # Start MongoDB
-pnpm regenerate-uris  # Regenerate URI index
-```
+✅ **SECTIONS MUST FOLLOW TWO-FILE PATTERN** - `config.ts` + `Component.tsx` in kebab-case folder
 
-## 🚫 CRITICAL CLIENT SITE RULES
+## 📦 CRITICAL: Admin Package.json Updates
 
-⚠️ **DO NOT MODIFY `/src/admin/` - IT WILL BE DELETED** - The ENTIRE admin folder is replaced on updates
+**When making ANY changes to the admin layer, you MUST:**
 
-⚠️ **USE CONFIG & EXTENSIONS** - You have FULL CONTROL through smartsite.config.ts and extensions
+1. **Update the version** in `src/admin/package.json`:
+   ```json
+   {
+     "version": "1.1.2",  // Increment this!
+     "releaseDate": "2025-01-05",  // Update date
+   }
+   ```
 
-⚠️ **NEVER CREATE PAYLOAD TYPES MANUALLY** - Always use generated types from `payload-types.ts`
+2. **Update sharedDependencies** if adding new packages:
+   ```json
+   "sharedDependencies": {
+     "@new-package": "^1.0.0",  // Add any new required packages
+   }
+   ```
 
-⚠️ **SECTIONS MUST FOLLOW TWO-FILE PATTERN** - `config.ts` + `Component.tsx` in kebab-case folder
+3. **Sync to starter** using: `pnpm sync:to-starter`
 
-⚠️ **NEED ADMIN CORE CHANGES?** - Submit a PR to github.com/andy-dextrous/ai-product-studio
+This ensures:
+- Version tracking for releases
+- Proper dependency management
+- Client sites get all required packages
 
-📖 **ALWAYS READ THE README.md** - Complete configuration reference and examples
-
-**REMEMBER**: This is a CLIENT SITE with FULL CUSTOMIZATION POWER through configuration and extensions. The admin core is protected, but you can override and extend ANYTHING without touching it.
+Remember: This is the innovation lab where all Smart Site features start. Work with real demo data to ensure features work in production scenarios.

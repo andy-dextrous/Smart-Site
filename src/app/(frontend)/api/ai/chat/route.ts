@@ -4,7 +4,7 @@ import { NextRequest } from "next/server"
 export const maxDuration = 120
 
 /*************************************************************************/
-/*  AI CHAT STREAMING ENDPOINT - COMPATIBLE WITH ASSISTANT-UI
+/*  AI CHAT STREAMING ENDPOINT 
 /*************************************************************************/
 
 export async function POST(req: NextRequest) {

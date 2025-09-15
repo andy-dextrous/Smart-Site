@@ -18,30 +18,35 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 ## ⚡ Core Features
 
 ### Field-Driven Architecture
+
 - **Reusable field patterns** - Pre-built field groups (`sectionIntro`, `sectionCta`, `button`, etc.)
 - **Type-safe components** - Automatic TypeScript generation from Payload schemas
 - **Visual field editor** - Admin UI adapts to your field configurations
 - **Smart defaults** - Sensible field defaults for rapid development
 
 ### Section-First Development
+
 - **20+ pre-built sections** - Hero, CTA, forms, grids, testimonials, and more
 - **Component isolation** - Each section is self-contained with config + component
 - **Drag-and-drop builder** - Arrange sections visually in Payload admin
 - **Responsive by default** - All sections mobile-optimized with Tailwind v4
 
 ### Enterprise Features
+
 - **O(1) URI resolution** - Instant page loading regardless of site size
 - **Smart caching** - Intelligent cache invalidation and dependency tracking
 - **SEO automation** - Meta tags, structured data, and sitemaps generated
 - **Multi-language ready** - i18n support built into the architecture
 
 ### Admin/Frontend Separation
+
 - **Protected admin layer** - Core CMS logic isolated from frontend code
 - **Safe updates** - Admin updates won't break your customizations
 - **Configuration-driven** - All customizations via `smartsite.config.ts`
 - **Clean architecture** - Clear separation of concerns
 
 ### AI-Powered Features
+
 - **Content assistant** - AI chat in admin panel for content creation
 - **SEO suggestions** - Automated SEO improvements and scoring
 - **Smart search** - AI-enhanced search functionality
@@ -112,6 +117,7 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 #### Option A: MongoDB (Recommended)
 
 **Cloud MongoDB (MongoDB Atlas)**
+
 1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 2. Create a cluster and database
 3. Get connection string from Atlas dashboard
@@ -121,9 +127,11 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 **Local MongoDB Development**
 
 **Initial Setup:**
+
 1. Install MongoDB locally:
 
    **macOS:**
+
    ```bash
    # Using Homebrew (recommended)
    brew tap mongodb/brew
@@ -132,13 +140,14 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
    ```
 
    **Windows:**
+
    ```powershell
    # Using Chocolatey (recommended)
    choco install mongodb
-   
+
    # Or using winget
    winget install MongoDB.Server
-   
+
    # Or download installer from https://www.mongodb.com/try/download/community
    # Follow the installation wizard and select "Install MongoDB as a Service"
    ```
@@ -150,15 +159,17 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 2. Install MongoDB Shell for database interaction:
 
    **macOS:**
+
    ```bash
    brew install mongodb/brew/mongodb-community-shell
    ```
 
    **Windows:**
+
    ```powershell
    # Using Chocolatey
    choco install mongodb-shell
-   
+
    # Or download from https://www.mongodb.com/try/download/shell
    ```
 
@@ -169,6 +180,7 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
    ```
 
 **Understanding Your Local MongoDB:**
+
 - **Location**: Your MongoDB data lives in `~/mongodb/data/`
 - **Status**: MongoDB runs as a background daemon (survives terminal closes/computer sleep)
 - **Port**: Default port 27017
@@ -177,6 +189,7 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 **Daily Development Workflow:**
 
 **Using project scripts (works on all platforms):**
+
 ```bash
 # 1. Check if MongoDB is running
 pnpm mongo:status
@@ -191,6 +204,7 @@ pnpm mongo:stop
 **Direct shell commands:**
 
 **macOS/Linux:**
+
 ```bash
 # 4. View databases via shell
 mongo --eval "db.adminCommand('listDatabases')"
@@ -200,6 +214,7 @@ mongo smart-site-dev --eval "db.getCollectionNames()"
 ```
 
 **Windows:**
+
 ```powershell
 # 4. View databases via shell
 mongo --eval "db.adminCommand('listDatabases')"
@@ -215,11 +230,13 @@ net stop MongoDB
 ```
 
 **GUI Access (Recommended):**
+
 - **MongoDB Compass**: Download from https://www.mongodb.com/products/compass
 - **Connection**: `mongodb://localhost:27017`
 - **Benefits**: Visual database browser, query builder, real-time monitoring
 
 **Multiple Project Setup:**
+
 ```bash
 # Each project uses different database name:
 # Project 1: DATABASE_URL=mongodb://localhost:27017/smart-site-dev
@@ -230,6 +247,7 @@ net stop MongoDB
 **Create new database for second project (all platforms):**
 
 **Interactive shell:**
+
 ```bash
 mongo
 > use smart-site-client2
@@ -238,16 +256,19 @@ mongo
 ```
 
 **One-liner (macOS/Linux):**
+
 ```bash
 mongo smart-site-client2 --eval 'db.setup.insertOne({project: "client2", created: new Date()})'
 ```
 
 **One-liner (Windows):**
+
 ```powershell
 mongo smart-site-client2 --eval "db.setup.insertOne({project: 'client2', created: new Date()})"
 ```
 
 **Important Notes:**
+
 - MongoDB creates databases lazily (only after inserting data)
 - GUI clients like Compass **cannot** start MongoDB - server must be running first
 - MongoDB shell connection fails if server is stopped - always check `pnpm mongo:status` first
@@ -346,6 +367,7 @@ pnpm mongo:status     # Check MongoDB status
 ### Design Philosophy
 
 Smart Site follows a **field-driven, section-first architecture** where:
+
 - **Fields drive everything** - CMS fields automatically generate admin UI and component props
 - **Sections are self-contained** - Each section has its own config and component
 - **Admin layer is protected** - Core CMS logic is isolated from frontend customizations
@@ -353,16 +375,16 @@ Smart Site follows a **field-driven, section-first architecture** where:
 
 ### Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
+| Layer         | Technology            | Purpose                                |
+| ------------- | --------------------- | -------------------------------------- |
 | **Framework** | Next.js 15 App Router | React framework with server components |
-| **CMS** | Payload CMS 3 | Headless CMS with visual editor |
-| **Styling** | Tailwind CSS v4 | Utility-first CSS with design tokens |
-| **Animation** | GSAP + ScrollTrigger | Professional animations |
-| **AI** | Mastra Framework | Remote AI backend integration |
-| **Database** | MongoDB/PostgreSQL | Content storage |
-| **Storage** | Vercel Blob/S3 | Media file storage |
-| **Language** | TypeScript | Type safety throughout |
+| **CMS**       | Payload CMS 3         | Headless CMS with visual editor        |
+| **Styling**   | Tailwind CSS v4       | Utility-first CSS with design tokens   |
+| **Animation** | GSAP + ScrollTrigger  | Professional animations                |
+| **AI**        | Mastra Framework      | Remote AI backend integration          |
+| **Database**  | MongoDB/PostgreSQL    | Content storage                        |
+| **Storage**   | Vercel Blob/S3        | Media file storage                     |
+| **Language**  | TypeScript            | Type safety throughout                 |
 
 ### Directory Structure
 
@@ -450,12 +472,12 @@ apps/smart-site/
 
 ### Layer Separation
 
-| Layer | Location | Purpose | Modify? |
-|-------|----------|---------|---------|
-| **Frontend** | `src/components/`, `src/app/(frontend)/` | Public website | ✅ Yes |
-| **Admin** | `src/admin/` | CMS core system | ❌ No (use config) |
-| **Extensions** | `src/extensions/` | User customizations | ✅ Yes |
-| **Config** | `src/smartsite.config.ts` | System configuration | ✅ Yes |
+| Layer          | Location                                 | Purpose              | Modify?            |
+| -------------- | ---------------------------------------- | -------------------- | ------------------ |
+| **Frontend**   | `src/components/`, `src/app/(frontend)/` | Public website       | ✅ Yes             |
+| **Admin**      | `src/admin/`                             | CMS core system      | ❌ No (use config) |
+| **Extensions** | `src/extensions/`                        | User customizations  | ✅ Yes             |
+| **Config**     | `src/smartsite.config.ts`                | System configuration | ✅ Yes             |
 
 ## 🔒 Admin Layer System
 
@@ -471,16 +493,16 @@ The `src/admin/` directory contains the **core system** that powers Smart Site. 
 
 ### What's Inside Admin
 
-| Directory | Purpose | Key Files |
-|-----------|---------|-----------|
-| `config/` | Configuration system | `defaults.ts`, `resolver.ts`, `frontend.ts` |
-| `payload/` | Payload CMS setup | `payload.config.ts`, collections, globals |
-| `cache/` | Caching & revalidation | O(1) lookups, smart invalidation |
-| `routing/` | URI engine | Route resolution, dependency tracking |
-| `data/` | Data access layer | Posts, drafts, user management |
-| `ai/` | AI integration | Mastra client configuration |
-| `utilities/` | Helper functions | SEO, formatting, validation |
-| `package.json` | Dependency manifest | Version tracking, shared dependencies |
+| Directory      | Purpose                | Key Files                                   |
+| -------------- | ---------------------- | ------------------------------------------- |
+| `config/`      | Configuration system   | `defaults.ts`, `resolver.ts`, `frontend.ts` |
+| `payload/`     | Payload CMS setup      | `payload.config.ts`, collections, globals   |
+| `cache/`       | Caching & revalidation | O(1) lookups, smart invalidation            |
+| `routing/`     | URI engine             | Route resolution, dependency tracking       |
+| `data/`        | Data access layer      | Posts, drafts, user management              |
+| `ai/`          | AI integration         | Mastra client configuration                 |
+| `utilities/`   | Helper functions       | SEO, formatting, validation                 |
+| `package.json` | Dependency manifest    | Version tracking, shared dependencies       |
 
 ### Admin Package.json Manifest
 
@@ -492,8 +514,7 @@ The admin layer includes its own `package.json` at `src/admin/package.json` whic
   "version": "1.1.1",
   "sharedDependencies": {
     // Dependencies that admin needs in the main package.json
-    "@payloadcms/next": "latest",
-    "@assistant-ui/react": "^0.10.25",
+    "@payloadcms/next": "latest"
     // ... other required packages
   },
   "peerDependencies": {
@@ -508,12 +529,14 @@ The admin layer includes its own `package.json` at `src/admin/package.json` whic
 ```
 
 **Key Features:**
+
 - **Version tracking** - Identifies admin layer version for releases
 - **Shared dependencies** - Packages needed by both admin and frontend
 - **Peer dependencies** - Framework version requirements
 - **Auto-sync** - CLI automatically syncs dependencies during updates
 
 **How It Works:**
+
 1. Admin declares its package requirements in `sharedDependencies`
 2. During updates, the CLI reads this manifest
 3. Required packages are automatically added to client's main `package.json`
@@ -537,10 +560,11 @@ This ensures client sites always have the packages the admin layer needs without
 ```
 
 Example:
+
 ```json
 {
-  "version": "1.1.2",  // ← ALWAYS INCREMENT THIS
-  "releaseDate": "2025-01-05",  // ← UPDATE DATE
+  "version": "1.1.2", // ← ALWAYS INCREMENT THIS
+  "releaseDate": "2025-01-05", // ← UPDATE DATE
   "sharedDependencies": {
     // Add any new packages the admin needs:
     "@new-package": "^1.0.0"
@@ -549,6 +573,7 @@ Example:
 ```
 
 **This is CRITICAL because:**
+
 - The version identifies each admin release
 - The CLI uses this for compatibility checks
 - sharedDependencies ensures client sites get required packages
@@ -639,6 +664,7 @@ AI_AGENT_USER_ID=68c0ba9971ba48af9e63f160
 #### Setting Up AI Authentication
 
 1. **Run Database Seeding**:
+
 ```bash
 pnpm seed
 # OR
@@ -646,6 +672,7 @@ curl -X POST http://localhost:3000/api/seed
 ```
 
 2. **Look for API Key Output**:
+
 ```
 ═══════════════════════════════════════════════════════════════
 AI AGENT API KEY (SAVE THIS - SHOWN ONLY ONCE):
@@ -663,10 +690,10 @@ User ID: [user-id]
 // Smart Site makes authenticated requests to AI backend
 const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
   headers: {
-    'Authorization': `Bearer ${AI_AGENT_API_KEY}`,
-    'X-Site-ID': AI_AGENT_USER_ID,
-    'X-Site-URL': NEXT_PUBLIC_URL
-  }
+    Authorization: `Bearer ${AI_AGENT_API_KEY}`,
+    "X-Site-ID": AI_AGENT_USER_ID,
+    "X-Site-URL": NEXT_PUBLIC_URL,
+  },
 })
 ```
 
@@ -683,17 +710,20 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 The following endpoints will be implemented to connect Smart Site with the AI backend:
 
 #### `/api/ai-config`
+
 - Exposes block schemas and field configurations
 - Bypasses GraphQL introspection limitations
 - Returns sanitized Payload configuration
 - Cached with ETag headers
 
 #### `/api/ai/auth`
+
 - Edge function for fast API key validation
 - Returns site metadata and permissions
 - Never trusts client-provided URLs
 
 #### `/api/ai/operations`
+
 - Proxies AI operations to backend
 - Re-validates API key for security
 - Streams responses back to frontend
@@ -706,10 +736,10 @@ Sections are the **core building blocks** of Smart Site. Each section is a self-
 
 Every section consists of two required files:
 
-| File | Purpose | Location |
-|------|---------|----------|
-| `config.ts` | Payload fields definition | `sections/[name]/config.ts` |
-| `Component.tsx` | React component | `sections/[name]/Component.tsx` |
+| File            | Purpose                   | Location                        |
+| --------------- | ------------------------- | ------------------------------- |
+| `config.ts`     | Payload fields definition | `sections/[name]/config.ts`     |
+| `Component.tsx` | React component           | `sections/[name]/Component.tsx` |
 
 ### Quick Start
 
@@ -731,8 +761,8 @@ export const HeroBanner: Block = {
   slug: "hero-banner",
   interfaceName: "HeroBannerBlock",
   fields: [
-    sectionIntro(),  // Reusable field group
-    sectionCta(),     // Call-to-action fields
+    sectionIntro(), // Reusable field group
+    sectionCta(), // Call-to-action fields
     {
       name: "backgroundImage",
       type: "upload",
@@ -749,10 +779,10 @@ import { SectionIntro, SectionCta } from "@/components/layout"
 import { Media } from "@/admin/payload/components/frontend/media"
 import type { HeroBannerBlock } from "@/admin/payload/payload-types"
 
-export function HeroBannerComponent({ 
-  sectionIntro, 
-  sectionCta, 
-  backgroundImage 
+export function HeroBannerComponent({
+  sectionIntro,
+  sectionCta,
+  backgroundImage
 }: HeroBannerBlock) {
   return (
     <section className="relative min-h-screen">
@@ -781,24 +811,26 @@ export const sectionsMap = {
 
 Smart Site provides **pre-built field groups** that ensure consistency:
 
-| Field Group | Purpose | Includes |
-|-------------|---------|----------|
-| `sectionIntro()` | Section header | Heading, description, alignment |
-| `sectionCta()` | Call-to-action | Button text, link, style |
-| `button()` | Single button | Label, URL, variant |
-| `buttonsGroup()` | Multiple buttons | Array of buttons |
-| `link()` | Smart linking | Internal/external/anchor |
-| `mediaWithOptions()` | Enhanced media | Image + alt text + caption |
+| Field Group          | Purpose          | Includes                        |
+| -------------------- | ---------------- | ------------------------------- |
+| `sectionIntro()`     | Section header   | Heading, description, alignment |
+| `sectionCta()`       | Call-to-action   | Button text, link, style        |
+| `button()`           | Single button    | Label, URL, variant             |
+| `buttonsGroup()`     | Multiple buttons | Array of buttons                |
+| `link()`             | Smart linking    | Internal/external/anchor        |
+| `mediaWithOptions()` | Enhanced media   | Image + alt text + caption      |
 
 ### Section Best Practices
 
 ✅ **DO:**
+
 - Use kebab-case folder names (`hero-banner`)
 - Leverage reusable field patterns
 - Keep sections generic and reusable
 - Use architectural names (`card-grid`, `text-image`)
 
 ❌ **DON'T:**
+
 - Create page-specific sections (`about-hero`)
 - Hardcode content in components
 - Mix admin and frontend imports
@@ -836,12 +868,12 @@ Smart Site: /blog/2024/my-post → 1 query (direct index lookup)
 
 ### Caching Strategy
 
-| Cache Type | Duration | Invalidation |
-|------------|----------|--------------|
-| **Pages** | Until edited | On save |
+| Cache Type   | Duration            | Invalidation    |
+| ------------ | ------------------- | --------------- |
+| **Pages**    | Until edited        | On save         |
 | **Archives** | Until child changes | On child update |
-| **Media** | 1 year | On replacement |
-| **API** | 60 seconds | Time-based |
+| **Media**    | 1 year              | On replacement  |
+| **API**      | 60 seconds          | Time-based      |
 
 ### Static Generation
 
@@ -849,8 +881,8 @@ Smart Site: /blog/2024/my-post → 1 query (direct index lookup)
 // Next.js static params generation
 export async function generateStaticParams() {
   const uris = await cache.getAllURIs()
-  return uris.map(uri => ({ 
-    slug: uri.split("/").filter(Boolean) 
+  return uris.map(uri => ({
+    slug: uri.split("/").filter(Boolean),
   }))
 }
 ```
@@ -869,10 +901,10 @@ const config: UserConfig = {
   collections: {
     pages: { enabled: true, frontend: true },
     posts: { enabled: true, frontend: true },
-    services: { enabled: false },  // Disable unwanted
+    services: { enabled: false }, // Disable unwanted
     // ... configure each collection
   },
-  
+
   // Feature flags
   features: {
     ai: { enabled: true, endpoint: "http://localhost:4112" },
@@ -882,7 +914,7 @@ const config: UserConfig = {
     search: true,
     sitemaps: true,
   },
-  
+
   // Admin configuration
   admin: {
     theme: {
@@ -895,7 +927,7 @@ const config: UserConfig = {
       favicon: "/favicon.png",
     },
   },
-  
+
   // Image optimization
   images: {
     quality: {
@@ -915,20 +947,20 @@ const config: UserConfig = {
       xl: 1280,
     },
   },
-  
+
   // GSAP configuration
   gsap: {
     scrollTrigger: true,
     scrollSmoother: true,
     // ... other GSAP plugins
   },
-  
+
   // Extensions
   extensions: {
-    collections: [],  // Custom collections
-    blocks: [],       // Custom blocks
-    globals: [],      // Custom globals
-    plugins: [],      // Payload plugins
+    collections: [], // Custom collections
+    blocks: [], // Custom blocks
+    globals: [], // Custom globals
+    plugins: [], // Payload plugins
   },
 }
 
@@ -939,18 +971,19 @@ export default config
 
 #### Collections Configuration
 
-| Collection | Settings | Purpose |
-|------------|----------|---------|
-| `pages` | `enabled`, `frontend`, `seo`, `sitemap` | Main website pages |
-| `posts` | `enabled`, `frontend`, `seo`, `sitemap` | Blog articles |
-| `services` | `enabled`, `frontend`, `seo`, `sitemap` | Service pages |
-| `team` | `enabled`, `frontend`, `seo`, `sitemap` | Team members |
-| `categories` | `enabled`, `frontend: false` | Content categorization |
-| `testimonials` | `enabled`, `frontend: false` | Customer feedback |
-| `templates` | `enabled`, `frontend: false` | Page templates |
-| `media` | `enabled`, `provider`, `config` | File storage |
+| Collection     | Settings                                | Purpose                |
+| -------------- | --------------------------------------- | ---------------------- |
+| `pages`        | `enabled`, `frontend`, `seo`, `sitemap` | Main website pages     |
+| `posts`        | `enabled`, `frontend`, `seo`, `sitemap` | Blog articles          |
+| `services`     | `enabled`, `frontend`, `seo`, `sitemap` | Service pages          |
+| `team`         | `enabled`, `frontend`, `seo`, `sitemap` | Team members           |
+| `categories`   | `enabled`, `frontend: false`            | Content categorization |
+| `testimonials` | `enabled`, `frontend: false`            | Customer feedback      |
+| `templates`    | `enabled`, `frontend: false`            | Page templates         |
+| `media`        | `enabled`, `provider`, `config`         | File storage           |
 
 Each collection supports:
+
 - `enabled`: Turn on/off
 - `frontend`: Enable frontend features (SEO, preview)
 - `seo`: Add SEO fields
@@ -959,19 +992,20 @@ Each collection supports:
 
 #### Feature Flags
 
-| Feature | Options | Default | Purpose |
-|---------|---------|---------|---------|
-| `ai.enabled` | `boolean` | `true` | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
-| `ai.endpoint` | `string` | `localhost:4112` | AI backend URL (only used when ai.enabled is true) |
-| `darkMode` | `boolean` | `false` | Dark/light theme toggle |
-| `i18n` | `boolean` | `false` | Internationalization |
-| `analytics` | `boolean` | `true` | Analytics tracking |
-| `search` | `boolean` | `true` | Search functionality |
-| `sitemaps` | `boolean` | `true` | XML sitemap generation |
+| Feature       | Options   | Default          | Purpose                                                                         |
+| ------------- | --------- | ---------------- | ------------------------------------------------------------------------------- |
+| `ai.enabled`  | `boolean` | `true`           | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
+| `ai.endpoint` | `string`  | `localhost:4112` | AI backend URL (only used when ai.enabled is true)                              |
+| `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
+| `i18n`        | `boolean` | `false`          | Internationalization                                                            |
+| `analytics`   | `boolean` | `true`           | Analytics tracking                                                              |
+| `search`      | `boolean` | `true`           | Search functionality                                                            |
+| `sitemaps`    | `boolean` | `true`           | XML sitemap generation                                                          |
 
 **AI Configuration Details:**
 
 When `ai.enabled` is set to `false`:
+
 - No connection to the AI backend is attempted
 - Chat panel UI is completely removed from the DOM
 - Keyboard shortcuts (Cmd+L) are disabled
@@ -981,14 +1015,14 @@ When `ai.enabled` is set to `false`:
 ```typescript
 // Disable AI completely
 features: {
-  ai: { 
+  ai: {
     enabled: false  // Bypasses entire AI layer
   }
 }
 
 // Enable AI with custom backend
 features: {
-  ai: { 
+  ai: {
     enabled: true,
     endpoint: "https://your-ai-backend.vercel.app"
   }
@@ -997,14 +1031,14 @@ features: {
 
 #### GSAP Plugins
 
-| Plugin | Default | Purpose |
-|--------|---------|---------|
-| `scrollTrigger` | `true` | Scroll-based animations |
-| `scrollSmoother` | `true` | Smooth scrolling |
-| `flip` | `false` | State transitions |
-| `draggable` | `false` | Drag interactions |
-| `morphSVG` | `false` | SVG morphing |
-| `splitText` | `false` | Text animations |
+| Plugin           | Default | Purpose                 |
+| ---------------- | ------- | ----------------------- |
+| `scrollTrigger`  | `true`  | Scroll-based animations |
+| `scrollSmoother` | `true`  | Smooth scrolling        |
+| `flip`           | `false` | State transitions       |
+| `draggable`      | `false` | Drag interactions       |
+| `morphSVG`       | `false` | SVG morphing            |
+| `splitText`      | `false` | Text animations         |
 
 #### Admin Configuration
 
@@ -1030,7 +1064,7 @@ admin: {
       fontSize: "14px",
     },
   },
-  
+
   // Page metadata
   meta: {
     title: "Admin | Smart Site",        // Browser title
@@ -1052,7 +1086,7 @@ images: {
     thumbnail: 75,       // Lower for thumbnails
     hero: 90,           // Higher for hero images
   },
-  
+
   // Image size variations generated by Payload
   sizes: [
     { name: "thumbnail", width: 300 },
@@ -1063,7 +1097,7 @@ images: {
     { name: "xlarge", width: 1920 },
     { name: "og", width: 1200, height: 630, crop: "center" },
   ],
-  
+
   // Responsive breakpoints for srcSet calculation
   breakpoints: {
     "3xl": 1920,
@@ -1133,13 +1167,13 @@ breadcrumbs: {
 <Breadcrumbs breadcrumbs={document.breadcrumbs} />
 
 // Override styles (replaces config className)
-<Breadcrumbs 
+<Breadcrumbs
   breadcrumbs={document.breadcrumbs}
   className="text-lg text-gray-600"
 />
 
 // Hide home link for specific instance
-<Breadcrumbs 
+<Breadcrumbs
   breadcrumbs={document.breadcrumbs}
   showHome={false}
 />
@@ -1190,14 +1224,14 @@ media: {
 
 ### Common Tasks
 
-| Task | Command/Location | Notes |
-|------|------------------|-------|
-| **Create section** | `src/components/sections/` | config.ts + Component.tsx |
-| **Add field pattern** | `src/components/fields/` | Reusable field groups |
-| **Customize admin** | `src/smartsite.config.ts` | Never edit /admin directly |
-| **Add collection** | `extensions.collections` | In config file |
-| **Style frontend** | `app/(frontend)/css/` | Tailwind v4 styles |
-| **Add API route** | `app/(frontend)/api/` | Frontend endpoints |
+| Task                  | Command/Location           | Notes                      |
+| --------------------- | -------------------------- | -------------------------- |
+| **Create section**    | `src/components/sections/` | config.ts + Component.tsx  |
+| **Add field pattern** | `src/components/fields/`   | Reusable field groups      |
+| **Customize admin**   | `src/smartsite.config.ts`  | Never edit /admin directly |
+| **Add collection**    | `extensions.collections`   | In config file             |
+| **Style frontend**    | `app/(frontend)/css/`      | Tailwind v4 styles         |
+| **Add API route**     | `app/(frontend)/api/`      | Frontend endpoints         |
 
 ### Development Commands
 
@@ -1230,14 +1264,14 @@ Smart Site includes **AI-powered development rules** in `.cursor/rules/` that gu
 
 ### Available Rules
 
-| Rule | Purpose | Trigger |
-|------|---------|---------|
+| Rule                  | Purpose                | Trigger                 |
+| --------------------- | ---------------------- | ----------------------- |
 | `adding-new-sections` | Section creation guide | Working in `/sections/` |
-| `payload-config` | Field configuration | Editing config files |
-| `tailwind` | Tailwind v4 patterns | CSS files |
-| `adding-animations` | GSAP implementation | Animation code |
-| `screenshots` | Design to code | Image implementation |
-| `html-structure` | Semantic HTML | Component markup |
+| `payload-config`      | Field configuration    | Editing config files    |
+| `tailwind`            | Tailwind v4 patterns   | CSS files               |
+| `adding-animations`   | GSAP implementation    | Animation code          |
+| `screenshots`         | Design to code         | Image implementation    |
+| `html-structure`      | Semantic HTML          | Component markup        |
 
 ### Using Rules
 
@@ -1247,22 +1281,23 @@ Smart Site includes **AI-powered development rules** in `.cursor/rules/` that gu
 ### AI Development
 
 Tell your AI assistant to use specific rules:
-- *"Create a new section using the adding-new-sections rule"*
-- *"Convert this design using the screenshots rule"*
-- *"Add animations following the GSAP rule"*
+
+- _"Create a new section using the adding-new-sections rule"_
+- _"Convert this design using the screenshots rule"_
+- _"Add animations following the GSAP rule"_
 
 ## 🔧 Troubleshooting
 
 ### Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| **Types not generating** | Run `pnpm generate:types` |
-| **Sections not appearing** | Check registration in `sections-map.tsx` |
-| **Admin changes lost** | Use `smartsite.config.ts` instead |
+| Issue                        | Solution                                       |
+| ---------------------------- | ---------------------------------------------- |
+| **Types not generating**     | Run `pnpm generate:types`                      |
+| **Sections not appearing**   | Check registration in `sections-map.tsx`       |
+| **Admin changes lost**       | Use `smartsite.config.ts` instead              |
 | **MongoDB connection fails** | Verify MongoDB is running: `pnpm mongo:status` |
-| **Build fails** | Run `pnpm type-check` and fix errors |
-| **AI chat not working** | Check AI backend is running on port 4112 |
+| **Build fails**              | Run `pnpm type-check` and fix errors           |
+| **AI chat not working**      | Check AI backend is running on port 4112       |
 
 ### Debug Commands
 
