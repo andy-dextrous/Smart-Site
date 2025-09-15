@@ -1,5 +1,3 @@
-// Section imports will be added here as new sections are created
-
 /*************************************************************************/
 /*  UNIFIED SECTIONS CONFIG
 /*
@@ -9,7 +7,5 @@
 
 export const sections = {
   // For Payload CMS - array of block configurations
-  sectionBlocks: [
-    // Sections will be added here as they are created
-  ],
+  sectionBlocks: [],
 }

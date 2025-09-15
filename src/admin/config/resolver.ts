@@ -1,4 +1,4 @@
-import "server-only"
+// server-only - removed for type generation compatibility
 import type { SmartSiteConfig } from "./defaults"
 import type { CollectionConfig, GlobalConfig, Block, Plugin } from "payload"
 import { applyFrontendWrapper } from "./frontend"
@@ -17,6 +17,7 @@ import { URIIndex } from "@/admin/payload/collections/uri-index"
 import { Header } from "@/admin/payload/globals/header/config"
 import { Footer } from "@/admin/payload/globals/footer/config"
 import { Settings } from "@/admin/payload/globals/settings"
+import { AISettings } from "@/admin/payload/globals/ai-settings"
 
 import { Code } from "@/admin/payload/blocks/code/config"
 import { FormBlock } from "@/admin/payload/blocks/form/config"
@@ -45,7 +46,8 @@ const defaultCollectionMap: Record<string, CollectionConfig> = {
 const defaultGlobalMap: Record<string, GlobalConfig> = {
   header: Header,
   footer: Footer,
-  settings: Settings
+  settings: Settings,
+  "ai-settings": AISettings
 }
 
 const defaultBlockMap: Record<string, Block> = {

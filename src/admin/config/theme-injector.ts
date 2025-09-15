@@ -1,4 +1,4 @@
-import "server-only"
+// server-only - removed for type generation compatibility
 import fs from "fs/promises"
 import path from "path"
 import type { SmartSiteConfig } from "./defaults"

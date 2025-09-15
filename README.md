@@ -619,6 +619,85 @@ pnpm dev  # Runs on port 4112
 # Update NEXT_PUBLIC_AI_URL in frontend
 ```
 
+### AI Backend Authentication System
+
+Smart Site authenticates with the AI backend using a special "AI Agent" user pattern:
+
+#### How Authentication Works
+
+1. **AI Agent User**: Each Smart Site instance has a hidden user with role `ai-agent`
+2. **API Key Generation**: This user has an API key (64-character hex string) for authentication
+3. **Auto-Creation**: The AI agent is automatically created during database seeding
+4. **Environment Storage**: Credentials are saved to `.env`:
+
+```bash
+# AI Agent Configuration (Auto-generated)
+AI_AGENT_API_KEY=80fda7460be5a83e4dc8256392bba4baacdd48777fd5eb1bdd13a1c1b9a25375
+AI_AGENT_USER_ID=68c0ba9971ba48af9e63f160
+```
+
+#### Setting Up AI Authentication
+
+1. **Run Database Seeding**:
+```bash
+pnpm seed
+# OR
+curl -X POST http://localhost:3000/api/seed
+```
+
+2. **Look for API Key Output**:
+```
+═══════════════════════════════════════════════════════════════
+AI AGENT API KEY (SAVE THIS - SHOWN ONLY ONCE):
+API Key: [64-character hex string]
+Email: ai@smartsite.local
+User ID: [user-id]
+═══════════════════════════════════════════════════════════════
+```
+
+3. **Verify Environment Variables**: Check that `.env` contains the auto-generated credentials
+
+#### API Authentication Flow
+
+```typescript
+// Smart Site makes authenticated requests to AI backend
+const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
+  headers: {
+    'Authorization': `Bearer ${AI_AGENT_API_KEY}`,
+    'X-Site-ID': AI_AGENT_USER_ID,
+    'X-Site-URL': NEXT_PUBLIC_URL
+  }
+})
+```
+
+#### Security Features
+
+- **Hidden User**: AI agent never appears in admin UI
+- **Encrypted Storage**: API keys are encrypted in database using `PAYLOAD_SECRET`
+- **One-Time Display**: API key shown only during creation
+- **Role Isolation**: `ai-agent` role has specific access patterns
+- **Multi-Tenant Ready**: Each site has unique credentials
+
+### Planned AI Endpoints
+
+The following endpoints will be implemented to connect Smart Site with the AI backend:
+
+#### `/api/ai-config`
+- Exposes block schemas and field configurations
+- Bypasses GraphQL introspection limitations
+- Returns sanitized Payload configuration
+- Cached with ETag headers
+
+#### `/api/ai/auth`
+- Edge function for fast API key validation
+- Returns site metadata and permissions
+- Never trusts client-provided URLs
+
+#### `/api/ai/operations`
+- Proxies AI operations to backend
+- Re-validates API key for security
+- Streams responses back to frontend
+
 ## 📦 Building Sections
 
 Sections are the **core building blocks** of Smart Site. Each section is a self-contained unit with its own fields and component.

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import React from "react"
-import { ChatPanel } from "./chat-panel"
+import { ChatPanel } from "../../../../components/chat-panel"
 import { AppSidebar } from "./app-sidebar"
 import { TopNavigation } from "./top-navigation"
 import { useAIContext } from "../ai-provider"

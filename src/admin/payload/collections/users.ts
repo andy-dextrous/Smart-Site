@@ -10,7 +10,17 @@ export const Users: CollectionConfig = {
     admin: authenticated,
     create: isAdmin,
     delete: isAdmin,
-    read: authenticated,
+    read: ({ req }) => {
+      // Allow server-side access with overrideAccess
+      if (!req.user) return false
+      
+      // For client-side requests, filter out AI agent users
+      return {
+        role: {
+          not_equals: "ai-agent",
+        },
+      }
+    },
     update: isAdminOrSelf,
   },
   admin: {
@@ -25,6 +35,7 @@ export const Users: CollectionConfig = {
     } as CollectionCustomMetadata,
   },
   auth: {
+    useAPIKey: true, // Enable API key generation for AI agents
     tokenExpiration: 604800000, // 7 days
     // verify: true, // Require email verification before being allowed to authenticate
     maxLoginAttempts: process.env.NODE_ENV === "production" ? 5 : 100,
@@ -63,6 +74,10 @@ export const Users: CollectionConfig = {
         {
           label: "Editor",
           value: "editor",
+        },
+        {
+          label: "AI Agent",
+          value: "ai-agent",
         },
       ],
       admin: {

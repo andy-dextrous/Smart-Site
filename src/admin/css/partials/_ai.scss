@@ -1,0 +1,37 @@
+// AI UI partials: typing indicator, chat accents, etc.
+
+.ti-wrap {
+  --main-color: #ecf0f1;
+  --point-color: #555;
+  --size: 2px; // matches compact spec from chat
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ti-dot {
+  border-radius: 100%;
+  border: var(--size) solid var(--point-color);
+  margin: calc(var(--size) * 1.5);
+  width: var(--size);
+  height: var(--size);
+}
+
+.ti-dot:nth-child(1) {
+  animation: preloader 0.45s ease-in-out alternate infinite;
+}
+
+.ti-dot:nth-child(2) {
+  animation: preloader 0.45s ease-in-out alternate 0.25s infinite;
+}
+
+.ti-dot:nth-child(3) {
+  animation: preloader 0.45s ease-in-out alternate 0.5s infinite;
+}
+
+@keyframes preloader {
+  100% {
+    transform: scale(2);
+  }
+}
+

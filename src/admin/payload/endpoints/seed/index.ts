@@ -38,6 +38,7 @@ import { operationsService, strategyService, technologyService } from "./service
 import { serviceTemplates } from "./templates/service-templates"
 import { technologyClientTestimonials } from "./testimonials/technology-clients"
 import { seedUser } from "./users/user"
+import { seedAIAgent, ensureAIAgentWithAPIKey } from "./users/ai-agent"
 
 // Types
 type SeedResult = {
@@ -245,7 +246,41 @@ class DynamicSeedManager {
       stats.created.globals = seededGlobals.length + 1 // +1 for settings global
 
       /**
-       * Step 8: Re-enable sync hooks only at the very end
+       * Step 8: Create AI agent user at the very end (after all other seeding)
+       */
+      this.payload.logger.info("Creating AI agent user with API key...")
+      try {
+        const { user: aiAgent, apiKey } = await ensureAIAgentWithAPIKey(
+          this.payload,
+          this.context
+        )
+        
+        // Store the API key securely (only shown once during creation)
+        if (apiKey) {
+          this.payload.logger.info("═══════════════════════════════════════════════════════════════")
+          this.payload.logger.info("AI AGENT API KEY (SAVE THIS - SHOWN ONLY ONCE):")
+          this.payload.logger.info(`API Key: ${apiKey}`)
+          this.payload.logger.info(`Email: ${aiAgent.email}`)
+          this.payload.logger.info(`User ID: ${aiAgent.id}`)
+          this.payload.logger.info("═══════════════════════════════════════════════════════════════")
+          
+          // Optionally save to .env file for development
+          if (process.env.NODE_ENV === "development") {
+            await this.saveAPIKeyToEnv(apiKey, aiAgent.id)
+          }
+        } else {
+          this.payload.logger.info(`AI agent already has API key configured (not shown for security)`)
+        }
+        
+        stats.created.users += 1 // Add AI agent to user count
+      } catch (error) {
+        this.payload.logger.error("Failed to create AI agent user:", error)
+        stats.errors.push(`AI agent creation failed: ${error}`)
+        // Don't fail the entire seeding if AI agent creation fails
+      }
+
+      /**
+       * Step 9: Re-enable sync hooks only at the very end
        */
       enableSyncHooks(this.payload, this.context)
 
@@ -287,23 +322,123 @@ class DynamicSeedManager {
   }
 
   /*************************************************************************/
+  /*  SAVE API KEY TO ENV FILE (DEVELOPMENT ONLY)
+  /*************************************************************************/
+  
+  private async saveAPIKeyToEnv(apiKey: string, userId: string): Promise<void> {
+    try {
+      const envPath = path.join(process.cwd(), ".env")
+      
+      // Read existing .env
+      let envContent = ""
+      try {
+        envContent = await fs.readFile(envPath, "utf-8")
+      } catch (error) {
+        this.payload.logger.error("Could not read .env file:", error)
+        return
+      }
+      
+      // Parse lines and update AI_AGENT entries in place
+      const lines = envContent.split("\n")
+      const updatedLines = []
+      let foundApiKey = false
+      let foundUserId = false
+      let lastNonEmptyIndex = -1
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        
+        // Update existing AI_AGENT_API_KEY
+        if (line.startsWith("AI_AGENT_API_KEY=")) {
+          updatedLines.push(`AI_AGENT_API_KEY=${apiKey}`)
+          foundApiKey = true
+        }
+        // Update existing AI_AGENT_USER_ID
+        else if (line.startsWith("AI_AGENT_USER_ID=")) {
+          updatedLines.push(`AI_AGENT_USER_ID=${userId}`)
+          foundUserId = true
+        }
+        // Keep all other lines
+        else {
+          updatedLines.push(line)
+        }
+        
+        // Track last non-empty line
+        if (line.trim() !== "") {
+          lastNonEmptyIndex = updatedLines.length - 1
+        }
+      }
+      
+      // If we didn't find the variables, add them
+      if (!foundApiKey || !foundUserId) {
+        // Find where to insert (before a section or at the end)
+        let insertIndex = lastNonEmptyIndex + 1
+        
+        // Look for the AI Agent Configuration comment
+        let hasAISection = false
+        for (let i = 0; i < updatedLines.length; i++) {
+          if (updatedLines[i].includes("AI AGENT CONFIGURATION") || 
+              updatedLines[i].includes("AI Agent Configuration")) {
+            hasAISection = true
+            insertIndex = i + 1
+            // Skip the comment line if it exists
+            while (insertIndex < updatedLines.length && 
+                   updatedLines[insertIndex].startsWith("#")) {
+              insertIndex++
+            }
+            break
+          }
+        }
+        
+        // If no AI section exists, add it at the end
+        if (!hasAISection) {
+          // Add blank line before new section if needed
+          if (lastNonEmptyIndex >= 0 && updatedLines[lastNonEmptyIndex].trim() !== "") {
+            updatedLines.splice(insertIndex, 0, "")
+            insertIndex++
+          }
+          updatedLines.splice(insertIndex, 0, "# AI Agent Configuration (Auto-generated)")
+          insertIndex++
+        }
+        
+        // Add the missing variables
+        if (!foundApiKey) {
+          updatedLines.splice(insertIndex, 0, `AI_AGENT_API_KEY=${apiKey}`)
+          insertIndex++
+        }
+        if (!foundUserId) {
+          updatedLines.splice(insertIndex, 0, `AI_AGENT_USER_ID=${userId}`)
+        }
+      }
+      
+      // Write back to file
+      await fs.writeFile(envPath, updatedLines.join("\n"))
+      
+      this.payload.logger.info("API key saved to .env for development use")
+    } catch (error) {
+      this.payload.logger.warn("Could not save API key to .env:", error)
+    }
+  }
+
+  /*************************************************************************/
   /*  CREATE USERS
   /*************************************************************************/
 
   private async seedUsers(): Promise<any[]> {
     this.payload.logger.info("Creating fresh admin user...")
+    const users = []
 
+    // Create the regular admin user
     const userData = seedUser()
-
-    // Always create a fresh user to ensure proper password hashing
     const user = await this.payload.create({
       collection: "users",
       data: userData,
       context: this.context,
     })
-
     this.payload.logger.info(`Created fresh user: ${userData.username}`)
-    return [user]
+    users.push(user)
+
+    return users
   }
 
   /*************************************************************************/

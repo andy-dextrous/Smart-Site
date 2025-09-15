@@ -1,4 +1,4 @@
-import "server-only"
+// server-only - removed for type generation compatibility
 import type { Plugin } from "payload"
 import type { SmartSiteConfig, MediaCollectionConfig } from "./defaults"
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"

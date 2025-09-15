@@ -1,4 +1,3 @@
-// Section component imports will be added here as new sections are created
 import React from "react"
 
 /*************************************************************************/
@@ -8,6 +7,4 @@ import React from "react"
 /*  This file exists in client space to enable direct imports
 /*************************************************************************/
 
-export const sectionsMap: Record<string, React.ComponentType<any>> = {
-  // Section mappings will be added here as new sections are created
-}
+export const sectionsMap: Record<string, React.ComponentType<any>> = {}

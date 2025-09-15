@@ -1,24 +1,15 @@
 "use client"
 
-import React, { createContext, useContext, useState, useCallback } from "react"
+import { getSmartSiteConfig } from "@/admin/config"
+import React, { createContext, useCallback, useContext, useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
-import { getMastraClient, isAIEnabled } from "@/admin/ai/mastra-client"
-import type { MastraClient } from "@mastra/client-js"
 
 /*************************************************************************/
 /*  AI PROVIDER - CONSOLIDATED AI FUNCTIONALITY
 /*************************************************************************/
 
 interface AIContextType {
-  // Connection status
-  isConnected: boolean
   isEnabled: boolean
-
-  // Mastra client
-  client: MastraClient | null
-  getAgent: (agentId: string) => any
-
-  // Chat panel state
   isChatOpen: boolean
   toggleChat: () => void
   closeChat: () => void
@@ -30,9 +21,7 @@ const AIContext = createContext<AIContextType | undefined>(undefined)
 export function AIProvider({ children }: { children: React.ReactNode }) {
   const [isChatOpen, setIsChatOpen] = useState(false)
 
-  // Get Mastra client and status
-  const client = getMastraClient()
-  const enabled = isAIEnabled()
+  const enabled = getSmartSiteConfig().features.ai.enabled
 
   const toggleChat = useCallback(() => {
     if (!enabled) return // Prevent toggling when disabled
@@ -48,16 +37,6 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
     setIsChatOpen(true)
   }, [enabled])
 
-  const getAgent = useCallback(
-    (agentId: string) => {
-      if (!enabled || !client) {
-        return null
-      }
-      return client.getAgent(agentId)
-    },
-    [client, enabled]
-  )
-
   // Only register hotkeys when AI is enabled
   useHotkeys("meta+l", toggleChat, {
     preventDefault: true,
@@ -67,10 +46,7 @@ export function AIProvider({ children }: { children: React.ReactNode }) {
   })
 
   const contextValue: AIContextType = {
-    isConnected: enabled && client !== null,
     isEnabled: enabled,
-    client,
-    getAgent,
     isChatOpen,
     toggleChat,
     closeChat,

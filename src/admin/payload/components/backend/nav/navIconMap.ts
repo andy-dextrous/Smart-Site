@@ -1,4 +1,4 @@
-import { Link, List, LucideProps } from "lucide-react"
+import { Link, List, LucideProps, Sparkles } from "lucide-react"
 import { ExoticComponent } from "react"
 import { FaFileAlt, FaRss, FaSearch, FaUserAlt, FaWpforms } from "react-icons/fa"
 import { IoIosDocument } from "react-icons/io"
@@ -35,6 +35,8 @@ export const navIconMap: Partial<
   templates: HiTemplate,
   default: IoIosDocument,
   testimonials: MdReviews,
+  ai: Sparkles,
+  "ai-settings": Sparkles,
 }
 
 export const getNavIcon = (slug: string) =>

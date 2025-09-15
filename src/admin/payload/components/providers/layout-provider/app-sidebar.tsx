@@ -255,7 +255,7 @@ export function AppSidebar() {
     settings: {
       label: "Settings",
       icon: getNavIcon("settings"),
-      items: ["settings", "header", "footer", "templates", "redirects", "categories"],
+      items: ["settings", "ai-settings", "header", "footer", "templates", "redirects", "categories"],
     },
   }
 
@@ -298,7 +298,7 @@ export function AppSidebar() {
         icon: (props: any) => <CollectionIcon item={col} slug={col.slug} {...props} />,
       })),
     ...visibleGlobals
-      .filter(glob => !["header", "footer", "settings"].includes(glob.slug))
+      .filter(glob => !["header", "footer", "settings", "ai-settings"].includes(glob.slug))
       .map(glob => ({
         type: "global",
         slug: glob.slug,
@@ -465,35 +465,37 @@ export function AppSidebar() {
           isOpen={openGroups.settings}
           onToggle={() => setOpenGroups(prev => ({ ...prev, settings: !prev.settings }))}
         >
-          {[...visibleCollections, ...visibleGlobals]
-            .filter(item => groups.settings.items.includes(item.slug))
-            .map(item => {
-              const isCollection = "labels" in item
-              const href = formatAdminURL({
-                adminRoute,
-                path: isCollection
-                  ? `/collections/${item.slug}`
-                  : `/globals/${item.slug}`,
-              })
-              const label = isCollection
-                ? getTranslation(item.labels?.plural || item.slug, i18n)
-                : getTranslation(item.label || item.slug, i18n)
-              const Icon = (props: any) => <CollectionIcon item={item} slug={item.slug} {...props} />
-              const isActive =
-                pathname.startsWith(href) &&
-                ["/", undefined].includes(pathname[href.length])
+          {groups.settings.items.map(itemSlug => {
+            // Regular item handling
+            const item = [...visibleCollections, ...visibleGlobals].find(i => i.slug === itemSlug)
+            if (!item) return null
+            
+            const isCollection = "labels" in item
+            const href = formatAdminURL({
+              adminRoute,
+              path: isCollection
+                ? `/collections/${item.slug}`
+                : `/globals/${item.slug}`,
+            })
+            const label = isCollection
+              ? getTranslation(item.labels?.plural || item.slug, i18n)
+              : getTranslation(item.label || item.slug, i18n)
+            const Icon = (props: any) => <CollectionIcon item={item} slug={item.slug} {...props} />
+            const isActive =
+              pathname.startsWith(href) &&
+              ["/", undefined].includes(pathname[href.length])
 
-              return (
-                <NavItem
-                  key={item.slug}
-                  href={href}
-                  icon={Icon}
-                  label={label}
-                  isActive={isActive}
-                  isCollapsed={isCollapsed}
-                />
-              )
-            })}
+            return (
+              <NavItem
+                key={item.slug}
+                href={href}
+                icon={Icon}
+                label={label}
+                isActive={isActive}
+                isCollapsed={isCollapsed}
+              />
+            )
+          })}
         </NavGroup>
       </div>
 

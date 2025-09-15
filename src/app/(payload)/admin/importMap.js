@@ -40,7 +40,6 @@ import { default as default_deb3d3e0d7ebd4444dedc22425d9c39c } from '@/admin/pay
 import { BeforeLogin as BeforeLogin_7928b506e44967428d9de145b0f5de84 } from '@/admin/payload/components/backend/before-login'
 import { AIProvider as AIProvider_60a9abb034156393a5335c785c8cc821 } from '@/admin/payload/components/providers/ai-provider'
 import { AILayoutProvider as AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45 } from '@/admin/payload/components/providers/layout-provider'
-import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { Dashboard as Dashboard_2318927de43c97f7df38b2e062d88eaf } from '@/admin/payload/components/backend/dashboard'
 
 export const importMap = {
@@ -86,6 +85,5 @@ export const importMap = {
   "@/admin/payload/components/backend/before-login#BeforeLogin": BeforeLogin_7928b506e44967428d9de145b0f5de84,
   "@/admin/payload/components/providers/ai-provider#AIProvider": AIProvider_60a9abb034156393a5335c785c8cc821,
   "@/admin/payload/components/providers/layout-provider#AILayoutProvider": AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45,
-  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "@/admin/payload/components/backend/dashboard#Dashboard": Dashboard_2318927de43c97f7df38b2e062d88eaf
 }

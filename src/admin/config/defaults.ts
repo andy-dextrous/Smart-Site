@@ -7,8 +7,16 @@ import { z } from "zod"
 const SitemapConfigSchema = z.object({
   enabled: z.boolean(),
   priority: z.number(),
-  changefreq: z.enum(["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"]),
-  respectNoIndex: z.boolean()
+  changefreq: z.enum([
+    "always",
+    "hourly",
+    "daily",
+    "weekly",
+    "monthly",
+    "yearly",
+    "never",
+  ]),
+  respectNoIndex: z.boolean(),
 })
 
 const CollectionConfigSchema = z.object({
@@ -16,30 +24,36 @@ const CollectionConfigSchema = z.object({
   frontend: z.boolean(),
   label: z.string(),
   seo: z.boolean().optional(),
-  frontendOptions: z.object({
-    seoSchemaType: z.enum([
-      "WebPage",
-      "Article", 
-      "Service",
-      "Person",
-      "Organization",
-      "LocalBusiness",
-      "Product",
-      "Event",
-      "FAQPage",
-      "HowTo"
-    ]).optional(),
-    enablePreview: z.boolean().default(true),
-    enableLivePreview: z.boolean().default(true),
-    customHooks: z.boolean().default(true),
-    slugLocked: z.boolean().default(true)
-  }).optional(),
-  sitemap: SitemapConfigSchema.optional()
+  frontendOptions: z
+    .object({
+      seoSchemaType: z
+        .enum([
+          "WebPage",
+          "Article",
+          "Service",
+          "Person",
+          "Organization",
+          "LocalBusiness",
+          "Product",
+          "Event",
+          "FAQPage",
+          "HowTo",
+        ])
+        .optional(),
+      enablePreview: z.boolean().default(true),
+      enableLivePreview: z.boolean().default(true),
+      customHooks: z.boolean().default(true),
+      slugLocked: z.boolean().default(true),
+    })
+    .optional(),
+  sitemap: SitemapConfigSchema.optional(),
 })
 
 const MediaCollectionConfigSchema = CollectionConfigSchema.extend({
-  provider: z.enum(["local", "vercel-blob", "s3", "cloudinary", "uploadthing"]).optional(),
-  config: z.record(z.any()).optional()
+  provider: z
+    .enum(["local", "vercel-blob", "s3", "cloudinary", "uploadthing"])
+    .optional(),
+  config: z.record(z.any()).optional(),
 })
 
 const GrayscaleSchema = z.object({
@@ -63,7 +77,7 @@ const GrayscaleSchema = z.object({
   "850": z.string(),
   "900": z.string(),
   "950": z.string(),
-  "1000": z.string()
+  "1000": z.string(),
 })
 
 const AdminThemeSchema = z.object({
@@ -74,25 +88,25 @@ const AdminThemeSchema = z.object({
     error: z.string(),
     success: z.string(),
     warning: z.string(),
-    grayscale: GrayscaleSchema
+    grayscale: GrayscaleSchema,
   }),
   layout: z.object({
     sidebarWidth: z.string(),
     headerHeight: z.string(),
     borderRadius: z.string(),
-    contentMaxWidth: z.string()
+    contentMaxWidth: z.string(),
   }),
   typography: z.object({
     fontFamily: z.string(),
     fontSize: z.string(),
-    lineHeight: z.string()
-  })
+    lineHeight: z.string(),
+  }),
 })
 
 const AdminMetaSchema = z.object({
   title: z.string(),
   description: z.string(),
-  favicon: z.string().optional()
+  favicon: z.string().optional(),
 })
 
 const ImageOptimizationSchema = z.object({
@@ -101,12 +115,14 @@ const ImageOptimizationSchema = z.object({
     thumbnail: z.number().min(1).max(100).optional(),
     hero: z.number().min(1).max(100).optional(),
   }),
-  sizes: z.array(z.object({
-    name: z.string(),
-    width: z.number(),
-    height: z.number().optional(),
-    crop: z.enum(["center", "top", "bottom", "left", "right"]).optional(),
-  })),
+  sizes: z.array(
+    z.object({
+      name: z.string(),
+      width: z.number(),
+      height: z.number().optional(),
+      crop: z.enum(["center", "top", "bottom", "left", "right"]).optional(),
+    })
+  ),
   breakpoints: z.record(z.string(), z.number()),
 })
 
@@ -120,7 +136,7 @@ const GSAPConfigSchema = z.object({
   splitText: z.boolean(),
   customEase: z.boolean(),
   physics2D: z.boolean(),
-  textPlugin: z.boolean()
+  textPlugin: z.boolean(),
 })
 
 const BreadcrumbConfigSchema = z.object({
@@ -129,26 +145,26 @@ const BreadcrumbConfigSchema = z.object({
   separator: z.enum(["slash", "chevron", "arrow", "dot"]).default("slash"),
   maxDepth: z.number().min(0).optional(),
   showCurrent: z.boolean().default(true),
-  className: z.string().optional()
+  className: z.string().optional(),
 })
 
 const FeaturesConfigSchema = z.object({
   ai: z.object({
     enabled: z.boolean(),
-    endpoint: z.string()
+    endpoint: z.string(),
   }),
   darkMode: z.boolean(),
   i18n: z.boolean(),
   analytics: z.boolean(),
   search: z.boolean(),
-  sitemaps: z.boolean()
+  sitemaps: z.boolean(),
 })
 
 const ExtensionsConfigSchema = z.object({
   collections: z.array(z.string()).default([]),
   blocks: z.array(z.string()).default([]),
   globals: z.array(z.string()).default([]),
-  plugins: z.array(z.string()).default([])
+  plugins: z.array(z.string()).default([]),
 })
 
 export const SmartSiteConfigSchema = z.object({
@@ -156,12 +172,12 @@ export const SmartSiteConfigSchema = z.object({
   features: FeaturesConfigSchema,
   admin: z.object({
     theme: AdminThemeSchema,
-    meta: AdminMetaSchema
+    meta: AdminMetaSchema,
   }),
   images: ImageOptimizationSchema,
   gsap: GSAPConfigSchema,
   breadcrumbs: BreadcrumbConfigSchema,
-  extensions: ExtensionsConfigSchema.optional()
+  extensions: ExtensionsConfigSchema.optional(),
 })
 
 /*************************************************************************/
@@ -192,7 +208,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
   /*************************************************************************/
   /*  COLLECTION CONFIGURATIONS
   /*************************************************************************/
-  
+
   collections: {
     pages: {
       enabled: true,
@@ -204,14 +220,14 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
         enablePreview: true,
         enableLivePreview: true,
         customHooks: true,
-        slugLocked: true
+        slugLocked: true,
       },
       sitemap: {
         enabled: true,
         priority: 0.7,
         changefreq: "weekly",
-        respectNoIndex: true
-      }
+        respectNoIndex: true,
+      },
     },
     posts: {
       enabled: true,
@@ -223,14 +239,14 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
         enablePreview: true,
         enableLivePreview: true,
         customHooks: true,
-        slugLocked: true
+        slugLocked: true,
       },
       sitemap: {
         enabled: true,
         priority: 0.6,
         changefreq: "daily",
-        respectNoIndex: true
-      }
+        respectNoIndex: true,
+      },
     },
     categories: {
       enabled: true,
@@ -247,14 +263,14 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
         enablePreview: true,
         enableLivePreview: true,
         customHooks: true,
-        slugLocked: true
+        slugLocked: true,
       },
       sitemap: {
         enabled: true,
         priority: 0.5,
         changefreq: "monthly",
-        respectNoIndex: true
-      }
+        respectNoIndex: true,
+      },
     },
     services: {
       enabled: true,
@@ -266,14 +282,14 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
         enablePreview: true,
         enableLivePreview: true,
         customHooks: true,
-        slugLocked: true
+        slugLocked: true,
       },
       sitemap: {
         enabled: true,
         priority: 0.7,
         changefreq: "weekly",
-        respectNoIndex: true
-      }
+        respectNoIndex: true,
+      },
     },
     testimonials: {
       enabled: true,
@@ -295,30 +311,30 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
       frontend: false,
       label: "Media",
       provider: "local",
-      config: {}
+      config: {},
     } as MediaCollectionConfig,
   },
 
   /*************************************************************************/
   /*  FEATURE FLAGS
   /*************************************************************************/
-  
+
   features: {
     ai: {
       enabled: true,
-      endpoint: "http://localhost:4112"
+      endpoint: "http://localhost:3333",
     },
     darkMode: false,
     i18n: false,
     analytics: true,
     search: true,
-    sitemaps: true
+    sitemaps: true,
   },
 
   /*************************************************************************/
   /*  ADMIN THEME CONFIGURATION
   /*************************************************************************/
-  
+
   admin: {
     theme: {
       colors: {
@@ -367,14 +383,14 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     meta: {
       title: "Admin | Smart Site",
       description: "Advanced admin panel for high-performance websites",
-      favicon: "/favicon.png"
-    }
+      favicon: "/favicon.png",
+    },
   },
 
   /*************************************************************************/
   /*  IMAGE OPTIMIZATION CONFIGURATION
   /*************************************************************************/
-  
+
   images: {
     quality: {
       default: 85,
@@ -393,17 +409,17 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     breakpoints: {
       "3xl": 1920,
       "2xl": 1536,
-      "xl": 1280,
-      "lg": 1024,
-      "md": 768,
-      "sm": 640,
+      xl: 1280,
+      lg: 1024,
+      md: 768,
+      sm: 640,
     },
   },
 
   /*************************************************************************/
   /*  GSAP ANIMATION CONFIGURATION
   /*************************************************************************/
-  
+
   gsap: {
     scrollTrigger: true,
     scrollSmoother: true,
@@ -420,7 +436,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
   /*************************************************************************/
   /*  BREADCRUMB CONFIGURATION
   /*************************************************************************/
-  
+
   breadcrumbs: {
     enabled: true,
     homeLabel: "Home",
@@ -433,7 +449,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
   /*************************************************************************/
   /*  EXTENSIONS (NO DEFAULTS)
   /*************************************************************************/
-  
+
   extensions: {
     collections: [],
     blocks: [],
