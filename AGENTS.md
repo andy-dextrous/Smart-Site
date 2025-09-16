@@ -89,6 +89,17 @@ Never run formatters manually (Prettier is automated). Do not start production b
 - Caching utilities live under `src/admin/cache`. Use them for URI and collection lookups.
 - Smart Site provides intelligent revalidation hooks; rely on provided helpers before forcing manual invalidation.
 
+### Collection intelligence
+- Default collection behaviour lives in `apps/smart-site/src/admin/config/defaults.ts` (`SMARTSITE_DEFAULTS`). Every first-party slug defined there (`pages`, `posts`, `services`, `team`, `testimonials`, `categories`, `media`, `templates`, `users`) starts enabled, so never tell a user they must "turn on" services or testimonials—they already exist unless deliberately disabled.
+- System collections (`uri-index`, `users`, `templates`) cannot be removed. The resolver in `src/admin/config/resolver.ts` always registers them to keep routing and admin access intact.
+- Plugin collections (`forms`, `form-submissions`, `redirects`, `search`, etc.) arrive through the default plugin stack in `src/admin/payload/plugins`. They appear in `payload-types.ts` automatically and do not need `smartsite.config.ts` entries.
+- Use this audit path when you need to describe the current setup:
+  1. Inspect `apps/smart-site/src/admin/config/defaults.ts` to understand the baseline.
+  2. Review the app-level `src/smartsite.config.ts` for overrides or explicit disables.
+  3. Check `src/extensions/index.ts` for custom slugs that replace or extend the defaults.
+  4. Confirm Payload’s output in `src/admin/payload/payload-types.ts` to see every registered collection and global.
+- Reserve `extensions.collections` for new slugs only. If a collection ships with Smart Site already, configure it via `smartsite.config.ts` instead of duplicating it as an extension.
+
 ---
 ## 4. Component Development Principles
 ### Styling (Tailwind v4, CSS-first)

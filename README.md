@@ -8,15 +8,19 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - [Installation & Getting Started](#installation--getting-started)
 - [Architecture Overview](#architecture-overview)
 - [Admin Layer System](#admin-layer-system)
-- [Building Sections](#building-sections)
-- [Configuration System](#configuration-system)
-- [Routing & Caching](#routing--caching)
 - [AI Integration](#ai-integration)
+- [Building Sections](#building-sections)
+- [Routing & Caching](#routing--caching)
+- [Configuration System](#configuration-system)
 - [Extensions & Overrides](#extensions--overrides)
 - [Development Workflow](#development-workflow)
 - [Troubleshooting](#troubleshooting)
 - [Deployment](#deployment)
+- [Additional Resources](#additional-resources)
+- [Contributing](#contributing)
+- [License](#license)
 
+<a id="core-features"></a>
 ## ⚡ Core Features
 
 ### Field-Driven Architecture
@@ -54,6 +58,7 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - **Smart search** - AI-enhanced search functionality
 - **Remote backend** - Secure AI processing via Mastra framework
 
+<a id="installation--getting-started"></a>
 ## 🚀 Installation & Getting Started
 
 ### Prerequisites
@@ -348,6 +353,7 @@ PAYLOAD_CONFIG_PATH=src/admin/payload/payload.config.ts payload  # Access Payloa
 pnpm generate:types   # Generate TypeScript types from Payload
 ```
 
+<a id="architecture-overview"></a>
 ## 🏗 Architecture Overview
 
 ### Design Philosophy
@@ -465,6 +471,7 @@ apps/smart-site/
 | **Extensions** | `src/extensions/`                        | User customizations  | ✅ Yes             |
 | **Config**     | `src/smartsite.config.ts`                | System configuration | ✅ Yes             |
 
+<a id="admin-layer-system"></a>
 ## 🔒 Admin Layer System
 
 The `src/admin/` directory contains the **core system** that powers Smart Site. In the master development environment, this layer is actively developed and maintained.
@@ -576,6 +583,7 @@ Example:
 7. **Dependencies** - CLI auto-syncs required packages from manifest
 8. **Install** - Clients run `pnpm install` to get new packages
 
+<a id="ai-integration"></a>
 ## 🤖 AI Integration
 
 Smart Site includes powerful AI features via the **Mastra framework**, with processing handled by a remote backend for security and scalability.
@@ -723,6 +731,7 @@ The following endpoints will be implemented to connect Smart Site with the AI ba
 - Re-validates API key for security
 - Streams responses back to frontend
 
+<a id="building-sections"></a>
 ## 📦 Building Sections
 
 Sections are the **core building blocks** of Smart Site. Each section is a self-contained unit with its own fields and component.
@@ -840,6 +849,7 @@ Smart Site provides **pre-built field groups** that ensure consistency:
 - Mix admin and frontend imports
 - Skip type safety
 
+<a id="routing--caching"></a>
 ## ⚡ Routing & Caching
 
 ### O(1) URI Resolution
@@ -891,6 +901,7 @@ export async function generateStaticParams() {
 }
 ```
 
+<a id="configuration-system"></a>
 ## ⚙️ Configuration System
 
 Smart Site uses a **comprehensive configuration system** via `src/smartsite.config.ts` that controls all aspects without modifying core files.
@@ -971,22 +982,42 @@ const config: UserConfig = {
 export default config
 ```
 
+### Default collections and extensions
+
+Smart Site ships with a full set of first-party collections that already cover typical marketing needs. The defaults live in `apps/smart-site/src/admin/config/defaults.ts` (`SMARTSITE_DEFAULTS`) and every collection defined there starts with `enabled: true`. That means services, team, testimonials, templates, media, categories, pages, and posts are available the moment the app boots—you only need to touch `smartsite.config.ts` if you want to rename them, change SEO/front-end behaviour, or explicitly disable something.
+
+- **System collections** (`uri-index`, `users`, `templates`) are always registered by the resolver in `src/admin/config/resolver.ts`, even if you try to disable them. They keep routing, authentication, and layout scaffolding intact.
+- **Content collections** (`pages`, `posts`, `services`, `team`, `testimonials`, `categories`, `media`) stay on by default. Set `enabled: false` in `smartsite.config.ts` to hide one.
+- **Extensions** are only for new slugs that do not exist in the default registry. Declare the slug in `smartsite.config.ts → extensions` and provide the actual config in `src/extensions`. Do **not** add built-in collections such as `services` or `testimonials` to extensions—they already exist.
+- **Plugin collections** (`forms`, `form-submissions`, `redirects`, `search`, etc.) are installed automatically by the default plugin stack in `src/admin/payload/plugins`. They will appear in `payload-types.ts` without any manual configuration.
+
+### Inspecting the active Payload configuration
+
+1. Open `apps/smart-site/src/admin/config/defaults.ts` to see every baseline setting, including the default labels, SEO flags, sitemap weights, and feature toggles.
+2. Review `apps/smart-site/src/smartsite.config.ts` for project-specific overrides—the file is merged deeply, so any key you omit uses the default above.
+3. Check `apps/smart-site/src/extensions/index.ts` (and the folders it imports) to find custom collections/globals/blocks that replace or extend the defaults. The resolver automatically swaps them in when the slug matches.
+4. Confirm the final build output in `apps/smart-site/src/admin/payload/payload-types.ts`. Payload regenerates this file on build and it lists every collection/global/block that is actually registered.
+
 ### Complete Configuration Options
 
 #### Collections Configuration
 
-| Collection     | Settings                                | Purpose                |
-| -------------- | --------------------------------------- | ---------------------- |
-| `pages`        | `enabled`, `frontend`, `seo`, `sitemap` | Main website pages     |
-| `posts`        | `enabled`, `frontend`, `seo`, `sitemap` | Blog articles          |
-| `services`     | `enabled`, `frontend`, `seo`, `sitemap` | Service pages          |
-| `team`         | `enabled`, `frontend`, `seo`, `sitemap` | Team members           |
-| `categories`   | `enabled`, `frontend: false`            | Content categorization |
-| `testimonials` | `enabled`, `frontend: false`            | Customer feedback      |
-| `templates`    | `enabled`, `frontend: false`            | Page templates         |
-| `media`        | `enabled`, `provider`, `config`         | File storage           |
+| Collection       | Default state        | Frontend default | Purpose                       |
+| ---------------- | -------------------- | ---------------- | ----------------------------- |
+| `pages`          | Enabled              | Yes              | Primary marketing pages       |
+| `posts`          | Enabled              | Yes              | Blog articles                 |
+| `services`       | Enabled              | Yes              | Service or offering pages     |
+| `team`           | Enabled              | Yes              | Team member bios              |
+| `testimonials`   | Enabled              | No               | Social proof library          |
+| `categories`     | Enabled              | No               | Content categorization        |
+| `media`          | Enabled (`local`)    | No               | Asset storage + adapters      |
+| `templates`*     | Enabled (system)     | No               | Page blueprint library        |
+| `users`*         | Enabled (system)     | No               | Admin authentication          |
+| `uri-index`*     | Always included      | N/A              | Global URI → document index   |
 
-Each collection supports:
+`*` System collections cannot be removed; Smart Site requires them for routing and admin access.
+
+Each configurable collection (any slug inside `smartsite.config.ts → collections`) supports:
 
 - `enabled`: Turn on/off
 - `frontend`: Enable frontend features (SEO, preview)
@@ -1216,6 +1247,7 @@ media: {
 }
 ```
 
+<a id="extensions--overrides"></a>
 ## 🧩 Extensions & Overrides
 
 ### Extensions (registering new content)
@@ -1249,6 +1281,7 @@ extensions.collections.pages   // optional override
 
 The merge order is: defaults → registry overrides → user config (`smartsite.config.ts`). System collections always load exactly once. Custom extensions declared via `smartsite.config.ts` that are not found in the registry will throw a runtime error, preventing silent typos.
 
+<a id="development-workflow"></a>
 ## 🛠 Development Workflow
 
 ### Recommended Development Process
@@ -1315,6 +1348,7 @@ Tell your AI assistant to use specific rules:
 - _"Convert this design using the screenshots rule"_
 - _"Add animations following the GSAP rule"_
 
+<a id="troubleshooting"></a>
 ## 🔧 Troubleshooting
 
 ### Common Issues
@@ -1344,6 +1378,7 @@ pnpm db:reset
 mongo --eval "db.adminCommand('listDatabases')"
 ```
 
+<a id="deployment"></a>
 ## 🚀 Deployment
 
 ### Frontend Deployment (Vercel Recommended)
@@ -1426,6 +1461,7 @@ Smart Site can deploy to any Node.js hosting platform:
 
 ---
 
+<a id="additional-resources"></a>
 ## 📖 Additional Resources
 
 - **[Payload CMS Documentation](https://payloadcms.com/docs)**
@@ -1435,10 +1471,12 @@ Smart Site can deploy to any Node.js hosting platform:
 - **[Mastra AI Documentation](https://mastra.ai/docs)**
 - **[Smart Site AI Backend](../smart-site-ai/README.md)** - Separate AI backend documentation
 
+<a id="contributing"></a>
 ## 🤝 Contributing
 
 This is an internal tool for rapid website development. For questions or improvements, consult the development team.
 
+<a id="license"></a>
 ## 📄 License
 
 MIT License - See LICENSE file for details.
