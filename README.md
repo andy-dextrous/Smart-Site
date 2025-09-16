@@ -12,7 +12,9 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - [Configuration System](#configuration-system)
 - [Routing & Caching](#routing--caching)
 - [AI Integration](#ai-integration)
+- [Extensions & Overrides](#extensions--overrides)
 - [Development Workflow](#development-workflow)
+- [Troubleshooting](#troubleshooting)
 - [Deployment](#deployment)
 
 ## ⚡ Core Features
@@ -72,13 +74,15 @@ cd smart-site
 # Install dependencies
 pnpm install
 
-# Copy environment file
-cp .env.example .env.local
+# Copy environment file (or run \`pnpm run setup\` for the interactive flow)
+cp .env.example .env
 ```
 
 ### 2. Environment Configuration
 
-Configure your `.env.local` file with these required variables:
+> 💡 **Quick start**: `pnpm run setup` walks you through port, database, storage, admin credentials, and seeds demo content automatically. It updates `.env`, starts the dev server, and leaves it running when finished.
+
+Configure your `.env` file with these required variables:
 
 ```bash
 # Core Configuration
@@ -188,19 +192,6 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 
 **Daily Development Workflow:**
 
-**Using project scripts (works on all platforms):**
-
-```bash
-# 1. Check if MongoDB is running
-pnpm mongo:status
-
-# 2. Start MongoDB (only if not running)
-pnpm mongo:start
-
-# 3. Stop MongoDB (when needed)
-pnpm mongo:stop
-```
-
 **Direct shell commands:**
 
 **macOS/Linux:**
@@ -271,14 +262,14 @@ mongo smart-site-client2 --eval "db.setup.insertOne({project: 'client2', created
 
 - MongoDB creates databases lazily (only after inserting data)
 - GUI clients like Compass **cannot** start MongoDB - server must be running first
-- MongoDB shell connection fails if server is stopped - always check `pnpm mongo:status` first
+- MongoDB shell connection fails if the server is stopped—start the service before running shell commands
 - One MongoDB server can host multiple project databases
 
 #### Option B: Vercel PostgreSQL
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
 2. Navigate to **Storage** → **Create Database** → **Postgres**
-3. Copy the `POSTGRES_URL` to your `.env.local`
+3. Copy the `POSTGRES_URL` to your `.env`
 
 ### 4. AI Backend Setup
 
@@ -353,13 +344,8 @@ pnpm seed             # Seed database with sample content
 pnpm regenerate-uris  # Regenerate URI index for routing
 
 # Payload CMS Commands
-pnpm payload          # Access Payload CLI
+PAYLOAD_CONFIG_PATH=src/admin/payload/payload.config.ts payload  # Access Payload CLI
 pnpm generate:types   # Generate TypeScript types from Payload
-
-# MongoDB Management (Local Development)
-pnpm mongo:start      # Start local MongoDB server
-pnpm mongo:stop       # Stop local MongoDB server
-pnpm mongo:status     # Check MongoDB status
 ```
 
 ## 🏗 Architecture Overview
@@ -682,7 +668,7 @@ User ID: [user-id]
 ═══════════════════════════════════════════════════════════════
 ```
 
-3. **Verify Environment Variables**: Check that `.env` contains the auto-generated credentials
+3. **Verify Environment Variables**: Check that `.env` contains the auto-generated credentials (the seed script keeps `.env` in sync—rerun it if values go missing)
 
 #### API Authentication Flow
 
@@ -696,6 +682,15 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
   },
 })
 ```
+
+#### End-to-End Request Flow
+
+1. Frontend API routes under `app/(frontend)/api/ai/*` validate the shared secret, add the `X-Site-ID` header, and proxy requests to the Mastra backend.
+2. The backend (see `apps/smart-site-ai/README.md`) verifies the site ID/API key pair, loads the correct workspace, and runs the requested chat/thread/schema operation.
+3. Responses stream back through the proxy so the admin chat panel and public endpoints never expose Mastra credentials directly.
+4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity.
+
+> For backend installation and environment setup, follow `apps/smart-site-ai/README.md`. Once the service is running, point `NEXT_PUBLIC_AI_URL` to that endpoint and the proxy routes above will take care of authentication.
 
 #### Security Features
 
@@ -806,6 +801,15 @@ export const sectionsMap = {
   "hero-banner": HeroBannerComponent,
 }
 ```
+
+### Design Tokens & Styling
+
+- **Spacing** (`theme.css`): use classes like `px-section-x`, `py-section-y`, `gap-content`, `gap-content-sm/lg`, and the container utilities (`container`, `container-md`, `container-sm`) to align with the layout grid.
+- **Color tokens**: prefer palette utilities such as `bg-primary-500`, `text-secondary-600`, `text-dark-700`, `border-light-border`. Gradient helpers (e.g., `.gradient-border`) live in `components.css`.
+- **Utilities** (`utilities.css`): helpers like `stop-scroll`, `scrollbar-hidden`, `center`, `fill-abs`, and `title-hidden` handle cross-component behaviors.
+- **Animations**: mark animated components with `"use client"`, import `useGSAP`/`gsap` from `@/providers/gsap`, scope the animation with a ref, animate transforms/opacity, and add `will-change` classes when animating.
+- **Typography & padding**: lean on the design system for spacing (`px-section-x`, `py-section-y`, `gap-content`) and type instead of adding ad-hoc `p-*`, `text-*`, or `leading-*` utilities inside components.
+- **Styling workflow**: check `components.css` for reusable patterns before layering custom Tailwind values; only add new classes there when the pattern will be reused.
 
 ### Reusable Field Patterns
 
@@ -1212,6 +1216,39 @@ media: {
 }
 ```
 
+## 🧩 Extensions & Overrides
+
+### Extensions (registering new content)
+
+Extensions let you ship additional Payload collections, globals, blocks, or plugins without touching `src/admin`.
+
+1. **Create the config** under `src/extensions/<type>/<slug>.ts`. Export a standard Payload config object (e.g., `CollectionConfig`).
+2. **Register it in the extension registry** (`src/extensions/index.ts`). Import your file and add it to the appropriate export map (`collections`, `globals`, `blocks`, `plugins`).
+3. **Enable it in `smartsite.config.ts`** by adding the slug to the corresponding `extensions.<type>` array. The resolver will pull the config from the registry and apply the same frontend wrappers used for core collections.
+
+```ts
+// src/smartsite.config.ts
+extensions: {
+  collections: ["faq"],
+  blocks: ["testimonial-grid"],
+  globals: [],
+  plugins: [],
+},
+```
+
+> Arrays in the `extensions` section replace the defaults rather than merging (see `deep-merge.ts`). Declare every extension slug you want active.
+
+### Overrides (replacing core behaviour)
+
+If you need to replace a built-in collection/global/block, drop a config with the same slug into the registry and the resolver will swap it automatically. Root collections (`users`, `uri-index`, `templates`) are always loaded, but any matching entry in the registry wins over the default.
+
+```ts
+defaultCollectionMap["pages"] // core definition
+extensions.collections.pages   // optional override
+```
+
+The merge order is: defaults → registry overrides → user config (`smartsite.config.ts`). System collections always load exactly once. Custom extensions declared via `smartsite.config.ts` that are not found in the registry will throw a runtime error, preventing silent typos.
+
 ## 🛠 Development Workflow
 
 ### Recommended Development Process
@@ -1233,6 +1270,18 @@ media: {
 | **Style frontend**    | `app/(frontend)/css/`      | Tailwind v4 styles         |
 | **Add API route**     | `app/(frontend)/api/`      | Frontend endpoints         |
 
+### Common Imports & Helpers
+
+| Module | Exports | Notes |
+| --- | --- | --- |
+| `@/admin/cache` | `cache.getByURI`, `cache.getCollection`, `cache.getGlobal`, revalidation helpers (`revalidate`, `batchRevalidate`, `revalidateGlobal`, etc.) | Unified caching + invalidation API used across sections and API routes. |
+| `@/admin/data/posts` | `getPostsWithPagination`, `getRecentPosts`, `getRelatedPosts` | Prebuilt queries for post listings and related posts. |
+| `@/admin/data/globals` | `getGlobal`, `getSettings`, `getHomepage` | Fetches globals and resolves the homepage page doc. |
+| `@/admin/data/user` | `getCurrentUser` | Reads the authenticated Payload user (for gating UI). |
+| `@/components/ui/*` | Buttons, cards, breadcrumb primitives, command palette utilities | Shared UI primitives wired to design tokens. |
+| `@/components/fields/*` | `sectionIntro`, `sectionCta`, `link`, `buttonsGroup`, etc. | Field builders used in section configs. |
+| `@/admin/components/render-sections` | `PageData`, `RenderSections` | Context props injected into every section component. |
+
 ### Development Commands
 
 ```bash
@@ -1253,30 +1302,10 @@ pnpm type-check        # TypeScript checks
 
 ### File Naming Conventions
 
-- **Components**: PascalCase (`HeroSection.tsx`)
-- **Folders**: kebab-case (`hero-section/`)
-- **Config files**: lowercase (`config.ts`)
-- **Utilities**: camelCase functions (`formatDate.ts`)
-
-## 📚 Cursor Rules
-
-Smart Site includes **AI-powered development rules** in `.cursor/rules/` that guide consistent development:
-
-### Available Rules
-
-| Rule                  | Purpose                | Trigger                 |
-| --------------------- | ---------------------- | ----------------------- |
-| `adding-new-sections` | Section creation guide | Working in `/sections/` |
-| `payload-config`      | Field configuration    | Editing config files    |
-| `tailwind`            | Tailwind v4 patterns   | CSS files               |
-| `adding-animations`   | GSAP implementation    | Animation code          |
-| `screenshots`         | Design to code         | Image implementation    |
-| `html-structure`      | Semantic HTML          | Component markup        |
-
-### Using Rules
-
-**Automatic**: Rules activate based on file context
-**Manual**: `Cmd/Ctrl + Shift + P` → "Rules: Apply Rule"
+- **Folders**: kebab-case (`hero-simple/`, `post-content/`)
+- **Section files**: `config.ts` (fields) + `Component.tsx` (React)
+- **Shared components/utilities**: kebab-case filenames (`heading-gradient.tsx`, `format-date.ts`)
+- **Exports**: use named functions (no default arrow exports)
 
 ### AI Development
 
@@ -1295,7 +1324,7 @@ Tell your AI assistant to use specific rules:
 | **Types not generating**     | Run `pnpm generate:types`                      |
 | **Sections not appearing**   | Check registration in `sections-map.tsx`       |
 | **Admin changes lost**       | Use `smartsite.config.ts` instead              |
-| **MongoDB connection fails** | Verify MongoDB is running: `pnpm mongo:status` |
+| **MongoDB connection fails** | Ensure the MongoDB service is running (brew services list / net start MongoDB) |
 | **Build fails**              | Run `pnpm type-check` and fix errors           |
 | **AI chat not working**      | Check AI backend is running on port 4112       |
 
@@ -1324,7 +1353,7 @@ mongo --eval "db.adminCommand('listDatabases')"
    - Configure build settings (auto-detected)
 
 2. **Environment Variables**
-   - Copy all variables from `.env.local`
+   - Copy all variables from `.env`
    - Update `NEXT_PUBLIC_URL` to production domain
    - Set `VERCEL_PROJECT_PRODUCTION_URL`
 

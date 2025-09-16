@@ -6,8 +6,11 @@
   /* https://www.fluid-type-scale.com/ */
 
   @theme {
-    --font-sans: "helvetica-neue-lt-pro", sans-serif;
-    --font-heading: "neue-haas-grotesk-display", sans-serif;
+    /* Fallbacks; actual font set via next/font variables on <html> */
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+      "Apple Color Emoji", "Segoe UI Emoji";
+    --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+      "Apple Color Emoji", "Segoe UI Emoji";
 
     --text-h1: clamp(2.986rem, 1.5253rem + 7.3033vw, 8.5rem);
     --text-h2: clamp(2.488rem, 1.4914rem + 4.9828vw, 6.25rem);
@@ -21,31 +24,17 @@
   }
 
   .text-gradient {
-    background: linear-gradient(
-      to right,
-      var(--color-secondary-600),
-      var(--color-primary-500)
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
+    color: var(--color-primary-600);
   }
 
   .text-gradient-hover:hover {
-    background: linear-gradient(
-      to right,
-      var(--color-secondary-600),
-      var(--color-primary-500)
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
+    color: var(--color-primary-600);
   }
 
   /* Sitewide Typography Customizations */
 
   h1 {
-    font-family: var(--font-heading);
+    font-family: inherit;
     font-size: var(--text-h1);
     color: var(--color-dark-950);
     line-height: 1.05;
@@ -54,7 +43,7 @@
   }
 
   h2 {
-    font-family: var(--font-heading);
+    font-family: inherit;
     font-size: var(--text-h2);
     color: var(--color-dark-950);
     line-height: 1.1;
@@ -63,7 +52,7 @@
   }
 
   h3 {
-    font-family: var(--font-heading);
+    font-family: inherit;
     font-size: var(--text-h3);
     color: var(--color-dark-950);
     line-height: 1.3;
@@ -72,7 +61,7 @@
   }
 
   h4 {
-    font-family: var(--font-heading);
+    font-family: inherit;
     font-size: var(--text-h4);
     color: var(--color-dark-950);
     line-height: 1.43;
@@ -81,7 +70,7 @@
   }
 
   h5 {
-    font-family: var(--font-heading);
+    font-family: inherit;
     font-size: var(--text-h5);
     color: var(--color-dark-950);
     line-height: 1.2;
@@ -90,7 +79,7 @@
   }
 
   h6 {
-    font-family: var(--font-heading);
+    font-family: inherit;
     font-size: var(--text-h6);
     color: var(--color-dark-950);
     line-height: 1.2;
@@ -100,7 +89,7 @@
 
   p {
     color: var(--color-dark-950);
-    font-family: var(--font-sans);
+    font-family: inherit;
     font-size: var(--text-base);
     line-height: 1.5;
     font-weight: 300;
@@ -115,7 +104,7 @@
 
   ul {
     color: var(--color-dark-950);
-    font-family: var(--font-sans);
+    font-family: inherit;
     font-size: var(--text-base);
     line-height: 1.5;
     letter-spacing: 0;
@@ -123,7 +112,7 @@
 
   ol {
     color: var(--color-dark-950);
-    font-family: var(--font-sans);
+    font-family: inherit;
     font-size: var(--text-base);
     line-height: 1.5;
     letter-spacing: 0;
@@ -131,7 +120,7 @@
 
   li {
     color: var(--color-dark-950);
-    font-family: var(--font-sans);
+    font-family: inherit;
     font-size: var(--text-base);
     line-height: 1.5;
     letter-spacing: 0;
@@ -139,7 +128,7 @@
 
   blockquote {
     color: var(--color-dark-950);
-    font-family: var(--font-sans);
+    font-family: inherit;
     font-size: var(--text-base);
     line-height: 1.5;
     letter-spacing: 0;

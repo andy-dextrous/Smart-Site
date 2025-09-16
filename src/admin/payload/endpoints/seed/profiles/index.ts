@@ -1,5 +1,4 @@
 export { minimalProfile } from "./minimal"
-export { demoProfile } from "./demo"
 export type { SeedProfile, ProfileName } from "./types"
 
 // Default profile is minimal

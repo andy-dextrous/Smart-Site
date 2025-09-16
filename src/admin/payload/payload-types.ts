@@ -544,6 +544,9 @@ export interface Page {
         | PostContentBlock
         | PostsArchiveBlock
         | RelatedPostsBlock
+        | HeroSimpleBlock
+        | ContentBlock
+        | ContactFormSimpleBlock
       )[]
     | null;
   seo?: {
@@ -1146,6 +1149,9 @@ export interface Service {
     | PostContentBlock
     | PostsArchiveBlock
     | RelatedPostsBlock
+    | HeroSimpleBlock
+    | ContentBlock
+    | ContactFormSimpleBlock
   )[];
   seo?: {
     meta?: {
@@ -2126,6 +2132,66 @@ export interface RelatedPostsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSimpleBlock".
+ */
+export interface HeroSimpleBlock {
+  heading: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  align: 'left' | 'center';
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero-simple';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormSimpleBlock".
+ */
+export interface ContactFormSimpleBlock {
+  form: string | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contact-form-simple';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "templates".
  */
 export interface Template {
@@ -2160,6 +2226,9 @@ export interface Template {
     | PostContentBlock
     | PostsArchiveBlock
     | RelatedPostsBlock
+    | HeroSimpleBlock
+    | ContentBlock
+    | ContactFormSimpleBlock
   )[];
   updatedAt: string;
   createdAt: string;
@@ -2568,6 +2637,9 @@ export interface PagesSelect<T extends boolean = true> {
         'post-content'?: T | PostContentBlockSelect<T>;
         'posts-archive'?: T | PostsArchiveBlockSelect<T>;
         'related-posts'?: T | RelatedPostsBlockSelect<T>;
+        'hero-simple'?: T | HeroSimpleBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
       };
   seo?:
     | T
@@ -2963,6 +3035,35 @@ export interface RelatedPostsBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSimpleBlock_select".
+ */
+export interface HeroSimpleBlockSelect<T extends boolean = true> {
+  heading?: T;
+  content?: T;
+  align?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_select".
+ */
+export interface ContentBlockSelect<T extends boolean = true> {
+  content?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormSimpleBlock_select".
+ */
+export interface ContactFormSimpleBlockSelect<T extends boolean = true> {
+  form?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -3286,6 +3387,9 @@ export interface ServicesSelect<T extends boolean = true> {
         'post-content'?: T | PostContentBlockSelect<T>;
         'posts-archive'?: T | PostsArchiveBlockSelect<T>;
         'related-posts'?: T | RelatedPostsBlockSelect<T>;
+        'hero-simple'?: T | HeroSimpleBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
       };
   seo?:
     | T
@@ -3378,6 +3482,9 @@ export interface TemplatesSelect<T extends boolean = true> {
         'post-content'?: T | PostContentBlockSelect<T>;
         'posts-archive'?: T | PostsArchiveBlockSelect<T>;
         'related-posts'?: T | RelatedPostsBlockSelect<T>;
+        'hero-simple'?: T | HeroSimpleBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
       };
   updatedAt?: T;
   createdAt?: T;

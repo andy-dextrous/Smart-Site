@@ -24,7 +24,7 @@ export const minimalProfile: SeedProfile = {
     
     // Skip all demo content
     categories: false,
-    forms: false,
+    forms: true,
     templates: false,
     media: false,
     testimonials: false,

@@ -6,10 +6,9 @@
 /*
 /*  Profiles:
 /*  - minimal: Clean start with essentials only (DEFAULT)
-/*  - demo: Full showcase with all features (current implementation)
 /*************************************************************************/
 
-export type ProfileName = "minimal" | "demo"
+export type ProfileName = "minimal"
 
 export interface SeedProfile {
   name: ProfileName
@@ -30,13 +29,13 @@ export interface SeedProfile {
     posts: boolean
     
     // Pages with different content levels
-    pages: "minimal" | "demo"
+    pages: "minimal"
     
     // Globals with different configurations
     globals: {
-      settings: "minimal" | "full"
-      header: "minimal" | "full"  
-      footer: "minimal" | "full"
+      settings: "minimal"
+      header: "minimal"  
+      footer: "minimal"
     }
   }
 }

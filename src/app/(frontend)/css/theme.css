@@ -46,54 +46,45 @@
     );
   }
 
-  /* Grid Lines */
-  /* This is used to control the responsive grid widths in the design. */
+
+  /* Brand Colors - neutralized via Tailwind palette variables */
 
   @theme {
-    --spacing-grid-col-width: max(
-      var(--spacing-section-x),
-      clamp(1rem, 17.632vw + -7.463rem, 9.375rem)
-    );
-  }
+    /* Primary (Tailwind Indigo) */
+    --color-primary: var(--color-indigo-600);
+    --color-primary-50: var(--color-indigo-50);
+    --color-primary-100: var(--color-indigo-100);
+    --color-primary-200: var(--color-indigo-200);
+    --color-primary-300: var(--color-indigo-300);
+    --color-primary-400: var(--color-indigo-400);
+    --color-primary-500: var(--color-indigo-500);
+    --color-primary-600: var(--color-indigo-600);
 
-  /* Brand Color Shades - get from https://www.tailwindshades.com */
+    /* Secondary (Tailwind Sky) */
+    --color-secondary: var(--color-sky-500);
+    --color-secondary-50: var(--color-sky-50);
+    --color-secondary-100: var(--color-sky-100);
+    --color-secondary-200: var(--color-sky-200);
+    --color-secondary-300: var(--color-sky-300);
+    --color-secondary-400: var(--color-sky-400);
+    --color-secondary-500: var(--color-sky-500);
+    --color-secondary-600: var(--color-sky-600);
+    --color-secondary-700: var(--color-sky-700);
 
-  @theme {
-    /* Primary - Brand Color 1 - Dominant */
-    --color-primary: oklch(50.49% 0.171 302.71);
-    --color-primary-50: oklch(92.71% 0.02428 306.95);
-    --color-primary-100: oklch(88.858% 0.03907 307.2);
-    --color-primary-200: oklch(76.74% 0.082 306.86);
-    --color-primary-300: oklch(65.11% 0.127 305.34);
-    --color-primary-400: oklch(57.25% 0.155 304.34);
-    --color-primary-500: oklch(57.734% 0.15374 304.17);
-    --color-primary-600: oklch(50.49% 0.17053 302.71);
+    /* Neutral */
+    --color-neutral: var(--color-zinc-50);
 
-    /* Secondary - Brand Color 2 - Secondary */
-    --color-secondary: oklch(47.642% 0.29956 274.94);
-    --color-secondary-50: oklch(92.323% 0.04273 298.82);
-    --color-secondary-100: oklch(87.316% 0.07112 297.48);
-    --color-secondary-200: oklch(77.222% 0.13094 295.67);
-    --color-secondary-300: oklch(59.2% 0.211 277.79);
-    --color-secondary-400: oklch(49.24% 0.281 269.8);
-    --color-secondary-500: oklch(47.64% 0.3 274.94);
-    --color-secondary-600: oklch(39.675% 0.24803 275.67);
-    --color-secondary-700: oklch(0.4683 0.2511 283.09);
+    /* Dark (Tailwind Zinc) */
+    --color-dark: var(--color-zinc-950);
+    --color-dark-50: var(--color-zinc-50);
+    --color-dark-100: var(--color-zinc-100);
+    --color-dark-600: var(--color-zinc-600);
+    --color-dark-700: var(--color-zinc-700);
+    --color-dark-800: var(--color-zinc-800);
+    --color-dark-900: var(--color-zinc-900);
+    --color-dark-950: var(--color-zinc-950);
 
-    /* Neutral - Gray shade */
-    --color-neutral: oklch(96.23% 0.005 286.3);
-
-    /* Dark - Black shade */
-    --color-dark: oklch(14.557% 0.00884 273.86);
-    --color-dark-50: oklch(96.23% 0.005 286.3);
-    --color-dark-100: oklch(96.23% 0.005 286.3);
-    --color-dark-600: oklch(33.41% 0.04 274.2);
-    --color-dark-700: oklch(29.75% 0.033 274.52);
-    --color-dark-800: oklch(25.96% 0.027 275.01);
-    --color-dark-900: oklch(22.097% 0.02176 276.465);
-    --color-dark-950: oklch(14.557% 0.00884 273.86);
-
-    /* White - White shade */
+    /* White */
     --color-white: oklch(100% 0 0);
   }
 

@@ -96,6 +96,7 @@ type Page {
   publishedAt: DateTime
   featuredImage: Media
   categories: [Category!]
+  sections: [Page_Sections!]
   seo: Page_Seo
   slug: String
   uri: String
@@ -244,6 +245,220 @@ type Category_Breadcrumbs {
   url: String
   label: String
   id: String
+}
+
+union Page_Sections = HeroSimpleBlock | ContentBlock | ContactFormSimpleBlock | PostsListBlock | PostBodyBlock | PostHeroMinimalBlock | PostContentMinimalBlock | RelatedPostsMinimalBlock
+
+type HeroSimpleBlock {
+  heading: String
+  content(depth: Int): JSON
+  align: HeroSimpleBlock_align
+  id: String
+  blockName: String
+  blockType: String
+}
+
+enum HeroSimpleBlock_align {
+  left
+  center
+}
+
+type ContentBlock {
+  content(depth: Int): JSON
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type ContactFormSimpleBlock {
+  form: Form
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Form {
+  id: String!
+  title: String!
+  fields: [Form_Fields!]
+  submitButtonLabel: String
+  confirmationType: Form_confirmationType
+  confirmationMessage(depth: Int): JSON
+  redirect: Form_Redirect
+  emails: [Form_Emails!]
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+union Form_Fields = Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea | Phone
+
+type Checkbox {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  defaultValue: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Country {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Email {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Message {
+  message(depth: Int): JSON
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Number {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Select {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  placeholder: String
+  options: [Select_Options!]
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Select_Options {
+  label: String
+  value: String
+  id: String
+}
+
+type State {
+  name: String!
+  label: String
+  width: Float
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Text {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Textarea {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type Phone {
+  name: String!
+  label: String
+  width: Float
+  defaultValue: String
+  required: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+enum Form_confirmationType {
+  message
+  redirect
+}
+
+type Form_Redirect {
+  url: String
+}
+
+type Form_Emails {
+  emailTo: String
+  cc: String
+  bcc: String
+  replyTo: String
+  emailFrom: String
+  subject: String
+  message(depth: Int): JSON
+  id: String
+}
+
+type PostsListBlock {
+  heading: String
+  description(depth: Int): JSON
+  postsPerPage: Float
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type PostBodyBlock {
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type PostHeroMinimalBlock {
+  showAuthor: Boolean
+  showPublishDate: Boolean
+  showCategories: Boolean
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type PostContentMinimalBlock {
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type RelatedPostsMinimalBlock {
+  heading: String
+  maxPosts: Float
+  id: String
+  blockName: String
+  blockType: String
 }
 
 type Page_Seo {
@@ -1890,6 +2105,7 @@ type PageVersion_Version {
   publishedAt: DateTime
   featuredImage: Media
   categories: [Category!]
+  sections: [PageVersion_Version_Sections!]
   seo: PageVersion_Version_Seo
   slug: String
   uri: String
@@ -1900,6 +2116,8 @@ type PageVersion_Version {
   createdAt: DateTime
   _status: PageVersion_Version__status
 }
+
+union PageVersion_Version_Sections = HeroSimpleBlock | ContentBlock | ContactFormSimpleBlock | PostsListBlock | PostBodyBlock | PostHeroMinimalBlock | PostContentMinimalBlock | RelatedPostsMinimalBlock
 
 type PageVersion_Version_Seo {
   meta: PageVersion_Version_Seo_Meta
@@ -10286,6 +10504,7 @@ type Service {
   description: String
   publishedAt: DateTime
   featuredImage: Media
+  sections: [Service_Sections!]!
   seo: Service_Seo
   slug: String
   uri: String
@@ -10294,6 +10513,8 @@ type Service {
   createdAt: DateTime
   _status: Service__status
 }
+
+union Service_Sections = HeroSimpleBlock | ContentBlock | ContactFormSimpleBlock | PostsListBlock | PostBodyBlock | PostHeroMinimalBlock | PostContentMinimalBlock | RelatedPostsMinimalBlock
 
 type Service_Seo {
   meta: Service_Seo_Meta
@@ -11712,6 +11933,7 @@ type ServiceVersion_Version {
   description: String
   publishedAt: DateTime
   featuredImage: Media
+  sections: [ServiceVersion_Version_Sections!]!
   seo: ServiceVersion_Version_Seo
   slug: String
   uri: String
@@ -11720,6 +11942,8 @@ type ServiceVersion_Version {
   createdAt: DateTime
   _status: ServiceVersion_Version__status
 }
+
+union ServiceVersion_Version_Sections = HeroSimpleBlock | ContentBlock | ContactFormSimpleBlock | PostsListBlock | PostBodyBlock | PostHeroMinimalBlock | PostContentMinimalBlock | RelatedPostsMinimalBlock
 
 type ServiceVersion_Version_Seo {
   meta: ServiceVersion_Version_Seo_Meta
@@ -12687,9 +12911,12 @@ type Template {
   id: String!
   name: String!
   description: String
+  sections: [Template_Sections!]!
   updatedAt: DateTime
   createdAt: DateTime
 }
+
+union Template_Sections = HeroSimpleBlock | ContentBlock | ContactFormSimpleBlock | PostsListBlock | PostBodyBlock | PostHeroMinimalBlock | PostContentMinimalBlock | RelatedPostsMinimalBlock
 
 type Templates {
   docs: [Template!]!
@@ -14132,152 +14359,6 @@ type RedirectsUpdateDocAccess {
 type RedirectsDeleteDocAccess {
   permission: Boolean!
   where: JSONObject
-}
-
-type Form {
-  id: String!
-  title: String!
-  fields: [Form_Fields!]
-  submitButtonLabel: String
-  confirmationType: Form_confirmationType
-  confirmationMessage(depth: Int): JSON
-  redirect: Form_Redirect
-  emails: [Form_Emails!]
-  updatedAt: DateTime
-  createdAt: DateTime
-}
-
-union Form_Fields = Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea | Phone
-
-type Checkbox {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  defaultValue: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Country {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Email {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Message {
-  message(depth: Int): JSON
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Number {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Select {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  placeholder: String
-  options: [Select_Options!]
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Select_Options {
-  label: String
-  value: String
-  id: String
-}
-
-type State {
-  name: String!
-  label: String
-  width: Float
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Text {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Textarea {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-type Phone {
-  name: String!
-  label: String
-  width: Float
-  defaultValue: String
-  required: Boolean
-  id: String
-  blockName: String
-  blockType: String
-}
-
-enum Form_confirmationType {
-  message
-  redirect
-}
-
-type Form_Redirect {
-  url: String
-}
-
-type Form_Emails {
-  emailTo: String
-  cc: String
-  bcc: String
-  replyTo: String
-  emailFrom: String
-  subject: String
-  message(depth: Int): JSON
-  id: String
 }
 
 type Forms {

@@ -4,7 +4,7 @@ import type { Header, Setting } from "@/admin/payload/payload-types"
 import Link from "next/link"
 
 import type { Config } from "payload"
-import LogoPrimaryLight from "../logos/logo-light"
+import LogoPrimary from "../logos/logo"
 import { MobileNavUpdated } from "./mobile-nav"
 import { getCurrentUser } from "@/admin/data/user"
 import { cn } from "@/utilities/ui"
@@ -21,19 +21,19 @@ export async function Header() {
   return (
     <header
       className={cn(
-        "h-nav md:px-section-x bg-dark/80 border-light-border fixed inset-x-0 z-[1000] border-b px-0 backdrop-blur-lg",
+        "h-nav md:px-section-x bg-white fixed inset-x-0 z-[1000] border-b border-zinc-200 px-0",
         // If user is logged in, add 32px to the top of the header to accomodate the admin bar
         user ? "top-[32px]" : "top-0"
       )}
     >
-      <div className="border-light-border h-full border-x-1 px-8">
+      <div className="h-full px-8">
         <div className="flex h-full items-center justify-between">
           <Link
             href="/"
             className="flex items-center space-x-3"
-            aria-label="Return to smart-site homepage"
+            aria-label="Return to homepage"
           >
-            <LogoPrimaryLight width={208} height={54} />
+            <LogoPrimary width={160} height={42} />
           </Link>
           <HeaderNavigation data={headerData} />
           <MobileNavUpdated data={headerData} settings={settings} />

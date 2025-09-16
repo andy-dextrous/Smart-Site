@@ -45,57 +45,82 @@ export function generateSecureAPIKey(): string {
 export async function ensureAIAgentWithAPIKey(
   payload: Payload,
   context: any
-): Promise<{ user: any; apiKey: string | null }> {
+): Promise<{ user: User; apiKey: string | null }> {
   const aiAgentData = seedAIAgent()
-  
-  // Check if AI agent already exists
-  const existingAgent = await payload.find({
-    collection: "users",
-    where: { role: { equals: "ai-agent" } },
-    limit: 1,
-    overrideAccess: true, // Bypass access control to find hidden AI agent
-  })
 
-  if (existingAgent.docs.length > 0) {
-    const agent = existingAgent.docs[0]
-    
-    // Check if agent already has an API key
-    if ((agent as any).apiKey) {
-      payload.logger.info(`AI agent already has API key configured`)
-      return { user: agent, apiKey: null } // Don't expose existing key
-    }
-    
-    // Generate new API key for existing agent
-    const newApiKey = generateSecureAPIKey()
-    
-    // Update the user with the new API key
-    // Note: Payload will encrypt this automatically
-    const updatedAgent = await payload.update({
+  const envUserId = process.env.AI_AGENT_USER_ID
+  const envApiKey = process.env.AI_AGENT_API_KEY
+
+  let existingAgent: User | null = null
+
+  if (envUserId) {
+    try {
+      const byId = await payload.findByID({
+        collection: "users",
+        id: envUserId,
+        overrideAccess: true,
+      })
+      if (byId) {
+        existingAgent = byId as User
+        payload.logger.info("AI agent exists by environment ID; preserving without changes")
+      }
+    } catch {}
+  }
+
+  if (!existingAgent) {
+    const search = await payload.find({
       collection: "users",
-      id: agent.id,
-      data: {
-        apiKey: newApiKey,
-        enableAPIKey: true,
-      } as any, // Type assertion until types are regenerated
+      where: { role: { equals: "ai-agent" } },
+      limit: 1,
       overrideAccess: true,
     })
-    
-    payload.logger.info(`Generated new API key for existing AI agent`)
-    return { user: updatedAgent, apiKey: newApiKey }
+    if (search.docs.length > 0) {
+      existingAgent = search.docs[0] as User
+      payload.logger.info("AI agent already exists; preserving without changes")
+    }
   }
-  
-  // Create new AI agent with API key
-  const newApiKey = generateSecureAPIKey()
-  
-  const aiAgent = await payload.create({
-    collection: "users",
-    data: {
-      ...aiAgentData,
-      apiKey: newApiKey, // Payload will encrypt this
-    } as any, // Type assertion until types are regenerated
-    overrideAccess: true,
-  })
-  
-  payload.logger.info(`Created AI agent with API key: ${aiAgentData.email}`)
-  return { user: aiAgent, apiKey: newApiKey }
+
+  if (!existingAgent) {
+    const newApiKey = generateSecureAPIKey()
+    const created = await payload.create({
+      collection: "users",
+      data: {
+        ...aiAgentData,
+        apiKey: newApiKey,
+      } as any,
+      overrideAccess: true,
+    })
+    const user = created as User
+    process.env.AI_AGENT_API_KEY = newApiKey
+    process.env.AI_AGENT_USER_ID = String(user.id)
+    payload.logger.info(`Created AI agent with API key: ${aiAgentData.email}`)
+    return { user, apiKey: newApiKey }
+  }
+
+  const rotateCredentials =
+    !envApiKey ||
+    !envUserId ||
+    String(envUserId) !== String(existingAgent.id) ||
+    existingAgent.enableAPIKey === false
+
+  if (rotateCredentials) {
+    const newApiKey = generateSecureAPIKey()
+    const updated = await payload.update({
+      collection: "users",
+      id: existingAgent.id,
+      data: {
+        enableAPIKey: true,
+        apiKey: newApiKey,
+      } as any,
+      overrideAccess: true,
+    })
+    const user = updated as User
+    process.env.AI_AGENT_API_KEY = newApiKey
+    process.env.AI_AGENT_USER_ID = String(user.id)
+    payload.logger.info("AI agent credentials rotated to match environment configuration")
+    return { user, apiKey: newApiKey }
+  }
+
+  process.env.AI_AGENT_USER_ID = String(existingAgent.id)
+  return { user: existingAgent, apiKey: null }
 }

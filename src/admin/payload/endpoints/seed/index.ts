@@ -5,9 +5,7 @@ import type { Payload } from "payload"
 // Import profile system
 import { 
   type SeedProfile, 
-  type ProfileName,
   minimalProfile, 
-  demoProfile, 
   defaultProfile 
 } from "./profiles"
 
@@ -15,30 +13,18 @@ import {
 import { regenerateURIs } from "@/admin/routing/index-manager"
 import { disableSyncHooks, enableSyncHooks } from "@/admin/utilities/prevent-hooks"
 import { formatIdForText, formatIdForRelationship } from "@/admin/payload/db/id-utils"
-import { technologyCategory } from "./categories/technology"
 import { primaryContactForm } from "./forms/primary-contact"
-import { footerGlobal } from "./globals/footer"
-import { headerGlobal } from "./globals/header"
-import { settingsGlobal } from "./globals/settings"
 import { 
   minimalHeaderGlobal, 
   minimalFooterGlobal, 
   minimalSettingsGlobal 
 } from "./globals/minimal-globals"
-import { aboutUsPage } from "./pages/about-us"
-import { contactPage } from "./pages/contact"
-import { homePage } from "./pages/home"
-import { insightsPage } from "./pages/insights"
-import { servicesPage } from "./pages/services"
 import { minimalPages } from "./pages/minimal-pages"
-import { analyticsStrategyPost } from "./posts/analytics-strategy"
-import { digitalTransformationPost } from "./posts/digital-transformation"
-import { scalingInfrastructurePost } from "./posts/scaling-infrastructure"
-import { operationsService, strategyService, technologyService } from "./services"
-import { serviceTemplates } from "./templates/service-templates"
-import { technologyClientTestimonials } from "./testimonials/technology-clients"
 import { seedUser } from "./users/user"
 import { seedAIAgent, ensureAIAgentWithAPIKey } from "./users/ai-agent"
+import { postMinimalTemplate } from "./templates/post-minimal"
+import { insightsMinimalPage } from "./pages/insights-minimal"
+import { sampleMinimalPosts } from "./posts/minimal-posts"
 
 // Types
 type SeedResult = {
@@ -49,6 +35,10 @@ type SeedResult = {
     errors: string[]
   }
   duration: number
+}
+
+type SeedOptions = {
+  blog?: boolean
 }
 
 /*************************************************************************/
@@ -80,6 +70,8 @@ class DynamicSeedManager {
   private mediaFiles: Map<string, any> = new Map()
   private context: any = {}
   private profile: SeedProfile
+  private blogEnabled: boolean = false
+  private postTemplateId: string | null = null
 
   constructor(payload: Payload) {
     this.payload = payload
@@ -87,15 +79,15 @@ class DynamicSeedManager {
   }
 
   /*************************************************************************/
-  /*  MAIN SEED DATABASE METHOD
+  /*  MAIN SEED DATABASE METHOD (MINIMAL-ONLY)
   /*
-  /*  Accepts optional profile parameter to control what gets seeded
-  /*  Defaults to minimal profile if not specified
+  /*  Starter seeds a minimal baseline only; no demo profile support
   /*************************************************************************/
 
-  async seedDatabase(profileName?: ProfileName): Promise<SeedResult> {
-    // Select profile based on parameter or use default (minimal)
-    this.profile = profileName === "demo" ? demoProfile : minimalProfile
+  async seedDatabase(options?: SeedOptions): Promise<SeedResult> {
+    // Minimal-only profile
+    this.profile = minimalProfile
+    this.blogEnabled = !!options?.blog
     
     this.payload.logger.info(`Using seed profile: ${this.profile.name} - ${this.profile.description}`)
     const startTime = Date.now()
@@ -129,7 +121,7 @@ class DynamicSeedManager {
        * Step 2: Clean existing data (including users to fix password hash issues)
        */
       this.payload.logger.info("Cleaning existing data (including users)...")
-      const deleteResult = await this.deleteData(false, false) // Pass false to prevent hook management inside deleteData
+      const deleteResult = await this.deleteData(false, false)
 
       // Don't fail the entire seeding if deletion fails on empty database
       if (!deleteResult.success) {
@@ -148,59 +140,34 @@ class DynamicSeedManager {
       /**
        * Step 4: Seed content based on profile
        */
-      let seededCategories: any[] = []
       let seededForms: any[] = []
-      let seededTemplates: any[] = []
-      let seededMedia: any[] = []
-      let seededTestimonials: any[] = []
       let seededPages: any[] = []
-      let seededServices: any[] = []
-      let seededPosts: any[] = []
-      
-      // Only seed if profile allows
-      if (this.profile.seedFunctions.categories) {
-        seededCategories = await this.seedCategories()
-      }
+      let blogPages: any[] = []
+      let blogPosts: any[] = []
       
       if (this.profile.seedFunctions.forms) {
         seededForms = await this.seedForms()
       }
       
-      if (this.profile.seedFunctions.templates) {
-        seededTemplates = await this.seedTemplates()
-      }
-      
-      if (this.profile.seedFunctions.media) {
-        seededMedia = await this.seedMedia()
-      }
-      
-      if (this.profile.seedFunctions.testimonials) {
-        seededTestimonials = await this.seedTestimonials()
-      }
-      
       // Pages - handle minimal vs demo
-      if (this.profile.seedFunctions.pages === "minimal") {
-        seededPages = await this.seedMinimalPages()
-      } else if (this.profile.seedFunctions.pages === "demo") {
-        seededPages = await this.seedPages(seededForms)
+      seededPages = await this.seedMinimalPages(seededForms)
+
+      // Optional blog seeding
+      if (this.blogEnabled) {
+        this.postTemplateId = await this.seedPostTemplate()
+        blogPages = await this.seedBlogPages()
+        blogPosts = await this.seedBlogPosts(seededUsers)
       }
       
-      if (this.profile.seedFunctions.services) {
-        seededServices = await this.seedServices()
-      }
-      
-      if (this.profile.seedFunctions.posts && seededCategories.length > 0) {
-        seededPosts = await this.seedPosts(seededUsers, seededCategories)
-      }
-      
-      // Globals - handle minimal vs full
-      const seededGlobals = await this.seedGlobals(seededPages, seededTemplates)
+      // Globals - minimal-only
+      const allPages = [...seededPages, ...blogPages]
+      const seededGlobals = await this.seedGlobals(allPages)
 
       /**
        * Step 5: Create settings global FIRST to establish routing configuration
        * This sets up homepage, archive pages, and other routing rules that affect URI generation
        */
-      await this.createSettingsGlobal(seededPages, seededTemplates)
+      await this.createSettingsGlobal(allPages)
 
       /**
        * Step 5.5: Invalidate settings cache to ensure URI regeneration uses fresh settings
@@ -225,24 +192,34 @@ class DynamicSeedManager {
       )
 
       /**
+       * Step 6.5: Revalidate posts-related caches so new blog content appears immediately
+       */
+      if (this.blogEnabled) {
+        try {
+          const { revalidateTag } = await import("next/cache")
+          // Invalidate collection and URI index cache tags for posts
+          revalidateTag("collection:posts")
+          revalidateTag("uri-index:posts")
+          // Also revalidate the Insights archive page URI
+          revalidateTag("uri:/insights")
+          this.payload.logger.info("Revalidated posts collection and insights URI cache tags")
+        } catch (error) {
+          this.payload.logger.error("Failed to revalidate posts/insights cache tags:", error)
+        }
+      }
+
+      /**
        * Step 7: Update header and footer globals with services for proper reference links
        * Keep hooks disabled during this step to prevent revalidation errors on archive pages
        * Only needed for demo profile
        */
-      if (this.profile.name === "demo" && seededServices.length > 0) {
-        await this.updateNavigationGlobals(seededServices)
-      }
+      // No navigation enrichment needed in minimal profile
 
       // Update stats
       stats.created.users = usersCreated
-      stats.created.categories = seededCategories.length
       stats.created.forms = seededForms.length
-      stats.created.templates = seededTemplates.length
-      stats.created.testimonials = seededTestimonials.length
-      stats.created.media = seededMedia.length
-      stats.created.posts = seededPosts.length
-      stats.created.services = seededServices.length
-      stats.created.pages = seededPages.length
+      stats.created.pages = allPages.length
+      stats.created.posts = blogPosts.length
       stats.created.globals = seededGlobals.length + 1 // +1 for settings global
 
       /**
@@ -442,19 +419,50 @@ class DynamicSeedManager {
   }
 
   /*************************************************************************/
-  /*  CREATE CATEGORIES
+  /*  BLOG: MINIMAL TEMPLATE FOR POSTS
   /*************************************************************************/
 
-  private async seedCategories(): Promise<any[]> {
-    this.payload.logger.info("Seeding categories...")
-    const categoryData = technologyCategory()
-    const category = await this.payload.create({
-      collection: "categories",
-      data: categoryData,
-      context: this.context,
-    })
-    return [category]
+  private async seedPostTemplate(): Promise<string | null> {
+    return await postMinimalTemplate(this.payload, this.context)
   }
+
+  /*************************************************************************/
+  /*  BLOG: MINIMAL INSIGHTS PAGE
+  /*************************************************************************/
+
+  private async seedBlogPages(): Promise<any[]> {
+    const pages: any[] = []
+    try {
+      const pageData = insightsMinimalPage()
+      const page = await this.payload.create({ collection: "pages", data: pageData as any, context: this.context })
+      pages.push(page)
+    } catch (error) {
+      this.payload.logger.error("Error creating insights page:", error)
+    }
+    return pages
+  }
+
+  /*************************************************************************/
+  /*  BLOG: MINIMAL POSTS
+  /*************************************************************************/
+
+  private async seedBlogPosts(users: any[]): Promise<any[]> {
+    const posts: any[] = []
+    const author = users[0]
+    const authorRel = author ? formatIdForRelationship(author.id) : null
+    const sample = sampleMinimalPosts(authorRel)
+    for (const p of sample) {
+      try {
+        const post = await this.payload.create({ collection: "posts", data: p as any, context: this.context })
+        posts.push(post)
+      } catch (error) {
+        this.payload.logger.error("Error creating post:", error)
+      }
+    }
+    return posts
+  }
+
+  // (Categories are not used in minimal starter)
 
   /*************************************************************************/
   /*  CREATE FORMS
@@ -471,178 +479,26 @@ class DynamicSeedManager {
     return [form]
   }
 
-  /*************************************************************************/
-  /*  CREATE TESTIMONIALS
-  /*************************************************************************/
+  // (Testimonials are not used in minimal starter)
 
-  private async seedTestimonials(): Promise<any[]> {
-    this.payload.logger.info("Seeding testimonials...")
+  // (Templates are not used in minimal starter)
 
-    // Testimonials now handle their own image downloading
-    const testimonialsData = await technologyClientTestimonials(
-      this.payload,
-      this.context
-    )
-    const testimonials = []
+  // (Media seeding is not used in minimal starter)
 
-    for (const testimonialData of testimonialsData) {
-      const testimonial = await this.payload.create({
-        collection: "testimonials",
-        data: testimonialData,
-        context: this.context,
-      })
-      testimonials.push(testimonial)
-    }
+  // (Posts are not used in minimal starter)
 
-    return testimonials
-  }
-
-  /*************************************************************************/
-  /*  CREATE TEMPLATES
-  /*************************************************************************/
-
-  private async seedTemplates(): Promise<any[]> {
-    this.payload.logger.info("Seeding templates...")
-
-    // Templates handle their own image downloading
-    const templatesData = await serviceTemplates(this.payload, this.context)
-    const templates = []
-
-    for (const templateData of templatesData) {
-      try {
-        const template = await this.payload.create({
-          collection: "templates",
-          data: templateData,
-          context: this.context,
-        })
-        templates.push(template)
-      } catch (error) {
-        this.payload.logger.error(
-          `Failed to create template ${templateData.name}:`,
-          error
-        )
-        // Continue with other templates even if one fails
-      }
-    }
-    return templates
-  }
-
-  /*************************************************************************/
-  /*  CREATE MEDIA
-  /*************************************************************************/
-
-  private async seedMedia(): Promise<any[]> {
-    this.payload.logger.info("Seeding media...")
-    const media = []
-
-    for (const [key, fileData] of this.mediaFiles.entries()) {
-      const mediaItem = await this.payload.create({
-        collection: "media",
-        data: {
-          alt: fileData.alt,
-          caption: fileData.caption,
-        },
-        file: {
-          name: fileData.name,
-          data: fileData.data,
-          mimetype: fileData.mimetype,
-          size: fileData.size,
-        },
-        context: this.context,
-      })
-      media.push(mediaItem)
-    }
-
-    return media
-  }
-
-  /*************************************************************************/
-  /*  CREATE POSTS
-  /*************************************************************************/
-
-  private async seedPosts(users: any[], categories: any[]): Promise<any[]> {
-    this.payload.logger.info("Seeding posts...")
-    const posts = []
-
-    const author = users[0]
-    const category = categories[0]
-
-    // Format IDs for relationships
-    const authorWithFormattedId = {
-      ...author,
-      id: formatIdForRelationship(author.id),
-    }
-    const categoryWithFormattedId = {
-      ...category,
-      id: formatIdForRelationship(category.id),
-    }
-
-    const postData = [
-      await scalingInfrastructurePost(
-        this.payload,
-        { author: authorWithFormattedId, category: categoryWithFormattedId },
-        this.context
-      ),
-      await analyticsStrategyPost(
-        this.payload,
-        { author: authorWithFormattedId, category: categoryWithFormattedId },
-        this.context
-      ),
-      await digitalTransformationPost(
-        this.payload,
-        { author: authorWithFormattedId, category: categoryWithFormattedId },
-        this.context
-      ),
-    ]
-
-    for (const data of postData) {
-      const post = await this.payload.create({
-        collection: "posts",
-        data,
-        context: this.context,
-      })
-      posts.push(post)
-    }
-
-    return posts
-  }
-
-  /*************************************************************************/
-  /*  CREATE SERVICES
-  /*************************************************************************/
-
-  private async seedServices(): Promise<any[]> {
-    this.payload.logger.info("Seeding services...")
-    const services = []
-
-    // Services now handle their own image downloading
-    const serviceData = [
-      await strategyService(this.payload, this.context),
-      await technologyService(this.payload, this.context),
-      await operationsService(this.payload, this.context),
-    ]
-
-    for (const data of serviceData) {
-      const service = await this.payload.create({
-        collection: "services",
-        data,
-        context: this.context,
-      })
-      services.push(service)
-    }
-
-    return services
-  }
+  // (Services are not used in minimal starter)
 
   /*************************************************************************/
   /*  CREATE MINIMAL PAGES
   /*************************************************************************/
 
-  private async seedMinimalPages(): Promise<any[]> {
+  private async seedMinimalPages(forms: any[]): Promise<any[]> {
     this.payload.logger.info("Seeding minimal pages (blank pages)...")
     const pages = []
     
-    const pageData = await minimalPages(this.payload, this.context)
+    const contactForm = forms?.[0]
+    const pageData = await minimalPages(this.payload, this.context, contactForm)
     
     for (const data of pageData) {
       try {
@@ -660,87 +516,84 @@ class DynamicSeedManager {
     return pages
   }
 
-  /*************************************************************************/
-  /*  CREATE PAGES (DEMO)
-  /*************************************************************************/
-
-  private async seedPages(forms: any[]): Promise<any[]> {
-    this.payload.logger.info("Seeding pages...")
-    const pages = []
-
-    const contactForm = forms[0]
-
-    // Format contact form ID for relationship
-    const formattedContactForm = {
-      ...contactForm,
-      id: formatIdForRelationship(contactForm.id),
-    }
-
-    // All pages now handle their own image downloading
-    const pageData = [
-      await homePage(this.payload, this.context),
-      await aboutUsPage(this.payload, this.context),
-      await contactPage(
-        this.payload,
-        { contactForm: formattedContactForm },
-        this.context
-      ),
-      await servicesPage(this.payload, this.context),
-      await insightsPage(this.payload, this.context),
-    ]
-
-    for (const data of pageData) {
-      try {
-        const page = await this.payload.create({
-          collection: "pages",
-          data,
-          context: this.context,
-        })
-        pages.push(page)
-      } catch (error) {
-        this.payload.logger.error("Error creating page:", error)
-        // Continue with other pages even if one fails
-      }
-    }
-
-    return pages
-  }
+  // (Demo pages are not used in minimal starter)
 
   /*************************************************************************/
   /*  CREATE INITIAL NAVIGATION GLOBALS
   /*************************************************************************/
 
-  private async seedGlobals(pages: any[], templates: any[]): Promise<any[]> {
-    this.payload.logger.info(`Seeding navigation globals (${this.profile.name} profile)...`)
+  private async seedGlobals(pages: any[]): Promise<any[]> {
+    this.payload.logger.info("Seeding navigation globals (minimal profile)...")
     const globals = []
 
     try {
-      // Use minimal or full header based on profile
-      const headerData = this.profile.seedFunctions.globals.header === "minimal" 
-        ? minimalHeaderGlobal()
-        : headerGlobal({ services: [] })
+      const headerData = minimalHeaderGlobal()
+      if (this.blogEnabled) {
+        try {
+          const insights = pages.find(p => p.slug === "insights")
+          if (insights) {
+            headerData.navItems.splice(1, 0, {
+              item: {
+                link: { type: "custom", newTab: false, url: "/insights", label: "Insights" },
+                subItems: [],
+              },
+            })
+          }
+        } catch {}
+      }
         
       const header = await this.payload.updateGlobal({
         slug: "header",
         data: headerData,
         context: this.context,
       })
+      // Explicitly revalidate header cache tag since hooks may be disabled during seed
+      try {
+        const { revalidateTag } = await import("next/cache")
+        revalidateTag("global:header")
+        this.payload.logger.info("Revalidated global:header after seed")
+      } catch (error) {
+        this.payload.logger.error("Failed to revalidate global:header:", error)
+      }
       globals.push(header)
     } catch (error) {
       this.payload.logger.error("Error creating header:", error)
     }
 
     try {
-      // Use minimal or full footer based on profile
-      const footerData = this.profile.seedFunctions.globals.footer === "minimal"
-        ? minimalFooterGlobal()
-        : footerGlobal({ services: [] })
-        
+      const footerData = minimalFooterGlobal()
+
+      // Mirror primary header links into a simple footer menu
+      try {
+        const homeLink = { type: "custom", newTab: false, url: "/", label: "Home" }
+        const contactLink = { type: "custom", newTab: false, url: "/contact", label: "Contact" }
+        const links = [homeLink]
+        if (this.blogEnabled) {
+          links.push({ type: "custom", newTab: false, url: "/insights", label: "Insights" })
+        }
+        links.push(contactLink)
+
+        footerData.menus = [
+          {
+            title: "Explore",
+            menuItems: links.map(link => ({ link })),
+          },
+        ]
+      } catch {}
+
       const footer = await this.payload.updateGlobal({
         slug: "footer",
         data: footerData,
         context: this.context,
       })
+      // Explicitly revalidate footer cache tag since hooks may be disabled during seed
+      try {
+        const { revalidateTag } = await import("next/cache")
+        revalidateTag("global:footer")
+        this.payload.logger.info("Revalidated global:footer after seed")
+      } catch (error) {
+        this.payload.logger.error("Failed to revalidate global:footer:", error)
+      }
       globals.push(footer)
     } catch (error) {
       this.payload.logger.error("Error creating footer:", error)
@@ -753,38 +606,24 @@ class DynamicSeedManager {
   /*  CREATE SETTINGS GLOBAL
   /*************************************************************************/
 
-  private async createSettingsGlobal(pages: any[], templates: any[]): Promise<void> {
-    this.payload.logger.info(`Creating settings global (${this.profile.name} profile)...`)
+  private async createSettingsGlobal(pages: any[]): Promise<void> {
+    this.payload.logger.info("Creating settings global (minimal profile)...")
 
     try {
       // Find the required pages from the created pages
       const homePage = pages.find(p => p.slug === "home") || pages[0]
+      const insightsPage = pages.find(p => p.slug === "insights")
       
-      // Use minimal or full settings based on profile
-      if (this.profile.seedFunctions.globals.settings === "minimal") {
-        await this.payload.updateGlobal({
-          slug: "settings",
-          data: minimalSettingsGlobal(homePage),
-          context: this.context,
-        })
-      } else {
-        // Full settings for demo profile
-        const servicesPage = pages.find(p => p.slug === "services")
-        const insightsPage = pages.find(p => p.slug === "insights")
-        const aboutUsPage = pages.find(p => p.slug === "about-us")
-
-        await this.payload.updateGlobal({
-          slug: "settings",
-          data: settingsGlobal({
-            homePage: homePage,
-            servicesPage: servicesPage,
-            insightsPage: insightsPage,
-            aboutUsPage: aboutUsPage,
-            templates: templates,
-          }),
-          context: this.context,
-        })
+      const settingsData: any = minimalSettingsGlobal(homePage)
+      if (this.blogEnabled && insightsPage) {
+        settingsData.routing = {
+          ...(settingsData.routing || {}),
+          postsCollectionLabel: "Insights",
+          postsArchivePage: insightsPage.id,
+          postsSingleTemplate: this.postTemplateId ? this.postTemplateId : null,
+        }
       }
+      await this.payload.updateGlobal({ slug: "settings", data: settingsData, context: this.context })
       
       this.payload.logger.info("Settings global created with routing configuration")
     } catch (error) {
@@ -796,54 +635,7 @@ class DynamicSeedManager {
   /*  UPDATE NAVIGATION GLOBALS
   /*************************************************************************/
 
-  private async updateNavigationGlobals(services: any[]): Promise<void> {
-    this.payload.logger.info("Updating navigation globals with service references...")
-
-    // Fetch services fresh from database to get updated URIs
-    // Use a fresh context to bypass any caching
-    const publishedServices = await this.payload.find({
-      collection: "services",
-      where: {
-        _status: { equals: "published" },
-      },
-      limit: 100,
-      context: { ...this.context, skipCache: true },
-    })
-
-    try {
-      await this.payload.updateGlobal({
-        slug: "header",
-        data: headerGlobal({ services: publishedServices.docs }),
-        context: this.context,
-      })
-    } catch (error) {
-      this.payload.logger.error("Error updating header:", error)
-    }
-
-    try {
-      await this.payload.updateGlobal({
-        slug: "footer",
-        data: footerGlobal({ services: publishedServices.docs }),
-        context: this.context,
-      })
-    } catch (error) {
-      this.payload.logger.error("Error updating footer:", error)
-    }
-
-    // Invalidate navigation cache to ensure frontend gets updated service URIs
-    try {
-      const { revalidateTag } = await import("next/cache")
-
-      // Directly invalidate the cache tags for header and footer globals
-      revalidateTag("global:header")
-      revalidateTag("global:footer")
-
-      // Also invalidate the "all" tag to ensure complete cache refresh
-      revalidateTag("all")
-    } catch (error) {
-      this.payload.logger.error("Error invalidating navigation cache:", error)
-    }
-  }
+  // (Navigation enrichment not needed in minimal starter)
 
   /*************************************************************************/
   /*  DELETE DATA METHODS
@@ -913,6 +705,15 @@ class DynamicSeedManager {
             // Delete items in the current page
             for (const item of items.docs) {
               try {
+                if (
+                  collection === "users" &&
+                  (
+                    (typeof process.env.AI_AGENT_USER_ID === "string" && String(item.id) === process.env.AI_AGENT_USER_ID) ||
+                    (typeof (item as any).role === "string" && (item as any).role === "ai-agent")
+                  )
+                ) {
+                  continue
+                }
                 await this.payload.delete({
                   collection: collection as any,
                   id: item.id,
