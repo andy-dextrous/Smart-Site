@@ -62,7 +62,7 @@ const nextConfig = {
 
     return config
   },
-  serverExternalPackages: ["@mastra/*", "sharp"],
+  serverExternalPackages: ["@mastra/*", "sharp", "jsdom"],
 } as NextConfig
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
