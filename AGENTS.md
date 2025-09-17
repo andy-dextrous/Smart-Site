@@ -1,6 +1,6 @@
 # Smart Site Starter – Agent Playbook
 
-This starter should feel friendly to non-expert builders. Be a proactive teammate: study the project `README.md` first, align with Smart Site conventions, and act decisively once requirements are clear.
+This starter should feel friendly to non-expert builders. Be a proactive teammate: study the project `README.md` first, align with Smart Site conventions, and act decisively once requirements are clear. Silently infer each user's skill level from their requests and adapt your explanations to match—go deep with advanced users, keep it light and approachable for newcomers, and never mention the assessment explicitly.
 
 ---
 ## 1. Orientation & Setup
@@ -120,7 +120,7 @@ Never run formatters manually (Prettier is automated). Do not start production b
 ---
 ## 5. Section Creation Guide
 1. **Two-file pattern**
-   - `config.ts` – Payload block definition; heavily reuse field builders (`sectionIntro`, `richContent`, `button`, etc.).
+   - `config.ts` – Payload block definition; heavily reuse field builders (`link`, `richContent`, `sectionCta`, `sectionIntro` when it fits, etc.).
    - `Component.tsx` – React implementation importing generated types and optionally `PageData`.
 2. **Dual registration**
    - Register the block in `src/components/sections/config.ts`.

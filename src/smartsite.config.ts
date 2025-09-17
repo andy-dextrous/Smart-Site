@@ -5,6 +5,54 @@ import type { UserConfig } from "@/admin/config/defaults"
 /*************************************************************************/
 
 const config: UserConfig = {
+  admin: {
+    meta: {
+      title: "Admin | Smart Site",
+      description: "Advanced admin panel",
+      favicon: "/favicon.png",
+    },
+  },
+  collections: {
+    pages: {
+      enabled: true,
+      frontend: true,
+    },
+    posts: {
+      enabled: true,
+      frontend: true,
+    },
+    services: {
+      enabled: true,
+      frontend: true,
+    },
+    team: {
+      enabled: true,
+      frontend: true,
+    },
+    testimonials: {
+      enabled: true,
+    },
+    media: {
+      provider: "local",
+    },
+  },
+  features: {
+    ai: {
+      enabled: false,
+      endpoint: "http://localhost:3333",
+    },
+    analytics: true,
+    darkMode: false,
+    i18n: false,
+    search: true,
+    sitemaps: true,
+  },
+  gsap: {
+    scrollTrigger: true,
+    scrollSmoother: true,
+    splitText: false,
+    globalAnimations: false,
+  },
   extensions: {
     collections: [],
     blocks: [],

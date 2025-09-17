@@ -137,6 +137,7 @@ const GSAPConfigSchema = z.object({
   customEase: z.boolean(),
   physics2D: z.boolean(),
   textPlugin: z.boolean(),
+  globalAnimations: z.boolean(),
 })
 
 const BreadcrumbConfigSchema = z.object({
@@ -431,6 +432,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     customEase: false,
     physics2D: false,
     textPlugin: false,
+    globalAnimations: false,
   },
 
   /*************************************************************************/

@@ -72,4 +72,12 @@ export function getCollectionConfig(slug: string): CollectionConfig | undefined 
 /*  RE-EXPORT TYPES
 /*************************************************************************/
 
-export type { SmartSiteConfig, UserConfig, CollectionConfig, MediaCollectionConfig, AdminTheme, GSAPConfig, FeaturesConfig } from "./defaults"
+export type {
+  SmartSiteConfig,
+  UserConfig,
+  CollectionConfig,
+  MediaCollectionConfig,
+  AdminTheme,
+  GSAPConfig,
+  FeaturesConfig,
+} from "./defaults"

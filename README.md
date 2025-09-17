@@ -12,6 +12,7 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - [Building Sections](#building-sections)
 - [Routing & Caching](#routing--caching)
 - [Configuration System](#configuration-system)
+- [Adding Animations](#adding-animations)
 - [Extensions & Overrides](#extensions--overrides)
 - [Development Workflow](#development-workflow)
 - [Troubleshooting](#troubleshooting)
@@ -25,7 +26,7 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 
 ### Field-Driven Architecture
 
-- **Reusable field patterns** - Pre-built field groups (`sectionIntro`, `sectionCta`, `button`, etc.)
+- **Reusable field patterns** - Pre-built field groups (`link`, `buttonsGroup`, `content`, etc.)
 - **Type-safe components** - Automatic TypeScript generation from Payload schemas
 - **Visual field editor** - Admin UI adapts to your field configurations
 - **Smart defaults** - Sensible field defaults for rapid development
@@ -113,7 +114,7 @@ RESEND_API_KEY=re_...                             # Resend.com API key
 RESEND_DEFAULT_FROM=noreply@example.com
 
 # AI Backend (Optional)
-NEXT_PUBLIC_AI_URL=http://localhost:4112          # Smart Site AI URL
+NEXT_PUBLIC_AI_URL=http://localhost:3333          # Smart Site AI URL
 # OPENAI_API_KEY=sk-...                           # If using AI features
 
 # Admin Seeding (Development)
@@ -619,7 +620,7 @@ const config: UserConfig = {
   frontend: {
     ai: {
       enabled: true,
-      url: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:4112",
+      url: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:3333",
     },
   },
 }
@@ -632,7 +633,7 @@ The AI backend (`apps/smart-site-ai`) runs separately:
 ```bash
 # Development
 cd apps/smart-site-ai
-pnpm dev  # Runs on port 4112
+pnpm dev  # Runs on port 3333
 
 # Production - Deploy to Vercel/Railway
 # Update NEXT_PUBLIC_AI_URL in frontend
@@ -759,13 +760,14 @@ touch src/components/sections/hero-banner/{config.ts,Component.tsx}
 
 ```typescript
 import type { Block } from "payload"
-import { sectionIntro, sectionCta } from "@/components/fields"
+import { link } from "@/components/fields/link/link"
+import { sectionCta } from "@/components/fields/section-cta/section-cta"
 
 export const HeroBanner: Block = {
   slug: "hero-banner",
   interfaceName: "HeroBannerBlock",
   fields: [
-    sectionIntro(), // Reusable field group
+    link(), // Smart link selector
     sectionCta(), // Call-to-action fields
     {
       name: "backgroundImage",
@@ -779,19 +781,29 @@ export const HeroBanner: Block = {
 ### Step 2: Build Component (Component.tsx)
 
 ```typescript
-import { SectionIntro, SectionCta } from "@/components/layout"
+import { CMSLink } from "@/components/fields/link"
+import { SectionCta } from "@/components/fields/section-cta"
 import { Media } from "@/admin/payload/components/frontend/media"
 import type { HeroBannerBlock } from "@/admin/payload/payload-types"
 
 export function HeroBannerComponent({
-  sectionIntro,
+  link,
   sectionCta,
   backgroundImage
 }: HeroBannerBlock) {
   return (
     <section className="relative min-h-screen">
       {backgroundImage && <Media resource={backgroundImage} />}
-      <SectionIntro {...sectionIntro} />
+      {link?.label && (
+        <CMSLink
+          newTab={link.newTab ?? undefined}
+          reference={link.reference ?? undefined}
+          type={link.type ?? undefined}
+          url={link.url ?? undefined}
+        >
+          {link.label}
+        </CMSLink>
+      )}
       <SectionCta {...sectionCta} />
     </section>
   )
@@ -816,22 +828,93 @@ export const sectionsMap = {
 - **Spacing** (`theme.css`): use classes like `px-section-x`, `py-section-y`, `gap-content`, `gap-content-sm/lg`, and the container utilities (`container`, `container-md`, `container-sm`) to align with the layout grid.
 - **Color tokens**: prefer palette utilities such as `bg-primary-500`, `text-secondary-600`, `text-dark-700`, `border-light-border`. Gradient helpers (e.g., `.gradient-border`) live in `components.css`.
 - **Utilities** (`utilities.css`): helpers like `stop-scroll`, `scrollbar-hidden`, `center`, `fill-abs`, and `title-hidden` handle cross-component behaviors.
-- **Animations**: mark animated components with `"use client"`, import `useGSAP`/`gsap` from `@/providers/gsap`, scope the animation with a ref, animate transforms/opacity, and add `will-change` classes when animating.
+- **Animations**: mark animated components with `"use client"`, import `useGSAP`/`gsap` from `@/providers/gsap`, scope the animation with a ref, animate transforms/opacity, add `will-change` classes when animating, and toggle `gsap.globalAnimations` when you prefer drop-in data-attribute reveals.
 - **Typography & padding**: lean on the design system for spacing (`px-section-x`, `py-section-y`, `gap-content`) and type instead of adding ad-hoc `p-*`, `text-*`, or `leading-*` utilities inside components.
 - **Styling workflow**: check `components.css` for reusable patterns before layering custom Tailwind values; only add new classes there when the pattern will be reused.
+
+### Adding Animations
+
+High-contrast motion is part of the Smart Site DNA. Pick the right layer for the job so pages stay maintainable and performant.
+
+#### 1. Quick presets (config-driven)
+
+- Toggle `gsap.globalAnimations` in `smartsite.config.ts` when editors just need tasteful reveals.
+- Add data attributes directly to markup – no custom hooks required:
+
+  ```tsx
+  <div data-animate="fade-up" data-animate-delay="0.2">
+    <h2 className="font-display text-balance">Heading that glides in</h2>
+  </div>
+  ```
+
+| Effect        | Attribute(s)                                                                                                      | Notes |
+| ------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| Fade + offset | `data-animate="fade-up\|fade-down\|fade-left\|fade-right\|fade-in"`, `data-animate-duration`, `data-animate-delay`, `data-animate-distance`, `data-animate-offset`, `data-animate-stagger`, `data-animate-target`, `data-animate-repeat` | Uses `ScrollTrigger`. Repeats when `data-animate-repeat="true"`.
+| Parallax      | `data-parallax`, `data-parallax-speed`, `data-parallax-start`, `data-parallax-end`, `data-parallax-scrub`          | Vertical translate tied to scroll. |
+| Rotate        | `data-rotate`, `data-rotate-turns`, `data-rotate-start`, `data-rotate-end`, `data-rotate-scrub`                    | Continuous scroll-based rotations. |
+| Typewriter    | `data-typewriter`, `data-typewriter-speed`, `data-typewriter-delay`, `data-typewriter-ease`, `data-typewriter-start`, `data-typewriter-repeat` | TextPlugin loads automatically when needed. |
+| Pulse         | `data-pulse`, `data-pulse-scale`, `data-pulse-duration`                                                            | Idle breathing animation (no ScrollTrigger required). |
+| Split text    | `data-split="lines\|words\|chars"`, `data-split-stagger`, `data-split-duration`, `data-split-offset`, `data-split-ease` | SplitText loads on demand and runs once per page load. |
+
+#### 2. Section-level timelines
+
+- Reach for bespoke timelines when motion depends on component state or complex sequencing.
+- Import from the provider so GSAP plugins respect config toggles:
+
+  ```tsx
+  "use client"
+
+  import { useRef } from "react"
+  import { gsap, useGSAP } from "@/providers/gsap"
+
+  export function FeatureRow() {
+    const scope = useRef<HTMLDivElement>(null)
+
+    useGSAP(() => {
+      const items = gsap.utils.toArray<HTMLElement>('[data-feature]', scope.current)
+      gsap.from(items, {
+        opacity: 0,
+        y: 24,
+        stagger: 0.12,
+        duration: 0.6,
+        ease: "power2.out",
+      })
+    }, { scope })
+
+    return (
+      <div ref={scope}>
+        {/* ... */}
+      </div>
+    )
+  }
+  ```
+
+#### 3. Custom GSAP effects
+
+- Register reusable effects in `apps/smart-site/src/providers/gsap/effects.ts`.
+- Client projects start with a blank registry (`apps/smart-site-starter/src/providers/gsap/effects.ts`) and the sync command leaves it untouched, so teams can add branded effects without conflicts.
+
+#### 4. Performance checklist
+
+- Prefer transforms and opacity; avoid animating layout properties.
+- Disable `gsap.globalAnimations` when a project only uses bespoke motion.
+- Kill any manually created `ScrollTrigger` or timelines inside cleanup callbacks.
+- Keep timelines scoped (`useGSAP` + refs) to prevent cross-page leaks.
 
 ### Reusable Field Patterns
 
 Smart Site provides **pre-built field groups** that ensure consistency:
 
-| Field Group          | Purpose          | Includes                        |
-| -------------------- | ---------------- | ------------------------------- |
-| `sectionIntro()`     | Section header   | Heading, description, alignment |
-| `sectionCta()`       | Call-to-action   | Button text, link, style        |
-| `button()`           | Single button    | Label, URL, variant             |
-| `buttonsGroup()`     | Multiple buttons | Array of buttons                |
-| `link()`             | Smart linking    | Internal/external/anchor        |
-| `mediaWithOptions()` | Enhanced media   | Image + alt text + caption      |
+| Field Group          | Purpose            | Includes                        |
+| -------------------- | ------------------ | ------------------------------- |
+| `link()`             | Smart linking      | Internal/external/anchor        |
+| `buttonsGroup()`     | Button clusters    | Array of buttons                |
+| `button()`           | Single action      | Label, URL, variant             |
+| `sectionCta()`       | Call-to-action bar | Button text, link, style        |
+| `sectionIntro()`     | Optional heading   | Heading, description, alignment |
+| `mediaWithOptions()` | Enhanced media     | Image + alt text + caption      |
+
+Use only the helpers that fit a section’s content footprint—`sectionIntro()` is handy when you need a heading/eyebrow pair, but many sections can skip it entirely in favour of richer link or content fields.
 
 ### Section Best Practices
 
@@ -922,7 +1005,7 @@ const config: UserConfig = {
 
   // Feature flags
   features: {
-    ai: { enabled: true, endpoint: "http://localhost:4112" },
+    ai: { enabled: true, endpoint: "http://localhost:3333" },
     darkMode: false,
     i18n: false,
     analytics: true,
@@ -932,10 +1015,6 @@ const config: UserConfig = {
 
   // Admin configuration
   admin: {
-    theme: {
-      colors: { accent: "#4f37fb" },
-      layout: { sidebarWidth: "240px" },
-    },
     meta: {
       title: "Admin | Smart Site",
       description: "Advanced admin panel",
@@ -943,39 +1022,32 @@ const config: UserConfig = {
     },
   },
 
-  // Image optimization
-  images: {
-    quality: {
-      default: 85,
-      thumbnail: 75,
-      hero: 90,
-    },
-    sizes: [
-      { name: "thumbnail", width: 300 },
-      { name: "medium", width: 900 },
-      { name: "large", width: 1400 },
-    ],
-    breakpoints: {
-      sm: 640,
-      md: 768,
-      lg: 1024,
-      xl: 1280,
-    },
+  // Collections (explicit defaults for discoverability)
+  collections: {
+    pages: { enabled: true, frontend: true },
+    posts: { enabled: true, frontend: true },
+    services: { enabled: true, frontend: true },
+    team: { enabled: true, frontend: true },
+    testimonials: { enabled: true },
+    media: { provider: "local" },
   },
 
-  // GSAP configuration
+  // Feature flags
+  features: {
+    ai: { enabled: true, endpoint: "http://localhost:3333" },
+    analytics: true,
+    darkMode: false,
+    i18n: false,
+    search: true,
+    sitemaps: true,
+  },
+
+  // GSAP configuration (common toggles)
   gsap: {
     scrollTrigger: true,
     scrollSmoother: true,
-    // ... other GSAP plugins
-  },
-
-  // Extensions
-  extensions: {
-    collections: [], // Custom collections
-    blocks: [], // Custom blocks
-    globals: [], // Custom globals
-    plugins: [], // Payload plugins
+    splitText: false,
+    globalAnimations: false,
   },
 }
 
@@ -1030,12 +1102,28 @@ Each configurable collection (any slug inside `smartsite.config.ts → collectio
 | Feature       | Options   | Default          | Purpose                                                                         |
 | ------------- | --------- | ---------------- | ------------------------------------------------------------------------------- |
 | `ai.enabled`  | `boolean` | `true`           | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
-| `ai.endpoint` | `string`  | `localhost:4112` | AI backend URL (only used when ai.enabled is true)                              |
+| `ai.endpoint` | `string`  | `localhost:3333` | AI backend URL (only used when ai.enabled is true)                              |
 | `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
 | `i18n`        | `boolean` | `false`          | Internationalization                                                            |
 | `analytics`   | `boolean` | `true`           | Analytics tracking                                                              |
 | `search`      | `boolean` | `true`           | Search functionality                                                            |
 | `sitemaps`    | `boolean` | `true`           | XML sitemap generation                                                          |
+
+#### GSAP Configuration
+
+| Option              | Type       | Default | Purpose                                                                  |
+| ------------------- | ---------- | ------- | ------------------------------------------------------------------------ |
+| `scrollTrigger`     | `boolean`  | `true`  | Registers `ScrollTrigger` for manual hooks and global animations         |
+| `scrollSmoother`    | `boolean`  | `true`  | Enables smooth scrolling context                                         |
+| `flip`              | `boolean`  | `false` | Loads GSAP Flip plugin                                                   |
+| `draggable`         | `boolean`  | `false` | Loads Draggable plugin                                                   |
+| `morphSVG`          | `boolean`  | `false` | Loads MorphSVG plugin                                                    |
+| `drawSVG`           | `boolean`  | `false` | Loads DrawSVG plugin                                                     |
+| `splitText`         | `boolean`  | `false` | Registers SplitText for manual hooks                                     |
+| `customEase`        | `boolean`  | `false` | Loads CustomEase                                                         |
+| `physics2D`         | `boolean`  | `false` | Loads Physics2D helpers                                                  |
+| `textPlugin`        | `boolean`  | `false` | Registers TextPlugin for manual hooks                                    |
+| `globalAnimations`  | `boolean`  | `false`  | Enables the global data-attribute animation provider                    |
 
 **AI Configuration Details:**
 
@@ -1302,6 +1390,7 @@ The merge order is: defaults → registry overrides → user config (`smartsite.
 | **Add collection**    | `extensions.collections`   | In config file             |
 | **Style frontend**    | `app/(frontend)/css/`      | Tailwind v4 styles         |
 | **Add API route**     | `app/(frontend)/api/`      | Frontend endpoints         |
+| **Quick animations**  | Data attributes (`data-animate`, etc.) | Enable `gsap.globalAnimations` in config |
 
 ### Common Imports & Helpers
 
@@ -1312,7 +1401,7 @@ The merge order is: defaults → registry overrides → user config (`smartsite.
 | `@/admin/data/globals` | `getGlobal`, `getSettings`, `getHomepage` | Fetches globals and resolves the homepage page doc. |
 | `@/admin/data/user` | `getCurrentUser` | Reads the authenticated Payload user (for gating UI). |
 | `@/components/ui/*` | Buttons, cards, breadcrumb primitives, command palette utilities | Shared UI primitives wired to design tokens. |
-| `@/components/fields/*` | `sectionIntro`, `sectionCta`, `link`, `buttonsGroup`, etc. | Field builders used in section configs. |
+| `@/components/fields/*` | `link`, `buttonsGroup`, `sectionCta`, `sectionIntro`, etc. | Field builders used in section configs. |
 | `@/admin/components/render-sections` | `PageData`, `RenderSections` | Context props injected into every section component. |
 
 ### Development Commands
@@ -1360,7 +1449,7 @@ Tell your AI assistant to use specific rules:
 | **Admin changes lost**       | Use `smartsite.config.ts` instead              |
 | **MongoDB connection fails** | Ensure the MongoDB service is running (brew services list / net start MongoDB) |
 | **Build fails**              | Run `pnpm type-check` and fix errors           |
-| **AI chat not working**      | Check AI backend is running on port 4112       |
+| **AI chat not working**      | Check AI backend is running on port 3333       |
 
 ### Debug Commands
 

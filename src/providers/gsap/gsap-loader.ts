@@ -8,7 +8,19 @@ import { getSmartSiteConfig } from "@/admin/config"
 
 export async function initializeGSAP() {
   const config = getSmartSiteConfig()
-  const hasAnyPlugin = Object.values(config.gsap).some(enabled => enabled)
+  const hasAnyPlugin = [
+    config.gsap.scrollTrigger,
+    config.gsap.scrollSmoother,
+    config.gsap.flip,
+    config.gsap.draggable,
+    config.gsap.morphSVG,
+    config.gsap.drawSVG,
+    config.gsap.splitText,
+    config.gsap.customEase,
+    config.gsap.physics2D,
+    config.gsap.textPlugin,
+    config.gsap.globalAnimations,
+  ].some(Boolean)
 
   if (!hasAnyPlugin) return null
 
@@ -20,13 +32,20 @@ export async function initializeGSAP() {
   /*  CONDITIONAL PLUGIN LOADING
   /*************************************************************************/
 
-  if (config.gsap.scrollTrigger) {
+  const globalAnimationsEnabled = config.gsap.globalAnimations
+
+  const needsScrollTrigger =
+    config.gsap.scrollTrigger ||
+    config.gsap.scrollSmoother ||
+    globalAnimationsEnabled
+
+  if (needsScrollTrigger) {
     const { ScrollTrigger } = await import("gsap/ScrollTrigger")
     gsap.registerPlugin(ScrollTrigger)
     plugins.push(ScrollTrigger)
   }
 
-  if (config.gsap.scrollSmoother && config.gsap.scrollTrigger) {
+  if (config.gsap.scrollSmoother && needsScrollTrigger) {
     const { ScrollSmoother } = await import("gsap/ScrollSmoother")
     gsap.registerPlugin(ScrollSmoother)
     plugins.push(ScrollSmoother)
@@ -56,7 +75,9 @@ export async function initializeGSAP() {
     plugins.push(DrawSVGPlugin)
   }
 
-  if (config.gsap.splitText) {
+  const needsSplitText = config.gsap.splitText
+
+  if (needsSplitText) {
     const { SplitText } = await import("gsap/SplitText")
     gsap.registerPlugin(SplitText)
     plugins.push(SplitText)
@@ -68,7 +89,15 @@ export async function initializeGSAP() {
     plugins.push(CustomEase)
   }
 
-  if (config.gsap.textPlugin) {
+  if (config.gsap.physics2D) {
+    const { Physics2DPlugin } = await import("gsap/Physics2DPlugin")
+    gsap.registerPlugin(Physics2DPlugin)
+    plugins.push(Physics2DPlugin)
+  }
+
+  const needsTextPlugin = config.gsap.textPlugin
+
+  if (needsTextPlugin) {
     const { TextPlugin } = await import("gsap/TextPlugin")
     gsap.registerPlugin(TextPlugin)
     plugins.push(TextPlugin)

@@ -12,12 +12,6 @@ const __dirname = path.dirname(__filename)
 const monorepoRoot = path.resolve(__dirname, "../..")
 
 const nextConfig = {
-  productionBrowserSourceMaps: false,
-  experimental: {
-    serverSourceMaps: false,
-    webpackBuildWorker: true,
-    webpackMemoryOptimizations: true,
-  },
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_URL].map(item => {

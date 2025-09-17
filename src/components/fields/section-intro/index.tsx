@@ -3,7 +3,6 @@
 import RichText from "@/components/fields/rich-text"
 import { cn } from "@/utilities/ui"
 import { parseHeadingGradient } from "@/components/heading-gradient"
-import { gsap, useGSAP } from "@/providers/gsap"
 import { useRef } from "react"
 
 /*************************************************************************/
@@ -32,21 +31,7 @@ export const SectionIntro: React.FC<SectionIntroProps> = ({
   // Parse heading and convert span tags to gradient elements
   const parsedHeading = parseHeadingGradient(heading)
 
-  /****************************************************
-   * GSAP Animation
-   ****************************************************/
 
-  useGSAP(() => {
-    if (titleRef.current) {
-      gsap.effects.titleReveal(titleRef.current, {
-        trigger: {
-          trigger: titleRef.current,
-          start: "top 90%",
-          end: "bottom 40%",
-        },
-      })
-    }
-  })
 
   if (!heading && !description) return null
 

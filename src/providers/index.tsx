@@ -1,5 +1,6 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import SmoothScrollProvider from "@/providers/gsap"
+import GlobalAnimationsProvider from "@/providers/gsap/global-animations"
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -23,5 +24,9 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 }
 
 const GSAP = ({ children }: { children: React.ReactNode }) => {
-  return <SmoothScrollProvider>{children}</SmoothScrollProvider>
+  return (
+    <SmoothScrollProvider>
+      <GlobalAnimationsProvider>{children}</GlobalAnimationsProvider>
+    </SmoothScrollProvider>
+  )
 }
