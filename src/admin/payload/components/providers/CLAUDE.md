@@ -40,9 +40,11 @@ const runtime = useChatRuntime({ api: "/api/ai/chat" })
 
 ```typescript
 // smartsite.config.ts configuration
-ai: {
-  enabled: true,
-  url: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:4112"
+features: {
+  ai: {
+    enabled: true,
+    endpoint: "http://localhost:4112",
+  },
 }
 
 // Client initialization with JWT auth
@@ -693,7 +695,7 @@ const smartSiteConfig = defineConfig({
   settings: {
     ai: {
       enabled: true,
-      url: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:4112",
+      endpoint: "http://localhost:4112",
     },
   },
 })
@@ -705,8 +707,8 @@ Required environment variables for AI functionality:
 
 ```bash
 # .env.local
-NEXT_PUBLIC_AI_URL=http://localhost:4112  # Mastra backend URL
 MASTRA_JWT_TOKEN=your-jwt-token          # Authentication token
+SMARTSITE_AI_REGISTRATION_SECRET=token   # Enables identity registration during seeding
 ```
 
 ## Testing Tool UIs

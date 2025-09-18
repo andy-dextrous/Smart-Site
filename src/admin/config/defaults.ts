@@ -153,6 +153,7 @@ const FeaturesConfigSchema = z.object({
   ai: z.object({
     enabled: z.boolean(),
     endpoint: z.string(),
+    registrationPath: z.string().default("/api/internal/identities"),
   }),
   darkMode: z.boolean(),
   i18n: z.boolean(),
@@ -324,6 +325,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     ai: {
       enabled: true,
       endpoint: "http://localhost:3333",
+      registrationPath: "/api/internal/identities",
     },
     darkMode: false,
     i18n: false,

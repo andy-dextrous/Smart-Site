@@ -72,10 +72,12 @@ class DynamicSeedManager {
   private profile: SeedProfile
   private blogEnabled: boolean = false
   private postTemplateId: string | null = null
+  private readonly siteName: string
 
-  constructor(payload: Payload) {
+  constructor(payload: Payload, siteName: string) {
     this.payload = payload
     this.profile = defaultProfile // Default to minimal
+    this.siteName = siteName
   }
 
   /*************************************************************************/
@@ -229,7 +231,8 @@ class DynamicSeedManager {
       try {
         const { user: aiAgent, apiKey } = await ensureAIAgentWithAPIKey(
           this.payload,
-          this.context
+          this.context,
+          this.siteName
         )
         
         // Store the API key securely (only shown once during creation)

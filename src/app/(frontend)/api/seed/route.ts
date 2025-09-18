@@ -42,14 +42,22 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     let blog = false
+    let siteName: string | undefined
     try {
       const body = await request.json()
       if (typeof body?.blog === "boolean") blog = body.blog
+      if (typeof body?.siteName === "string") siteName = body.siteName.trim()
     } catch {}
 
-    payload.logger.info(`Starting seed operation with profile: minimal${blog ? " (blog)" : ""}`)
+    if (!siteName) {
+      throw new Error("Seed request must include a siteName string")
+    }
 
-    const seedManager = new DynamicSeedManager(payload)
+    payload.logger.info(
+      `Starting seed operation for "${siteName}" with profile: minimal${blog ? " (blog)" : ""}`
+    )
+
+    const seedManager = new DynamicSeedManager(payload, siteName)
     const startTime = Date.now()
 
     // Minimal-only seeding

@@ -24,16 +24,19 @@ async function main() {
   await ensureEnvFile(envPath, envExamplePath)
   const currentEnv = await readEnv(envPath)
 
+  const { siteName } = await askSiteName(currentEnv)
   const { port } = await askPort()
   const { dbProvider, dbUrl } = await askDatabase(currentEnv)
   const { storageProvider, blobToken } = await askStorage()
   const { adminEmail, adminPassword } = await askAdmin(currentEnv)
 
+  summary.siteName = siteName
   summary.port = port
   summary.dbProvider = dbProvider
   summary.storage = storageProvider
 
   const updatedEnv = { ...currentEnv }
+  updatedEnv.SMARTSITE_SITE_NAME = siteName
   // Always align public URL to selected port for local dev
   updatedEnv.NEXT_PUBLIC_URL = `http://localhost:${port}`
   updatedEnv.DATABASE_PROVIDER = dbProvider
@@ -66,7 +69,7 @@ async function main() {
 
   const { doSeed, blog } = await askSeed()
   if (doSeed) {
-    const { keepRunning } = await runDevAndSeed(appRoot, port, { blog })
+    const { keepRunning } = await runDevAndSeed(appRoot, port, { blog, siteName })
     summary.seedProfile = "minimal"
     summary.blog = blog
     summary.devLeftRunning = keepRunning
@@ -78,6 +81,36 @@ async function main() {
 /*************************************************************************/
 /*  PROMPTS
 /*************************************************************************/
+
+async function askSiteName(env: Record<string, string>) {
+  const answers = await inquirer.prompt([
+    {
+      type: "input",
+      name: "siteName",
+      message: "Site name (permanent identifier shown in Smart Site AI)",
+      default:
+        env.SMARTSITE_SITE_NAME && env.SMARTSITE_SITE_NAME.trim().length > 0
+          ? env.SMARTSITE_SITE_NAME
+          : "Smart Site",
+      validate: (value: string) => {
+        const trimmed = value.trim()
+        if (trimmed.length < 3) {
+          return "Enter at least 3 characters"
+        }
+        return true
+      },
+      filter: (value: string) => value.trim(),
+    },
+  ])
+
+  console.log(
+    chalk.gray(
+      "ℹ️  This name is stored with the AI identity and cannot be changed without manual intervention."
+    )
+  )
+
+  return answers as { siteName: string }
+}
 
 async function askPort() {
   const defaultPort = 3010
@@ -289,9 +322,10 @@ async function writeEnvFromTemplate(envPath: string, examplePath: string, env: R
     "RESEND_API_KEY",
     "PAYLOAD_CONFIG_PATH",
     "NEXT_PUBLIC_URL",
-    "NEXT_PUBLIC_AI_URL",
     "PAYLOAD_ADMIN_EMAIL",
     "PAYLOAD_ADMIN_PASSWORD",
+    "SMARTSITE_SITE_NAME",
+    "SMARTSITE_AI_REGISTRATION_SECRET",
   ]
   for (const key of keysToReplace) {
     if (env[key]) replaceKeyInline(key, env[key])
@@ -380,7 +414,11 @@ async function updateScriptsPort(appRoot: string, port: number) {
 /*  DEV + SEED
 /*************************************************************************/
 
-async function runDevAndSeed(cwd: string, port: number, options: { blog?: boolean }) {
+async function runDevAndSeed(
+  cwd: string,
+  port: number,
+  options: { blog?: boolean; siteName: string }
+) {
   const spinner = ora("Starting dev server...").start()
   const child = execa(
     "pnpm",
@@ -419,7 +457,7 @@ async function runDevAndSeed(cwd: string, port: number, options: { blog?: boolea
     const res = await fetch(`http://localhost:${port}/api/seed`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ blog: !!options.blog }),
+      body: JSON.stringify({ blog: !!options.blog, siteName: options.siteName }),
     })
     if (!res.ok) {
       const text = await res.text()

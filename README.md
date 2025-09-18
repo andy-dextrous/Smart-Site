@@ -114,13 +114,25 @@ RESEND_API_KEY=re_...                             # Resend.com API key
 RESEND_DEFAULT_FROM=noreply@example.com
 
 # AI Backend (Optional)
-NEXT_PUBLIC_AI_URL=http://localhost:3333          # Smart Site AI URL
 # OPENAI_API_KEY=sk-...                           # If using AI features
+SMARTSITE_AI_REGISTRATION_SECRET=<registration-token>
+
+# AI Agent (auto-generated after seeding)
+AI_AGENT_API_KEY=
+AI_AGENT_USER_ID=
 
 # Admin Seeding (Development)
 PAYLOAD_ADMIN_EMAIL=admin@example.com
 PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 ```
+
+#### AI Environment Variables
+
+- `SMARTSITE_AI_REGISTRATION_SECRET` — shared bearer token issued by Smart Site AI. When present, the seed step posts your site ID, URL, and API credentials to the AI backend so it can enroll the instance and return plan metadata. Leave it blank locally if you are not ready to register.
+- `AI_AGENT_API_KEY` — 64-character key generated the first time you run `pnpm seed` (or hit `/api/seed`). The seeding script creates the hidden `ai-agent` user, writes the key to `.env`, and echoes it once in the terminal for safekeeping. Downstream AI routes attach it as the `Authorization` header.
+- `AI_AGENT_USER_ID` — the Payload user ID created alongside the agent API key during seeding. It is written to `.env` and forwarded to the Mastra backend as the `X-Site-ID` header so requests are scoped to the correct site.
+
+> Rerun the seed if `.env` ever loses the agent credentials. The script reconciles the database user and restores the values without regenerating keys unless a rotation flow is requested.
 
 ### 3. Database Setup
 
@@ -589,6 +601,25 @@ Example:
 
 Smart Site includes powerful AI features via the **Mastra framework**, with processing handled by a remote backend for security and scalability.
 
+### Initial Registration Flow
+
+1. Confirm `features.ai.enabled` is `true` in `src/smartsite.config.ts` and that `SMARTSITE_AI_REGISTRATION_SECRET` matches the secret configured on your Smart Site AI instance (default endpoint `http://localhost:3333`).
+2. Run the standard seed flow (`pnpm seed`, the `/api/seed` endpoint, or the interactive setup script). During seeding the hidden `ai-agent` user is ensured, the site is registered with Smart Site AI, and `AI_AGENT_API_KEY` / `AI_AGENT_USER_ID` are written to `.env`.
+3. Restart Smart Site so the updated environment variables are loaded.
+
+After this handshake the admin chat assistant and other AI features can reach the backend immediately.
+
+### Regenerating Credentials Later
+
+If a key is lost—or you want to rotate it without touching content—run:
+
+```bash
+pnpm --filter @product-studio/smart-site ai:register         # Sync existing credentials
+pnpm --filter @product-studio/smart-site ai:register --force # Issue a brand-new API key
+```
+
+The command reuses the existing AI agent, updates Smart Site AI, and rewrites the `.env` entries in-place.
+
 ### Architecture
 
 ```
@@ -617,10 +648,11 @@ Configure AI in `src/smartsite.config.ts`:
 
 ```typescript
 const config: UserConfig = {
-  frontend: {
+  features: {
     ai: {
       enabled: true,
-      url: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:3333",
+      endpoint: "http://localhost:3333",
+      registrationPath: "/api/internal/identities", // optional override
     },
   },
 }
@@ -636,7 +668,7 @@ cd apps/smart-site-ai
 pnpm dev  # Runs on port 3333
 
 # Production - Deploy to Vercel/Railway
-# Update NEXT_PUBLIC_AI_URL in frontend
+# Update config.features.ai.endpoint in smartsite.config.ts
 ```
 
 ### AI Backend Authentication System
@@ -648,13 +680,15 @@ Smart Site authenticates with the AI backend using a special "AI Agent" user pat
 1. **AI Agent User**: Each Smart Site instance has a hidden user with role `ai-agent`
 2. **API Key Generation**: This user has an API key (64-character hex string) for authentication
 3. **Auto-Creation**: The AI agent is automatically created during database seeding
-4. **Environment Storage**: Credentials are saved to `.env`:
+4. **Environment Storage**: Credentials are saved to `.env` (rerunnable with `pnpm --filter @product-studio/smart-site ai:register`):
 
 ```bash
 # AI Agent Configuration (Auto-generated)
 AI_AGENT_API_KEY=80fda7460be5a83e4dc8256392bba4baacdd48777fd5eb1bdd13a1c1b9a25375
 AI_AGENT_USER_ID=68c0ba9971ba48af9e63f160
 ```
+
+> When `SMARTSITE_AI_REGISTRATION_SECRET` is set, the seeding step automatically registers the identity with Smart Site AI (using the endpoint defined in `smartsite.config.ts`), prints an audit fingerprint, and returns a single-use recovery token. Store that token in your secrets vault immediately—it's not recoverable after it expires.
 
 #### Setting Up AI Authentication
 
@@ -697,9 +731,9 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 1. Frontend API routes under `app/(frontend)/api/ai/*` validate the shared secret, add the `X-Site-ID` header, and proxy requests to the Mastra backend.
 2. The backend (see `apps/smart-site-ai/README.md`) verifies the site ID/API key pair, loads the correct workspace, and runs the requested chat/thread/schema operation.
 3. Responses stream back through the proxy so the admin chat panel and public endpoints never expose Mastra credentials directly.
-4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity.
+4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity; you can rerun this logic later via `pnpm --filter @product-studio/smart-site ai:register` (add `--force` to rotate the key).
 
-> For backend installation and environment setup, follow `apps/smart-site-ai/README.md`. Once the service is running, point `NEXT_PUBLIC_AI_URL` to that endpoint and the proxy routes above will take care of authentication.
+> For backend installation and environment setup, follow `apps/smart-site-ai/README.md`. Once the service is running, set `features.ai.endpoint` in `smartsite.config.ts` to that URL and the proxy routes above will take care of authentication.
 
 #### Security Features
 
@@ -1449,7 +1483,8 @@ Tell your AI assistant to use specific rules:
 | **Admin changes lost**       | Use `smartsite.config.ts` instead              |
 | **MongoDB connection fails** | Ensure the MongoDB service is running (brew services list / net start MongoDB) |
 | **Build fails**              | Run `pnpm type-check` and fix errors           |
-| **AI chat not working**      | Check AI backend is running on port 3333       |
+| **AI chat not working**      | Confirm Smart Site AI is running on port 3333 and secrets match |
+| **Lost AI credentials**      | Run `pnpm --filter @product-studio/smart-site ai:register --force`, then restart Smart Site |
 
 ### Debug Commands
 
