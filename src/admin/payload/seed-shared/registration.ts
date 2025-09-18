@@ -42,13 +42,14 @@ function isPlaceholderSecret(secret: string | null): boolean {
 	return false
 }
 
-function buildRegistrationUrl(): RegistrationEndpointResult {
+function buildRegistrationUrl(env?: NodeJS.ProcessEnv): RegistrationEndpointResult {
 	const config = getSmartSiteConfig()
 	if (!config.features.ai.enabled) {
 		return { url: null, reason: "AI feature disabled in smartsite.config.ts" }
 	}
 
-	const endpoint = config.features.ai.endpoint?.trim()
+	const envEndpoint = env?.SMARTSITE_AI_ENDPOINT?.trim()
+	const endpoint = envEndpoint || config.features.ai.endpoint?.trim()
 	if (!endpoint) {
 		return { url: null, reason: "features.ai.endpoint is not set" }
 	}
@@ -82,17 +83,15 @@ function logConfigDebug(
 	params.payload.logger.info(`  secret.present: ${secretRaw ? "true" : "false"}`)
 	params.payload.logger.info(`  secret.placeholder: ${isPlaceholderSecret(secretRaw)}`)
 	params.payload.logger.info(`  siteUrl: ${siteUrl ?? "null"}`)
-	params.payload.logger.info(
-		`  env.NEXT_PUBLIC_URL: ${(params.env ?? process.env).NEXT_PUBLIC_URL ?? "undefined"}`
-	)
-	params.payload.logger.info(
-		`  env.SMARTSITE_AI_REGISTRATION_SECRET set: ${Boolean(secretRaw)}`
-	)
+	const activeEnv = params.env ?? process.env
+	params.payload.logger.info(`  env.NEXT_PUBLIC_URL: ${activeEnv.NEXT_PUBLIC_URL ?? "undefined"}`)
+	params.payload.logger.info(`  env.SMARTSITE_AI_ENDPOINT: ${activeEnv.SMARTSITE_AI_ENDPOINT ?? "undefined"}`)
+	params.payload.logger.info(`  env.SMARTSITE_AI_REGISTRATION_SECRET set: ${Boolean(secretRaw)}`)
 }
 
 export async function registerIdentityWithSmartSiteAI(params: IdentityRegistrationParams): Promise<void> {
 	const env = params.env ?? process.env
-	const endpointResult = buildRegistrationUrl()
+	const endpointResult = buildRegistrationUrl(env)
 	const endpoint = endpointResult.url
 	const secretRaw = resolveSecret(env)
 	const siteName = params.siteName.trim()
@@ -121,18 +120,22 @@ export async function registerIdentityWithSmartSiteAI(params: IdentityRegistrati
 	const secret = secretRaw!.trim()
 	params.payload.logger.info(`Registering Smart Site identity at ${endpoint} for site ${siteName} (${siteUrl})`)
 
+	const payloadBody = JSON.stringify({
+		siteId: String(params.user.id),
+		siteUrl,
+		apiKey: params.apiKey,
+		siteName,
+	})
+	const bufferBody = Buffer.from(payloadBody, "utf8")
+
 	const response = await fetch(endpoint, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
+			"Content-Length": String(bufferBody.byteLength),
 			Authorization: `Bearer ${secret}`,
 		},
-		body: JSON.stringify({
-			siteId: String(params.user.id),
-			siteUrl,
-			apiKey: params.apiKey,
-			siteName,
-		}),
+		body: bufferBody,
 	})
 
 	if (!response.ok) {

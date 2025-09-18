@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+import "tsconfig-paths/register"
 import { buildSchema, getIntrospectionQuery, graphql } from "graphql"
 import { execFileSync } from "node:child_process"
 import crypto from "node:crypto"
@@ -24,9 +25,21 @@ async function main() {
   }
 
   console.log("Generating GraphQL SDL with Payload...")
+  const registerModule = "tsconfig-paths/register.js"
+  const nodeOptions = [
+    process.env.NODE_OPTIONS,
+    `--import=${registerModule}`,
+    `--require ${registerModule}`,
+  ]
+    .filter(Boolean)
+    .join(" ")
   execFileSync(bin, ["generate:schema"], {
     stdio: "inherit",
-    env: { ...process.env, PAYLOAD_CONFIG_PATH: payloadConfig },
+    env: {
+      ...process.env,
+      NODE_OPTIONS: nodeOptions,
+      PAYLOAD_CONFIG_PATH: payloadConfig,
+    },
     cwd,
   })
 
