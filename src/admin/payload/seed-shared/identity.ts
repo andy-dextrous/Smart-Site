@@ -14,6 +14,7 @@ export interface EnsureAIAgentOptions {
   context?: any
   env?: NodeJS.ProcessEnv
   allowCreate?: boolean
+  forceRegenerate?: boolean
   siteName: string
   onKeyIssued?: (details: { user: User; apiKey: string }) => Promise<void> | void
 }
@@ -49,7 +50,13 @@ export function buildAIAgentSeed(siteName: string, env?: NodeJS.ProcessEnv): Par
 }
 
 export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Promise<EnsureAIAgentResult> {
-  const { payload, context, allowCreate = true, onKeyIssued } = options
+  const {
+    payload,
+    context,
+    allowCreate = true,
+    onKeyIssued,
+    forceRegenerate = false,
+  } = options
   const env = options.env ?? process.env
   const logger = payload.logger
 
@@ -61,7 +68,7 @@ export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Prom
     throw new Error("Site name is required to create the AI agent identity")
   }
 
-  if (envUserId) {
+  if (envUserId && !forceRegenerate) {
     try {
       const existing = await payload.findByID({
         collection: "users",
@@ -101,10 +108,39 @@ export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Prom
 
   if (existingAgent.docs.length > 0) {
     const agent = existingAgent.docs[0] as User
+
+    if (forceRegenerate) {
+      const apiKey = generateSecureAPIKey()
+      const updated = (await payload.update({
+        collection: "users",
+        id: agent.id,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        } as any,
+        overrideAccess: true,
+        context,
+      })) as User
+
+      logger.info("Regenerated AI agent API key via force option")
+
+      env.AI_AGENT_USER_ID = String(updated.id)
+      env.AI_AGENT_API_KEY = apiKey
+
+      if (onKeyIssued) {
+        await onKeyIssued({ user: updated, apiKey })
+      }
+
+      return { user: updated, apiKey, created: false }
+    }
+
     if (!envApiKey) {
-      throw new Error(
-        "AI agent user exists in the database but AI_AGENT_API_KEY is not set. Restore the original key instead of regenerating."
-      )
+      logger.info("AI agent user exists but no API key in env; generating fresh credentials")
+      return await ensureAIAgentIdentity({
+        ...options,
+        env,
+        forceRegenerate: true,
+      })
     }
 
     logger.info("AI agent already exists; keeping existing credentials")

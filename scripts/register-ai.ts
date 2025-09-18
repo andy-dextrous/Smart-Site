@@ -3,6 +3,8 @@ import fs from "fs-extra"
 import chalk from "chalk"
 import ora from "ora"
 import { randomBytes } from "crypto"
+import { stdin as input, stdout as output } from "node:process"
+import { createInterface } from "node:readline/promises"
 import { getPayload } from "payload"
 import { ensureAIAgentWithAPIKey } from "@/admin/payload/endpoints/seed/users/ai-agent"
 
@@ -116,12 +118,22 @@ function ensureBaseSecrets(env: EnvMap): EnvMap {
 	return updates
 }
 
-function resolveSiteName(): string {
-	const raw = process.env.SMARTSITE_SITE_NAME?.trim()
-	if (raw && raw.length > 0) {
-		return raw
+async function resolveSiteName(env: EnvMap): Promise<string> {
+	const existing = env.SMARTSITE_SITE_NAME?.trim() || process.env.SMARTSITE_SITE_NAME?.trim()
+	if (existing && existing.length > 0) {
+		return existing
 	}
-	return "Smart Site"
+
+	const fallback = "Smart Site"
+
+	if (!output.isTTY || !input.isTTY) {
+		return fallback
+	}
+
+	const rl = createInterface({ input, output })
+	const answer = (await rl.question(`Site name [${fallback}]: `)).trim()
+	rl.close()
+	return answer.length > 0 ? answer : fallback
 }
 
 async function main() {
@@ -143,7 +155,8 @@ async function main() {
 		process.exit(1)
 	}
 
-	const siteName = resolveSiteName()
+	const siteName = await resolveSiteName(envFile)
+	process.env.SMARTSITE_SITE_NAME = siteName
 	const spinner = ora(`Registering AI agent for "${siteName}"`).start()
 
 	try {

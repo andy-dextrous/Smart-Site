@@ -37,10 +37,6 @@ const config: UserConfig = {
     },
   },
   features: {
-    ai: {
-      enabled: true,
-      endpoint: "http://localhost:3333",
-    },
     analytics: true,
     darkMode: false,
     i18n: false,

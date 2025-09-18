@@ -206,6 +206,9 @@ export type UserConfig = DeepPartial<SmartSiteConfig>
 /*  SMARTSITE DEFAULT CONFIGURATION
 /*************************************************************************/
 
+const DEFAULT_AI_ENDPOINT =
+  process.env.SMARTSITE_AI_ENDPOINT?.trim() || "https://smart-site-ai-core.vercel.app"
+
 export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
   /*************************************************************************/
   /*  COLLECTION CONFIGURATIONS
@@ -324,7 +327,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
   features: {
     ai: {
       enabled: true,
-      endpoint: "http://localhost:3333",
+      endpoint: DEFAULT_AI_ENDPOINT,
       registrationPath: "/api/internal/identities",
     },
     darkMode: false,
