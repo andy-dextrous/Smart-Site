@@ -33,6 +33,9 @@ const DEFAULT_SITEMAP_CONFIG: SitemapCollectionConfig = {
 
 export function getFrontendCollectionKeys(): string[] {
   const smartSiteConfig = getSmartSiteConfig()
+  if (!smartSiteConfig.features.sitemaps) {
+    return []
+  }
   const frontendCollections = getFrontendCollections()
   const collectionSlugs = Object.keys(frontendCollections)
 
@@ -67,6 +70,9 @@ export function getSitemapConfig(collection: string): SitemapCollectionConfig {
 
 export function shouldIncludeCollectionInSitemap(collection: string): boolean {
   const smartSiteConfig = getSmartSiteConfig()
+  if (!smartSiteConfig.features.sitemaps) {
+    return false
+  }
   const collectionConfig = smartSiteConfig.collections[collection]
   
   if (!collectionConfig?.enabled || !collectionConfig?.frontend) {

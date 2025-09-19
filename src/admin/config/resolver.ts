@@ -84,6 +84,13 @@ export function resolveConfiguration(config: SmartSiteConfig) {
 // System collections that must always be included for the app to function
 const SYSTEM_COLLECTIONS = ["uri-index", "users", "templates"]
 
+const COLLECTION_DEPENDENCY_WARNINGS: Record<string, string> = {
+  categories:
+    "Collection 'categories' is referenced by core relationships (pages.categories, posts.categories). Disable only if those fields are removed or reconfigured.",
+  media:
+    "Collection 'media' powers upload fields across the app. Disabling it will break media relationships unless every upload field is overridden.",
+}
+
 function resolveCollections(
   config: SmartSiteConfig
 ): CollectionConfig[] {
@@ -108,6 +115,10 @@ function resolveCollections(
     // Check if collection is enabled in config
     const collectionConfig = config.collections[slug]
     if (!collectionConfig || !collectionConfig.enabled) {
+      const warning = COLLECTION_DEPENDENCY_WARNINGS[slug]
+      if (warning) {
+        console.warn(`⚠️  smartsite.config.ts: ${warning}`)
+      }
       continue
     }
     slugs.add(slug)

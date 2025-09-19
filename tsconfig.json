@@ -23,7 +23,9 @@
       "@/*": ["./src/*"],
       "@payload-config": ["./src/admin/payload/payload.config.ts"],
       "@payload-types": ["./src/admin/payload/types"],
-      "@smartsite-config": ["src/smartsite.config.ts"]
+      "@smartsite-config": ["src/smartsite.config.ts"],
+      "@public/*": ["./public/*"],
+      "@public": ["./public"]
     },
     "target": "ES2022",
     "types": ["react/jsx-runtime", "node"]

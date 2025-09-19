@@ -43,8 +43,13 @@ export async function getArchiveChildCollections(
   const archiveSettings = getArchiveSettings()
 
   for (const setting of archiveSettings) {
-    const archivePage = routing[setting.field]
-    if (archivePage?.id === pageId) {
+    const archiveSetting = routing[setting.field]
+    const archiveId =
+      typeof archiveSetting === "object" && archiveSetting !== null
+        ? archiveSetting.id
+        : archiveSetting
+
+    if (archiveId === pageId) {
       let pageSlug = setting.collection
       try {
         const fullPage = await payloadInstance.findByID({
@@ -266,31 +271,55 @@ export async function getCollectionItemsForArchive(
     payloadInstance = await getPayload({ config: configPromise.default })
   }
 
-  // Try to query with _status first (for collections with drafts enabled)
-  // If that fails, fall back to querying without _status filter
-  try {
-    const items = await payloadInstance.find({
+  const results: any[] = []
+  let page = 1
+  let supportsDraftFilter = true
+
+  while (true) {
+    const query: any = {
       collection: collection as any,
-      where: {
+      limit,
+      page,
+      depth: 1,
+      overrideAccess: true,
+    }
+
+    if (supportsDraftFilter) {
+      query.where = {
         _status: { equals: "published" },
-      },
-      limit,
-      depth: 1,
-      overrideAccess: true,
-    })
+      }
+    }
 
-    return items.docs
-  } catch (error) {
-    // If _status query fails, the collection likely doesn't have drafts enabled
-    const items = await payloadInstance.find({
-      collection: collection as any,
-      limit,
-      depth: 1,
-      overrideAccess: true,
-    })
+    let response: any
+    try {
+      response = await payloadInstance.find(query)
+    } catch (error) {
+      if (supportsDraftFilter) {
+        supportsDraftFilter = false
+        page = 1
+        continue
+      }
+      throw error
+    }
 
-    return items.docs
+    results.push(...response.docs)
+
+    const hasMore = (() => {
+      if (response.hasNextPage === false) return false
+      if (response.totalPages && response.page) {
+        return response.page < response.totalPages
+      }
+      return response.docs.length === limit
+    })()
+
+    if (!hasMore || response.docs.length === 0) {
+      break
+    }
+
+    page += 1
   }
+
+  return results
 }
 
 /*************************************************************************/

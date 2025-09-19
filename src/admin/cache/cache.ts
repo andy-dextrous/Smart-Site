@@ -370,7 +370,7 @@ export const cache = {
     draft: boolean = false
   ): Promise<any | null> => {
     const cacheKey = generateCacheKey({ collection, params: [id], draft })
-    const tags = generateCacheTags({ collection })
+    const tags = generateCacheTags({ collection, params: [id] })
 
     const timestamp = new Date().toISOString()
     logCacheEvent({

@@ -1,312 +1,210 @@
-# Smart Site System Architecture
+# Smart Site Starter – Agent Playbook
 
-**Enterprise Website Builder - Master Development Environment**
+This starter should feel friendly to non-expert builders. Be a proactive teammate: study the project `README.md` first, align with Smart Site conventions, and act decisively once requirements are clear. Silently infer each user's skill level from their requests and adapt your explanations to match—go deep with advanced users, keep it light and approachable for newcomers, and never mention the assessment explicitly.
 
-A field-driven, section-first website building system built on Next.js 15, Payload CMS 3, Tailwind CSS v4, and GSAP. This system provides a complete CMS with O(1) URI resolution, intelligent caching, and AI integration. This is the master development environment where all new features and core functionality are built.
+---
+## 1. Orientation & Setup
+- **Always begin with** `pnpm run setup`. The guided CLI:
+  - Copies `.env.example` to `.env` when needed
+  - Collects the port, database provider/URL, storage preference, and admin credentials
+  - Ensures secrets (`PAYLOAD_SECRET`, `PREVIEW_SECRET`) exist
+  - Starts the dev server, runs the seeding API, and leaves the server running
+  - Prints `🚀 Your Smart Site is ready to build.` on success
+- Requirements: Node.js ≥ 20, `pnpm@9.x` (never use npm). Verify with `node --version`, `pnpm --version`.
+- If `.env` loses `AI_AGENT_API_KEY` or `AI_AGENT_USER_ID`, re-run the seed so the CLI restores the canonical Smart Site identity.
 
-## System Identification
-
-**Type**: Master Development System
-**Location**: `apps/smart-site/`
-**Purpose**: Core development and innovation for Smart Site platform
-**Environment**: Full demo data and all sections for realistic testing
-
-## Technical Architecture
-
-### Core Files
-- **`src/smartsite.config.ts`** - User configuration entry point
-- **`src/admin/config/defaults.ts`** - Complete configuration schema
-- **`src/admin/config/resolver.ts`** - Configuration resolution engine
-- **`src/admin/payload/payload.config.ts`** - Generated Payload configuration
-- **`src/app/(frontend)/[[...uri]]/page.tsx`** - Dynamic route handler
-
-### Main Process Flow
-
-```typescript
-// 1. User defines configuration
-const config: UserConfig = {
-  collections: { services: { enabled: false } },
-  features: { ai: { enabled: true } },
-}
-
-// 2. Resolver merges with defaults
-resolveConfiguration(config) → {
-  collections: [...defaultCollections, ...userCollections],
-  features: { ...defaultFeatures, ...userFeatures },
-}
-
-// 3. Frontend request hits catch-all route
-/about → [[...uri]]/page.tsx → URI Index lookup → Render page
+### Essential commands
 ```
-
-### What the System Provides
-
-✅ **O(1) URI resolution** - Single database query for any URL
-✅ **Field-driven architecture** - CMS fields generate UI automatically  
-✅ **Smart caching** - Intelligent invalidation and dependency tracking
-✅ **Section isolation** - Each section is self-contained
-✅ **Safe updates** - Admin layer updates preserve customizations
-✅ **AI integration** - Chat assistant and content generation
-
-## Integration Points
-
-### 1. Configuration System (`smartsite.config.ts`)
-
-Controls all aspects without modifying core files:
-
-```typescript
-const config: UserConfig = {
-  // Collections configuration
-  collections: {
-    pages: { enabled: true, frontend: true, seo: true },
-    services: { enabled: false },  // Disable unwanted
-  },
-  
-  // Feature flags
-  features: {
-    ai: { enabled: true, endpoint: "http://localhost:4112" },
-    darkMode: false,
-    sitemaps: true,
-  },
-  
-  // GSAP plugins
-  gsap: {
-    scrollTrigger: true,
-    scrollSmoother: true,
-  },
-  
-  // Extensions
-  extensions: {
-    collections: [],  // Custom collections
-    blocks: [],       // Custom blocks
-  },
-}
+pnpm install        # dependencies (use after pulling changes)
+pnpm run setup      # env + seed flow (interactive)
+pnpm dev            # start dev server only if the CLI is not already running it
+pnpm lint           # required before sign-off
+pnpm type-check     # required before sign-off
+pnpm kill           # free ports 3000/3001 if occupied
 ```
+Never run formatters manually (Prettier is automated). Do not start production builds or run tests unless the user explicitly asks.
 
-### 2. Section Development (`src/components/sections/`)
+---
+## 2. Repository Boundaries & Safety Rules
+- `src/admin/` is **off-limits** in the starter. Customize via:
+  - `src/smartsite.config.ts`
+  - `src/extensions/` (collections, globals, blocks)
+  - `src/components/` (sections, shared components)
+- Respect Smart Site’s admin permissions model:
+  - Master app (`apps/smart-site/`) can modify admin; starter and client apps cannot.
+  - Client implementations under `apps/clients/*` must use `smartsite.config.ts` and extensions only; never touch their admin directories.
+- File and folder names **must be kebab-case**.
+  ```ts
+  // ✅ CORRECT
+  src/components/sections/hero-simple/
+  // ❌ WRONG
+  src/components/sections/HeroSimple/
+  ```
+- Use **named function declarations**, not top-level arrow functions.
+  ```ts
+  function processData() {
+    // …
+  }
+  ```
+- Organize large files with block comments and **no inline comments**.
+  ```ts
+  /*************************************************************************/
+  /*  SECTION RENDERING LOGIC
+  /*************************************************************************/
+  ```
+- Use absolute import aliases (`@/…`). Stick to the Next.js App Router.
+- Server action files (`"use server"`) must export async functions only—no shared utilities.
+- Cached helpers should use descriptive names without the word "cache".
+- Keep solutions simple and idiomatic; consult existing utilities before inventing new ones.
+- Always review existing patterns (utilities, hooks, section examples) before writing new code.
+- Place new files in the established folders for that concern (sections, extensions, utilities, etc.).
+- Prefer server components; only opt into client components when interactivity demands it, and always scope GSAP to a container ref.
+- Never use mock data.
+- Avoid hacks or one-off workarounds; deliver clean, maintainable implementations even under time pressure.
+- Never create ad-hoc Payload types—run the official generators if necessary.
+- Never hardcode URIs; rely on the routing engine, cached `getByURI`, and helpers.
+- Do not add extra Markdown docs, commit changes, or run tests/builds unless the user directs you to do so.
+- Large files begin with the Smart Site banner comment:
+  ```ts
+  /*************************************************************************/
+  /*  FILE TITLE
+  /*************************************************************************/
+  ```
+- Within files, break major sections with the lightweight JSDOC-like panel style used in the chat components:
+  ```ts
+  /**
+   * Subsection Title
+   */
+  ```
 
-Every section requires two files:
+---
+## 3. System Architecture Snapshot
+- Catch-all route: `app/(frontend)/[[...uri]]/page.tsx` resolves every URL through the URI index (O(1) lookup). It hands the result to `RenderSections`.
+- Configuration stack:
+  - `src/smartsite.config.ts` → user overrides
+  - `src/admin/config/defaults.ts` → full schema with defaults
+  - `src/admin/config/resolver.ts` → merges defaults + overrides
+  - `src/admin/payload/payload.config.ts` → generated Payload config
+- `RenderSections` injects contextual props (`document`, `collection`, `breadcrumbs`, routing params) into every section. Use `PageData` when you need them.
+- Caching utilities live under `src/admin/cache`. Use them for URI and collection lookups.
+- Smart Site provides intelligent revalidation hooks; rely on provided helpers before forcing manual invalidation.
 
-```typescript
-// config.ts - Field definitions
-export const HeroBanner: Block = {
-  slug: "hero-banner",
-  interfaceName: "HeroBannerBlock",
-  fields: [
-    sectionIntro(),  // Reusable field group
-    sectionCta(),
-    { name: "backgroundImage", type: "upload", relationTo: "media" },
-  ],
-}
+### Collection intelligence
+- Default collection behaviour lives in `apps/smart-site/src/admin/config/defaults.ts` (`SMARTSITE_DEFAULTS`). Every first-party slug defined there (`pages`, `posts`, `services`, `team`, `testimonials`, `categories`, `media`, `templates`, `users`) starts enabled, so never tell a user they must "turn on" services or testimonials—they already exist unless deliberately disabled.
+- System collections (`uri-index`, `users`, `templates`) cannot be removed. The resolver in `src/admin/config/resolver.ts` always registers them to keep routing and admin access intact.
+- Plugin collections (`forms`, `form-submissions`, `redirects`, `search`, etc.) arrive through the default plugin stack in `src/admin/payload/plugins`. They appear in `payload-types.ts` automatically and do not need `smartsite.config.ts` entries.
+- Use this audit path when you need to describe the current setup:
+  1. Inspect `apps/smart-site/src/admin/config/defaults.ts` to understand the baseline.
+  2. Review the app-level `src/smartsite.config.ts` for overrides or explicit disables.
+  3. Check `src/extensions/index.ts` for custom slugs that replace or extend the defaults.
+  4. Confirm Payload’s output in `src/admin/payload/payload-types.ts` to see every registered collection and global.
+- Reserve `extensions.collections` for new slugs only. If a collection ships with Smart Site already, configure it via `smartsite.config.ts` instead of duplicating it as an extension.
 
-// Component.tsx - React component
-export function HeroBannerComponent(props: HeroBannerBlock) {
-  return <section>...</section>
-}
-```
+---
+## 4. Component Development Principles
+### Styling (Tailwind v4, CSS-first)
+- Design tokens live in `theme.css`; reusable component classes go in `components.css`.
+- Prefer tokens/variables (`bg-primary-500`, `gap-content`) before composing raw Tailwind utilities.
+- Layout stacks should use flex + gap rather than individual margins.
+- Padding and typography come from the design system—use the section spacing classes (`px-section-x`, `py-section-y`, etc.) and typography utilities (`prose`, `text-balance`, `font-display`) instead of adding custom `p-*` or `text-*` values inside components.
 
-### 3. Admin Layer Development (`src/admin/`)
+### GSAP animations
+- Mark animated components with `"use client"`.
+- Import exclusively from the provider:
+  ```ts
+  import { useGSAP, gsap } from "@/providers/gsap"
+  ```
+- Always scope animations with a ref: `useGSAP(() => { … }, { scope: ref })`.
+- Animate transforms/opacity, keep durations subtle (≈0.4–0.8s, `power2.out`). Add `will-change` classes to animated elements when appropriate.
 
-The core admin system where Smart Site backend is developed:
-
-- **Core Payload configuration** and CMS setup
-- **Backend components** and dashboard UI
-- **Caching and routing** infrastructure
-- **AI integration** and chat components
-
-### 4. URI Resolution System
-
-O(1) constant-time URL lookups:
-
-```typescript
-// URI Index maintains pre-computed mappings
-/about → { collection: "pages", slug: "about", id: "..." }
-/blog/my-post → { collection: "posts", slug: "my-post", id: "..." }
-
-// Single query resolution in [[...uri]]/page.tsx
-const doc = await cache.getByURI(uri)  // One database hit
-```
-
-## Risk-Based Development Guidelines
-
-### ⚠️ High-Impact Files
-
-Files that affect the entire system:
-
-- **`src/admin/payload/payload.config.ts`** - Main Payload configuration
-- **`src/admin/config/defaults.ts`** - Configuration schema
-- **`src/admin/config/resolver.ts`** - Resolution engine
-- **`src/app/(frontend)/[[...uri]]/page.tsx`** - All frontend routing
-- **`src/smartsite.config.ts`** - User configuration
-
-### ✅ Recommended Patterns
-
-**Section Creation**:
-```typescript
-// ✅ CORRECT - Use two-file pattern
-src/components/sections/hero-banner/
-├── config.ts       # Payload fields
-└── Component.tsx   # React component
-
-// ❌ WRONG - Single file or wrong location
-src/sections/HeroBanner.tsx  # Wrong location and casing
-```
-
-**Field Reuse**:
-```typescript
-// ✅ CORRECT - Use field functions
-import { sectionIntro, sectionCta, button } from "@/components/fields"
-
-fields: [
-  sectionIntro({ collapsibleLabel: "Hero Content" }),
-  sectionCta(),
-]
-
-// ❌ WRONG - Duplicate field definitions
-fields: [
-  { name: "heading", type: "text" },  // Recreating existing patterns
-]
-```
-
-**Configuration**:
-```typescript
-// Use smartsite.config.ts for user-facing configuration
-const config: UserConfig = {
-  collections: { services: { enabled: false } },
-}
-
-// Modify admin files directly for core development
-// src/admin/payload/payload.config.ts for Payload setup
-```
-
-### Development Best Practices
-
-**Key areas to understand**:
-
-- **Generated types** - Let Payload generate `payload-types.ts`
-- **URI Index** - Managed automatically by hooks
-- **Cache keys** - Maintain cache invalidation patterns
-- **Route resolution** - The `[[...uri]]` handler is optimized
-
-## 🔧 Utility Functions Reference
-
-### Cache Utilities (`src/admin/cache/`)
-```typescript
-import { cache } from "@/admin/cache"
-
-// O(1) URI lookup
-const page = await cache.getByURI("/about")
-
-// Get by collection and slug
-const post = await cache.getBySlug("posts", "my-post")
-
-// Revalidate cache
-await revalidate({ collection: "pages", doc })
-```
-
-### Field Patterns (`src/components/fields/`)
-```typescript
-import { sectionIntro, sectionCta, button, buttonsGroup, link } from "@/components/fields"
-
-// Pre-built field groups with consistent patterns
-sectionIntro({ collapsibleLabel: "Content" })
-buttonsGroup({ max: 3 })
-```
-
-### Media Components (`src/admin/payload/components/frontend/media/`)
-```typescript
-import { Media } from "@/admin/payload/components/frontend/media"
-
-// Responsive image/video component
-<Media resource={mediaObject} fill className="object-cover" />
-```
-
-## System Dependencies
-
-**Configuration Files** (3):
-- `smartsite.config.ts`
-- `admin/config/defaults.ts`
-- `admin/config/resolver.ts`
-
-**Collection Files** (10+):
-- `pages.ts`, `posts.ts`, `services.ts`
-- `team.ts`, `categories.ts`, `media.ts`
-- `testimonials.ts`, `templates.ts`
-- `users.ts`, `uri-index.ts`
-
-**Section Files** (20+):
-- Each section has `config.ts` and `Component.tsx`
-- Registered in `sections-map.tsx` and `config.ts`
-
-**Field Groups** (10+):
-- `sectionIntro`, `sectionCta`, `button`
-- `buttonsGroup`, `link`, `mediaWithOptions`
-
-## Troubleshooting
-
-### Common Issues & Solutions
-
-1. **Sections not appearing in admin**:
-   - Check registration in `src/components/sections/config.ts`
-   - Verify component mapping in `sections-map.tsx`
-   - Restart dev server after adding sections
-
-2. **Types not generating**:
-   - Run `pnpm generate:types`
-   - Check database connection
-   - Verify Payload is running
-
-3. **Admin changes lost after update**:
-   - Use `smartsite.config.ts` for all customizations
-   - Move custom code to `/src/extensions/`
-   - Never modify `/src/admin/` directly
-
-4. **URI resolution failing**:
-   - Run `pnpm regenerate-uris`
-   - Check URI Index collection in database
-   - Verify page has a slug field
-
-5. **Build failures**:
-   - Run `pnpm type-check`
-   - Check for missing imports
-   - Verify all sections are properly typed
-
-## Development Guidelines
-
-✅ **MASTER DEVELOPMENT ENVIRONMENT** - All core Smart Site features are built here
-
-✅ **UPDATE ADMIN PACKAGE.JSON VERSION** - When making admin changes, ALWAYS update `src/admin/package.json` version
-
-✅ **NEVER CREATE PAYLOAD TYPES MANUALLY** - Always use generated types from `payload-types.ts`
-
-✅ **TEST WITH DEMO DATA** - Full demo content ensures features work in production
-
-✅ **SECTIONS MUST FOLLOW TWO-FILE PATTERN** - `config.ts` + `Component.tsx` in kebab-case folder
-
-## 📦 CRITICAL: Admin Package.json Updates
-
-**When making ANY changes to the admin layer, you MUST:**
-
-1. **Update the version** in `src/admin/package.json`:
-   ```json
-   {
-     "version": "1.1.2",  // Increment this!
-     "releaseDate": "2025-01-05",  // Update date
+---
+## 5. Section Creation Guide
+1. **Two-file pattern**
+   - `config.ts` – Payload block definition; heavily reuse field builders (`link`, `richContent`, `sectionCta`, `sectionIntro` when it fits, etc.).
+   - `Component.tsx` – React implementation importing generated types and optionally `PageData`.
+2. **Dual registration**
+   - Register the block in `src/components/sections/config.ts`.
+   - Map the component in `src/components/sections/sections-map.tsx`.
+3. **Context props**
+   ```ts
+   import type { PageData } from "@/admin/components/render-sections"
+   export const HeroSimpleComponent: React.FC<HeroSimpleBlock & PageData> = props => {
+     const { heading, breadcrumbs, document } = props
+     // …
    }
    ```
+4. **Field-first philosophy**
+   - Use field helpers to enforce consistent structures.
+   - Build reusable blocks for rich-text embeds when content should appear inside articles.
+5. **Naming**
+   - Name by structure, not marketing copy (e.g., `feature-grid`, not `growth-story`).
+6. **Layout**
+   - Use `section` elements stacked inside `<main>`.
+   - Prefer component spacing tokens (`gap-content`, `px-section-x`).
 
-2. **Update sharedDependencies** if adding new packages:
-   ```json
-   "sharedDependencies": {
-     "@new-package": "^1.0.0",  // Add any new required packages
-   }
-   ```
+### Fields vs. Blocks vs. Sections
+- **Fields** – consistent data sets (heading, CTA, button). Always reuse functions where available.
+- **Blocks** – content snippets inside rich text (media embeds, code snippets, inline forms).
+- **Sections** – full-width architectural layouts that compose the page.
 
-3. **Sync to starter** using: `pnpm sync:to-starter`
+---
+## 6. Data & Caching Patterns
+- Fetch via supplied utilities (`getPostsWithPagination`, `cache.getCollection`, `cache.getByURI`). Prefer server components.
+- When exposing a collection to the frontend, set `frontend`/`seo` in `smartsite.config.ts` and update `frontendOptions.seoSchemaType` if needed.
+- For new collections/globals, create extensions under `src/extensions` and register them; keep generated admin files pristine.
+- If manual revalidation or URI regeneration is required, use the provided revalidate utilities (they expect both `doc` and `previousDoc`).
+- When consulting framework docs (Tailwind, GSAP, Assistant UI, Payload), use the official sources or the Context7 MCP tools for up-to-date references.
 
-This ensures:
-- Version tracking for releases
-- Proper dependency management
-- Client sites get all required packages
+---
+## 7. AI Agent Identity
+- The Smart Site AI backend treats `AI_AGENT_USER_ID` as the permanent workspace key. **Never create multiple AI agent users.**
+- The seeding helper (`ensureAIAgentWithAPIKey`) reuses the existing agent. If `.env` is missing values or the key is disabled, it re-enables API access on the same ID and surfaces the key so `.env` can be updated.
+- Downstream requests (chat, threads, schema APIs) send `Authorization: Bearer <AI_AGENT_API_KEY>` and `X-Site-ID: <AI_AGENT_USER_ID>`; breaking this pairing severs the workspace.
 
-Remember: This is the innovation lab where all Smart Site features start. Work with real demo data to ensure features work in production scenarios.
+---
+## 8. Translating User Requests
+Use Smart Site terminology and patterns when responding:
+- “Add/change a section” → scaffold the two-file section, register it, and follow styling/animation rules.
+- “Adjust layout/styling” → leverage design tokens or reusable CSS classes. Avoid ad-hoc styling.
+- “Fetch content” → use provided data utilities and keep fetching in server components.
+- “Configure navigation/footer” → guide the user to edit the relevant globals via the admin UI.
+- “Add a collection or block” → implement through `src/extensions` and register in `smartsite.config.ts`.
+- “Enable animations/features” → toggle the relevant flags in `smartsite.config.ts` (e.g., GSAP plugins, breadcrumbs settings).
+- “Change data model/collection” → extend the collection under `src/extensions/collections/` and register in `smartsite.config.ts`; never edit admin core.
+- “Update a page/URL” → rely on the routing engine and cached helpers; never build paths manually.
+- “Types look wrong” → regenerate using the official tooling (`pnpm generate:types` if defined); never handcraft interfaces.
+- “Content looks stale” → trigger the provided revalidation helper with both `doc` and `previousDoc`.
+- “Create a custom collection (e.g., testimonials, FAQs, products)” → define via extensions, register, optionally build a rendering section, and have the user populate via admin.
+- “Create a blog listing page” → reuse the `posts` collection, provide/register a `posts-list` section, and have the user publish a “Blog” page.
+- “Expose an existing collection on the frontend” → set `frontend`/`seo` flags in config and let the user add sections referencing it.
+- “Add fields to a collection without touching admin” → extend via `src/extensions/collections/` and re-register; user repopulates content.
+- “Add a reusable block/section sitewide” → add the block in extensions, build/register the section pair, and instruct the user to place it where needed.
+- “Turn on advanced animations (ScrollSmoother, MorphSVG, etc.)” → toggle `smartsite.config.ts → gsap` while keeping imports from `@/providers/gsap`.
+- “Change breadcrumbs behavior/labels” → adjust the breadcrumbs config (separator, home label, max depth) centrally.
+- “Tweak admin colors/branding” → update `smartsite.config.ts → admin.theme` and `admin.meta`.
+- “Optimize image sizes for performance” → tune `smartsite.config.ts → images` options.
+- “I want a custom route” → use CMS-driven pages when possible; otherwise build Next.js API routes under `app/(frontend)/api/*`.
+- “Add a contact form/email send” → lean on Payload forms or build a tailored API route; clarify validation, storage, and notifications first.
+- “Change navigation/footer” → have the user edit the Header/Footer globals; only adjust code when the structure must change.
+- “Fix SEO for a page” → leverage SEO fields, canonical URL, and `noIndex`; sitemaps come from the URI index.
+- “I changed a slug; now links broke” → allow the routing engine to rebuild redirects, run URI regeneration utilities if necessary, and revalidate the affected content.
+- When in doubt, restate the request in Smart Site terms, cite the README or this playbook section you’ll follow, and confirm before coding.
+
+---
+## 9. Collaboration Etiquette
+- Default to action for well-understood tasks; ask only when ambiguity remains.
+- Provide concise updates referencing the sections of this playbook and any README instructions you applied.
+- Keep the UI approachable for non-experts—make sensible choices without over-explaining.
+
+---
+## 10. Quick Reference
+- **Setup**: `pnpm run setup`
+- **Admin guardrail**: never edit `src/admin/` in the starter
+- **Sections**: two files + two registrations
+- **Styling**: use tokens, Tailwind v4 CSS-first approach
+- **Animations**: `"use client"`, `@/providers/gsap`, scoped refs
+- **Data**: use cache/utilities; avoid client-side fetching for structured content
+- **AI identity**: single agent user, env must match DB
+- **Docs**: README + this playbook + official library docs
+
+Keep this document beside the project README and revisit it whenever you encounter unfamiliar territory.

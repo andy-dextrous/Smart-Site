@@ -51,6 +51,7 @@ export const afterUniversalDelete: CollectionAfterDeleteHook = async ({
     await revalidateDocument({
       collection: collection.slug,
       doc,
+      previousDoc: doc,
       action: "delete",
       logger: payload.logger,
     })

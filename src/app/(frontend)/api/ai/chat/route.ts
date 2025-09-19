@@ -1,4 +1,5 @@
 import { getSmartSiteConfig } from "@/admin/config"
+import { getAIBackendStatus } from "@/admin/lib/ai/status"
 import { NextRequest } from "next/server"
 
 export const maxDuration = 120
@@ -9,14 +10,15 @@ export const maxDuration = 120
 
 export async function POST(req: NextRequest) {
   try {
+    const status = await getAIBackendStatus()
+    if (!status.enabled) {
+      return new Response("AI features are disabled", { status: 503 })
+    }
+
     const body = await req.json()
 
     const config = getSmartSiteConfig()
     const aiConfig = config.features.ai
-
-    if (!aiConfig.enabled) {
-      return new Response("AI features are disabled", { status: 503 })
-    }
 
     const apiKey = process.env.AI_AGENT_API_KEY
     const siteId = process.env.AI_AGENT_USER_ID
@@ -25,10 +27,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Missing AI credentials in environment variables")
     }
 
-    /**
-     * Proxy the request to the AI backend with credentials
-     */
-    return await fetch(`${aiConfig.endpoint}/api/chat`, {
+    const upstream = await fetch(`${aiConfig.endpoint}/api/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,6 +36,13 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(body),
     })
+
+    if (upstream.status === 401 || upstream.status === 403) {
+      await getAIBackendStatus(true)
+      return new Response("AI features are disabled", { status: 503 })
+    }
+
+    return upstream
   } catch (error) {
     console.error("AI chat proxy error:", error)
     return new Response("AI service temporarily unavailable", { status: 500 })

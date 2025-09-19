@@ -285,7 +285,7 @@ async function getDocumentUpdatesForOperation(
               documentId: item.id,
               oldURI,
               newURI,
-              status: item._status || "published",
+              status: item._status === "draft" ? "draft" : "published",
               operation: operation.operation,
               doc: item,
             })
@@ -323,7 +323,7 @@ async function getDocumentUpdatesForOperation(
             documentId: descendant.id,
             oldURI,
             newURI,
-            status: descendant._status || "published",
+            status: descendant._status === "draft" ? "draft" : "published",
             operation: operation.operation,
             doc: descendant,
           })
@@ -450,7 +450,7 @@ async function getDocumentUpdatesForOperation(
                 documentId: item.id,
                 oldURI,
                 newURI,
-                status: item._status || "published",
+                status: item._status === "draft" ? "draft" : "published",
                 operation: operation.operation,
                 doc: item,
               })
@@ -493,7 +493,7 @@ async function getDocumentUpdatesForOperation(
               documentId: item.id,
               oldURI,
               newURI: newURI || oldURI,
-              status: item._status === "published" ? "published" : "draft",
+              status: item._status === "draft" ? "draft" : "published",
               templateId: templateChange.newTemplate,
               operation: operation.operation,
               doc: item,
@@ -533,6 +533,9 @@ async function executeDocumentUpdate(
   payload: any
 ): Promise<void> {
   // Update URI in index
+  const updatedDoc = { ...update.doc, uri: update.newURI }
+  const previousDoc = { ...update.doc, uri: update.oldURI }
+
   await updateURI({
     uri: update.newURI,
     collection: update.collection,
@@ -540,6 +543,8 @@ async function executeDocumentUpdate(
     status: update.status,
     previousURI: update.oldURI !== update.newURI ? update.oldURI : undefined,
     templateId: update.templateId,
+    data: updatedDoc,
+    originalDoc: previousDoc,
   })
 
   // Update the actual document with new URI

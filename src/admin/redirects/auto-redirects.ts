@@ -223,6 +223,9 @@ async function cleanupConflictingRedirects(targetURI: string): Promise<void> {
         `Removed ${successfulDeletions}/${conflictingRedirects.docs.length} conflicting automatic redirects for ${targetURI}`
       )
     }
+
+    revalidateTag(`redirect:${targetURI}`)
+    revalidateTag("collection:redirects")
   } catch (error) {
     const payload = await getPayload({ config: configPromise })
     payload.logger.error(

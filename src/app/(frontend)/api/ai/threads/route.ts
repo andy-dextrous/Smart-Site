@@ -1,4 +1,5 @@
 import { getSmartSiteConfig } from "@/admin/config"
+import { getAIBackendStatus } from "@/admin/lib/ai/status"
 import { NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -9,9 +10,11 @@ export const dynamic = "force-dynamic"
 
 export async function GET(req: NextRequest) {
   try {
+    const status = await getAIBackendStatus()
+    if (!status.enabled) return new Response("AI disabled", { status: 503 })
+
     const config = getSmartSiteConfig()
     const aiConfig = config.features.ai
-    if (!aiConfig.enabled) return new Response("AI disabled", { status: 503 })
 
     const apiKey = process.env.AI_AGENT_API_KEY
     const siteId = process.env.AI_AGENT_USER_ID
@@ -21,7 +24,7 @@ export async function GET(req: NextRequest) {
     const page = url.searchParams.get("page") || "0"
     const perPage = url.searchParams.get("perPage") || "25"
 
-    return await fetch(`${aiConfig.endpoint}/api/threads?page=${page}&perPage=${perPage}` as string, {
+    const upstream = await fetch(`${aiConfig.endpoint}/api/threads?page=${page}&perPage=${perPage}` as string, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -29,6 +32,13 @@ export async function GET(req: NextRequest) {
       },
       cache: "no-store",
     })
+
+    if (upstream.status === 401 || upstream.status === 403) {
+      await getAIBackendStatus(true)
+      return new Response("AI disabled", { status: 503 })
+    }
+
+    return upstream
   } catch (error) {
     console.error("Threads proxy GET error:", error)
     return new Response("AI service temporarily unavailable", { status: 500 })
@@ -37,6 +47,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const status = await getAIBackendStatus()
+    if (!status.enabled) return new Response("AI disabled", { status: 503 })
+
     const config = getSmartSiteConfig()
     const aiConfig = config.features.ai
     if (!aiConfig.enabled) return new Response("AI disabled", { status: 503 })
@@ -47,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.text()
 
-    return await fetch(`${aiConfig.endpoint}/api/threads`, {
+    const upstream = await fetch(`${aiConfig.endpoint}/api/threads`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -56,6 +69,13 @@ export async function POST(req: NextRequest) {
       },
       body,
     })
+
+    if (upstream.status === 401 || upstream.status === 403) {
+      await getAIBackendStatus(true)
+      return new Response("AI disabled", { status: 503 })
+    }
+
+    return upstream
   } catch (error) {
     console.error("Threads proxy POST error:", error)
     return new Response("AI service temporarily unavailable", { status: 500 })

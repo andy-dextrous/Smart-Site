@@ -54,6 +54,7 @@ const MediaCollectionConfigSchema = CollectionConfigSchema.extend({
     .enum(["local", "vercel-blob", "s3", "cloudinary", "uploadthing"])
     .optional(),
   config: z.record(z.any()).optional(),
+  staticDir: z.string().optional(),
 })
 
 const GrayscaleSchema = z.object({
@@ -149,6 +150,25 @@ const BreadcrumbConfigSchema = z.object({
   className: z.string().optional(),
 })
 
+const I18nConfigSchema = z
+  .object({
+    defaultLocale: z.string().min(1),
+    locales: z.array(z.string().min(1)).min(1),
+    prefixDefaultLocale: z.boolean().optional(),
+    localeCookie: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.locales.includes(value.defaultLocale)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "defaultLocale must be included in locales",
+        path: ["locales"],
+      })
+    }
+  })
+
+const I18nFeatureSchema = z.union([z.boolean(), I18nConfigSchema])
+
 const FeaturesConfigSchema = z.object({
   ai: z.object({
     enabled: z.boolean(),
@@ -156,7 +176,7 @@ const FeaturesConfigSchema = z.object({
     registrationPath: z.string().default("/api/internal/identities"),
   }),
   darkMode: z.boolean(),
-  i18n: z.boolean(),
+  i18n: I18nFeatureSchema,
   analytics: z.boolean(),
   search: z.boolean(),
   sitemaps: z.boolean(),
@@ -195,6 +215,8 @@ export type ImageOptimizationConfig = z.infer<typeof ImageOptimizationSchema>
 export type GSAPConfig = z.infer<typeof GSAPConfigSchema>
 export type BreadcrumbConfig = z.infer<typeof BreadcrumbConfigSchema>
 export type FeaturesConfig = z.infer<typeof FeaturesConfigSchema>
+export type I18nConfig = z.infer<typeof I18nConfigSchema>
+export type I18nFeature = z.infer<typeof I18nFeatureSchema>
 
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]

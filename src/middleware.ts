@@ -1,4 +1,6 @@
+import { i18nRouter } from "next-i18n-router"
 import { NextRequest, NextResponse } from "next/server"
+import { getI18nConfig } from "@/admin/config/features"
 
 /*************************************************************************/
 /*  MIDDLEWARE - DRAFT MODE ROUTING & I18N
@@ -19,6 +21,21 @@ export function middleware(request: NextRequest) {
     }
 
     return NextResponse.rewrite(previewUrl)
+  }
+
+  const i18n = getI18nConfig()
+
+  if (i18n.enabled) {
+    const response = i18nRouter(request, {
+      locales: i18n.locales,
+      defaultLocale: i18n.defaultLocale,
+      localeCookie: i18n.localeCookie,
+      prefixDefault: i18n.prefixDefaultLocale,
+    })
+
+    if (response) {
+      return response
+    }
   }
 
   return NextResponse.next()

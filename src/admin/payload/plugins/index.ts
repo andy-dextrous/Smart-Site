@@ -239,11 +239,14 @@ const nestedDocs = nestedDocsPlugin({
 /*  PLUGINS
 /*************************************************************************/
 
+const smartSiteConfig = getSmartSiteConfig()
+const searchEnabled = smartSiteConfig.features.search
+
 export const plugins: Plugin[] = [
-  redirects, 
-  forms, 
-  search, 
-  nestedDocs
+  redirects,
+  forms,
+  ...(searchEnabled ? [search] : []),
+  nestedDocs,
 ]
 
 /*************************************************************************/
@@ -251,13 +254,13 @@ export const plugins: Plugin[] = [
 /*************************************************************************/
 
 export function getPlugins(): Plugin[] {
-  const storagePlugins = resolveStoragePlugins(getSmartSiteConfig())
-  
+  const storagePlugins = resolveStoragePlugins(smartSiteConfig)
+
   return [
     redirects,
-    forms, 
-    search,
+    forms,
+    ...(searchEnabled ? [search] : []),
     ...storagePlugins,
-    nestedDocs
+    nestedDocs,
   ]
 }

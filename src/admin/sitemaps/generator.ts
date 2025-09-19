@@ -1,6 +1,6 @@
 import { cache } from "@/admin/cache"
 import { getServerSideURL } from "@/admin/utilities/get-url"
-import { getSitemapConfig } from "./config"
+import { getSitemapConfig, shouldIncludeCollectionInSitemap } from "./config"
 import {
   createSitemapEntry,
   filterDocumentsForSitemap,
@@ -29,7 +29,16 @@ export async function generateSitemap(
   options: GenerateSitemapOptions
 ): Promise<SitemapGenerationResult> {
   const { collectionName } = options
-  const siteUrl = getServerSideURL()
+
+  if (!shouldIncludeCollectionInSitemap(collectionName)) {
+    return {
+      entries: [],
+      collection: collectionName,
+      totalCount: 0,
+      filteredCount: 0,
+    }
+  }
+  const siteUrl = options.siteUrl ?? getServerSideURL()
   const config = getSitemapConfig(collectionName)
 
   /**

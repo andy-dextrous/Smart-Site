@@ -1,16 +1,43 @@
+"use client"
+
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import SmoothScrollProvider from "@/providers/gsap"
 import GlobalAnimationsProvider from "@/providers/gsap/global-animations"
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+type ProvidersProps = {
+  children: React.ReactNode
+  enableDarkMode?: boolean
+}
+
+export default function Providers({ children, enableDarkMode = true }: ProvidersProps) {
   return (
-    <ThemeProvider>
+    <ThemeProvider enableDarkMode={enableDarkMode}>
       <GSAP>{children}</GSAP>
     </ThemeProvider>
   )
 }
 
-const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+const ThemeProvider = ({
+  children,
+  enableDarkMode,
+}: {
+  children: React.ReactNode
+  enableDarkMode: boolean
+}) => {
+  if (!enableDarkMode) {
+    return (
+      <NextThemesProvider
+        attribute="class"
+        defaultTheme="light"
+        themes={["light"]}
+        enableSystem={false}
+        disableTransitionOnChange
+      >
+        {children}
+      </NextThemesProvider>
+    )
+  }
+
   return (
     <NextThemesProvider
       attribute="class"

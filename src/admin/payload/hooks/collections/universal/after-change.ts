@@ -31,8 +31,14 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
 
   await updateURIIndex(doc, previousDoc, collection, payload)
 
-  const isPublished = doc._status === "published"
-  if (context.disableRevalidate || !isPublished) return doc
+  const previousStatus = previousDoc?._status
+  const isCurrentlyPublished =
+    doc._status === "published" || typeof doc._status === "undefined"
+  const wasPreviouslyPublished = previousStatus === "published"
+
+  if (context.disableRevalidate || (!isCurrentlyPublished && !wasPreviouslyPublished)) {
+    return doc
+  }
 
   try {
     await revalidateDocument({
@@ -59,23 +65,22 @@ async function updateURIIndex(doc: any, previousDoc: any, collection: any, paylo
   const templateId = await getTemplateIdForCollection(collection.slug, payload)
 
   try {
-    // Only update URI index if this is the published version
-    // Draft saves should not affect the URI index status
-    const shouldUpdateIndex = doc._status === "published"
+    const entryStatus = doc._status === "draft" ? "draft" : "published"
 
-    if (shouldUpdateIndex) {
-      await updateURI({
-        uri: doc.uri,
-        collection: collection.slug,
-        documentId: doc.id,
-        status: "published", // Always use published for URI index
-        previousURI: previousDoc?.uri,
-        templateId: templateId || undefined,
-        data: doc,
-        originalDoc: previousDoc,
-      })
-      payload.logger.info(`Updated URI index for ${collection.slug}/${doc.id}`)
-    }
+    await updateURI({
+      uri: doc.uri,
+      collection: collection.slug,
+      documentId: doc.id,
+      status: entryStatus,
+      previousURI: previousDoc?.uri,
+      templateId: templateId || undefined,
+      data: doc,
+      originalDoc: previousDoc,
+    })
+
+    payload.logger.info(
+      `Updated URI index for ${collection.slug}/${doc.id} (status: ${entryStatus})`
+    )
   } catch (error) {
     payload.logger.error(
       `URI index update failed for ${collection.slug}/${doc.id}:`,

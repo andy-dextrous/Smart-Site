@@ -27,7 +27,13 @@ export interface SitemapEntry {
  * Check if a document should be included in sitemaps based on SEO settings
  */
 export function shouldIncludeInSitemap(doc: SitemapDocumentFields): boolean {
-  if (doc._status !== "published") {
+  const status = doc._status ?? "published"
+
+  if (status !== "published") {
+    return false
+  }
+
+  if (!doc.uri || doc.uri.trim() === "") {
     return false
   }
 
@@ -50,6 +56,14 @@ export function shouldIncludeInSitemap(doc: SitemapDocumentFields): boolean {
 export function getCanonicalUrl(doc: SitemapDocumentFields, siteUrl: string): string {
   const canonicalUrl = doc.seo?.meta?.canonicalUrl
 
+  const resolveInternal = (path: string) => {
+    if (!path.startsWith("/")) {
+      return `/${path}`
+    }
+
+    return path
+  }
+
   if (canonicalUrl && isExternalUrl(canonicalUrl)) {
     return canonicalUrl
   }
@@ -58,7 +72,9 @@ export function getCanonicalUrl(doc: SitemapDocumentFields, siteUrl: string): st
     return `${siteUrl}${canonicalUrl}`
   }
 
-  return `${siteUrl}${doc.uri}`
+  const resolvedUri = resolveInternal(doc.uri || "/")
+
+  return `${siteUrl}${resolvedUri}`
 }
 
 /**

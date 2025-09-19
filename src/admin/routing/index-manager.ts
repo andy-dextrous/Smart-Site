@@ -51,15 +51,17 @@ export async function updateURI({
   try {
     const payload = await getPayload({ config: configPromise })
 
-    const existingEntry = await payload.find({
+    const formattedDocumentId = formatIdForText(documentId)
+
+    const existingEntries = await payload.find({
       collection: "uri-index",
       where: {
         and: [
           { sourceCollection: { equals: collection } },
-          { documentId: { equals: documentId } },
+          { documentId: { equals: formattedDocumentId } },
         ],
       },
-      limit: 1,
+      limit: 10,
     })
 
     /**
@@ -89,10 +91,20 @@ export async function updateURI({
       }
     }
 
+    const normalizedPreviousURI =
+      previousURI && previousURI !== uri ? previousURI : undefined
+
+    let redirectSource = normalizedPreviousURI
+
+    const publishedEntry = existingEntries.docs.find((doc: any) => doc.status === "published")
+    const draftEntry = existingEntries.docs.find((doc: any) => doc.status === "draft")
+    const targetStatus = status
+    const targetEntry = targetStatus === "draft" ? draftEntry : publishedEntry
+
     const indexData = {
       uri,
       sourceCollection: collection,
-      documentId: formatIdForText(documentId),
+      documentId: formattedDocumentId,
       document: {
         relationTo: collection as any,
         value: formatIdForRelationship(documentId),
@@ -100,27 +112,23 @@ export async function updateURI({
       status,
       templateId: resolvedTemplateId,
       breadcrumbs: resolvedBreadcrumbs || [],
-      previousURIs: previousURI ? [{ uri: previousURI }] : undefined,
+      previousURIs:
+        normalizedPreviousURI && targetEntry?.previousURIs
+          ? [{ uri: normalizedPreviousURI }, ...targetEntry.previousURIs]
+              .filter((prev, index, self) =>
+                prev?.uri && self.findIndex(existing => existing?.uri === prev.uri) === index
+              )
+              .slice(0, 10)
+          : normalizedPreviousURI
+          ? [{ uri: normalizedPreviousURI }]
+          : targetEntry?.previousURIs,
     }
 
-    if (existingEntry.docs.length > 0) {
-      const existingDoc = existingEntry.docs[0]
-      let updatedPreviousURIs = existingDoc.previousURIs || []
-
-      if (
-        previousURI &&
-        !updatedPreviousURIs.some((prev: any) => prev.uri === previousURI)
-      ) {
-        updatedPreviousURIs = [{ uri: previousURI }, ...updatedPreviousURIs].slice(0, 10)
-      }
-
+    if (targetEntry) {
       await payload.update({
         collection: "uri-index",
-        id: existingDoc.id,
-        data: {
-          ...indexData,
-          previousURIs: updatedPreviousURIs,
-        } as any,
+        id: targetEntry.id,
+        data: indexData as any,
       })
     } else {
       await payload.create({
@@ -129,13 +137,45 @@ export async function updateURI({
       })
     }
 
+    if (status === "published" && draftEntry?.id && draftEntry.id !== targetEntry?.id) {
+      try {
+        await payload.delete({ collection: "uri-index", id: draftEntry.id })
+      } catch (error) {
+        payload.logger.warn(
+          `Failed to clean up draft URI index entry for ${collection}/${documentId}:`,
+          error
+        )
+      }
+    }
+
     /**
      * After successfully updating the URI index, create an automatic redirect
      */
-    if (previousURI && previousURI !== uri) {
-      const redirectResult = await createAutomaticRedirect(previousURI, uri)
+    const redirectBaseline = status === "published" ? publishedEntry : targetEntry
+
+    if (!redirectSource && redirectBaseline && status === "published") {
+      const historicalURI = redirectBaseline.previousURIs?.find(
+        (prev: any) => prev?.uri && prev.uri !== uri
+      )?.uri
+
+      if (historicalURI) {
+        redirectSource = historicalURI
+      }
+    }
+
+    if (
+      !redirectSource &&
+      redirectBaseline &&
+      redirectBaseline.uri &&
+      redirectBaseline.uri !== uri
+    ) {
+      redirectSource = redirectBaseline.uri
+    }
+
+    if (status === "published" && redirectSource && redirectSource !== uri) {
+      const redirectResult = await createAutomaticRedirect(redirectSource, uri)
       if (redirectResult.success) {
-        payload.logger.info(`✅ Automatic redirect created: ${previousURI} → ${uri}`)
+        payload.logger.info(`✅ Automatic redirect created: ${redirectSource} → ${uri}`)
       } else {
         payload.logger.warn(`⚠️ Automatic redirect skipped: ${redirectResult.message}`)
       }
@@ -154,22 +194,28 @@ export async function deleteURI(collection: string, documentId: string): Promise
   try {
     const payload = await getPayload({ config: configPromise })
 
-    const existingEntry = await payload.find({
+    const formattedDocumentId = formatIdForText(documentId)
+
+    const existingEntries = await payload.find({
       collection: "uri-index",
       where: {
         and: [
           { sourceCollection: { equals: collection } },
-          { documentId: { equals: documentId } },
+          { documentId: { equals: formattedDocumentId } },
         ],
       },
-      limit: 1,
+      limit: 10,
     })
 
-    if (existingEntry.docs.length > 0) {
-      await payload.delete({
-        collection: "uri-index",
-        id: existingEntry.docs[0].id,
-      })
+    if (existingEntries.docs.length > 0) {
+      await Promise.all(
+        existingEntries.docs.map((entry: any) =>
+          payload.delete({
+            collection: "uri-index",
+            id: entry.id,
+          })
+        )
+      )
     }
   } catch (error) {
     const payload = await getPayload({ config: configPromise })
@@ -192,6 +238,10 @@ export async function checkURIConflict(
   try {
     const payload = await getPayload({ config: configPromise })
     const normalizedURI = routingEngine.normalizeURI(uri)
+    const normalizedExcludeId =
+      typeof excludeDocumentId !== "undefined"
+        ? formatIdForText(excludeDocumentId)
+        : undefined
 
     const conflicts = await payload.find({
       collection: "uri-index",
@@ -205,7 +255,7 @@ export async function checkURIConflict(
       if (excludeCollection && excludeDocumentId) {
         return !(
           doc.sourceCollection === excludeCollection &&
-          doc.documentId === excludeDocumentId
+          doc.documentId === normalizedExcludeId
         )
       }
       return true
@@ -511,22 +561,26 @@ async function upsertURIIndexEntry({
   // Use simple ID formatting utilities
 
   // Try to find existing entry
-  const existingEntry = await payload.find({
+  const formattedDocumentId = formatIdForText(documentId)
+
+  const existingEntries = await payload.find({
     collection: "uri-index",
     where: {
       and: [
         { sourceCollection: { equals: sourceCollection } },
-        { documentId: { equals: formatIdForText(documentId) } },
+        { documentId: { equals: formattedDocumentId } },
       ],
     },
-    limit: 1,
+    limit: 10,
     context,
   })
+
+  const targetEntry = existingEntries.docs.find((entry: any) => entry.status === status)
 
   const indexData = {
     uri,
     sourceCollection,
-    documentId: formatIdForText(documentId),
+    documentId: formattedDocumentId,
     document: {
       relationTo: sourceCollection as any,
       value: formatIdForRelationship(documentId),
@@ -534,12 +588,13 @@ async function upsertURIIndexEntry({
     status,
     templateId,
     breadcrumbs,
+    previousURIs: targetEntry?.previousURIs,
   }
 
-  if (existingEntry.docs.length > 0) {
+  if (targetEntry) {
     await payload.update({
       collection: "uri-index",
-      id: existingEntry.docs[0].id,
+      id: targetEntry.id,
       data: indexData,
       context,
     })

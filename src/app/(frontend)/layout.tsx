@@ -7,6 +7,8 @@ import parse from "html-react-parser"
 import Providers from "@/providers"
 import React from "react"
 import "./css/globals.css"
+import { getSmartSiteConfig } from "@/admin/config"
+import { getI18nConfig } from "@/admin/config/features"
 
 /*************************************************************************/
 /*  ROOT LAYOUT
@@ -15,6 +17,8 @@ import "./css/globals.css"
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings()
   const { integrations } = settings
+  const smartSiteConfig = getSmartSiteConfig()
+  const i18n = getI18nConfig()
 
   /**
   /*  Get code in head and body end from settings
@@ -26,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const bodyEnd = integrations?.bodyEnd
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={i18n.defaultLocale} suppressHydrationWarning>
       <head>
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
@@ -40,7 +44,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
 
-        <Providers>
+        <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
           <SmartSiteAdminBar settings={settings} />
           <Header />
           <div id="smooth-wrapper">

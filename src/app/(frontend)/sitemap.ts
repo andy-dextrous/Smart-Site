@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
-import { getFrontendCollectionKeys } from "@/admin/sitemaps/config"
+import { getSmartSiteConfig } from "@/admin/config"
+import { getFrontendCollectionKeys, shouldIncludeCollectionInSitemap } from "@/admin/sitemaps/config"
 import { generateSitemap } from "@/admin/sitemaps/generator"
 import { getServerSideURL } from "@/admin/utilities/get-url"
 
@@ -9,6 +10,10 @@ import { getServerSideURL } from "@/admin/utilities/get-url"
 
 export async function generateSitemaps() {
   try {
+    const config = getSmartSiteConfig()
+    if (!config.features.sitemaps) {
+      return []
+    }
     const activeSitemapKeys = getFrontendCollectionKeys()
 
     return activeSitemapKeys.map(collectionSlug => ({
@@ -32,12 +37,24 @@ export default async function sitemap({
   const siteUrl = getServerSideURL()
 
   try {
-    // const getSitemapEntries = unstable_cache(
+    const config = getSmartSiteConfig()
+    if (!config.features.sitemaps) {
+      return []
+    }
+
     const getSitemapEntries = async (collectionName: string) => {
+      if (!shouldIncludeCollectionInSitemap(collectionName)) {
+        return []
+      }
+
       const result = await generateSitemap({
         collectionName,
         siteUrl,
       })
+
+      if (!result.entries.length) {
+        return []
+      }
 
       return result.entries.map(entry => ({
         url: entry.loc,

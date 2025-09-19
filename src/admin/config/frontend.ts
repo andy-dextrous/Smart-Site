@@ -38,6 +38,11 @@ export type FrontendCollection = {
 export type EnableFrontendOptions = {
   label?: string
   seoSchemaType?: SEOSchemaType
+  enablePreview?: boolean
+  enableLivePreview?: boolean
+  customHooks?: boolean
+  slugLocked?: boolean
+  seoEnabled?: boolean
 }
 
 type CollectionStructure = {
@@ -61,10 +66,18 @@ export function enableFrontend<TSlug extends CollectionSlug>(
   config: CollectionConfig<TSlug>,
   options?: EnableFrontendOptions
 ): CollectionConfig<TSlug> {
-  const { label, seoSchemaType } = options || {}
+  const {
+    label,
+    seoSchemaType,
+    enablePreview = true,
+    enableLivePreview = true,
+    customHooks = true,
+    slugLocked = true,
+    seoEnabled = true,
+  } = options || {}
   const structure = analyzeCollectionStructure(config)
-  const enhancedFields = buildEnhancedFields(config, structure, seoSchemaType)
-  const collection = createFrontendCollection(config, label, structure)
+  const enhancedFields = buildEnhancedFields(config, structure, seoSchemaType, seoEnabled)
+  const collection = createFrontendCollection(config, label, structure, seoEnabled)
 
   registeredCollections.set(config.slug, collection)
 
@@ -73,36 +86,49 @@ export function enableFrontend<TSlug extends CollectionSlug>(
     fields: [...enhancedFields, ...slugField()],
     admin: {
       ...config.admin,
-      // Add preview functionality automatically
-      livePreview: config.admin?.livePreview ?? {
-        url: ({ data, req }) => {
-          const previewPath = generatePreviewPath({
-            slug: typeof data?.slug === "string" ? data.slug : "",
-            collection: config.slug as CollectionSlug,
-            req,
-            data,
-          })
-          // Add livePreview parameter for admin bar hiding
-          return previewPath + "&livePreview=true"
-        },
-      },
+      // Add preview functionality automatically when enabled
+      livePreview:
+        enableLivePreview === false
+          ? config.admin?.livePreview
+          : config.admin?.livePreview ?? {
+              url: ({ data, req }) => {
+                const previewPath = generatePreviewPath({
+                  slug: typeof data?.slug === "string" ? data.slug : "",
+                  collection: config.slug as CollectionSlug,
+                  req,
+                  data,
+                })
+                // Add livePreview parameter for admin bar hiding
+                return `${previewPath}&livePreview=true`
+              },
+            },
       preview:
-        config.admin?.preview ??
-        ((data, { req }) => {
-          return generatePreviewPath({
-            slug: typeof data?.slug === "string" ? data.slug : "",
-            collection: config.slug as CollectionSlug,
-            req,
-            data,
-          })
-        }),
+        enablePreview === false
+          ? config.admin?.preview
+          : config.admin?.preview ?? ((data, { req }) => {
+              return generatePreviewPath({
+                slug: typeof data?.slug === "string" ? data.slug : "",
+                collection: config.slug as CollectionSlug,
+                req,
+                data,
+              })
+            }),
     },
     hooks: {
       ...config.hooks,
-      beforeChange: [...(config.hooks?.beforeChange || []), beforeUniversalChange],
-      afterChange: [...(config.hooks?.afterChange || []), afterUniversalChange],
-      afterDelete: [...(config.hooks?.afterDelete || []), afterUniversalDelete],
-      beforeOperation: [...(config.hooks?.beforeOperation || []), lockSlugAfterPublish],
+      beforeChange: customHooks
+        ? [...(config.hooks?.beforeChange || []), beforeUniversalChange]
+        : config.hooks?.beforeChange,
+      afterChange: customHooks
+        ? [...(config.hooks?.afterChange || []), afterUniversalChange]
+        : config.hooks?.afterChange,
+      afterDelete: customHooks
+        ? [...(config.hooks?.afterDelete || []), afterUniversalDelete]
+        : config.hooks?.afterDelete,
+      beforeOperation:
+        customHooks && slugLocked
+          ? [...(config.hooks?.beforeOperation || []), lockSlugAfterPublish]
+          : config.hooks?.beforeOperation,
     },
   }
 }
@@ -129,8 +155,13 @@ export function applyFrontendWrapper(
   const frontendOptions = {
     label: collectionConfig.label,
     seoSchemaType: collectionConfig.frontendOptions?.seoSchemaType,
+    enablePreview: collectionConfig.frontendOptions?.enablePreview,
+    enableLivePreview: collectionConfig.frontendOptions?.enableLivePreview,
+    customHooks: collectionConfig.frontendOptions?.customHooks,
+    slugLocked: collectionConfig.frontendOptions?.slugLocked,
+    seoEnabled: collectionConfig.seo !== false,
   }
-  
+
   return enableFrontend(baseConfig, frontendOptions)
 }
 
@@ -180,21 +211,22 @@ function hasFieldRecursive(fields: Field[], fieldNames: string[]): boolean {
 function buildEnhancedFields(
   config: CollectionConfig,
   structure: CollectionStructure,
-  seoSchemaType?: SEOSchemaType
+  seoSchemaType: SEOSchemaType | undefined,
+  seoEnabled: boolean
 ): Field[] {
   const fields = structure.hasTitle
     ? [...config.fields]
     : [titleField(), ...config.fields]
 
   if (structure.hasExistingTabs) {
-    return addSEOToExistingTabs(fields, structure, seoSchemaType)
+    return addSEOToExistingTabs(fields, structure, seoSchemaType, seoEnabled)
   }
 
   if (structure.hasBlockContent) {
-    return createTabsWithSEO(fields, structure, seoSchemaType)
+    return createTabsWithSEO(fields, structure, seoSchemaType, seoEnabled)
   }
 
-  return addSEOToSimpleLayout(fields, structure, seoSchemaType)
+  return addSEOToSimpleLayout(fields, structure, seoSchemaType, seoEnabled)
 }
 
 function extractTitleFields(fields: Field[]): {
@@ -230,9 +262,10 @@ function isTitleField(field: Field): boolean {
 function addSEOToExistingTabs(
   fields: Field[],
   structure: CollectionStructure,
-  seoSchemaType?: SEOSchemaType
+  seoSchemaType: SEOSchemaType | undefined,
+  seoEnabled: boolean
 ): Field[] {
-  if (structure.hasCustomSEO) {
+  if (structure.hasCustomSEO || !seoEnabled) {
     return fields
   }
 
@@ -257,11 +290,12 @@ function addSEOToExistingTabs(
 function createTabsWithSEO(
   fields: Field[],
   structure: CollectionStructure,
-  seoSchemaType?: SEOSchemaType
+  seoSchemaType: SEOSchemaType | undefined,
+  seoEnabled: boolean
 ): Field[] {
   const { titleFields, contentFields } = extractTitleFields(fields)
 
-  if (structure.hasCustomSEO) {
+  if (structure.hasCustomSEO || !seoEnabled) {
     return [
       ...titleFields,
       {
@@ -277,32 +311,47 @@ function createTabsWithSEO(
     ]
   }
 
-  return [
-    ...titleFields,
-    {
-      type: "tabs",
-      tabs: [
+  return seoEnabled
+    ? [
+      ...titleFields,
+      {
+        type: "tabs",
+        tabs: [
+          {
+            name: "content",
+            label: "Content",
+            fields: contentFields,
+          },
+          {
+            name: "seo",
+            label: "SEO",
+            fields: seoFields({ seoSchemaType }),
+          },
+        ],
+      },
+    ]
+    : [
+        ...titleFields,
         {
-          name: "content",
-          label: "Content",
-          fields: contentFields,
+          type: "tabs",
+          tabs: [
+            {
+              name: "content",
+              label: "Content",
+              fields: contentFields,
+            },
+          ],
         },
-        {
-          name: "seo",
-          label: "SEO",
-          fields: seoFields({ seoSchemaType }),
-        },
-      ],
-    },
-  ]
+      ]
 }
 
 function addSEOToSimpleLayout(
   fields: Field[],
   structure: CollectionStructure,
-  seoSchemaType?: SEOSchemaType
+  seoSchemaType: SEOSchemaType | undefined,
+  seoEnabled: boolean
 ): Field[] {
-  if (structure.hasCustomSEO) {
+  if (structure.hasCustomSEO || !seoEnabled) {
     return fields
   }
 
@@ -318,11 +367,15 @@ function addSEOToSimpleLayout(
           label: "Content",
           fields: contentFields,
         },
-        {
-          name: "seo",
-          label: "SEO",
-          fields: seoFields({ seoSchemaType }),
-        },
+        ...(seoEnabled
+          ? [
+              {
+                name: "seo",
+                label: "SEO",
+                fields: seoFields({ seoSchemaType }),
+              },
+            ]
+          : []),
       ],
     },
   ]
@@ -331,12 +384,13 @@ function addSEOToSimpleLayout(
 function createFrontendCollection(
   config: CollectionConfig,
   label: string | undefined,
-  structure: CollectionStructure
+  structure: CollectionStructure,
+  seoEnabled: boolean
 ): FrontendCollection {
   return {
     slug: config.slug,
     label: label || capitalizeFirst(config.slug),
-    hasSEO: !structure.hasCustomSEO,
+    hasSEO: seoEnabled && !structure.hasCustomSEO,
   }
 }
 
@@ -353,7 +407,7 @@ export function getFrontendCollections(): FrontendCollection[] {
     frontendCollections.push({
       slug,
       label: collection.label,
-      hasSEO: collection.seo || false,
+      hasSEO: collection.seo !== false,
     })
   }
 
@@ -370,7 +424,7 @@ export function getFrontendCollection(slug: string): FrontendCollection | undefi
     return {
       slug,
       label: config.label,
-      hasSEO: config.seo || false,
+      hasSEO: config.seo !== false,
     }
   }
   return undefined

@@ -4,6 +4,7 @@ import { routingEngine } from "@/admin/routing"
 import { detectChanges, type ChangeDetection } from "./change-detection"
 import { getPayload } from "payload"
 import configPromise from "@payload-config"
+import { isFrontendCollection } from "@/admin/config/frontend"
 
 /*************************************************************************/
 /*  UNIVERSAL REVALIDATION ENGINE - TYPES & INTERFACES
@@ -255,9 +256,18 @@ async function revalidateForDocumentChange(
   /**
    * 1. Always invalidate the specific document
    */
-  const itemTag = `item:${collection}:${doc.slug || doc.id}`
-  revalidateTag(itemTag)
-  result.tagsInvalidated.push(itemTag)
+  const itemTags = new Set<string>()
+  if (doc.slug) {
+    itemTags.add(`item:${collection}:${doc.slug}`)
+  }
+  if (doc.id) {
+    itemTags.add(`item:${collection}:${doc.id}`)
+  }
+
+  itemTags.forEach(tag => {
+    revalidateTag(tag)
+    result.tagsInvalidated.push(tag)
+  })
 
   /**
    * 2. ...And its matching URI
@@ -276,6 +286,23 @@ async function revalidateForDocumentChange(
   }
 
   /**
+   * 2b. Refresh collection and URI index tags so list queries stay fresh
+   */
+  const collectionTag = `collection:${collection}`
+  if (!result.tagsInvalidated.includes(collectionTag)) {
+    revalidateTag(collectionTag)
+    result.tagsInvalidated.push(collectionTag)
+  }
+
+  if (isFrontendCollection(collection)) {
+    const uriIndexCollectionTag = `uri-index:${collection}`
+    if (!result.tagsInvalidated.includes(uriIndexCollectionTag)) {
+      revalidateTag(uriIndexCollectionTag)
+      result.tagsInvalidated.push(uriIndexCollectionTag)
+    }
+  }
+
+  /**
    * 3. Also invalidate the old URI if it changed
    */
   if (changes.uriChanged && changes.oldUri) {
@@ -289,6 +316,15 @@ async function revalidateForDocumentChange(
      */
     revalidatePath(changes.oldUri)
     result.pathsInvalidated.push(changes.oldUri)
+  }
+
+  /**
+   * 3b. Also invalidate old slug-based cache entries when slug changes
+   */
+  if (changes.slugChanged && changes.oldSlug) {
+    const oldSlugTag = `item:${collection}:${changes.oldSlug}`
+    revalidateTag(oldSlugTag)
+    result.tagsInvalidated.push(oldSlugTag)
   }
 
   /**
@@ -633,7 +669,9 @@ async function revalidateAllInternal(
 
 export function shouldSkipInvalidation(doc: any, changes: ChangeDetection): boolean {
   // Skip if document is draft and no status change
-  if (doc._status !== "published" && !changes.statusChanged) {
+  const currentStatus = typeof doc._status === "string" ? doc._status : "published"
+
+  if (currentStatus !== "published" && !changes.statusChanged) {
     return true
   }
 
@@ -643,7 +681,8 @@ export function shouldSkipInvalidation(doc: any, changes: ChangeDetection): bool
     !changes.statusChanged &&
     !changes.slugChanged &&
     !changes.parentChanged &&
-    !changes.titleChanged
+    !changes.titleChanged &&
+    !changes.contentChanged
   ) {
     return true
   }

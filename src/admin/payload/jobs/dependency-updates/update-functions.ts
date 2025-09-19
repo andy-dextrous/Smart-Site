@@ -92,11 +92,13 @@ export async function processArchivePageUpdate(
         })
 
         if (oldURI !== newURI) {
+          const itemStatus = item._status === "draft" ? "draft" : "published"
+
           await updateURI({
             uri: newURI,
             collection: dependency.collection,
             documentId: item.id,
-            status: item._status || "published",
+            status: itemStatus,
             previousURI: oldURI,
           })
 
@@ -430,12 +432,14 @@ export async function processSettingsChange(
         })
 
         if (oldURI !== newURI) {
+          const itemStatus = item._status === "draft" ? "draft" : "published"
+
           // Update URI in index
           await updateURI({
             uri: newURI,
             collection: collectionSlug,
             documentId: item.id,
-            status: item._status || "published",
+            status: itemStatus,
             previousURI: oldURI,
           })
 
@@ -545,11 +549,13 @@ export async function processTemplateChange(
 
         // Always update URI index with new template ID - this is crucial for template changes
 
+        const itemStatus = item._status === "draft" ? "draft" : "published"
+
         await updateURI({
           uri: newURI || oldURI,
           collection: templateChange.collection,
           documentId: item.id,
-          status: item._status === "published" ? "published" : "draft",
+          status: itemStatus,
           templateId: templateChange.newTemplate,
           previousURI: oldURI !== newURI ? oldURI : undefined,
         })

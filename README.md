@@ -9,6 +9,9 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - [Architecture Overview](#architecture-overview)
 - [Admin Layer System](#admin-layer-system)
 - [AI Integration](#ai-integration)
+- [Design System](#design-system)
+- [Settings](#settings)
+- [Templates](#templates)
 - [Building Sections](#building-sections)
 - [Routing & Caching](#routing--caching)
 - [Configuration System](#configuration-system)
@@ -33,10 +36,12 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 
 ### Section-First Development
 
-- **20+ pre-built sections** - Hero, CTA, forms, grids, testimonials, and more
+- **Installable section library** - Pull curated blocks from the Smart Site Sections Library (shadcn-style installer)
 - **Component isolation** - Each section is self-contained with config + component
 - **Drag-and-drop builder** - Arrange sections visually in Payload admin
 - **Responsive by default** - All sections mobile-optimized with Tailwind v4
+
+> The starter ships with an empty sections directory so you can decide what ships to clients. Install production-ready blocks from the Smart Site Sections Library when you need them, or author custom sections in-house.
 
 ### Enterprise Features
 
@@ -57,7 +62,7 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - **Content assistant** - AI chat in admin panel for content creation
 - **SEO suggestions** - Automated SEO improvements and scoring
 - **Smart search** - AI-enhanced search functionality
-- **Remote backend** - Secure AI processing via Mastra framework
+- **Managed backend** - Secure AI processing through Wild Creative's Smart Site AI platform
 
 <a id="installation--getting-started"></a>
 ## 🚀 Installation & Getting Started
@@ -66,29 +71,37 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 
 - **Node.js 20+**
 - **pnpm** (preferred package manager)
-- **Database**: PostgreSQL or MongoDB
+- **Database**: MongoDB Community (local via Homebrew) or MongoDB Atlas
 - **File Storage**: Vercel Blob (recommended) or other storage solution
-- **AI Backend**: Smart Site AI server (separate installation)
+- **AI Backend**: Managed Smart Site AI platform (subscription access via andrew@wildcreative.com.au)
 
 ### 1. Project Setup
 
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd smart-site
+cd <your-site-folder>
 
 # Install dependencies
 pnpm install
-
-# Copy environment file (or run \`pnpm run setup\` for the interactive flow)
-cp .env.example .env
 ```
+
+1. Open `.env.example` and, if your team has an active Smart Site AI subscription, request the `SMARTSITE_AI_REGISTRATION_SECRET` from Wild Creative (andrew@wildcreative.com.au) and paste it in. Leave the field blank if you are not connecting to the managed AI service. Every other key will be filled in by the setup script.
+2. Run the interactive bootstrap:
+
+   ```bash
+   pnpm run setup
+   ```
+
+   The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, seeds demo data, and can leave `pnpm dev` running when it finishes.
 
 ### 2. Environment Configuration
 
-> 💡 **Quick start**: `pnpm run setup` walks you through port, database, storage, admin credentials, and seeds demo content automatically. It updates `.env`, starts the dev server, and leaves it running when finished.
+> 💡 **Quick start**: Once the registration secret is set, `pnpm run setup` handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes.
+>
+> ⚠️ Use only the `SMARTSITE_AI_REGISTRATION_SECRET` issued by Wild Creative. Without an issued secret the wizard skips AI registration and the site operates without AI features.
 
-Configure your `.env` file with these required variables:
+The setup script writes these values into `.env`; use this reference when updating keys manually or configuring CI pipelines:
 
 ```bash
 # Core Configuration
@@ -96,9 +109,9 @@ NODE_ENV=development
 NEXT_PUBLIC_URL=http://localhost:3000
 PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts
 
-# Database (Choose MongoDB or PostgreSQL)
-DATABASE_PROVIDER=mongoose                         # or "postgres"
-DATABASE_URL=mongodb://localhost:27017/smart-site  # or PostgreSQL URL
+# Database
+DATABASE_PROVIDER=mongoose
+DATABASE_URL=mongodb://127.0.0.1:27017/smart-site-dev
 
 # Security
 PAYLOAD_SECRET=<generate-random-32-char-string>    # openssl rand -hex 32
@@ -128,222 +141,173 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 
 #### AI Environment Variables
 
-- `SMARTSITE_AI_REGISTRATION_SECRET` — shared bearer token issued by Smart Site AI. When present, the seed step posts your site ID, URL, and API credentials to the AI backend so it can enroll the instance and return plan metadata. Leave it blank locally if you are not ready to register.
-- `AI_AGENT_API_KEY` — 64-character key generated the first time you run `pnpm seed` (or hit `/api/seed`). The seeding script creates the hidden `ai-agent` user, writes the key to `.env`, and echoes it once in the terminal for safekeeping. Downstream AI routes attach it as the `Authorization` header.
-- `AI_AGENT_USER_ID` — the Payload user ID created alongside the agent API key during seeding. It is written to `.env` and forwarded to the Mastra backend as the `X-Site-ID` header so requests are scoped to the correct site.
+- `SMARTSITE_AI_REGISTRATION_SECRET` — subscription credential issued directly by Wild Creative. Contact andrew@wildcreative.com.au to obtain or rotate the value. Without this key the site remains disconnected from the managed AI platform.
+- `AI_AGENT_API_KEY` — generated automatically during seeding once the registration secret is present. This key identifies your site to the managed backend; store it securely and never share it outside your organization.
+- `AI_AGENT_USER_ID` — auto-generated identifier paired with the API key. It scopes every AI request to your tenant on the managed service.
 
 > Rerun the seed if `.env` ever loses the agent credentials. The script reconciles the database user and restores the values without regenerating keys unless a rotation flow is requested.
 
 ### 3. Database Setup
 
-#### Option A: MongoDB (Recommended)
+Smart Site runs on MongoDB in every environment. PostgreSQL drivers remain in the repository for compatibility with legacy tooling, but the canonical configuration sets `DATABASE_PROVIDER=mongoose` and points `DATABASE_URL` at a MongoDB deployment.
 
-**Cloud MongoDB (MongoDB Atlas)**
+#### Local development (macOS and Linux)
 
-1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a cluster and database
-3. Get connection string from Atlas dashboard
-4. Set `DATABASE_PROVIDER=mongoose`
-5. Add your `DATABASE_URL` to `.env`
-
-**Local MongoDB Development**
-
-**Initial Setup:**
-
-1. Install MongoDB locally:
-
-   **macOS:**
+1. Install MongoDB Community with Homebrew.
 
    ```bash
-   # Using Homebrew (recommended)
    brew tap mongodb/brew
-   brew install mongodb-community
-   brew services start mongodb/brew/mongodb-community
+   brew install mongodb-community@8.0
+   brew services start mongodb-community@8.0
    ```
 
-   **Windows:**
-
-   ```powershell
-   # Using Chocolatey (recommended)
-   choco install mongodb
-
-   # Or using winget
-   winget install MongoDB.Server
-
-   # Or download installer from https://www.mongodb.com/try/download/community
-   # Follow the installation wizard and select "Install MongoDB as a Service"
-   ```
-
-   **Manual Download (both platforms):**
-   - Visit https://www.mongodb.com/try/download/community
-   - Choose your OS and follow installation instructions
-
-2. Install MongoDB Shell for database interaction:
-
-   **macOS:**
+2. Verify the service and confirm connectivity.
 
    ```bash
-   brew install mongodb/brew/mongodb-community-shell
+   brew services list | grep mongodb
+   mongosh "mongodb://127.0.0.1:27017" --eval "db.adminCommand('ping')"
    ```
 
-   **Windows:**
+3. Update `.env` for local development.
 
-   ```powershell
-   # Using Chocolatey
-   choco install mongodb-shell
-
-   # Or download from https://www.mongodb.com/try/download/shell
-   ```
-
-3. Configure environment:
    ```bash
    DATABASE_PROVIDER=mongoose
-   DATABASE_URL=mongodb://localhost:27017/smart-site-dev
+   DATABASE_URL=mongodb://127.0.0.1:27017/smart-site-dev
    ```
 
-**Understanding Your Local MongoDB:**
+4. Useful administration commands.
 
-- **Location**: Your MongoDB data lives in `~/mongodb/data/`
-- **Status**: MongoDB runs as a background daemon (survives terminal closes/computer sleep)
-- **Port**: Default port 27017
-- **Multiple projects**: Same MongoDB server, different database names
+   ```bash
+   brew services start mongodb-community@8.0
+   brew services restart mongodb-community@8.0
+   brew services stop mongodb-community@8.0
+   brew services list | grep mongodb-community@8.0
+   tail -f $(brew --prefix)/var/log/mongodb/mongo.log
+   ```
 
-**Daily Development Workflow:**
+Homebrew stores data in `$(brew --prefix)/var/mongodb` (for example `/usr/local/var/mongodb`) and logs in `$(brew --prefix)/var/log/mongodb/mongo.log`. One daemon can host any number of Smart Site databases—use different names (for example `smart-site-dev`, `smart-site-staging`) to keep environments isolated.
 
-**Direct shell commands:**
-
-**macOS/Linux:**
-
-```bash
-# 4. View databases via shell
-mongo --eval "db.adminCommand('listDatabases')"
-
-# 5. View collections in your project
-mongo smart-site-dev --eval "db.getCollectionNames()"
-```
-
-**Windows:**
-
-```powershell
-# 4. View databases via shell
-mongo --eval "db.adminCommand('listDatabases')"
-
-# 5. View collections in your project
-mongo smart-site-dev --eval "db.getCollectionNames()"
-
-# Alternative: Start MongoDB service manually if needed
-net start MongoDB
-
-# Stop MongoDB service
-net stop MongoDB
-```
-
-**GUI Access (Recommended):**
-
-- **MongoDB Compass**: Download from https://www.mongodb.com/products/compass
-- **Connection**: `mongodb://localhost:27017`
-- **Benefits**: Visual database browser, query builder, real-time monitoring
-
-**Multiple Project Setup:**
+##### Backups and restores (macOS/Linux)
 
 ```bash
-# Each project uses different database name:
-# Project 1: DATABASE_URL=mongodb://localhost:27017/smart-site-dev
-# Project 2: DATABASE_URL=mongodb://localhost:27017/smart-site-client2
-# Project 3: DATABASE_URL=mongodb://localhost:27017/smart-site-ecommerce
+mkdir -p backups
+mongodump --uri "${MONGODB_URI:-mongodb://127.0.0.1:27017/smart-site-dev}" --out ./backups/$(date +%Y%m%d-%H%M%S)
 ```
-
-**Create new database for second project (all platforms):**
-
-**Interactive shell:**
 
 ```bash
-mongo
-> use smart-site-client2
-> db.setup.insertOne({project: "client2", created: new Date()})
-> exit
+# Set MONGODB_URI to the target connection string and provide a BACKUP_PATH directory
+MONGODB_URI="mongodb+srv://<username>:<password>@<cluster-url>/smart-site-prod" \
+BACKUP_PATH=./backups/dev-YYYYMMDD-HHMMSS \
+mongorestore --uri "$MONGODB_URI" "$BACKUP_PATH"
 ```
 
-**One-liner (macOS/Linux):**
+#### Local development (Windows)
+
+1. Install MongoDB as a Windows service.
+
+   ```powershell
+   choco install mongodb --params "/InstallDirectory=C:\\Program Files\\MongoDB"
+   net start MongoDB
+   ```
+
+   The installer registers the service and places data under `C:\Program Files\MongoDB\Server\<version>\data`. Keep the default port `27017` for parity with local scripts.
+
+2. Install MongoDB Shell (mongosh) if it is not included.
+
+   ```powershell
+   choco install mongosh
+   ```
+
+3. Set the same environment variables in `.env` as the macOS/Linux flow.
+
+   ```bash
+   DATABASE_PROVIDER=mongoose
+   DATABASE_URL=mongodb://127.0.0.1:27017/smart-site-dev
+   ```
+
+4. Manage the Windows service when required.
+
+   ```powershell
+   net stop MongoDB
+   net start MongoDB
+   ```
+
+#### GUI tooling
+
+- [MongoDB Compass](https://www.mongodb.com/products/compass) is the recommended GUI. Connect with `mongodb://127.0.0.1:27017` in development and paste Atlas connection strings for staging or production.
+- The seed scripts create collections automatically; Compass will list them after the first request to `/api/seed` or after running `pnpm seed:minimal`.
+
+#### Production and staging (MongoDB Atlas)
+
+1. Provision a MongoDB Atlas cluster (Dedicated or Serverless) in the region closest to your deployment.
+2. Create a database user with read/write access and restrict IP access to your deployment environments.
+3. Copy the SRV connection string from Atlas and update the environment.
+
+   ```bash
+   DATABASE_PROVIDER=mongoose
+   DATABASE_URL=mongodb+srv://<username>:<password>@<cluster-url>/smart-site-prod?retryWrites=true&w=majority
+   ```
+
+4. Redeploy Smart Site so the new environment variables take effect.
+
+#### Moving data between environments
+
+Use MongoDB’s native tools for a repeatable promote flow.
 
 ```bash
-mongo smart-site-client2 --eval 'db.setup.insertOne({project: "client2", created: new Date()})'
+mongodump --uri "mongodb://127.0.0.1:27017/smart-site-dev" --out ./backups/dev-$(date +%Y%m%d-%H%M%S)
 ```
 
-**One-liner (Windows):**
-
-```powershell
-mongo smart-site-client2 --eval "db.setup.insertOne({project: 'client2', created: new Date()})"
+```bash
+mongorestore --uri "mongodb+srv://<username>:<password>@<cluster-url>/smart-site-prod" ./backups/dev-YYYYMMDD-HHMMSS
 ```
 
-**Important Notes:**
-
-- MongoDB creates databases lazily (only after inserting data)
-- GUI clients like Compass **cannot** start MongoDB - server must be running first
-- MongoDB shell connection fails if the server is stopped—start the service before running shell commands
-- One MongoDB server can host multiple project databases
-
-#### Option B: Vercel PostgreSQL
-
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Navigate to **Storage** → **Create Database** → **Postgres**
-3. Copy the `POSTGRES_URL` to your `.env`
+Run seeding (`pnpm seed:minimal` or `pnpm seed:demo`) only against development databases. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
 
 ### 4. AI Backend Setup
 
-Smart Site requires a separate AI backend service. See the [AI Backend Integration](#ai-backend-integration) section for setup instructions.
+Smart Site runs standalone out of the box. To enable AI features you connect to the managed Smart Site AI platform operated by Wild Creative. There is no customer-managed installation step—simply request access via andrew@wildcreative.com.au and add the supplied registration secret to your `.env` file before seeding.
 
 ### 5. Development Server
 
 ```bash
 # Start development server
 pnpm dev
-
-# Fresh development start (resets database and seeds data)
-pnpm dev:fresh
 ```
 
 ### 6. Database Seeding & Initial Setup
 
-> **🗃️ Important:** Before you start building, seed your database with sample content for the best development experience.
+> **🗃️ Important:** The setup wizard seeds the minimal profile for you. Use the commands below only when you need to reseed or switch profiles.
 
-#### **Automatic Seeding (Recommended)**
+`pnpm run setup` already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the database.
 
-```bash
-# Start fresh with a clean database and sample content
-pnpm dev:fresh
+#### Reseeding from the command line
 
-# Or seed manually after starting the server
-pnpm seed
-```
-
-#### **Manual Seeding via Admin Panel**
-
-1. **Start the development server**: `pnpm dev`
-2. **Access the admin panel**: Navigate to `http://localhost:3000/admin`
-3. **Create your admin user**: Follow the setup wizard
-4. **Seed via API**: Make a POST request to `http://localhost:3000/api/seed`
+1. Ensure the dev server is running (`pnpm dev`).
+2. Run the seeding script (defaults to the minimal profile):
 
    ```bash
-   # Command line seeding
-   curl -X POST http://localhost:3000/api/seed
+   pnpm seed
    ```
 
-#### **What Gets Seeded**
+   Use `pnpm seed:demo` when you intentionally need the rich demo dataset. The script reads `SMARTSITE_SITE_NAME` so update `.env` before seeding if you want different registration metadata.
 
-The seeding process creates realistic sample content including:
+#### Minimal seed contents
 
-- **Pages**: Homepage, About, Services, Contact with realistic content
-- **Posts**: Blog posts with proper categories and tags
-- **Services**: Sample service offerings with descriptions
-- **Media**: Sample images and documents
-- **Forms**: Contact forms and lead capture forms
-- **Navigation**: Main navigation and footer structures
-- **Users**: Admin user (if none exists)
-- **Templates**: Page templates and section configurations
-- **Categories**: Content categorization and taxonomies
+The minimal profile is intentionally lean, giving editors the essentials without opinionated marketing copy:
 
-> **💡 Pro Tip:** The seeded content follows all design system patterns and provides excellent examples for building your own sections.
+- **Admin user** using the credentials you entered during setup.
+- **Primary contact form** stored in the Forms collection (name, email, phone, message, confirmation workflow, notification email).
+- **Pages**:
+  - `Home` with a hero + content block that explains how to start building sections.
+  - `Contact` with a hero and the primary contact form already embedded.
+  - `Privacy Policy` and `Terms` with placeholder content ready to replace.
+- **Navigation**:
+  - Header links for Home and Contact.
+  - Footer legal links for Privacy Policy and Terms.
+- **Global settings** preconfigured with site name/description, SEO defaults (including robots.txt), and routing that points the homepage field at the seeded Home page. Social links, locations, analytics IDs, and templates are intentionally left blank for you to fill in.
+
+Run the **demo** profile when you want a fully populated showcase—posts, services, testimonials, media, templates, and expanded navigation are all included in that variant.
 
 ### 7. Available Scripts
 
@@ -357,8 +321,8 @@ pnpm type-check       # Run TypeScript checks
 
 # Database & Content Management
 pnpm db:schema        # Generate database schema
-pnpm db:reset         # Reset database and seed data
-pnpm seed             # Seed database with sample content
+pnpm db:reset         # Reset database and run the demo seed profile
+pnpm seed             # Seed demo content (requires dev server at :3000)
 pnpm regenerate-uris  # Regenerate URI index for routing
 
 # Payload CMS Commands
@@ -394,7 +358,7 @@ Smart Site follows a **field-driven, section-first architecture** where:
 ### Directory Structure
 
 ```
-apps/smart-site/
+.
 ├── src/
 │   ├── app/                              # Next.js App Router
 │   │   ├── (frontend)/                   # 🌐 Public website routes
@@ -413,7 +377,7 @@ apps/smart-site/
 │   │       └── api/                      # CMS API endpoints
 │   │
 │   ├── components/                       # 🎨 Frontend components
-│   │   ├── sections/                     # 📦 Content sections (main dev area)
+│   │   ├── sections/                     # 📦 Sections you install or create (starter ships empty)
 │   │   │   ├── config.ts                 # Section registry
 │   │   │   ├── sections-map.tsx          # Component mapping
 │   │   │   ├── CLAUDE.md                 # Section dev guide
@@ -603,19 +567,19 @@ Smart Site includes powerful AI features via the **Mastra framework**, with proc
 
 ### Initial Registration Flow
 
-1. Confirm `features.ai.enabled` is `true` in `src/smartsite.config.ts` and that `SMARTSITE_AI_REGISTRATION_SECRET` matches the secret configured on your Smart Site AI instance (default endpoint `http://localhost:3333`).
+1. Confirm `features.ai.enabled` is set to `true` in `src/smartsite.config.ts` and that the `SMARTSITE_AI_REGISTRATION_SECRET` in `.env` matches the subscription credential provided by Wild Creative. Do not modify the default endpoint unless the Wild Creative team supplies an alternative.
 2. Run the standard seed flow (`pnpm seed`, the `/api/seed` endpoint, or the interactive setup script). During seeding the hidden `ai-agent` user is ensured, the site is registered with Smart Site AI, and `AI_AGENT_API_KEY` / `AI_AGENT_USER_ID` are written to `.env`.
 3. Restart Smart Site so the updated environment variables are loaded.
 
-After this handshake the admin chat assistant and other AI features can reach the backend immediately.
+After this handshake the admin chat assistant and other AI features can reach the managed backend immediately. If anything fails during registration, email andrew@wildcreative.com.au for support—there is no customer-side troubleshooting beyond verifying the secret and rerunning the seed.
 
 ### Regenerating Credentials Later
 
-If a key is lost—or you want to rotate it without touching content—run:
+If a key is lost—or you want to rotate it without touching content—contact Wild Creative first, then run:
 
 ```bash
-pnpm --filter @product-studio/smart-site ai:register         # Sync existing credentials
-pnpm --filter @product-studio/smart-site ai:register --force # Issue a brand-new API key
+pnpm ai:register         # Sync existing credentials with the managed service
+pnpm ai:register --force # Issue a brand-new API key (coordinate with Wild Creative before executing)
 ```
 
 The command reuses the existing AI agent, updates Smart Site AI, and rewrites the `.env` entries in-place.
@@ -644,32 +608,11 @@ The command reuses the existing AI agent, updates Smart Site AI, and rewrites th
 
 ### Configuration
 
-Configure AI in `src/smartsite.config.ts`:
-
-```typescript
-const config: UserConfig = {
-  features: {
-    ai: {
-      enabled: true,
-      endpoint: "http://localhost:3333",
-      registrationPath: "/api/internal/identities", // optional override
-    },
-  },
-}
-```
+Configure AI in `src/smartsite.config.ts` by toggling `features.ai.enabled`. Leave `features.ai.endpoint` and other advanced options at their defaults unless Wild Creative gives you a managed override.
 
 ### Backend Setup
 
-The AI backend (`apps/smart-site-ai`) runs separately:
-
-```bash
-# Development
-cd apps/smart-site-ai
-pnpm dev  # Runs on port 3333
-
-# Production - Deploy to Vercel/Railway
-# Update config.features.ai.endpoint in smartsite.config.ts
-```
+No backend deployment is required on the client side. The Smart Site AI platform is operated by Wild Creative and shared across subscribing sites. Reach out to andrew@wildcreative.com.au if you need to confirm uptime or request regional routing changes.
 
 ### AI Backend Authentication System
 
@@ -680,15 +623,15 @@ Smart Site authenticates with the AI backend using a special "AI Agent" user pat
 1. **AI Agent User**: Each Smart Site instance has a hidden user with role `ai-agent`
 2. **API Key Generation**: This user has an API key (64-character hex string) for authentication
 3. **Auto-Creation**: The AI agent is automatically created during database seeding
-4. **Environment Storage**: Credentials are saved to `.env` (rerunnable with `pnpm --filter @product-studio/smart-site ai:register`):
+4. **Environment Storage**: Credentials are saved to `.env` (rerunnable with `pnpm ai:register`):
 
 ```bash
-# AI Agent Configuration (Auto-generated)
+# AI Agent Configuration (Auto-generated example)
 AI_AGENT_API_KEY=80fda7460be5a83e4dc8256392bba4baacdd48777fd5eb1bdd13a1c1b9a25375
 AI_AGENT_USER_ID=68c0ba9971ba48af9e63f160
 ```
 
-> When `SMARTSITE_AI_REGISTRATION_SECRET` is set, the seeding step automatically registers the identity with Smart Site AI (using the endpoint defined in `smartsite.config.ts`), prints an audit fingerprint, and returns a single-use recovery token. Store that token in your secrets vault immediately—it's not recoverable after it expires.
+> When the Wild Creative-issued `SMARTSITE_AI_REGISTRATION_SECRET` is present, the seeding step registers your site with the managed Smart Site AI platform, prints an audit fingerprint, and returns a single-use recovery token. Store that token securely—the platform cannot reissue it without manual intervention from Wild Creative.
 
 #### Setting Up AI Authentication
 
@@ -696,9 +639,9 @@ AI_AGENT_USER_ID=68c0ba9971ba48af9e63f160
 
 ```bash
 pnpm seed
-# OR
-curl -X POST http://localhost:3000/api/seed
 ```
+
+   Use `pnpm seed:demo` when you need the full demo profile for showcase content.
 
 2. **Look for API Key Output**:
 
@@ -729,11 +672,11 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 #### End-to-End Request Flow
 
 1. Frontend API routes under `app/(frontend)/api/ai/*` validate the shared secret, add the `X-Site-ID` header, and proxy requests to the Mastra backend.
-2. The backend (see `apps/smart-site-ai/README.md`) verifies the site ID/API key pair, loads the correct workspace, and runs the requested chat/thread/schema operation.
+2. The managed Smart Site AI backend operated by Wild Creative verifies the site ID/API key pair, loads the correct workspace, and runs the requested chat/thread/schema operation.
 3. Responses stream back through the proxy so the admin chat panel and public endpoints never expose Mastra credentials directly.
-4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity; you can rerun this logic later via `pnpm --filter @product-studio/smart-site ai:register` (add `--force` to rotate the key).
+4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity; you can rerun this logic later via `pnpm ai:register` (add `--force` to rotate the key).
 
-> For backend installation and environment setup, follow `apps/smart-site-ai/README.md`. Once the service is running, set `features.ai.endpoint` in `smartsite.config.ts` to that URL and the proxy routes above will take care of authentication.
+> Backend provisioning is handled entirely by Wild Creative. If you need to confirm connectivity or request changes, email andrew@wildcreative.com.au rather than attempting to deploy your own instance.
 
 #### Security Features
 
@@ -743,33 +686,80 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 - **Role Isolation**: `ai-agent` role has specific access patterns
 - **Multi-Tenant Ready**: Each site has unique credentials
 
-### Planned AI Endpoints
+<a id="design-system"></a>
+## 🎨 Design System
 
-The following endpoints will be implemented to connect Smart Site with the AI backend:
+Smart Site inherits the universal design system defined in `src/app/(frontend)/css`. These tokens mirror the Smart Site Starter, so the same spacing rhythm and color palette apply across every project.
 
-#### `/api/ai-config`
+### Token Sources
+- `theme.css` declares all spacing clamps, container widths, navigation offsets, and the shared color palette.
+- `base.css` applies global section padding (`px-section-x py-section-y`), sets the default background/text colors, and seeds border styling.
+- `typography.css` defines the fluid type scale, heading hierarchy, and default link treatments. Avoid reapplying these inside sections unless you are building an intentional variant.
+- `utilities.css` exposes container helpers (`container`, `container-md`, `container-sm`) that wrap the matching `max-w-*` tokens.
 
-- Exposes block schemas and field configurations
-- Bypasses GraphQL introspection limitations
-- Returns sanitized Payload configuration
-- Cached with ETag headers
+### Spacing System
+- **Section rhythm**: Each `<section>` automatically receives the global horizontal and vertical padding together with positioning defaults. Reach for the section scale tokens only when a block needs intentionally tighter or looser vertical rhythm.
+- **Navigation offsets**: Apply the first-section offset token to clear the fixed header, and use the navigation-spacing variables on overlays that sit inside the hero grid.
+- **Containers & gutters**: The container tokens clamp readable widths, while the offset variables let full-bleed surfaces align their inner content back to the grid.
+- **Interior spacing**: The content spacing tokens control gaps between stacked elements and the inset padding inside cards or callouts. Prefer these over bespoke values to stay on the shared rhythm.
 
-#### `/api/ai/auth`
+### Color Palette
+- **Primary** tokens define the dominant brand hue used for key actions, emphasis, and interactive states.
+- **Secondary** tokens supply a complementary accent for supporting highlights, gradients, or secondary CTAs.
+- **Neutral** tokens provide the light gray base for subtle backgrounds and dividers, while the **dark** scale spans text, elevated surfaces, and inverted sections.
+- **Role-based** tokens give you consistent border, form-outline, and translucent treatments without relying on ad-hoc opacity adjustments.
 
-- Edge function for fast API key validation
-- Returns site metadata and permissions
-- Never trusts client-provided URLs
+### Usage Guidelines
+- Lean on the defaults from `base.css` and `typography.css`; stacking additional padding or text utilities on top of them typically doubles spacing or breaks the type scale.
+- Compose new sections with the shared building blocks so spacing and color tokens are applied consistently for you.
+- Reference the design system variables through the provided utilities rather than hard-coding values; this keeps Smart Site and the Starter aligned.
 
-#### `/api/ai/operations`
+<a id="settings"></a>
+## 🛠 Settings
 
-- Proxies AI operations to backend
-- Re-validates API key for security
-- Streams responses back to frontend
+Smart Site exposes multiple globals to keep site-wide controls inside the admin:
+
+- **Header** (`src/admin/payload/globals/header/config.ts`): Manage navigation structure, dropdowns, and nested submenus. Update this when menus change—do not hard-code links in layout components.
+- **Footer** (`src/admin/payload/globals/footer/config.ts`): Configure footer menus and legal links. This is the canonical source for footer navigation, so editors can reorder or rename links without code deployments.
+- **Settings** (`src/admin/payload/globals/settings/index.ts`): Owns brand text, location data, routing defaults, SEO fallbacks, and integrations. Because this document is fetched on every request, treat it as the definitive place to toggle site-wide behaviour.
+- **AI Settings** (`src/admin/payload/globals/ai-settings/index.ts`): Stores AI feature switches and credentials when the Mastra backend is active.
+
+### When to use Settings vs. other configuration
+
+- Use **Settings** for anything editorial teams must control live—branding text, social links, analytics IDs, archive/template relationships, search-engine verification, robots toggles, or the first-section nav offset logic driven by routing.
+- Use **Header**/**Footer** for navigation updates. They feed directly into frontend components and trigger cache revalidation through their `afterChange` hooks.
+- Use `src/smartsite.config.ts` for developer-level feature flags (enabling collections, turning on GSAP modules, selecting storage providers). These values require a redeploy and are not meant for editors.
+- Create purpose-built globals/collections when a client needs custom data structures (e.g., testimonials, pricing matrices). Keep Settings focused on foundational behaviour.
+
+### Settings tabs at a glance
+- **General**: `siteName` and `siteDescription` power branding text and default metadata. Adjust when the company name or positioning changes.
+- **Social Media**: Manage outbound profile URLs in one place. Header/footer components consume this array directly.
+- **Locations**: Maintain office/contact entries with coordinates. Map-based sections and structured data use this list, so prefer updating here instead of editing components.
+- **Routing**: Assign the homepage, default page template, collection archive pages, and per-collection single templates. Changing these triggers revalidation and updates the auto-apply template logic.
+- **SEO**: Set default meta imagery, favicons, organisation schema, and verification codes. Use the robots controls to block staging instances from crawlers.
+- **Social Defaults**: Provide fallback Open Graph/Twitter assets and handles when individual entries lack overrides.
+- **Integrations**: Paste analytics IDs or trusted embeds into `<head>`/`<body>` slots without touching code.
+
+All of these updates should go through the admin. The `afterSettingsChange`, `afterHeaderChange`, and `afterFooterChange` hooks handle cache invalidation, template dependency jobs, and navigation refreshes; bypassing the UI skips those guarantees.
+
+<a id="templates"></a>
+## 🧩 Templates
+
+Templates are editorial building blocks that capture reusable section stacks. The philosophy is: **codify layout intent once, let editors apply it repeatedly without duplicating effort.**
+
+- **Where they live**: `src/admin/payload/collections/templates.ts` defines the collection. Each template includes a name, an optional description (help text for editors), and a required list of section blocks.
+- **How they are used**:
+  - **Automatic**: In Settings → Routing, set `Default Page Template` or a collection-specific `Single Template`. When an editor creates a new entry for those collections and leaves sections empty, the `applyDefaultTemplate` hook clones that template into the document.
+  - **Manual**: Section-based collections expose an **Apply Template** field in the sidebar (rendered by `assign-template`). Selecting a template replaces the current section list, keeping block order and default props intact.
+- **When to create a template**: Any time a layout repeats across entries—service details, product landers, sub-brand homepages, campaign microsites. One-off hero compositions or experimental pages can remain freeform sections instead.
+- **Maintenance**: Editing a template does not overwrite customised pages. After changing a template, ask editors to reapply it where necessary; the dependency job invalidates caches so previews stay fresh but respects per-page tweaks.
+
+Keep templates lean—avoid hard-coded copy, and use placeholder text that nudges editors toward the intended structure. This keeps them flexible while still enforcing layout standards.
 
 <a id="building-sections"></a>
 ## 📦 Building Sections
 
-Sections are the **core building blocks** of Smart Site. Each section is a self-contained unit with its own fields and component.
+Sections are the **core building blocks** of Smart Site. Start with a blank canvas, install audited patterns from the Smart Site Sections Library, or craft bespoke sections in this directory. Each section is a self-contained unit with its own fields and component.
 
 ### Section Architecture
 
@@ -817,7 +807,7 @@ export const HeroBanner: Block = {
 ```typescript
 import { CMSLink } from "@/components/fields/link"
 import { SectionCta } from "@/components/fields/section-cta"
-import { Media } from "@/admin/payload/components/frontend/media"
+import { Media } from "@/components/fields/media"
 import type { HeroBannerBlock } from "@/admin/payload/payload-types"
 
 export function HeroBannerComponent({
@@ -925,8 +915,8 @@ High-contrast motion is part of the Smart Site DNA. Pick the right layer for the
 
 #### 3. Custom GSAP effects
 
-- Register reusable effects in `apps/smart-site/src/providers/gsap/effects.ts`.
-- Client projects start with a blank registry (`apps/smart-site-starter/src/providers/gsap/effects.ts`) and the sync command leaves it untouched, so teams can add branded effects without conflicts.
+- Register reusable effects in `src/providers/gsap/effects.ts`.
+- Keep project-specific effects in `src/providers/gsap/effects.ts` so teams can add branded motion without conflicts.
 
 #### 4. Performance checklist
 
@@ -946,7 +936,7 @@ Smart Site provides **pre-built field groups** that ensure consistency:
 | `button()`           | Single action      | Label, URL, variant             |
 | `sectionCta()`       | Call-to-action bar | Button text, link, style        |
 | `sectionIntro()`     | Optional heading   | Heading, description, alignment |
-| `mediaWithOptions()` | Enhanced media     | Image + alt text + caption      |
+| `image()`            | Media upload       | Image-only upload field         |
 
 Use only the helpers that fit a section’s content footprint—`sectionIntro()` is handy when you need a heading/eyebrow pair, but many sections can skip it entirely in favour of richer link or content fields.
 
@@ -1029,25 +1019,6 @@ Smart Site uses a **comprehensive configuration system** via `src/smartsite.conf
 import type { UserConfig } from "@/admin/config/defaults"
 
 const config: UserConfig = {
-  // Collections configuration
-  collections: {
-    pages: { enabled: true, frontend: true },
-    posts: { enabled: true, frontend: true },
-    services: { enabled: false }, // Disable unwanted
-    // ... configure each collection
-  },
-
-  // Feature flags
-  features: {
-    ai: { enabled: true, endpoint: "http://localhost:3333" },
-    darkMode: false,
-    i18n: false,
-    analytics: true,
-    search: true,
-    sitemaps: true,
-  },
-
-  // Admin configuration
   admin: {
     meta: {
       title: "Admin | Smart Site",
@@ -1055,42 +1026,42 @@ const config: UserConfig = {
       favicon: "/favicon.png",
     },
   },
-
-  // Collections (explicit defaults for discoverability)
   collections: {
-    pages: { enabled: true, frontend: true },
-    posts: { enabled: true, frontend: true },
-    services: { enabled: true, frontend: true },
-    team: { enabled: true, frontend: true },
-    testimonials: { enabled: true },
-    media: { provider: "local" },
+    services: { enabled: false }, // example: hide services in this project
   },
-
-  // Feature flags
   features: {
-    ai: { enabled: true, endpoint: "http://localhost:3333" },
+    ai: {
+      enabled: true,
+      endpoint: "https://smart-site-ai-core.vercel.app", // managed service (override only if Wild Creative provides a custom URL)
+    },
     analytics: true,
     darkMode: false,
     i18n: false,
     search: true,
     sitemaps: true,
   },
-
-  // GSAP configuration (common toggles)
   gsap: {
     scrollTrigger: true,
     scrollSmoother: true,
     splitText: false,
     globalAnimations: false,
   },
+  extensions: {
+    collections: [],
+    blocks: [],
+    globals: [],
+    plugins: [],
+  },
 }
 
 export default config
 ```
 
+`features.ai.endpoint` defaults to the hosted Smart Site AI service (`https://smart-site-ai-core.vercel.app`). Only change this value if Wild Creative supplies a different managed endpoint.
+
 ### Default collections and extensions
 
-Smart Site ships with a full set of first-party collections that already cover typical marketing needs. The defaults live in `apps/smart-site/src/admin/config/defaults.ts` (`SMARTSITE_DEFAULTS`) and every collection defined there starts with `enabled: true`. That means services, team, testimonials, templates, media, categories, pages, and posts are available the moment the app boots—you only need to touch `smartsite.config.ts` if you want to rename them, change SEO/front-end behaviour, or explicitly disable something.
+Smart Site ships with a full set of first-party collections that already cover typical marketing needs. The defaults live in `src/admin/config/defaults.ts` (`SMARTSITE_DEFAULTS`) and every collection defined there starts with `enabled: true`. That means services, team, testimonials, templates, media, categories, pages, and posts are available the moment the app boots—you only need to touch `smartsite.config.ts` if you want to rename them, change SEO/front-end behaviour, or explicitly disable something.
 
 - **System collections** (`uri-index`, `users`, `templates`) are always registered by the resolver in `src/admin/config/resolver.ts`, even if you try to disable them. They keep routing, authentication, and layout scaffolding intact.
 - **Content collections** (`pages`, `posts`, `services`, `team`, `testimonials`, `categories`, `media`) stay on by default. Set `enabled: false` in `smartsite.config.ts` to hide one.
@@ -1099,10 +1070,10 @@ Smart Site ships with a full set of first-party collections that already cover t
 
 ### Inspecting the active Payload configuration
 
-1. Open `apps/smart-site/src/admin/config/defaults.ts` to see every baseline setting, including the default labels, SEO flags, sitemap weights, and feature toggles.
-2. Review `apps/smart-site/src/smartsite.config.ts` for project-specific overrides—the file is merged deeply, so any key you omit uses the default above.
-3. Check `apps/smart-site/src/extensions/index.ts` (and the folders it imports) to find custom collections/globals/blocks that replace or extend the defaults. The resolver automatically swaps them in when the slug matches.
-4. Confirm the final build output in `apps/smart-site/src/admin/payload/payload-types.ts`. Payload regenerates this file on build and it lists every collection/global/block that is actually registered.
+1. Open `src/admin/config/defaults.ts` to see every baseline setting, including the default labels, SEO flags, sitemap weights, and feature toggles.
+2. Review `src/smartsite.config.ts` for project-specific overrides—the file is merged deeply, so any key you omit uses the default above.
+3. Check `src/extensions/index.ts` (and the folders it imports) to find custom collections/globals/blocks that replace or extend the defaults. The resolver automatically swaps them in when the slug matches.
+4. Confirm the final build output in `src/admin/payload/payload-types.ts`. Payload regenerates this file on build and it lists every collection/global/block that is actually registered.
 
 ### Complete Configuration Options
 
@@ -1136,7 +1107,7 @@ Each configurable collection (any slug inside `smartsite.config.ts → collectio
 | Feature       | Options   | Default          | Purpose                                                                         |
 | ------------- | --------- | ---------------- | ------------------------------------------------------------------------------- |
 | `ai.enabled`  | `boolean` | `true`           | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
-| `ai.endpoint` | `string`  | `localhost:3333` | AI backend URL (only used when ai.enabled is true)                              |
+| `ai.endpoint` | `string`  | `https://smart-site-ai-core.vercel.app` | Managed AI backend URL (Wild Creative will advise if this needs to change)   |
 | `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
 | `i18n`        | `boolean` | `false`          | Internationalization                                                            |
 | `analytics`   | `boolean` | `true`           | Analytics tracking                                                              |
@@ -1483,14 +1454,14 @@ Tell your AI assistant to use specific rules:
 | **Admin changes lost**       | Use `smartsite.config.ts` instead              |
 | **MongoDB connection fails** | Ensure the MongoDB service is running (brew services list / net start MongoDB) |
 | **Build fails**              | Run `pnpm type-check` and fix errors           |
-| **AI chat not working**      | Confirm Smart Site AI is running on port 3333 and secrets match |
-| **Lost AI credentials**      | Run `pnpm --filter @product-studio/smart-site ai:register --force`, then restart Smart Site |
+| **AI chat not working**      | Email andrew@wildcreative.com.au—backend uptime is managed by Wild Creative |
+| **Lost AI credentials**      | Coordinate with Wild Creative, then run `pnpm ai:register --force` and restart |
 
 ### Debug Commands
 
 ```bash
 # Check database connection
-pnpm payload migrate:status
+PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts pnpm exec payload migrate:status
 
 # Regenerate URI index
 pnpm regenerate-uris
@@ -1528,27 +1499,7 @@ mongo --eval "db.adminCommand('listDatabases')"
 
 ### AI Backend Deployment
 
-The Smart Site AI backend must be deployed separately:
-
-1. **Deploy AI Backend**
-   - Deploy `smart-site-ai` to Vercel, Railway, or other hosting
-   - Set environment variables (`DATABASE_URL`, `OPENAI_API_KEY`)
-   - Note the deployed URL
-
-2. **Update Frontend Configuration**
-   - Update `smartsite.config.ts` with production AI backend URL:
-
-   ```typescript
-   ai: {
-     enabled: true,
-     url: "https://your-ai-backend.vercel.app",
-   }
-   ```
-
-3. **Security Considerations**
-   - AI backend can be private/internal-only
-   - Frontend communicates via HTTP API only
-   - No AI secrets exposed to frontend
+The Smart Site AI backend is operated entirely by Wild Creative. There are no deployment steps for clients—Wild Creative provisions, maintains, and secures the AI platform. To enable AI for your Smart Site instance, ensure your subscription is active and confirm the connection by seeding with the provided registration secret. For upgrades, regional routing, or incident support, email andrew@wildcreative.com.au.
 
 ### Other Platforms
 
@@ -1573,13 +1524,13 @@ Smart Site can deploy to any Node.js hosting platform:
 - [ ] **Content seeded or migrated**
 - [ ] **Database seeding API endpoint secured for production**
 
-#### AI Backend (Smart Site AI)
+#### AI Backend (Managed by Wild Creative)
 
-- [ ] AI backend deployed separately
-- [ ] AI backend environment variables configured (`DATABASE_URL`, `OPENAI_API_KEY`)
-- [ ] AI backend URL updated in frontend config
-- [ ] AI backend health check accessible
-- [ ] Frontend can successfully connect to AI backend
+- [ ] Subscription confirmed with Wild Creative
+- [ ] `SMARTSITE_AI_REGISTRATION_SECRET` provided by Wild Creative and stored in `.env`
+- [ ] `AI_AGENT_API_KEY` / `AI_AGENT_USER_ID` generated after seeding
+- [ ] Connection test completed (admin chat assistant responding)
+- [ ] Support contact: andrew@wildcreative.com.au documented for the team
 
 > **🚀 Production Seeding:** Remember to seed your production database after deployment using the same `/api/seed` endpoint or by running `pnpm seed` in your production environment.
 
@@ -1593,7 +1544,7 @@ Smart Site can deploy to any Node.js hosting platform:
 - **[Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)**
 - **[GSAP Documentation](https://greensock.com/docs/)**
 - **[Mastra AI Documentation](https://mastra.ai/docs)**
-- **[Smart Site AI Backend](../smart-site-ai/README.md)** - Separate AI backend documentation
+- **[Smart Site AI Backend](../smart-site-ai/README.md)** *(Wild Creative internal operations reference)*
 
 <a id="contributing"></a>
 ## 🤝 Contributing

@@ -5,8 +5,11 @@
 import { SMARTSITE_DEFAULTS, type SmartSiteConfig, type CollectionConfig, type UserConfig } from "./defaults"
 import { deepMerge, deepFreeze } from "./deep-merge"
 import userConfig from "@/smartsite.config"
+import { emitValidationWarnings, validateMergedConfig, validateUserConfig } from "./validator"
 
 let cachedConfig: SmartSiteConfig | null = null
+let validatedUserConfig: UserConfig | null = null
+const warnedFrontendDisabled = new Set<string>()
 
 /**
  * Get the merged SmartSite configuration
@@ -15,11 +18,17 @@ let cachedConfig: SmartSiteConfig | null = null
  */
 export function getSmartSiteConfig(): SmartSiteConfig {
   if (!cachedConfig) {
+    const overrides = validatedUserConfig ?? validateUserConfig(userConfig)
+    validatedUserConfig = overrides
+
     // Deep merge user config with defaults
-    const merged = deepMerge(SMARTSITE_DEFAULTS, userConfig as UserConfig)
-    
+    const mergedCandidate = deepMerge(SMARTSITE_DEFAULTS, overrides)
+
+    const validatedMerged = validateMergedConfig(mergedCandidate)
+    emitValidationWarnings({ merged: validatedMerged, user: overrides })
+
     // Freeze to prevent mutations
-    cachedConfig = deepFreeze(merged) as SmartSiteConfig
+    cachedConfig = deepFreeze(validatedMerged) as SmartSiteConfig
   }
   
   return cachedConfig
@@ -37,6 +46,16 @@ export function getFrontendCollections(): Record<string, CollectionConfig> {
   const frontend: Record<string, CollectionConfig> = {}
   
   for (const [slug, collection] of Object.entries(config.collections)) {
+    if (collection.frontend && collection.enabled === false) {
+      if (!warnedFrontendDisabled.has(slug)) {
+        console.warn(
+          `⚠️  smartsite.config.ts: Collection '${slug}' is marked as frontend but disabled. It will be skipped by routing and sitemaps.`
+        )
+        warnedFrontendDisabled.add(slug)
+      }
+      continue
+    }
+
     if (collection.frontend && collection.enabled) {
       frontend[slug] = collection
     }
@@ -80,4 +99,6 @@ export type {
   AdminTheme,
   GSAPConfig,
   FeaturesConfig,
+  I18nConfig,
+  I18nFeature,
 } from "./defaults"
