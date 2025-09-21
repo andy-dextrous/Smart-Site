@@ -23,16 +23,143 @@ import {
   useState,
 } from "react";
 
+export const inlineCitationStyles = /* css */ `
+.chat-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-inline__text {
+  border-radius: var(--chat-radius-sm);
+  transition: background 0.2s ease;
+}
+
+.chat-inline:hover .chat-inline__text {
+  background: rgba(79, 55, 251, 0.12);
+}
+
+.chat-inline__badge {
+  margin-left: 4px;
+  border-radius: 999px;
+}
+
+.chat-inline__card-body {
+  position: relative;
+  width: 320px;
+  padding: 0;
+}
+
+.chat-inline__carousel {
+  width: 100%;
+}
+
+.chat-inline__carousel-item {
+  width: 100%;
+  padding: 16px;
+  padding-left: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-inline__carousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--chat-color-layer-1);
+  padding: 8px;
+  border-top-left-radius: var(--chat-radius-md);
+  border-top-right-radius: var(--chat-radius-md);
+}
+
+.chat-inline__carousel-index {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-inline__nav-button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.chat-inline__nav-button:hover {
+  background: var(--chat-color-layer-2);
+}
+
+.chat-inline__nav-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-inline__source {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-inline__source-title {
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--chat-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-inline__source-url {
+  font-size: 12px;
+  color: var(--chat-color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-inline__source-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--chat-color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.chat-inline__quote {
+  border-left: 2px solid var(--chat-color-border);
+  padding-left: 12px;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-inline__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--chat-color-text-secondary);
+}
+`
+
 export type InlineCitationProps = ComponentProps<"span">;
 
 export const InlineCitation = ({
   className,
   ...props
 }: InlineCitationProps) => (
-  <span
-    className={cn("group inline items-center gap-1", className)}
-    {...props}
-  />
+  <span className={cn("chat-inline", className)} {...props} />
 );
 
 export type InlineCitationTextProps = ComponentProps<"span">;
@@ -41,10 +168,7 @@ export const InlineCitationText = ({
   className,
   ...props
 }: InlineCitationTextProps) => (
-  <span
-    className={cn("transition-colors group-hover:bg-accent", className)}
-    {...props}
-  />
+  <span className={cn("chat-inline__text", className)} {...props} />
 );
 
 export type InlineCitationCardProps = ComponentProps<typeof HoverCard>;
@@ -64,7 +188,7 @@ export const InlineCitationCardTrigger = ({
 }: InlineCitationCardTriggerProps) => (
   <HoverCardTrigger asChild>
     <Badge
-      className={cn("ml-1 rounded-full", className)}
+      className={cn("chat-inline__badge", className)}
       variant="secondary"
       {...props}
     >
@@ -86,7 +210,7 @@ export const InlineCitationCardBody = ({
   className,
   ...props
 }: InlineCitationCardBodyProps) => (
-  <HoverCardContent className={cn("relative w-80 p-0", className)} {...props} />
+  <HoverCardContent className={cn("chat-inline__card-body", className)} {...props} />
 );
 
 const CarouselApiContext = createContext<CarouselApi | undefined>(undefined);
@@ -107,7 +231,11 @@ export const InlineCitationCarousel = ({
 
   return (
     <CarouselApiContext.Provider value={api}>
-      <Carousel className={cn("w-full", className)} setApi={setApi} {...props}>
+      <Carousel
+        className={cn("chat-inline__carousel", className)}
+        setApi={setApi}
+        {...props}
+      >
         {children}
       </Carousel>
     </CarouselApiContext.Provider>
@@ -126,10 +254,7 @@ export const InlineCitationCarouselItem = ({
   className,
   ...props
 }: InlineCitationCarouselItemProps) => (
-  <CarouselItem
-    className={cn("w-full space-y-2 p-4 pl-8", className)}
-    {...props}
-  />
+  <CarouselItem className={cn("chat-inline__carousel-item", className)} {...props} />
 );
 
 export type InlineCitationCarouselHeaderProps = ComponentProps<"div">;
@@ -138,13 +263,7 @@ export const InlineCitationCarouselHeader = ({
   className,
   ...props
 }: InlineCitationCarouselHeaderProps) => (
-  <div
-    className={cn(
-      "flex items-center justify-between gap-2 rounded-t-md bg-secondary p-2",
-      className
-    )}
-    {...props}
-  />
+  <div className={cn("chat-inline__carousel-header", className)} {...props} />
 );
 
 export type InlineCitationCarouselIndexProps = ComponentProps<"div">;
@@ -172,13 +291,7 @@ export const InlineCitationCarouselIndex = ({
   }, [api]);
 
   return (
-    <div
-      className={cn(
-        "flex flex-1 items-center justify-end px-3 py-1 text-muted-foreground text-xs",
-        className
-      )}
-      {...props}
-    >
+    <div className={cn("chat-inline__carousel-index", className)} {...props}>
       {children ?? `${current}/${count}`}
     </div>
   );
@@ -201,12 +314,12 @@ export const InlineCitationCarouselPrev = ({
   return (
     <button
       aria-label="Previous"
-      className={cn("shrink-0", className)}
+      className={cn("chat-inline__nav-button", className)}
       onClick={handleClick}
       type="button"
       {...props}
     >
-      <ArrowLeftIcon className="size-4 text-muted-foreground" />
+      <ArrowLeftIcon className="chat-inline__nav-icon" />
     </button>
   );
 };
@@ -228,12 +341,12 @@ export const InlineCitationCarouselNext = ({
   return (
     <button
       aria-label="Next"
-      className={cn("shrink-0", className)}
+      className={cn("chat-inline__nav-button", className)}
       onClick={handleClick}
       type="button"
       {...props}
     >
-      <ArrowRightIcon className="size-4 text-muted-foreground" />
+      <ArrowRightIcon className="chat-inline__nav-icon" />
     </button>
   );
 };
@@ -252,18 +365,10 @@ export const InlineCitationSource = ({
   children,
   ...props
 }: InlineCitationSourceProps) => (
-  <div className={cn("space-y-1", className)} {...props}>
-    {title && (
-      <h4 className="truncate font-medium text-sm leading-tight">{title}</h4>
-    )}
-    {url && (
-      <p className="truncate break-all text-muted-foreground text-xs">{url}</p>
-    )}
-    {description && (
-      <p className="line-clamp-3 text-muted-foreground text-sm leading-relaxed">
-        {description}
-      </p>
-    )}
+  <div className={cn("chat-inline__source", className)} {...props}>
+    {title && <h4 className="chat-inline__source-title">{title}</h4>}
+    {url && <p className="chat-inline__source-url">{url}</p>}
+    {description && <p className="chat-inline__source-description">{description}</p>}
     {children}
   </div>
 );
@@ -276,10 +381,7 @@ export const InlineCitationQuote = ({
   ...props
 }: InlineCitationQuoteProps) => (
   <blockquote
-    className={cn(
-      "border-muted border-l-2 pl-3 text-muted-foreground text-sm italic",
-      className
-    )}
+    className={cn("chat-inline__quote", className)}
     {...props}
   >
     {children}

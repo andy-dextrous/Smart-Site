@@ -1,7 +1,16 @@
 "use client"
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
+import {
+  closeChatPanel,
+  initializeChatStore,
+  openChatPanel,
+  setChatAvailability,
+  toggleChatOpen,
+  useChatStore,
+} from "@/admin/components/chat-panel/chat-store"
+import { ChatExperienceMount } from "@/admin/components/chat-panel/chat-experience-mount"
 
 interface AIContextType {
   isEnabled: boolean
@@ -18,46 +27,71 @@ interface AIProviderClientProps {
   children: React.ReactNode
   enabled: boolean
   reason: string | null
+  withContainer?: boolean
 }
 
-export function AIProviderClient({ children, enabled, reason }: AIProviderClientProps) {
-  const [isChatOpen, setIsChatOpen] = useState(false)
+export function AIProviderClient({ children, enabled, reason, withContainer = true }: AIProviderClientProps) {
+  useEffect(() => {
+    initializeChatStore()
+  }, [])
+
+  useEffect(() => {
+    setChatAvailability(enabled, reason)
+  }, [enabled, reason])
+
+  const isChatOpen = useChatStore(state => state.isOpen)
+  const isEnabled = useChatStore(state => state.isEnabled)
+  const statusReason = useChatStore(state => state.statusReason)
 
   const toggleChat = useCallback(() => {
-    if (!enabled) return
-    setIsChatOpen(prev => !prev)
-  }, [enabled])
+    if (!isEnabled) return
+    toggleChatOpen()
+  }, [isEnabled])
 
   const closeChat = useCallback(() => {
-    setIsChatOpen(false)
+    closeChatPanel()
   }, [])
 
   const openChat = useCallback(() => {
-    if (!enabled) return
-    setIsChatOpen(true)
-  }, [enabled])
+    if (!isEnabled) return
+    openChatPanel()
+  }, [isEnabled])
 
-  useHotkeys("meta+l", toggleChat, {
-    preventDefault: true,
-    enableOnFormTags: true,
-    enableOnContentEditable: true,
-    enabled,
-  })
+  useHotkeys(
+    "meta+l",
+    event => {
+      event.preventDefault()
+      if (!isEnabled) return
+      toggleChatOpen()
+    },
+    {
+      enableOnContentEditable: true,
+      enableOnFormTags: true,
+      enabled: isEnabled,
+      preventDefault: true,
+    },
+    [isEnabled]
+  )
 
   const contextValue = useMemo<AIContextType>(() => ({
-    isEnabled: enabled,
-    statusReason: reason,
+    isEnabled,
+    statusReason,
     isChatOpen,
     toggleChat,
     closeChat,
     openChat,
-  }), [enabled, reason, isChatOpen, toggleChat, closeChat, openChat])
+  }), [isEnabled, statusReason, isChatOpen, toggleChat, closeChat, openChat])
 
   return (
     <AIContext.Provider value={contextValue}>
-      <div id="smart-site-admin" className="flex h-full w-full flex-col">
-        {children}
-      </div>
+      {withContainer ? (
+        <div id="smart-site-admin" className="flex h-full w-full flex-col">
+          {children}
+        </div>
+      ) : (
+        children
+      )}
+      <ChatExperienceMount scope={withContainer ? "admin" : "frontend"} />
     </AIContext.Provider>
   )
 }

@@ -5,8 +5,6 @@ import { RowLabelProps, useRowLabel } from "@payloadcms/ui"
 export const SocialLinksRowLabel: React.FC<RowLabelProps> = () => {
   const data = useRowLabel() as any
 
-  console.log("Social Links RowLabel data:", data)
-
   const platformName = data?.data?.platform
     ? data.data.platform.charAt(0).toUpperCase() + data.data.platform.slice(1)
     : "Social Link"

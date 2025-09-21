@@ -34,12 +34,7 @@ export function TopNavigation() {
 
       <div className="flex items-center gap-3">
         <Button asChild variant="secondary" size="lg">
-          <Link
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 font-medium"
-          >
+          <Link href="/" className="flex items-center gap-2 font-medium">
             <ExternalLink />
             <span>View Site</span>
           </Link>

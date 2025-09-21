@@ -8,11 +8,20 @@ import { AIProviderClient, useAIContext } from "./ai-provider-client"
 
 interface AIProviderProps {
   children: ReactNode
+  withContainer?: boolean
 }
 
-export async function AIProvider({ children }: AIProviderProps) {
+export async function AIProvider({ children, withContainer = true }: AIProviderProps) {
   const status = await getAIBackendStatus()
-  return <AIProviderClient enabled={status.enabled} reason={status.reason}>{children}</AIProviderClient>
+  return (
+    <AIProviderClient enabled={status.enabled} reason={status.reason} withContainer={withContainer}>
+      {children}
+    </AIProviderClient>
+  )
+}
+
+export async function AIProviderWithoutContainer({ children }: { children: ReactNode }) {
+  return <AIProvider withContainer={false}>{children}</AIProvider>
 }
 
 export { useAIContext }

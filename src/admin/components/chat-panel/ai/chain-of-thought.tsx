@@ -17,6 +17,171 @@ import {
 import type { ComponentProps } from "react";
 import { createContext, memo, useContext } from "react";
 
+export const chainOfThoughtStyles = /* css */ `
+.chat-chain {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 66ch;
+}
+
+.chat-chain__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--chat-color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.chat-chain__trigger:hover {
+  color: var(--chat-color-text-primary);
+}
+
+.chat-chain__trigger-label {
+  flex: 1;
+  text-align: left;
+}
+
+.chat-chain__trigger-icon,
+.chat-chain__trigger-chevron,
+.chat-chain__step-icon,
+.chat-chain__nav-icon {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.chat-chain__trigger-chevron {
+  transition: transform 0.2s ease;
+}
+
+.chat-chain__trigger[data-state="open"] .chat-chain__trigger-chevron {
+  transform: rotate(180deg);
+}
+
+.chat-chain__step {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--chat-color-text-secondary);
+  animation: chat-chain-step-in 0.18s ease;
+}
+
+.chat-chain__step--active {
+  color: var(--chat-color-text-primary);
+}
+
+.chat-chain__step--pending {
+  color: color-mix(in srgb, var(--chat-color-text-secondary) 50%, transparent);
+}
+
+.chat-chain__step-indicator {
+  position: relative;
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chat-chain__step-connector {
+  position: absolute;
+  top: 28px;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--chat-color-border);
+}
+
+.chat-chain__step:last-child .chat-chain__step-connector {
+  display: none;
+}
+
+.chat-chain__step-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-chain__step-description {
+  font-size: 12px;
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-chain__search-results {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-chain__search-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.chat-chain__content {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--chat-color-text-secondary);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chat-chain__content[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.chat-chain__content[data-state="open"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes chat-chain-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-chain__image {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-chain__image-frame {
+  position: relative;
+  display: flex;
+  max-height: 22rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--chat-radius-md);
+  background: color-mix(in srgb, var(--chat-color-layer-1) 70%, transparent);
+  padding: 12px;
+}
+
+.chat-chain__image-caption {
+  font-size: 12px;
+  color: var(--chat-color-text-secondary);
+}
+`
+
 type ChainOfThoughtContextValue = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -59,10 +224,7 @@ export const ChainOfThought = memo(
 
     return (
       <ChainOfThoughtContext.Provider value={{ isOpen, setIsOpen }}>
-        <div
-          className={cn("not-prose max-w-prose space-y-4", className)}
-          {...props}
-        >
+        <div className={cn("chat-chain", className)} {...props}>
           {children}
         </div>
       </ChainOfThoughtContext.Provider>
@@ -81,22 +243,14 @@ export const ChainOfThoughtHeader = memo(
     return (
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
-          className={cn(
-            "flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground",
-            className
-          )}
+          className={cn("chat-chain__trigger", className)}
           {...props}
         >
-          <BrainIcon className="size-4" />
-          <span className="flex-1 text-left">
+          <BrainIcon className="chat-chain__trigger-icon" />
+          <span className="chat-chain__trigger-label">
             {children ?? "Chain of Thought"}
           </span>
-          <ChevronDownIcon
-            className={cn(
-              "size-4 transition-transform",
-              isOpen ? "rotate-180" : "rotate-0"
-            )}
-          />
+          <ChevronDownIcon className="chat-chain__trigger-chevron" />
         </CollapsibleTrigger>
       </Collapsible>
     );
@@ -121,30 +275,23 @@ export const ChainOfThoughtStep = memo(
     ...props
   }: ChainOfThoughtStepProps) => {
     const statusStyles = {
-      complete: "text-muted-foreground",
-      active: "text-foreground",
-      pending: "text-muted-foreground/50",
-    };
+      complete: "chat-chain__step--complete",
+      active: "chat-chain__step--active",
+      pending: "chat-chain__step--pending",
+    } as const;
 
     return (
       <div
-        className={cn(
-          "flex gap-2 text-sm",
-          statusStyles[status],
-          "fade-in-0 slide-in-from-top-2 animate-in",
-          className
-        )}
+        className={cn("chat-chain__step", statusStyles[status], className)}
         {...props}
       >
-        <div className="relative mt-0.5">
-          <Icon className="size-4" />
-          <div className="-mx-px absolute top-7 bottom-0 left-1/2 w-px bg-border" />
+        <div className="chat-chain__step-indicator">
+          <Icon className="chat-chain__step-icon" />
+          <div className="chat-chain__step-connector" />
         </div>
-        <div className="flex-1 space-y-2">
+        <div className="chat-chain__step-body">
           <div>{label}</div>
-          {description && (
-            <div className="text-muted-foreground text-xs">{description}</div>
-          )}
+          {description && <div className="chat-chain__step-description">{description}</div>}
           {children}
         </div>
       </div>
@@ -156,7 +303,7 @@ export type ChainOfThoughtSearchResultsProps = ComponentProps<"div">;
 
 export const ChainOfThoughtSearchResults = memo(
   ({ className, ...props }: ChainOfThoughtSearchResultsProps) => (
-    <div className={cn("flex items-center gap-2", className)} {...props} />
+    <div className={cn("chat-chain__search-results", className)} {...props} />
   )
 );
 
@@ -165,7 +312,7 @@ export type ChainOfThoughtSearchResultProps = ComponentProps<typeof Badge>;
 export const ChainOfThoughtSearchResult = memo(
   ({ className, children, ...props }: ChainOfThoughtSearchResultProps) => (
     <Badge
-      className={cn("gap-1 px-2 py-0.5 font-normal text-xs", className)}
+      className={cn("chat-chain__search-result", className)}
       variant="secondary"
       {...props}
     >
@@ -185,11 +332,7 @@ export const ChainOfThoughtContent = memo(
     return (
       <Collapsible open={isOpen}>
         <CollapsibleContent
-          className={cn(
-            "mt-2 space-y-3",
-            "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
-            className
-          )}
+          className={cn("chat-chain__content", className)}
           {...props}
         >
           {children}
@@ -205,11 +348,11 @@ export type ChainOfThoughtImageProps = ComponentProps<"div"> & {
 
 export const ChainOfThoughtImage = memo(
   ({ className, children, caption, ...props }: ChainOfThoughtImageProps) => (
-    <div className={cn("mt-2 space-y-2", className)} {...props}>
-      <div className="relative flex max-h-[22rem] items-center justify-center overflow-hidden rounded-lg bg-muted p-3">
+    <div className={cn("chat-chain__image", className)} {...props}>
+      <div className="chat-chain__image-frame">
         {children}
       </div>
-      {caption && <p className="text-muted-foreground text-xs">{caption}</p>}
+      {caption && <p className="chat-chain__image-caption">{caption}</p>}
     </div>
   )
 );

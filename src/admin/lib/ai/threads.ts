@@ -1,6 +1,8 @@
 /**
  * Thread model
  */
+import type { UIMessage } from "ai"
+
 export type Thread = { id: string; title?: string; updatedAt?: string }
 
 /**
@@ -30,13 +32,13 @@ export async function createThread(): Promise<Thread | null> {
 /**
  * Fetch messages for a thread
  */
-export async function listThreadMessages(threadId: string, last = 50): Promise<any[]> {
+export async function listThreadMessages(threadId: string, last = 50): Promise<UIMessage[]> {
   const res = await fetch(`/api/ai/threads/${threadId}/messages?last=${last}`, {
     cache: "no-store",
   })
   if (!res.ok) return []
   const data = await res.json().catch(() => ({ messages: [] }))
-  return (data?.messages || []) as any[]
+  return (data?.messages || []) as UIMessage[]
 }
 
 /**

@@ -12,6 +12,75 @@ import type { ComponentProps } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 import { Response } from "./response";
 
+export const reasoningStyles = /* css */ `
+.chat-reasoning {
+  margin-bottom: 16px;
+}
+
+.chat-reasoning__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--chat-color-text-secondary);
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: var(--chat-radius-sm);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.chat-reasoning__trigger:hover {
+  color: var(--chat-color-text-primary);
+  background: color-mix(in srgb, var(--chat-color-layer-1) 80%, transparent);
+}
+
+.chat-reasoning__icon {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+  opacity: 0.75;
+}
+
+.chat-reasoning__chevron {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.chat-reasoning__trigger[data-state="open"] .chat-reasoning__chevron {
+  transform: rotate(180deg);
+}
+
+.chat-reasoning__content {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--chat-color-text-secondary);
+  background: color-mix(in srgb, var(--chat-color-layer-1) 60%, transparent);
+  border-radius: var(--chat-radius-md);
+  padding: 12px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chat-reasoning__content[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.chat-reasoning__content[data-state="open"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chat-reasoning__body {
+  display: grid;
+  gap: 8px;
+}
+`
+
 type ReasoningContextValue = {
   isStreaming: boolean;
   isOpen: boolean;
@@ -98,7 +167,7 @@ export const Reasoning = memo(
         value={{ isStreaming, isOpen, setIsOpen, duration }}
       >
         <Collapsible
-          className={cn("not-prose mb-4", className)}
+          className={cn("chat-reasoning", className)}
           onOpenChange={handleOpenChange}
           open={isOpen}
           {...props}
@@ -128,25 +197,14 @@ export const ReasoningTrigger = memo(
 
     return (
       <CollapsibleTrigger
-        className={cn(
-          "flex w-full items-center gap-2 text-admin-600 dark:text-admin-400 text-sm",
-          "bg-transparent hover:bg-admin-100/50 dark:hover:bg-admin-800/50",
-          "px-2 py-1 rounded-md transition-all",
-          "border-none outline-none",
-          className
-        )}
+        className={cn("chat-reasoning__trigger", className)}
         {...props}
       >
         {children ?? (
           <>
-            <BrainIcon className="size-4 opacity-70" />
+            <BrainIcon className="chat-reasoning__icon" />
             {getThinkingMessage(isStreaming, duration)}
-            <ChevronDownIcon
-              className={cn(
-                "size-4 transition-transform opacity-70",
-                isOpen ? "rotate-180" : "rotate-0"
-              )}
-            />
+            <ChevronDownIcon className="chat-reasoning__chevron" />
           </>
         )}
       </CollapsibleTrigger>
@@ -163,16 +221,10 @@ export type ReasoningContentProps = ComponentProps<
 export const ReasoningContent = memo(
   ({ className, children, ...props }: ReasoningContentProps) => (
     <CollapsibleContent
-      className={cn(
-        "mt-2 text-sm text-admin-600 dark:text-admin-400",
-        "bg-admin-100/30 dark:bg-admin-800/30 rounded-lg p-3",
-        "border-none",
-        "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
-        className
-      )}
+      className={cn("chat-reasoning__content", className)}
       {...props}
     >
-      <Response className="grid gap-2">{children}</Response>
+      <Response className="chat-reasoning__body">{children}</Response>
     </CollapsibleContent>
   )
 );

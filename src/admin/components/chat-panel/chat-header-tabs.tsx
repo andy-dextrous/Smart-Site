@@ -1,24 +1,120 @@
 "use client"
 
-import { Button } from "@/admin/components/ui/button"
-import { TabsList, TabsTrigger } from "@/admin/components/ui/tabs"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
 import { PlusIcon, XIcon } from "lucide-react"
-import { type Thread } from "@/admin/lib/ai/threads"
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/admin/components/ui/alert-dialog"
+import { cn } from "@/admin/utilities/ui"
+import type { Thread } from "@/admin/lib/ai/threads"
 
-/**
- * Component props
- */
+export const chatHeaderStyles = /* css */ `
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--chat-color-border);
+  background: var(--chat-color-layer-1);
+}
+
+.chat-tabs__list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chat-tabs__list::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-tabs__item {
+  position: relative;
+  display: inline-flex;
+}
+
+.chat-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  padding-right: 36px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--chat-color-text-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.chat-tabs__tab[data-active="true"] {
+  background: var(--chat-color-layer-2);
+  color: var(--chat-color-text-primary);
+}
+
+.chat-tabs__tab-label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-tabs__tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  color: var(--chat-color-text-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+.chat-tabs__tab-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--chat-color-text-primary);
+}
+
+.chat-root[data-theme="dark"] .chat-tabs__tab-close,
+[data-chat-panel-root][data-theme="dark"] .chat-tabs__tab-close {
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-root[data-theme="dark"] .chat-tabs__tab-close:hover,
+[data-chat-panel-root][data-theme="dark"] .chat-tabs__tab-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--chat-color-text-primary);
+}
+
+.chat-tabs__tab-close-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.chat-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-header__new,
+.chat-header__close {
+  width: 40px;
+  height: 40px;
+}
+
+.chat-header__close-icon {
+  width: 18px;
+  height: 18px;
+}
+`
+
 interface ChatHeaderTabsProps {
   threads: Thread[]
   openTabs: string[]
@@ -32,9 +128,6 @@ interface ChatHeaderTabsProps {
   onClosePanel: () => void
 }
 
-/**
- * Chat header with tabs and actions
- */
 export function ChatHeaderTabs({
   threads,
   openTabs,
@@ -47,109 +140,65 @@ export function ChatHeaderTabs({
   getDisplayTitle,
   onClosePanel,
 }: ChatHeaderTabsProps) {
+  const handleClose = (threadId: string, confirm: boolean) => {
+    if (confirm) {
+      const ok = typeof window === "undefined" || window.confirm("Delete this chat thread? This cannot be undone.")
+      if (!ok) {
+        return
+      }
+      if (onDeleteThread) {
+        onDeleteThread(threadId)
+        return
+      }
+    }
+    onCloseTab(threadId)
+  }
+
   return (
-    <div className="border-admin-200 bg-admin-100 dark:border-admin-850 dark:bg-admin-900 flex w-full flex-shrink-0 items-center justify-between gap-2 border-b p-2">
-      <div className="flex min-w-0 w-full flex-1 items-center gap-2 overflow-x-auto">
-        <TabsList className="bg-admin-100 text-admin-600 dark:bg-admin-900 dark:text-admin-400 flex w-full items-center justify-start px-1 py-0 whitespace-nowrap">
-          {openTabs.map(tid => {
-            const t = threads.find(th => th.id === tid)
-            const title = getDisplayTitle(t)
-            const showConfirm = hasMessages ? hasMessages(tid) : true
-            return (
-              <TabsTrigger
-                key={tid}
-                value={tid}
-                className="h-[calc(100%-1px)] px-2.5 sm:px-3 border-none text-admin-900 dark:text-admin-100 hover:text-admin-950 dark:hover:text-admin-50 data-[state=active]:bg-admin-200 dark:data-[state=active]:bg-admin-750 data-[state=active]:text-admin-900 dark:data-[state=active]:text-admin-100 flex-none rounded-md shadow-none data-[state=active]:shadow-none"
+    <div className="chat-header">
+      <TabsPrimitive.List className="chat-tabs__list">
+        {openTabs.map(threadId => {
+          const thread = threads.find(item => item.id === threadId)
+          const title = getDisplayTitle(thread)
+          const confirmClose = hasMessages ? hasMessages(threadId) : true
+          const closeLabel = confirmClose ? "Delete thread" : "Close thread"
+          return (
+            <div className="chat-tabs__item" key={threadId}>
+              <TabsPrimitive.Trigger
+                className={cn("chat-tabs__tab")}
+                data-active={activeThreadId === threadId}
+                value={threadId}
+                onClick={() => onSelect(threadId)}
               >
-                <span className="flex min-w-0 items-center gap-1 text-[13px] max-w-40 truncate">{title}</span>
-                {showConfirm ? (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded text-admin-700 hover:text-admin-900 dark:text-admin-300 dark:hover:text-admin-100 opacity-80 hover:opacity-100 focus:outline-none"
-                        onClick={e => {
-                          e.stopPropagation()
-                        }}
-                        onKeyDown={e => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            ;(e.target as HTMLElement).click()
-                          }
-                        }}
-                        aria-label="Delete thread"
-                      >
-                        <XIcon className="h-3 w-3" />
-                      </span>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent onClick={e => e.stopPropagation()}>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this chat thread?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will permanently delete this thread and its messages. This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={e => e.stopPropagation()}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={e => {
-                            e.stopPropagation()
-                            if (onDeleteThread) onDeleteThread(tid)
-                            else onCloseTab(tid)
-                          }}
-                        >
-                          Delete thread
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                ) : (
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded text-admin-700 hover:text-admin-900 dark:text-admin-300 dark:hover:text-admin-100 opacity-80 hover:opacity-100 focus:outline-none"
-                    onClick={e => {
-                      e.stopPropagation()
-                      if (onDeleteThread) onDeleteThread(tid)
-                      else onCloseTab(tid)
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        ;(e.target as HTMLElement).click()
-                      }
-                    }}
-                    aria-label="Delete thread"
-                  >
-                    <XIcon className="h-3 w-3" />
-                  </span>
-                )}
-              </TabsTrigger>
-            )
-          })}
-          {/* New chat button inside the tabs row */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onNewThread}
-            className="flex-none rounded-md bg-transparent dark:bg-transparent hover:text-admin-950 dark:hover:text-admin-50 text-admin-900 dark:text-admin-100 h-[calc(100%-1px)] aspect-square"
-            aria-label="New chat"
-          >
-            <PlusIcon />
-          </Button>
-        </TabsList>
+                <span className="chat-tabs__tab-label">{title}</span>
+              </TabsPrimitive.Trigger>
+              <button
+                aria-label={closeLabel}
+                className="chat-tabs__tab-close"
+                onClick={event => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  handleClose(threadId, confirmClose)
+                }}
+                type="button"
+              >
+                <XIcon aria-hidden className="chat-tabs__tab-close-icon" />
+                <span className="chat-sr-only">{closeLabel}</span>
+              </button>
+            </div>
+          )
+        })}
+      </TabsPrimitive.List>
+      <div className="chat-header__actions">
+        <button className="chat-button-icon chat-header__new" onClick={onNewThread} type="button">
+          <PlusIcon aria-hidden className="chat-icon" />
+          <span className="chat-sr-only">Start a new chat</span>
+        </button>
+        <button className="chat-button-icon chat-header__close" onClick={onClosePanel} type="button">
+          <XIcon aria-hidden className="chat-header__close-icon" />
+          <span className="chat-sr-only">Close chat</span>
+        </button>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClosePanel}
-        className="bg-transparent hover:bg-transparent text-admin-900 dark:text-admin-100 h-10 w-10 p-2.5"
-      >
-        <XIcon className="h-6 w-6" />
-      </Button>
     </div>
   )
 }

@@ -25,6 +25,96 @@ type ContextSchema = {
   modelId?: ModelId
 }
 
+export const contextStyles = /* css */ `
+.chat-context__trigger-percent {
+  color: var(--chat-color-text-secondary);
+  font-weight: 500;
+}
+
+.chat-context__content {
+  min-width: 240px;
+  background: var(--chat-color-layer-0);
+  border: 1px solid var(--chat-color-border);
+  border-radius: var(--chat-radius-md);
+  box-shadow: var(--chat-shadow-sm);
+  overflow: hidden;
+  padding: 0;
+}
+
+.chat-context__content > * + * {
+  border-top: 1px solid var(--chat-color-border);
+}
+
+.chat-context__header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.chat-context__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.chat-context__metric {
+  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-context__progress-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-context__progress {
+  height: 8px;
+  border-radius: var(--chat-radius-sm);
+  background: var(--chat-color-layer-2);
+}
+
+.chat-context__progress [data-slot="progress-indicator"] {
+  background: var(--chat-color-accent);
+}
+
+.chat-context__body {
+  width: 100%;
+  padding: 12px 16px;
+}
+
+.chat-context__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 12px;
+  background: var(--chat-color-layer-1);
+}
+
+.chat-context__label {
+  color: var(--chat-color-text-secondary);
+}
+
+.chat-context__usage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.chat-context__cost {
+  margin-left: 8px;
+  color: var(--chat-color-text-secondary);
+}
+`
+
 const ContextContext = createContext<ContextSchema | null>(null)
 
 const useContextValue = () => {
@@ -113,7 +203,7 @@ export const ContextTrigger = ({ children, ...props }: ContextTriggerProps) => {
     <HoverCardTrigger asChild>
       {children ?? (
         <Button type="button" variant="ghost" {...props}>
-          <span className="text-muted-foreground font-medium">{renderedPercent}</span>
+          <span className="chat-context__trigger-percent">{renderedPercent}</span>
           <ContextIcon />
         </Button>
       )}
@@ -125,7 +215,7 @@ export type ContextContentProps = ComponentProps<typeof HoverCardContent>
 
 export const ContextContent = ({ className, ...props }: ContextContentProps) => (
   <HoverCardContent
-    className={cn("min-w-[240px] divide-y overflow-hidden p-0", className)}
+    className={cn("chat-context__content", className)}
     {...props}
   />
 )
@@ -151,17 +241,17 @@ export const ContextContentHeader = ({
   }).format(maxTokens)
 
   return (
-    <div className={cn("w-full space-y-2 p-3", className)} {...props}>
+    <div className={cn("chat-context__header", className)} {...props}>
       {children ?? (
         <>
-          <div className="flex items-center justify-between gap-3 text-xs">
+          <div className="chat-context__header-row">
             <p>{displayPct}</p>
-            <p className="text-muted-foreground font-mono">
+            <p className="chat-context__metric">
               {used} / {total}
             </p>
           </div>
-          <div className="space-y-2">
-            <Progress className="bg-muted" value={usedPercent * PERCENT_MAX} />
+          <div className="chat-context__progress-group">
+            <Progress className="chat-context__progress" value={usedPercent * PERCENT_MAX} />
           </div>
         </>
       )}
@@ -176,7 +266,7 @@ export const ContextContentBody = ({
   className,
   ...props
 }: ContextContentBody) => (
-  <div className={cn("w-full p-3", className)} {...props}>
+  <div className={cn("chat-context__body", className)} {...props}>
     {children}
   </div>
 )
@@ -204,16 +294,10 @@ export const ContextContentFooter = ({
   }).format(costUSD ?? 0)
 
   return (
-    <div
-      className={cn(
-        "bg-secondary flex w-full items-center justify-between gap-3 p-3 text-xs",
-        className
-      )}
-      {...props}
-    >
+    <div className={cn("chat-context__footer", className)} {...props}>
       {children ?? (
         <>
-          <span className="text-muted-foreground">Total cost</span>
+          <span className="chat-context__label">Total cost</span>
           <span>{totalCost}</span>
         </>
       )}
@@ -251,11 +335,8 @@ export const ContextInputUsage = ({
   }).format(inputCost ?? 0)
 
   return (
-    <div
-      className={cn("flex items-center justify-between text-xs", className)}
-      {...props}
-    >
-      <span className="text-muted-foreground">Input</span>
+    <div className={cn("chat-context__usage-row", className)} {...props}>
+      <span className="chat-context__label">Input</span>
       <TokensWithCost costText={inputCostText} tokens={inputTokens} />
     </div>
   )
@@ -291,11 +372,8 @@ export const ContextOutputUsage = ({
   }).format(outputCost ?? 0)
 
   return (
-    <div
-      className={cn("flex items-center justify-between text-xs", className)}
-      {...props}
-    >
-      <span className="text-muted-foreground">Output</span>
+    <div className={cn("chat-context__usage-row", className)} {...props}>
+      <span className="chat-context__label">Output</span>
       <TokensWithCost costText={outputCostText} tokens={outputTokens} />
     </div>
   )
@@ -331,11 +409,8 @@ export const ContextReasoningUsage = ({
   }).format(reasoningCost ?? 0)
 
   return (
-    <div
-      className={cn("flex items-center justify-between text-xs", className)}
-      {...props}
-    >
-      <span className="text-muted-foreground">Reasoning</span>
+    <div className={cn("chat-context__usage-row", className)} {...props}>
+      <span className="chat-context__label">Reasoning</span>
       <TokensWithCost costText={reasoningCostText} tokens={reasoningTokens} />
     </div>
   )
@@ -371,11 +446,8 @@ export const ContextCacheUsage = ({
   }).format(cacheCost ?? 0)
 
   return (
-    <div
-      className={cn("flex items-center justify-between text-xs", className)}
-      {...props}
-    >
-      <span className="text-muted-foreground">Cache</span>
+    <div className={cn("chat-context__usage-row", className)} {...props}>
+      <span className="chat-context__label">Cache</span>
       <TokensWithCost costText={cacheCostText} tokens={cacheTokens} />
     </div>
   )
@@ -388,6 +460,6 @@ const TokensWithCost = ({ tokens, costText }: { tokens?: number; costText?: stri
       : new Intl.NumberFormat("en-US", {
           notation: "compact",
         }).format(tokens)}
-    {costText ? <span className="text-muted-foreground ml-2">• {costText}</span> : null}
+    {costText ? <span className="chat-context__cost">• {costText}</span> : null}
   </span>
 )

@@ -3,6 +3,15 @@ import NextImage from "next/image";
 import { cn } from "@/admin/utilities/ui";
 import type { Experimental_GeneratedImage } from "ai";
 
+export const generatedImageStyles = /* css */ `
+.chat-generated-image {
+  max-width: 100%;
+  height: auto;
+  overflow: hidden;
+  border-radius: var(--chat-radius-md);
+}
+`
+
 export type ImageProps = Experimental_GeneratedImage & {
   className?: string;
   alt?: string;
@@ -23,10 +32,7 @@ export function Image({
   return (
     <NextImage
       alt={alt ?? ""}
-      className={cn(
-        "h-auto max-w-full overflow-hidden rounded-md",
-        className
-      )}
+      className={cn("chat-generated-image", className)}
       height={height ?? 1024}
       sizes="100vw"
       src={dataUrl}

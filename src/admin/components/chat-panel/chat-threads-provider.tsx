@@ -1,19 +1,21 @@
 "use client"
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import type { FileUIPart, UIMessage } from "ai"
 import { createThread, listThreadMessages, listThreads, deleteThread as apiDeleteThread, type Thread } from "@/admin/lib/ai/threads"
+import { CHAT_CACHE_KEY } from "@/admin/components/chat-panel/chat-storage"
 
 /*************************************************************************/
 /*  CHAT THREADS PROVIDER - LOCAL TO CHAT PANEL
 /*************************************************************************/
 
-type ThreadStatus = "idle" | "loading" | "streaming" | "submitted" | "error"
+export type ThreadStatus = "idle" | "loading" | "streaming" | "submitted" | "error"
 
 /**
  * Messages state shape
  */
 type MessagesState = {
-  items: any[]
+  items: UIMessage[]
   status: ThreadStatus
   version: number
   updatedAt?: number
@@ -22,18 +24,26 @@ type MessagesState = {
 type MessagesByThread = Record<string, MessagesState>
 
 type RuntimeApi = {
-  sendMessage: (params: { text: string; files?: any[] }) => void
+  sendMessage: (params: { text: string; files?: FileUIPart[] }) => void
   regenerate: () => void
   addToolResult?: (params: { tool: string; toolCallId: string; output: any }) => void
+}
+
+interface CachedChatState {
+  version: number
+  threads: Thread[]
+  openTabs: string[]
+  activeThreadId?: string
+  messagesByThreadId: MessagesByThread
 }
 
 interface ChatThreadsContextValue {
   threads: Thread[]
   openTabs: string[]
   activeThreadId?: string
-  messages: any[]
+  messages: UIMessage[]
   status: ThreadStatus
-  getThreadMessages: (threadId?: string) => any[]
+  getThreadMessages: (threadId?: string) => UIMessage[]
   getThreadStatus: (threadId?: string) => ThreadStatus
   getDisplayTitle: (t?: Thread) => string
   refreshThreads: () => Promise<void>
@@ -42,10 +52,10 @@ interface ChatThreadsContextValue {
   onNewThread: () => Promise<void>
   closeTab: (threadId: string) => Promise<void>
   deleteThread: (threadId: string) => Promise<void>
-  sendMessage: (params: { text: string; files?: any[] }) => void
+  sendMessage: (params: { text: string; files?: FileUIPart[] }) => void
   regenerate: () => void
   registerRuntime: (api: RuntimeApi | null) => void
-  setThreadMessages: (params: { threadId: string; items: any[]; status?: ThreadStatus; mode?: "hydrate" | "replace" }) => void
+  setThreadMessages: (params: { threadId: string; items: UIMessage[]; status?: ThreadStatus; mode?: "hydrate" | "replace" }) => void
 }
 
 /**
@@ -54,8 +64,15 @@ interface ChatThreadsContextValue {
 const LAST_THREAD_KEY = "smart-site-last-thread"
 const OPEN_TABS_KEY = "smart-site-open-tabs"
 const TABS_CAP = 8
+const CHAT_CACHE_VERSION = 1
 
 const ChatThreadsContext = createContext<ChatThreadsContextValue | undefined>(undefined)
+
+function debugLog(...args: unknown[]) {
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("[chat-threads]", ...args)
+  }
+}
 
 export function ChatThreadsProvider({ children, isOpen }: { children: React.ReactNode; isOpen: boolean }) {
   /**
@@ -75,6 +92,8 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
   const initializedRef = useRef(false)
   const threadsSummaryRef = useRef<string>("")
   const messagesFreshAtRef = useRef<Record<string, number>>({})
+  const messagesStateRef = useRef<MessagesByThread>({})
+  const cachedStateRef = useRef<CachedChatState | null>(null)
 
   /**
    * TTL and fingerprints
@@ -106,19 +125,24 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
     return raw
   }
 
-  const getActiveMessages = useMemo(() => {
-    return messagesByThreadId[activeThreadId || ""]?.items || []
+  const getActiveMessages = useMemo<UIMessage[]>(() => {
+    const key = activeThreadId || ""
+    return messagesByThreadId[key]?.items ?? []
   }, [messagesByThreadId, activeThreadId])
 
   const getActiveStatus: ThreadStatus = useMemo(() => {
-    return messagesByThreadId[activeThreadId || ""]?.status || "idle"
+    const key = activeThreadId || ""
+    return messagesByThreadId[key]?.status || "idle"
   }, [messagesByThreadId, activeThreadId])
 
   /**
    * Per-thread selectors (for TabsContent rendering)
    */
   const getThreadMessages = useCallback(
-    (threadId?: string) => (threadId ? messagesByThreadId[threadId]?.items || [] : []),
+    (threadId?: string) => {
+      if (!threadId) return [] as UIMessage[]
+      return messagesByThreadId[threadId]?.items ?? []
+    },
     [messagesByThreadId]
   )
 
@@ -133,14 +157,18 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
   const persistTabs = useCallback((tabs: string[]) => {
     try {
       localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(tabs))
-    } catch {}
+    } catch (error) {
+      debugLog("Persist tabs failed", { error, tabs })
+    }
   }, [])
 
   const persistActive = useCallback((id?: string) => {
     try {
       if (!id) return
       localStorage.setItem(LAST_THREAD_KEY, id)
-    } catch {}
+    } catch (error) {
+      debugLog("Persist active thread failed", { error, id })
+    }
   }, [])
 
   /**
@@ -148,7 +176,10 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
    */
   const refreshThreads = useCallback(async () => {
     const token = ++threadsRefreshTokenRef.current
-    const list = await listThreads().catch(() => [])
+    const list = await listThreads().catch(error => {
+      debugLog("listThreads failed", error)
+      return []
+    })
     if (token !== threadsRefreshTokenRef.current) return
     const summary = summarizeThreads(list)
     if (summary === threadsSummaryRef.current) return
@@ -166,7 +197,7 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
 
       const now = Date.now()
       const lastFresh = messagesFreshAtRef.current[threadId] || 0
-      const prevState = messagesByThreadId[threadId]
+      const prevState = messagesStateRef.current[threadId]
       const hasCache = Boolean(prevState?.items?.length)
 
       if (!opts.force && now - lastFresh < MESSAGES_TTL) {
@@ -185,7 +216,10 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
         }))
       }
 
-      const msgs = await listThreadMessages(threadId, 50).catch(() => [])
+      const msgs = await listThreadMessages(threadId, 50).catch(error => {
+        debugLog("listThreadMessages failed", { threadId, error })
+        return []
+      })
       if (token !== loadTokensRef.current[threadId]) return
 
       messagesFreshAtRef.current[threadId] = Date.now()
@@ -204,7 +238,7 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
         },
       }))
     },
-    [messagesByThreadId, activeThreadId]
+    [activeThreadId]
   )
 
   /**
@@ -220,13 +254,18 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
       })
       persistActive(threadId)
       // Fetch in background to avoid blocking UI; cached state shows immediately.
-      refreshMessages(threadId).catch(() => {})
+      refreshMessages(threadId).catch(error => {
+        debugLog("refreshMessages async update failed", { threadId, error })
+      })
     },
     [refreshMessages, persistActive, persistTabs]
   )
 
   const onNewThread = useCallback(async () => {
-    const created = await createThread().catch(() => null)
+    const created = await createThread().catch(error => {
+      debugLog("createThread failed", error)
+      return null
+    })
     if (created?.id) {
       await switchThread(created.id)
       await refreshThreads()
@@ -239,7 +278,10 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
       const isLast = current.length <= 1
       const idx = current.indexOf(threadId)
       if (isLast) {
-        const created = await createThread().catch(() => null)
+        const created = await createThread().catch(error => {
+          debugLog("createThread on final tab failed", error)
+          return null
+        })
         if (created?.id) {
           setOpenTabs([created.id])
           persistTabs([created.id])
@@ -264,7 +306,10 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
    */
   const deleteThread = useCallback(
     async (threadId: string) => {
-      await apiDeleteThread(threadId).catch(() => false)
+      await apiDeleteThread(threadId).catch(error => {
+        debugLog("deleteThread failed", { threadId, error })
+        return false
+      })
       setThreads(prev => prev.filter(t => t.id !== threadId))
       setMessagesByThreadId(prev => {
         const { [threadId]: _discard, ...rest } = prev
@@ -279,7 +324,10 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
         const nextId = remaining[idx - 1] || remaining[0]
         if (nextId) await switchThread(nextId)
         else {
-          const created = await createThread().catch(() => null)
+          const created = await createThread().catch(error => {
+            debugLog("createThread after delete failed", error)
+            return null
+          })
           if (created?.id) {
             setOpenTabs([created.id])
             persistTabs([created.id])
@@ -313,32 +361,53 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
   useEffect(() => {
     if (!isOpen || initializedRef.current) return
     ;(async () => {
-      const list = await listThreads().catch(() => [])
+      const cached = cachedStateRef.current
+      let list = Array.isArray(cached?.threads) ? cached!.threads : []
+      if (!list.length) {
+        list = await listThreads().catch(error => {
+          debugLog("listThreads hydrate fallback failed", error)
+          return []
+        })
+      }
       setThreads(list)
-      let lastId: string | undefined
-      try {
-        lastId = localStorage.getItem(LAST_THREAD_KEY) || undefined
-      } catch {}
-      const storedTabs: string[] = (() => {
+
+      let lastId: string | undefined = cached?.activeThreadId
+      if (!lastId) {
+        try {
+          lastId = localStorage.getItem(LAST_THREAD_KEY) || undefined
+        } catch {}
+      }
+
+      const storedTabs = (() => {
+        if (Array.isArray(cached?.openTabs) && cached!.openTabs.length) {
+          return cached!.openTabs.slice(-TABS_CAP)
+        }
         try {
           const raw = localStorage.getItem(OPEN_TABS_KEY)
           if (!raw) return []
           const arr = JSON.parse(raw)
           if (Array.isArray(arr)) return arr.slice(-TABS_CAP)
           return []
-        } catch {
+        } catch (error) {
+          debugLog("Restore stored tabs failed", { error })
           return []
         }
       })()
+
       const exists = lastId && list.some(t => t.id === lastId)
+
       if (list.length === 0) {
         const created = await createThread().catch(() => null)
         if (created?.id) {
           setOpenTabs(prev => Array.from(new Set([...(storedTabs || []), created.id])).slice(-TABS_CAP))
           setActiveThreadId(created.id)
           persistActive(created.id)
-          await refreshMessages(created.id)
-          await refreshThreads()
+          await refreshMessages(created.id).catch(error => {
+            debugLog("refreshMessages on initial create failed", { threadId: created.id, error })
+          })
+          await refreshThreads().catch(error => {
+            debugLog("refreshThreads after initial create failed", error)
+          })
         }
       } else {
         const targetId = exists ? (lastId as string) : list[0].id
@@ -346,11 +415,82 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
         setOpenTabs(Array.from(new Set([...(tabs || []), targetId])).slice(-TABS_CAP))
         setActiveThreadId(targetId)
         persistActive(targetId)
-        await refreshMessages(targetId)
+        await refreshMessages(targetId).catch(error => {
+          debugLog("refreshMessages on hydrate target failed", { threadId: targetId, error })
+        })
+        refreshThreads().catch(error => {
+          debugLog("refreshThreads during hydrate failed", error)
+        })
       }
       initializedRef.current = true
     })()
   }, [isOpen])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const raw = window.sessionStorage.getItem(CHAT_CACHE_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw)
+      if (!parsed || parsed.version !== CHAT_CACHE_VERSION) return
+      cachedStateRef.current = parsed
+
+      if (Array.isArray(parsed.threads) && parsed.threads.length) {
+        setThreads(parsed.threads)
+      }
+      if (Array.isArray(parsed.openTabs) && parsed.openTabs.length) {
+        setOpenTabs(parsed.openTabs.slice(-TABS_CAP))
+      }
+      if (typeof parsed.activeThreadId === "string") {
+        setActiveThreadId(parsed.activeThreadId)
+      }
+      if (parsed.messagesByThreadId && typeof parsed.messagesByThreadId === "object") {
+        setMessagesByThreadId(parsed.messagesByThreadId as MessagesByThread)
+        messagesStateRef.current = parsed.messagesByThreadId as MessagesByThread
+      }
+    } catch (error) {
+      debugLog("Restore session cache failed", { error })
+    }
+  }, [])
+
+  useEffect(() => {
+    messagesStateRef.current = messagesByThreadId
+  }, [messagesByThreadId])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (!isOpen) return
+    const timeout = window.setTimeout(() => {
+      try {
+        const serialized: CachedChatState = {
+          version: CHAT_CACHE_VERSION,
+          threads,
+          openTabs,
+          activeThreadId,
+          messagesByThreadId: Object.fromEntries(
+            Object.entries(messagesByThreadId || {}).map(([id, state]) => {
+              const items = Array.isArray(state?.items) ? state.items.slice(-50) : []
+              return [
+                id,
+                {
+                  items,
+                  status: state?.status || "idle",
+                  version: state?.version || 0,
+                  updatedAt: state?.updatedAt,
+                },
+              ]
+            })
+          ) as MessagesByThread,
+        }
+        window.sessionStorage.setItem(CHAT_CACHE_KEY, JSON.stringify(serialized))
+      } catch (error) {
+        debugLog("Write chat session cache failed", { error })
+      }
+    }, 100)
+    return () => {
+      window.clearTimeout(timeout)
+    }
+  }, [isOpen, threads, openTabs, activeThreadId, messagesByThreadId])
 
   /**
    * Persist active thread id
@@ -359,7 +499,9 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
     if (!activeThreadId) return
     try {
       localStorage.setItem(LAST_THREAD_KEY, activeThreadId)
-    } catch {}
+    } catch (error) {
+      debugLog("Persist active thread effect failed", { error, activeThreadId })
+    }
   }, [activeThreadId])
 
   /**

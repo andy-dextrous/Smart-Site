@@ -1,6 +1,15 @@
 import { cn } from "@/admin/utilities/ui";
 import type { HTMLAttributes } from "react";
 
+export const loaderStyles = /* css */ `
+.chat-loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: chat-spin 1s linear infinite;
+}
+`
+
 type LoaderIconProps = {
   size?: number;
 };
@@ -84,13 +93,7 @@ export type LoaderProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 export const Loader = ({ className, size = 16, ...props }: LoaderProps) => (
-  <div
-    className={cn(
-      "inline-flex animate-spin items-center justify-center",
-      className
-    )}
-    {...props}
-  >
+  <div className={cn("chat-loader", className)} {...props}>
     <LoaderIcon size={size} />
   </div>
 );
