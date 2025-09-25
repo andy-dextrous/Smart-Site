@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { getOnToolCallHandler } from "@/admin/ai/on-tool-call"
@@ -14,16 +14,49 @@ export function ActiveChatRuntime() {
   /**
    * Runtime context
    */
-  const { activeThreadId, messages, setThreadMessages, registerRuntime, refreshThreads } = useChatThreadsContext()
+  const {
+    activeThreadId,
+    messages,
+    setThreadMessages,
+    registerRuntime,
+    refreshThreads,
+    getClientContext,
+    recordSelection,
+  } =
+    useChatThreadsContext()
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/ai/chat",
+        prepareSendMessagesRequest: async ({ body, id, messages, trigger, messageId }) => {
+          const base = body || {}
+          return {
+            body: {
+              ...base,
+              id,
+              messages,
+              trigger,
+              messageId,
+              clientContext: getClientContext(),
+            },
+          }
+        },
+      }),
+    [getClientContext]
+  )
 
   /**
    * AI SDK chat hook
    */
-  const { messages: chatMessages, status, setMessages, addToolResult, sendMessage, regenerate } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/ai/chat" }),
+  const { messages: chatMessages, status, setMessages, addToolResult, sendMessage, regenerate, stop } = useChat({
+    transport,
     id: activeThreadId,
     onToolCall: async ({ toolCall }) => {
-      const handler = getOnToolCallHandler((params) => addToolResultRef.current?.(params))
+      const handler = getOnToolCallHandler(
+        params => addToolResultRef.current?.(params),
+        selection => recordSelection(selection)
+      )
       await handler({ toolCall } as any)
     },
     onFinish: async () => {
@@ -88,9 +121,9 @@ export function ActiveChatRuntime() {
   }, [status])
 
   useEffect(() => {
-    registerRuntime({ sendMessage, regenerate, addToolResult: (p) => addToolResult(p) })
+    registerRuntime({ sendMessage, regenerate, addToolResult: (p) => addToolResult(p), stop })
     return () => registerRuntime(null)
-  }, [registerRuntime, sendMessage, regenerate, addToolResult])
+  }, [registerRuntime, sendMessage, regenerate, addToolResult, stop])
 
   return null
 }

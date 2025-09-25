@@ -17,6 +17,7 @@ import { getDocumentTheme } from "@/admin/components/chat-panel/get-document-the
 interface ChatPanelCoreProps {
   isOpen: boolean
   onClose: () => void
+  scope: "admin" | "frontend"
 }
 
 export const chatOverlayStyles = /* css */ `
@@ -114,9 +115,9 @@ export const chatPanelShellStyles = /* css */ `
 }
 `
 
-export function ChatPanelCore({ isOpen, onClose }: ChatPanelCoreProps) {
+export function ChatPanelCore({ isOpen, onClose, scope }: ChatPanelCoreProps) {
   return (
-    <ChatThreadsProvider isOpen={isOpen}>
+    <ChatThreadsProvider isOpen={isOpen} scope={scope}>
       <ActiveChatRuntime />
       <DialogPrimitive.Root modal open={isOpen} onOpenChange={open => !open && onClose()}>
         <ChatPanelInner isOpen={isOpen} onClose={onClose} />

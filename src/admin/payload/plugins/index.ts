@@ -14,6 +14,7 @@ import { beforeSyncWithSearch } from "@/admin/payload/search/beforeSync"
 import { searchFields } from "@/admin/payload/search/fieldOverrides"
 import { getSmartSiteConfig } from "@/admin/config"
 import { resolveStoragePlugins } from "@/admin/config/storage-resolver"
+import { aiBridgePlugin } from "@/admin/payload/plugins/ai-bridge"
 
 /*************************************************************************/
 /*  REDIRECTS PLUGIN
@@ -197,6 +198,11 @@ const forms = formBuilderPlugin({
     hooks: {
       afterRead: [markAsReadAfterRead],
     },
+    access: {
+      update: ({ req }) => {
+        return Boolean(req.user)
+      },
+    },
   },
 })
 
@@ -247,6 +253,7 @@ export const plugins: Plugin[] = [
   forms,
   ...(searchEnabled ? [search] : []),
   nestedDocs,
+  aiBridgePlugin,
 ]
 
 /*************************************************************************/
@@ -262,5 +269,6 @@ export function getPlugins(): Plugin[] {
     ...(searchEnabled ? [search] : []),
     ...storagePlugins,
     nestedDocs,
+    aiBridgePlugin,
   ]
 }

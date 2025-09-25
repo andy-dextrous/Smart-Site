@@ -156,16 +156,18 @@ export const conversationStyles = /* css */ `
 .chat-conversation {
   position: relative;
   flex: 1;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  overscroll-behavior: contain;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chat-conversation > div {
   flex: 1 1 auto;
   width: 100% !important;
   height: 100% !important;
-  overflow: visible !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 .chat-conversation__content {
@@ -214,8 +216,8 @@ export function Conversation({
 }: ConversationProps) {
   return (
     <StickToBottom
-      className={cn("chat-conversation relative flex-1 overflow-y-auto", className)}
-      initial="smooth"
+      className={cn("chat-conversation relative flex-1", className)}
+      initial="instant"
       resize="smooth"
       role={role}
       tabIndex={tabIndex}

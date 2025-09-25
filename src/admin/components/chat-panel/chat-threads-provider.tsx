@@ -1,9 +1,14 @@
 "use client"
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useAuth } from "@payloadcms/ui"
+import { usePathname } from "next/navigation"
 import type { FileUIPart, UIMessage } from "ai"
 import { createThread, listThreadMessages, listThreads, deleteThread as apiDeleteThread, type Thread } from "@/admin/lib/ai/threads"
 import { CHAT_CACHE_KEY } from "@/admin/components/chat-panel/chat-storage"
+import type { SmartSiteClientContext } from "@/admin/lib/ai/client-context"
+import { uploadChatAttachments } from "@/admin/ai/upload-attachments"
+import { toast } from "sonner"
 
 /*************************************************************************/
 /*  CHAT THREADS PROVIDER - LOCAL TO CHAT PANEL
@@ -23,10 +28,13 @@ type MessagesState = {
 
 type MessagesByThread = Record<string, MessagesState>
 
+type OutgoingFilePart = FileUIPart & { file?: File }
+
 type RuntimeApi = {
-  sendMessage: (params: { text: string; files?: FileUIPart[] }) => void
+  sendMessage: (params: { text: string; files?: OutgoingFilePart[]; metadata?: Record<string, unknown> }) => void
   regenerate: () => void
   addToolResult?: (params: { tool: string; toolCallId: string; output: any }) => void
+  stop?: () => void
 }
 
 interface CachedChatState {
@@ -54,8 +62,11 @@ interface ChatThreadsContextValue {
   deleteThread: (threadId: string) => Promise<void>
   sendMessage: (params: { text: string; files?: FileUIPart[] }) => void
   regenerate: () => void
+  stopStreaming: () => void
   registerRuntime: (api: RuntimeApi | null) => void
   setThreadMessages: (params: { threadId: string; items: UIMessage[]; status?: ThreadStatus; mode?: "hydrate" | "replace" }) => void
+  getClientContext: () => SmartSiteClientContext
+  recordSelection: (selection: SmartSiteClientContext["selection"]) => void
 }
 
 /**
@@ -74,7 +85,30 @@ function debugLog(...args: unknown[]) {
   }
 }
 
-export function ChatThreadsProvider({ children, isOpen }: { children: React.ReactNode; isOpen: boolean }) {
+interface ChatThreadsProviderProps {
+  children: React.ReactNode
+  isOpen: boolean
+  scope: "admin" | "frontend"
+}
+
+type PayloadAdminUser = {
+  id?: string
+  _id?: string
+  email?: string
+  name?: string
+  roles?: string[] | string
+  [key: string]: unknown
+}
+
+function deriveUploaderId(user?: PayloadAdminUser | null): string | undefined {
+  if (!user) return undefined
+  if (typeof user.id === "string" && user.id) return user.id
+  if (typeof user._id === "string" && user._id) return user._id
+  return undefined
+}
+
+export function ChatThreadsProvider({ children, isOpen, scope }: ChatThreadsProviderProps) {
+  const wasOpenRef = useRef<boolean | null>(null)
   /**
    * Local state
    */
@@ -94,6 +128,10 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
   const messagesFreshAtRef = useRef<Record<string, number>>({})
   const messagesStateRef = useRef<MessagesByThread>({})
   const cachedStateRef = useRef<CachedChatState | null>(null)
+  const selectionRef = useRef<SmartSiteClientContext["selection"]>(null)
+
+  const { user } = useAuth<PayloadAdminUser>()
+  const pathname = usePathname()
 
   /**
    * TTL and fingerprints
@@ -151,6 +189,86 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
     [messagesByThreadId]
   )
 
+  const readSelectionFromDom = useCallback((): SmartSiteClientContext["selection"] => {
+    if (typeof window === "undefined") return null
+    const route = window.location.pathname || ""
+    const parts = route.split("/").filter(Boolean)
+    const collectionsIndex = parts.findIndex(part => part === "collections")
+    let collection: string | undefined
+    let documentId: string | undefined
+    if (collectionsIndex >= 0) {
+      collection = parts[collectionsIndex + 1]
+      documentId = parts[collectionsIndex + 2]
+    }
+    const active = typeof document !== "undefined" ? (document.activeElement as HTMLElement | null) : null
+    const fieldPath = active?.getAttribute?.("name") || active?.id || undefined
+    if (!collection && !documentId && !fieldPath) {
+      return null
+    }
+    return { collection, documentId, fieldPath }
+  }, [])
+
+  const getClientContext = useCallback((): SmartSiteClientContext => {
+    const now = Date.now()
+    const rolesRaw = user?.roles
+    const normalizedRoles = Array.isArray(rolesRaw)
+      ? rolesRaw.filter((role): role is string => typeof role === "string")
+      : typeof rolesRaw === "string"
+        ? [rolesRaw]
+        : undefined
+
+    const normalizedUser = user
+      ? {
+          id:
+            typeof user.id === "string"
+              ? user.id
+              : typeof user._id === "string"
+                ? user._id
+                : undefined,
+          displayName:
+            typeof user.name === "string"
+              ? user.name
+              : typeof user.email === "string"
+                ? user.email
+                : undefined,
+          email: typeof user.email === "string" ? user.email : undefined,
+          roles: normalizedRoles,
+        }
+      : undefined
+
+    const selection = selectionRef.current ?? readSelectionFromDom()
+    if (!selectionRef.current && selection) {
+      selectionRef.current = selection
+    }
+
+    return {
+      user: normalizedUser ?? null,
+      surface: {
+        scope,
+        pathname: pathname ?? undefined,
+      },
+      selection: selection ?? null,
+      thread: activeThreadId ? { id: activeThreadId } : null,
+      request: {
+        id: `req-${now}-${Math.random().toString(36).slice(2, 10)}`,
+        timestamp: now,
+      },
+    }
+  }, [user, scope, pathname, activeThreadId, readSelectionFromDom])
+
+  const recordSelection = useCallback((selection: SmartSiteClientContext["selection"]) => {
+    if (!selection) {
+      selectionRef.current = null
+      return
+    }
+    const hasValue = Boolean(selection.collection || selection.documentId || selection.fieldPath)
+    selectionRef.current = hasValue ? selection : null
+  }, [])
+
+  useEffect(() => {
+    recordSelection(null)
+  }, [pathname, recordSelection])
+
   /**
    * Persistence helpers
    */
@@ -190,6 +308,119 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
   /**
    * Fetch: messages with TTL + fingerprint guard
    */
+function normalizeStoredMessage(message: UIMessage): UIMessage {
+  const cloned = { ...message }
+  if (Array.isArray(cloned.parts)) {
+    cloned.parts = cloned.parts.map(part => {
+      if (!part || typeof (part as any).type !== "string") {
+        return part as UIMessage["parts"][number]
+      }
+      const currentType = (part as any).type as string
+      if (currentType.startsWith("data-tool")) {
+        const restoredType = currentType.replace(/^data-/, "") as UIMessage["parts"][number]["type"]
+        return {
+          ...(part as Record<string, unknown>),
+          type: restoredType,
+        } as UIMessage["parts"][number]
+      }
+      return part as UIMessage["parts"][number]
+    })
+  }
+  const withInvocations = cloned as UIMessage & {
+    toolInvocations?: Array<Record<string, unknown>>
+  }
+  if (Array.isArray(withInvocations.toolInvocations)) {
+    withInvocations.toolInvocations = withInvocations.toolInvocations.map(invocation => {
+      const updated = { ...invocation }
+      if (typeof updated.state === "string" && updated.state === "streaming") {
+        delete updated.state
+      }
+      return updated
+    })
+  }
+  return withInvocations
+}
+
+interface ToolInvocationSnapshot {
+  result?: unknown
+  args?: unknown
+  toolName?: unknown
+  toolCallId?: unknown
+}
+
+function buildToolInvocationSnapshot(messages: UIMessage[] | undefined) {
+  const map = new Map<string, ToolInvocationSnapshot>()
+  if (!Array.isArray(messages)) return map
+  for (const message of messages) {
+    if (Array.isArray(message.parts)) {
+      for (const part of message.parts) {
+        const callId = (part as any)?.toolInvocation?.toolCallId
+        if (typeof callId === "string") {
+          map.set(callId, {
+            result: (part as any)?.toolInvocation?.result,
+            args: (part as any)?.toolInvocation?.args,
+            toolName: (part as any)?.toolInvocation?.toolName,
+            toolCallId: callId,
+          })
+        }
+      }
+    }
+    const invocations = (message as any)?.toolInvocations as Array<Record<string, unknown>> | undefined
+    if (Array.isArray(invocations)) {
+      for (const invocation of invocations) {
+        const callId = typeof invocation.toolCallId === "string" ? invocation.toolCallId : undefined
+        if (callId && !map.has(callId)) {
+          map.set(callId, {
+            result: invocation.result,
+            args: invocation.args,
+            toolName: invocation.toolName,
+            toolCallId: callId,
+          })
+        }
+      }
+    }
+  }
+  return map
+}
+
+function enrichMessageWithSnapshots(message: UIMessage, snapshot: Map<string, ToolInvocationSnapshot>): UIMessage {
+  const enriched: UIMessage & {
+    toolInvocations?: Array<Record<string, unknown>>
+  } = { ...message }
+
+  if (Array.isArray(enriched.parts)) {
+    enriched.parts = enriched.parts.map(part => {
+      const callId = (part as any)?.toolInvocation?.toolCallId
+      if (typeof callId === "string" && snapshot.has(callId)) {
+        const snap = snapshot.get(callId)!
+        const mergedInvocation = {
+          ...(part as any).toolInvocation,
+          ...snap,
+        }
+        return {
+          ...(part as any),
+          toolInvocation: mergedInvocation,
+        } as UIMessage["parts"][number]
+      }
+      return part
+    })
+  }
+
+  const invocations = (enriched.toolInvocations ?? []) as Array<Record<string, unknown>>
+  if (Array.isArray(invocations) && invocations.length) {
+    enriched.toolInvocations = invocations.map(invocation => {
+      const callId = typeof invocation.toolCallId === "string" ? invocation.toolCallId : undefined
+      if (callId && snapshot.has(callId)) {
+        const snap = snapshot.get(callId)!
+        return { ...invocation, ...snap }
+      }
+      return invocation
+    })
+  }
+
+  return enriched
+}
+
   const refreshMessages = useCallback(
     async (threadId: string, opts: { force?: boolean } = {}) => {
       const token = (loadTokensRef.current[threadId] || 0) + 1
@@ -204,22 +435,12 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
         return
       }
 
-      if (!hasCache) {
-        setMessagesByThreadId(prev => ({
-          ...prev,
-          [threadId]: {
-            items: prev[threadId]?.items || [],
-            status: prev[threadId]?.status === "streaming" ? "streaming" : "loading",
-            version: (prev[threadId]?.version || 0) + 1,
-            updatedAt: prev[threadId]?.updatedAt,
-          },
-        }))
-      }
-
-      const msgs = await listThreadMessages(threadId, 50).catch(error => {
-        debugLog("listThreadMessages failed", { threadId, error })
-        return []
-      })
+      const msgs = await listThreadMessages(threadId, 50)
+        .then(messages => messages.map(normalizeStoredMessage))
+        .catch(error => {
+          debugLog("listThreadMessages failed", { threadId, error })
+          return []
+        })
       if (token !== loadTokensRef.current[threadId]) return
 
       messagesFreshAtRef.current[threadId] = Date.now()
@@ -228,10 +449,13 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
       const isStreaming = prevState?.status === "streaming"
       if (isActive && isStreaming) return
 
+      const snapshot = buildToolInvocationSnapshot(prevState?.items)
+      const enriched = msgs.map(message => enrichMessageWithSnapshots(message, snapshot))
+
       setMessagesByThreadId(prev => ({
         ...prev,
         [threadId]: {
-          items: msgs,
+          items: enriched,
           status: prev[threadId]?.status || "idle",
           version: (prev[threadId]?.version || 0) + 1,
           updatedAt: Date.now(),
@@ -343,23 +567,143 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
   /**
    * Runtime bridge
    */
-  const sendMessage = useCallback((params: { text: string; files?: any[] }) => {
-    runtimeRef.current?.sendMessage(params)
-  }, [])
+  const sendMessage = useCallback(
+    (params: { text: string; files?: OutgoingFilePart[] }) => {
+      const runtime = runtimeRef.current
+      if (!runtime) return
+
+      const threadId = activeThreadId
+      const uploaderId = deriveUploaderId(user)
+
+      ;(async () => {
+        try {
+          let preparedFiles: OutgoingFilePart[] = params.files ? [...params.files] : []
+          let metadata: { attachments: { id: string; type: string }[] } | undefined
+
+          if (threadId && preparedFiles.length) {
+            const uploadable = preparedFiles.filter(
+              (part): part is OutgoingFilePart & { file: File } => part?.file instanceof File
+            )
+
+            if (uploadable.length) {
+              const results = await uploadChatAttachments({
+                threadId,
+                files: uploadable.map(part => part.file),
+                uploaderId,
+              })
+
+              metadata = {
+                attachments: results.map(result => ({ id: result.id, type: result.type })),
+              }
+
+              let resultIndex = 0
+              preparedFiles = preparedFiles.map(part => {
+                const { file, ...rest } = part ?? ({} as OutgoingFilePart)
+                const upload = file ? results[resultIndex++] : undefined
+                if (upload?.clientPreview?.url) {
+                  return {
+                    ...rest,
+                    url: upload.clientPreview.url,
+                    mediaType: upload.clientPreview.mediaType,
+                    filename: upload.clientPreview.filename ?? rest.filename,
+                  }
+                }
+                return rest
+              })
+            }
+          }
+
+          if (!metadata && preparedFiles.length) {
+            preparedFiles = preparedFiles.map(part => {
+              const { file, ...rest } = part ?? ({} as OutgoingFilePart)
+              return rest
+            })
+          }
+
+          runtime.sendMessage({
+            text: params.text,
+            files: preparedFiles.map(part => {
+              const { file, ...rest } = part ?? ({} as OutgoingFilePart)
+              return rest
+            }),
+            metadata,
+          })
+        } catch (error) {
+          console.error("[chat-threads] sendMessage error", error)
+          const message = error instanceof Error ? error.message : "Failed to send message"
+          toast.error(message)
+        }
+      })()
+    },
+    [activeThreadId, user]
+  )
 
   const regenerate = useCallback(() => {
     runtimeRef.current?.regenerate()
   }, [])
 
+  const stopStreaming = useCallback(() => {
+    const runtime = runtimeRef.current
+    runtime?.stop?.()
+    const threadId = activeThreadId
+    if (!threadId) return
+
+    setMessagesByThreadId(prev => {
+      const current = prev[threadId]
+      if (!current) {
+        return prev
+      }
+
+      if (current.status !== "streaming" && current.status !== "submitted") {
+        return prev
+      }
+
+      return {
+        ...prev,
+        [threadId]: {
+          ...current,
+          status: "idle",
+          version: (current.version || 0) + 1,
+          updatedAt: Date.now(),
+        },
+      }
+    })
+  }, [activeThreadId])
+
   const registerRuntime = useCallback((api: RuntimeApi | null) => {
     runtimeRef.current = api
   }, [])
+
+  const setThreadMessages = useCallback(
+    ({ threadId, items, status, mode = "replace" }: { threadId: string; items: UIMessage[]; status?: ThreadStatus; mode?: "hydrate" | "replace" }) => {
+      setMessagesByThreadId(prev => {
+        const current = prev[threadId]
+        const keepExisting = mode === "hydrate" && current?.items?.length
+        const nextItems = keepExisting ? current!.items : items
+        const nextStatus = status || current?.status || "idle"
+        return {
+          ...prev,
+          [threadId]: {
+            items: nextItems,
+            status: nextStatus,
+            version: (current?.version || 0) + 1,
+            updatedAt: Date.now(),
+          },
+        }
+      })
+    },
+    []
+  )
 
   /**
    * Initialization
    */
   useEffect(() => {
-    if (!isOpen || initializedRef.current) return
+    const wasOpen = wasOpenRef.current
+    wasOpenRef.current = isOpen
+    if (!isOpen || initializedRef.current) {
+      return
+    }
     ;(async () => {
       const cached = cachedStateRef.current
       let list = Array.isArray(cached?.threads) ? cached!.threads : []
@@ -415,7 +759,7 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
         setOpenTabs(Array.from(new Set([...(tabs || []), targetId])).slice(-TABS_CAP))
         setActiveThreadId(targetId)
         persistActive(targetId)
-        await refreshMessages(targetId).catch(error => {
+        refreshMessages(targetId, { force: true }).catch(error => {
           debugLog("refreshMessages on hydrate target failed", { threadId: targetId, error })
         })
         refreshThreads().catch(error => {
@@ -459,7 +803,6 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    if (!isOpen) return
     const timeout = window.setTimeout(() => {
       try {
         const serialized: CachedChatState = {
@@ -490,7 +833,7 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
     return () => {
       window.clearTimeout(timeout)
     }
-  }, [isOpen, threads, openTabs, activeThreadId, messagesByThreadId])
+  }, [threads, openTabs, activeThreadId, messagesByThreadId])
 
   /**
    * Persist active thread id
@@ -524,24 +867,11 @@ export function ChatThreadsProvider({ children, isOpen }: { children: React.Reac
     deleteThread,
     sendMessage,
     regenerate,
+    stopStreaming,
     registerRuntime,
-    setThreadMessages: useCallback(({ threadId, items, status, mode = "replace" }) => {
-      setMessagesByThreadId(prev => {
-        const current = prev[threadId]
-        const keepExisting = mode === "hydrate" && current?.items?.length
-        const nextItems = keepExisting ? current!.items : items
-        const nextStatus = status || current?.status || "idle"
-        return {
-          ...prev,
-          [threadId]: {
-            items: nextItems,
-            status: nextStatus,
-            version: (current?.version || 0) + 1,
-            updatedAt: Date.now(),
-          },
-        }
-      })
-    }, []),
+    setThreadMessages,
+    getClientContext,
+    recordSelection,
   }
 
   return <ChatThreadsContext.Provider value={value}>{children}</ChatThreadsContext.Provider>

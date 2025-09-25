@@ -9,6 +9,7 @@ import { CodeBlock } from "./code-block"
 
 export const toolStyles = /* css */ `
 .chat-tool {
+  margin-bottom: 2rem;
   border: 1px solid var(--chat-color-border);
   border-radius: var(--chat-radius-md);
   overflow: hidden;

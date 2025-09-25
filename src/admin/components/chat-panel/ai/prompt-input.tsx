@@ -40,13 +40,15 @@ import {
   XIcon,
 } from "lucide-react"
 
+type AttachmentItem = FileUIPart & { id: string; file?: File }
+
 type AttachmentsContextValue = {
-  files: (FileUIPart & { id: string })[]
-  add: (files: File[] | FileList) => void
-  remove: (id: string) => void
-  clear: () => void
-  openFileDialog: () => void
-  fileInputRef: RefObject<HTMLInputElement | null>
+	files: AttachmentItem[]
+	add: (files: File[] | FileList) => void
+	remove: (id: string) => void
+	clear: () => void
+	openFileDialog: () => void
+	fileInputRef: RefObject<HTMLInputElement | null>
 }
 
 const AttachmentsContext = createContext<AttachmentsContextValue | null>(null)
@@ -262,7 +264,7 @@ export const promptInputStyles = /* css */ `
 `
 
 export type PromptInputAttachmentProps = HTMLAttributes<HTMLDivElement> & {
-  data: FileUIPart & { id: string }
+	data: AttachmentItem
   className?: string
 }
 
@@ -349,7 +351,7 @@ export function PromptInputAttachment({ data, className, ...props }: PromptInput
 }
 
 export type PromptInputAttachmentsProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
-  children: (attachment: FileUIPart & { id: string }) => ReactNode
+	children: (attachment: AttachmentItem) => ReactNode
 }
 
 export function PromptInputAttachments({ className, children, ...props }: PromptInputAttachmentsProps) {
@@ -387,8 +389,8 @@ export function PromptInputAttachments({ className, children, ...props }: Prompt
 }
 
 export type PromptInputMessage = {
-  text?: string
-  files?: FileUIPart[]
+	text?: string
+	files?: AttachmentItem[]
 }
 
 export type PromptInputProps = Omit<HTMLAttributes<HTMLFormElement>, "onSubmit"> & {
@@ -397,7 +399,7 @@ export type PromptInputProps = Omit<HTMLAttributes<HTMLFormElement>, "onSubmit">
   maxFiles?: number
   maxFileSize?: number
   onError?: (err: { code: "max_files" | "max_file_size" | "accept"; message: string }) => void
-  onSubmit: (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => void
+  onSubmit: (message: PromptInputMessage, event: FormEvent<HTMLFormElement>) => void | boolean
 }
 
 export function PromptInput({
@@ -411,7 +413,7 @@ export function PromptInput({
   children,
   ...props
 }: PromptInputProps) {
-  const [items, setItems] = useState<(FileUIPart & { id: string })[]>([])
+  const [items, setItems] = useState<AttachmentItem[]>([])
   const inputRef = useRef<HTMLInputElement | null>(null)
   const anchorRef = useRef<HTMLSpanElement>(null)
   const formRef = useRef<HTMLFormElement | null>(null)
@@ -467,7 +469,7 @@ export function PromptInput({
         if (typeof capacity === "number" && sized.length > capacity) {
           onError?.({ code: "max_files", message: "Too many files. Some were not added." })
         }
-        const next: (FileUIPart & { id: string })[] = []
+        const next: AttachmentItem[] = []
         for (const file of capped) {
           next.push({
             id: nanoid(),
@@ -475,6 +477,7 @@ export function PromptInput({
             url: URL.createObjectURL(file),
             mediaType: file.type,
             filename: file.name,
+            file,
           })
         }
         return previous.concat(next)
@@ -567,8 +570,11 @@ export function PromptInput({
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = event => {
     event.preventDefault()
-    const files: FileUIPart[] = items.map(item => ({ ...item }))
-    onSubmit({ text: event.currentTarget.message.value, files }, event)
+    const files: AttachmentItem[] = items.map(item => ({ ...item }))
+    const result = onSubmit({ text: event.currentTarget.message.value, files }, event)
+    if (result === false) {
+      return
+    }
     clear()
   }
 

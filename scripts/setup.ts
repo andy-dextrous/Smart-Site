@@ -69,10 +69,10 @@ async function main() {
 
   const { doSeed, blog } = await askSeed()
   if (doSeed) {
-    const { keepRunning } = await runDevAndSeed(appRoot, port, { blog, siteName })
+    await runDevAndSeed(appRoot, port, { blog, siteName })
     summary.seedProfile = "minimal"
     summary.blog = blog
-    summary.devLeftRunning = keepRunning
+    summary.devLeftRunning = true
   }
 
   printSummary(summary)
@@ -113,7 +113,7 @@ async function askSiteName(env: Record<string, string>) {
 }
 
 async function askPort() {
-  const defaultPort = 3010
+  const defaultPort = 3000
   const answers = await inquirer.prompt([
     {
       type: "number",
@@ -467,26 +467,15 @@ async function runDevAndSeed(
     // Allow trailing server logs from hooks to flush before prompting the user
     await delay(1200)
     console.log(chalk.green("✔ Seed complete"))
+    console.log(chalk.gray(`ℹ️  Opening browser at http://localhost:${port}`))
   } catch (e: any) {
     seedSpinner.fail("Seed failed")
     throw e
   }
 
-  const { keepRunning } = await inquirer.prompt([
-    { type: "confirm", name: "keepRunning", message: "Leave dev server running?", default: true },
-  ])
+  await openBrowser(`http://localhost:${port}`)
 
-  if (!keepRunning) {
-    try {
-      child.kill("SIGINT")
-      await new Promise<void>((resolve) => child.on("exit", () => resolve()))
-    } catch {}
-  } else {
-    child.stdout?.pipe(process.stdout)
-    child.stderr?.pipe(process.stderr)
-  }
-
-  return { keepRunning }
+  return { keepRunning: true }
 }
 
 async function waitForServer(url: string, timeoutMs: number) {
@@ -528,6 +517,27 @@ async function tryHead(raw: string) {
     })
     req.end()
   })
+}
+
+async function openBrowser(url: string) {
+  const platform = process.platform
+  try {
+    if (platform === "darwin") {
+      await execa("open", [url], { stdio: "ignore", detached: true })
+      return
+    }
+    if (platform === "win32") {
+      await execa("cmd", ["/c", "start", "", url], { windowsHide: true, stdio: "ignore" })
+      return
+    }
+    await execa("xdg-open", [url], { stdio: "ignore", detached: true })
+  } catch (error) {
+    console.log(
+      chalk.yellow(
+        `⚠ Unable to open browser automatically: ${(error as Error)?.message || "unknown error"}`
+      )
+    )
+  }
 }
 
 async function isPortFree(port: number) {

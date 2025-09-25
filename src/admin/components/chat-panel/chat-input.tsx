@@ -11,6 +11,7 @@ import {
   type PromptInputMessage,
   usePromptInputAttachments,
 } from "@/admin/components/chat-panel/ai/prompt-input"
+import { useChatThreadsContext } from "./chat-threads-provider"
 import type { ThreadStatus } from "@/admin/components/chat-panel/chat-threads-provider"
 
 interface ChatInputProps {
@@ -21,6 +22,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ status, onSubmit, focusSignal, isActive }: ChatInputProps) {
+  const { stopStreaming } = useChatThreadsContext()
   const [input, setInput] = useState("")
   const textareaId = useId()
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -76,12 +78,18 @@ export function ChatInput({ status, onSubmit, focusSignal, isActive }: ChatInput
       <PromptInputSubmit
         aria-label={submitLabel}
         disabled={shouldDisable}
+        onClick={isStreaming ? () => stopStreaming() : undefined}
         status={submitStatus}
+        type={isStreaming ? "button" : "submit"}
       />
     )
   }
 
-  const handleSubmit = (message: PromptInputMessage) => {
+  const handleSubmit = (message: PromptInputMessage): boolean | void => {
+    if (status === "streaming") {
+      stopStreaming()
+      return false
+    }
     const hasText = Boolean(message.text)
     const hasAttachments = Boolean(message.files?.length)
     if (!(hasText || hasAttachments)) {

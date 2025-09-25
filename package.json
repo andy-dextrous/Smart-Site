@@ -1,6 +1,6 @@
 {
   "name": "smart-site",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Enterprise website builder: Next.js 15 + Payload CMS 3 with Tailwind v4, GSAP animations, and Mastra-powered AI — section-first architecture with smart routing/caching.",
   "license": "MIT",
   "type": "module",
@@ -11,7 +11,6 @@
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:sitemap": "tsx scripts/generate-sitemap-index.ts",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
-    "generate:graphql:schema": "tsx scripts/generate-graphql-schema.ts",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",

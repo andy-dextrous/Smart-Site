@@ -389,7 +389,9 @@ export function ChatExperienceMount({ scope }: { scope: "admin" | "frontend" }) 
 
   return createPortal(
     <>
-      {shouldRenderPanelDelayed ? <ChatPanelCore isOpen={shouldRenderPanel} onClose={closeChat} /> : null}
+      {shouldRenderPanelDelayed ? (
+        <ChatPanelCore isOpen={shouldRenderPanel} onClose={closeChat} scope={scope} />
+      ) : null}
       {launcher}
     </>,
     portalTarget

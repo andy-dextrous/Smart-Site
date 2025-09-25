@@ -192,7 +192,6 @@ function ConversationAutoStick({ focusSignal, isActive, status, messages }: Conv
     const frame = requestAnimationFrame(() => {
       scrollToBottom({
         animation: status === "streaming" ? "smooth" : "instant",
-        ignoreEscapes: focusChanged,
         wait: 0,
       })
     })

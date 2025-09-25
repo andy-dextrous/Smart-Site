@@ -5,6 +5,7 @@
 /*************************************************************************/
 
 type AddToolResult = (params: { tool: string; toolCallId: string; output: any }) => void
+type SelectionSink = (selection: { collection?: string; documentId?: string; fieldPath?: string } | null) => void
 
 type ClientToolCall = {
   toolName: string
@@ -12,7 +13,7 @@ type ClientToolCall = {
   input?: Record<string, any>
 }
 
-export function getOnToolCallHandler(addToolResult: AddToolResult) {
+export function getOnToolCallHandler(addToolResult: AddToolResult, recordSelection?: SelectionSink) {
   return async function onToolCall({ toolCall }: { toolCall: ClientToolCall }) {
     try {
       const { toolName, toolCallId, input } = toolCall
@@ -173,6 +174,11 @@ export function getOnToolCallHandler(addToolResult: AddToolResult) {
             }
           }
           submit({ route, collection, documentId, fieldPath })
+          recordSelection?.(
+            collection || documentId || fieldPath
+              ? { collection, documentId, fieldPath }
+              : null
+          )
           break
         }
         default: {

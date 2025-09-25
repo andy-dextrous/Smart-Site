@@ -16,5 +16,5 @@ export function ChatPanel() {
     if (typeof document === "undefined") return
     injectChatStyles(document)
   }, [])
-  return <ChatPanelCore isOpen={isChatOpen} onClose={closeChat} />
+  return <ChatPanelCore isOpen={isChatOpen} onClose={closeChat} scope="admin" />
 }

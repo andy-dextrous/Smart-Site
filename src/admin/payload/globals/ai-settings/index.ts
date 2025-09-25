@@ -1,6 +1,21 @@
 import type { GlobalConfig } from "payload"
 import { authenticated } from "@/admin/payload/access/authenticated"
 import { anyone } from "@/admin/payload/access/anyone"
+import { sections } from "@/components/sections/config"
+import { afterAISettingsChange } from "@/admin/payload/hooks/globals/ai-settings"
+
+const sectionOptions = sections.sectionBlocks
+  .map(block => {
+    const label =
+      typeof block.labels === "object" && block.labels !== null && "singular" in block.labels
+        ? String(block.labels.singular)
+        : block.slug
+    return {
+      label,
+      value: block.slug,
+    }
+  })
+  .sort((a, b) => a.label.localeCompare(b.label))
 
 export const AISettings: GlobalConfig = {
   slug: "ai-settings",
@@ -191,7 +206,51 @@ export const AISettings: GlobalConfig = {
             },
           ],
         },
+        {
+          name: "sections",
+          label: "Section Guidance",
+          fields: [
+            {
+              name: "sectionGuidance",
+              label: "Section Guidance",
+              type: "array",
+              admin: {
+                description:
+                  "Control which sections the AI can use and describe how it should apply them when composing page layouts.",
+                initCollapsed: true,
+              },
+              fields: [
+                {
+                  name: "sectionSlug",
+                  label: "Section",
+                  type: "select",
+                  options: sectionOptions,
+                  required: true,
+                },
+                {
+                  name: "includeInDesigns",
+                  label: "Include In AI-Generated Designs",
+                  type: "checkbox",
+                  defaultValue: true,
+                },
+                {
+                  name: "usageInstructions",
+                  label: "Usage Instructions",
+                  type: "textarea",
+                  admin: {
+                    rows: 5,
+                    description:
+                      "Describe ideal use cases, required content, or sequencing notes that the AI should follow when selecting this section.",
+                  },
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
   ],
+  hooks: {
+    afterChange: [afterAISettingsChange],
+  },
 }

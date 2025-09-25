@@ -1,15 +1,15 @@
 import type { CollectionConfig } from "payload"
-import { isAdmin } from "@/admin/payload/access/admin"
+import { isAdminOrAiAgent } from "@/admin/payload/access/admin"
 import { frontendCollections } from "@/admin/config/frontend"
 import { CollectionSlug } from "payload"
 
 export const URIIndex: CollectionConfig = {
   slug: "uri-index",
   access: {
-    create: isAdmin,
-    delete: isAdmin,
-    read: isAdmin,
-    update: isAdmin,
+    create: isAdminOrAiAgent,
+    delete: isAdminOrAiAgent,
+    read: isAdminOrAiAgent,
+    update: isAdminOrAiAgent,
   },
   admin: {
     hidden: true,
