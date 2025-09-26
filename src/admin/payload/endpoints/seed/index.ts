@@ -507,7 +507,7 @@ class DynamicSeedManager {
       try {
         const page = await this.payload.create({
           collection: "pages",
-          data,
+          data: data as any,
           context: this.context,
         })
         pages.push(page)

@@ -1,7 +1,6 @@
-import type { Page } from "@/admin/payload/payload-types"
 import { createRichText, paragraph } from "@/admin/utilities/rich-text-builder"
 
-export function insightsMinimalPage(): Omit<Page, "updatedAt" | "id" | "createdAt"> {
+export function insightsMinimalPage() {
   return {
     title: "Insights",
     slug: "insights",

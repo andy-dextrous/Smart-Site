@@ -1,7 +1,8 @@
 import type { Payload } from "payload"
-import type { Page, Form, ContactFormSimpleBlock } from "@/admin/payload/payload-types"
 import { createRichText, paragraph } from "@/admin/utilities/rich-text-builder"
-import { formatIdForRelationship } from "@/admin/payload/db/id-utils"
+
+type SeedForm = { id: string | number }
+type SeedPage = Record<string, unknown>
 
 /*************************************************************************/
 /*  MINIMAL PAGES DATA
@@ -16,10 +17,10 @@ import { formatIdForRelationship } from "@/admin/payload/db/id-utils"
 /*************************************************************************/
 
 export const minimalPages = async (
-  payload: Payload,
-  context?: any,
-  contactForm?: Form
-): Promise<Array<Omit<Page, "updatedAt" | "id" | "createdAt">>> => {
+  _payload: Payload,
+  _context?: unknown,
+  contactForm?: SeedForm
+): Promise<SeedPage[]> => {
   return [
     {
       title: "Home",
@@ -64,9 +65,8 @@ export const minimalPages = async (
           ? [
               {
                 blockType: "contact-form-simple",
-                // Ensure relationship ID is a string to satisfy generated types
                 form: String(contactForm.id),
-              } as ContactFormSimpleBlock,
+              },
             ]
           : []),
       ],
