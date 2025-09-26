@@ -26,15 +26,15 @@ export function middleware(request: NextRequest) {
   const i18n = getI18nConfig()
 
   if (i18n.enabled) {
-    const response = i18nRouter(request, {
+    const response = i18nRouter(request as any, {
       locales: i18n.locales,
       defaultLocale: i18n.defaultLocale,
       localeCookie: i18n.localeCookie,
       prefixDefault: i18n.prefixDefaultLocale,
-    })
+    }) as unknown
 
     if (response) {
-      return response
+      return response as NextResponse
     }
   }
 
