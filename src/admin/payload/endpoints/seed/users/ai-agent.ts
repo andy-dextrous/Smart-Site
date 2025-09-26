@@ -17,18 +17,25 @@ export function seedAIAgent(siteName = "Smart Site"): any {
   return buildAIAgentSeed(siteName)
 }
 
+interface EnsureAgentOptions {
+  force?: boolean
+  env?: NodeJS.ProcessEnv
+}
+
 export async function ensureAIAgentWithAPIKey(
   payload: Payload,
   context: any,
-  siteName: string
+  siteName: string,
+  options?: EnsureAgentOptions
 ): Promise<{ user: User; apiKey: string | null }> {
-  const env = process.env
+  const env = options?.env ?? process.env
 
   const result = await ensureAIAgentIdentity({
     payload,
     context,
     siteName,
     env,
+    forceRegenerate: options?.force ?? false,
   })
 
   const effectiveApiKey = result.apiKey ?? env.AI_AGENT_API_KEY?.trim()

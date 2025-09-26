@@ -1,13 +1,17 @@
+import React from "react"
 import { getPostsWithPagination } from "@/admin/data/posts"
-import type { PostsListBlock } from "@/admin/payload/payload-types"
 import Link from "next/link"
 import { cn } from "@/utilities/ui"
+
+type PostsListProps = {
+  postsPerPage?: number | null
+}
 
 /*************************************************************************/
 /*  POSTS LIST - MINIMAL COMPONENT
 /*************************************************************************/
 
-export const PostsListComponent: React.FC<PostsListBlock> = async props => {
+export const PostsListComponent: React.FC<PostsListProps> = async props => {
   const { postsPerPage } = props
   // Handle null/undefined and invalid values from CMS (Payload may return null)
   const limit = typeof postsPerPage === "number" && postsPerPage > 0 ? postsPerPage : 6
