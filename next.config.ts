@@ -1,4 +1,5 @@
 import { withPayload } from "@payloadcms/next/withPayload"
+import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import redirects from "./redirects.js"
@@ -9,7 +10,25 @@ const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
 // Get monorepo root dynamically
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const monorepoRoot = path.resolve(__dirname, "../..")
+
+function resolveMonorepoRoot(startDir: string): string {
+  let currentDir = startDir
+  const filesystemRoot = path.parse(currentDir).root
+
+  while (currentDir !== filesystemRoot) {
+    const workspaceFile = path.join(currentDir, "pnpm-workspace.yaml")
+
+    if (fs.existsSync(workspaceFile)) {
+      return currentDir
+    }
+
+    currentDir = path.dirname(currentDir)
+  }
+
+  return startDir
+}
+
+const monorepoRoot = resolveMonorepoRoot(__dirname)
 
 const nextConfig = {
   images: {

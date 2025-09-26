@@ -17,9 +17,19 @@ export function resolveStoragePlugins(config: SmartSiteConfig): Plugin[] {
     return []
   }
   
-  const provider = mediaConfig.provider || "local"
-  
-  switch (provider) {
+  const inferredProvider = (() => {
+    if (mediaConfig?.provider) {
+      return mediaConfig.provider
+    }
+
+    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN) {
+      return "vercel-blob"
+    }
+
+    return "local"
+  })()
+
+  switch (inferredProvider) {
     case "vercel-blob":
       plugins.push(...configureVercelStorage(config))
       break

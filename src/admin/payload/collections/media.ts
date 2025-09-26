@@ -79,7 +79,15 @@ function createUploadConfig(): UploadConfig {
     : imageSizes[0]?.name
 
   const baseFormatOptions = buildFormatOptions(qualityMap.default)
-  const provider = mediaConfig.provider || "local"
+  let provider = mediaConfig?.provider
+
+  if (!provider) {
+    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN) {
+      provider = "vercel-blob"
+    } else {
+      provider = "local"
+    }
+  }
 
   if (provider !== "local") {
     return {
