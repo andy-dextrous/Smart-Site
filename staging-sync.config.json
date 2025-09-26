@@ -1,0 +1,20 @@
+{
+  "database": {
+    "prod": "smart-site-starter-prod",
+    "staging": "smart-site-starter-staging"
+  },
+  "protectedCollections": [
+    "users",
+    "form-submissions",
+    "payload-preferences",
+    "payload-jobs",
+    "payload-queued",
+    "payload-versions",
+    "payload-sessions"
+  ],
+  "protectedCollectionPatterns": [
+    "payload-*",
+    "payload_*",
+    "_payload*"
+  ]
+}

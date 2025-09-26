@@ -23,6 +23,7 @@ A **field-driven, section-first website builder** powered by **Next.js 15**, **P
 - [Additional Resources](#additional-resources)
 - [Contributing](#contributing)
 - [License](#license)
+- [Staging Environments](#staging-environments)
 
 <a id="core-features"></a>
 ## ⚡ Core Features
@@ -1533,6 +1534,17 @@ Smart Site can deploy to any Node.js hosting platform:
 - [ ] Support contact: andrew@wildcreative.com.au documented for the team
 
 > **🚀 Production Seeding:** Remember to seed your production database after deployment using the same `/api/seed` endpoint or by running `pnpm seed` in your production environment.
+
+---
+
+<a id="staging-environments"></a>
+## 🧪 Staging Environments
+
+- **Purpose**: Allow teams to validate new sections and workflows against a staging MongoDB cluster (`STAGING_DATABASE_URL`) without touching the live site referenced by `DATABASE_URL`.
+- **Automatic selection**: Development servers and preview deploys prefer staging when the staging URI exists. Override with `SMARTSITE_DATABASE_TARGET=staging` to force staging or `SMARTSITE_DATABASE_TARGET=prod` when you must inspect production.
+- **Sync commands**: The bundled helper (`pnpm staging:pull`, `pnpm staging:push`) wraps `mongodump`/`mongorestore` to move content between environments. Install the MongoDB Database Tools locally before running the commands.
+- **Protection rules**: Customize `staging-sync.config.json` to set database names and declare protected collections. By default the script skips users, submissions, and all `payload-*` internals so operational data stays intact.
+- **Export ready**: Because `scripts/db/staging-sync.mjs` lives inside the Starter, any project generated from the template inherits the same staging workflow without Turborepo dependencies.
 
 ---
 

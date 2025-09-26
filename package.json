@@ -23,6 +23,8 @@
     "seed": "pnpm run seed:demo",
     "seed:minimal": "curl -X POST \"http://localhost:3000/api/seed\" -H \"Content-Type: application/json\" -d '{\"profile\":\"minimal\"}'",
     "regenerate-uris": "curl -X GET \"http://localhost:3000/api/regenerate-uris\"",
+    "staging:pull": "node ./scripts/db/staging-sync.mjs pull",
+    "staging:push": "node ./scripts/db/staging-sync.mjs push",
     "db:schema": "cross-env NODE_OPTIONS=--no-deprecation payload generate:db-schema",
     "db:reset": "pnpm db:schema && pnpm seed",
     "dev:fresh": "pnpm db:reset && pnpm dev",
