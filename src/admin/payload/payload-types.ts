@@ -526,27 +526,14 @@ export interface Page {
   categories?: (string | Category)[] | null;
   sections?:
     | (
-        | HeroPrimaryBlock
-        | HeroFullBlock
-        | TextImageBlock
-        | CirclesAnimationBlock
-        | ServiceCardsListBlock
-        | TestimonialsBlock
-        | InfoGridBlock
-        | LatestArticlesBlock
-        | FullwidthCtaBlock
-        | GlobeLocationsBlock
-        | ContactFormBlock
-        | CtaFormBlock
-        | HeadingLeftContentBlock
-        | SimpleTextBlock
-        | PostHeroBlock
-        | PostContentBlock
-        | PostsArchiveBlock
-        | RelatedPostsBlock
         | HeroSimpleBlock
         | ContentBlock
         | ContactFormSimpleBlock
+        | PostsListBlock
+        | PostBodyBlock
+        | PostHeroMinimalBlock
+        | PostContentMinimalBlock
+        | RelatedPostsMinimalBlock
       )[]
     | null;
   seo?: {
@@ -702,52 +689,139 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroPrimaryBlock".
+ * via the `definition` "HeroSimpleBlock".
  */
-export interface HeroPrimaryBlock {
+export interface HeroSimpleBlock {
   heading: string;
-  content: string;
-  /**
-   * The unique selling proposition text that appears below the hero content
-   */
-  usp: string;
-  /**
-   * Optional background image for the hero section
-   */
-  backgroundImage?: (string | null) | Media;
-  buttons?:
-    | {
-        button: {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null)
-              | ({
-                  relationTo: 'team';
-                  value: string | Team;
-                } | null)
-              | ({
-                  relationTo: 'services';
-                  value: string | Service;
-                } | null);
-            url?: string | null;
-            label: string;
-          };
-        };
-        id?: string | null;
-      }[]
-    | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  align: 'left' | 'center';
   id?: string | null;
   blockName?: string | null;
-  blockType: 'hero-primary';
+  blockType: 'hero-simple';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormSimpleBlock".
+ */
+export interface ContactFormSimpleBlock {
+  form: string | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contact-form-simple';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsListBlock".
+ */
+export interface PostsListBlock {
+  /**
+   * Main heading for the posts list
+   */
+  heading?: string | null;
+  /**
+   * Optional description shown below the heading
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Number of posts to show
+   */
+  postsPerPage?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts-list';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostBodyBlock".
+ */
+export interface PostBodyBlock {
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'post-body';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostHeroMinimalBlock".
+ */
+export interface PostHeroMinimalBlock {
+  showAuthor?: boolean | null;
+  showPublishDate?: boolean | null;
+  showCategories?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'post-hero-minimal';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostContentMinimalBlock".
+ */
+export interface PostContentMinimalBlock {
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'post-content-minimal';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedPostsMinimalBlock".
+ */
+export interface RelatedPostsMinimalBlock {
+  heading?: string | null;
+  maxPosts?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'related-posts-minimal';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1131,27 +1205,14 @@ export interface Service {
   publishedAt?: string | null;
   featuredImage?: (string | null) | Media;
   sections: (
-    | HeroPrimaryBlock
-    | HeroFullBlock
-    | TextImageBlock
-    | CirclesAnimationBlock
-    | ServiceCardsListBlock
-    | TestimonialsBlock
-    | InfoGridBlock
-    | LatestArticlesBlock
-    | FullwidthCtaBlock
-    | GlobeLocationsBlock
-    | ContactFormBlock
-    | CtaFormBlock
-    | HeadingLeftContentBlock
-    | SimpleTextBlock
-    | PostHeroBlock
-    | PostContentBlock
-    | PostsArchiveBlock
-    | RelatedPostsBlock
     | HeroSimpleBlock
     | ContentBlock
     | ContactFormSimpleBlock
+    | PostsListBlock
+    | PostBodyBlock
+    | PostHeroMinimalBlock
+    | PostContentMinimalBlock
+    | RelatedPostsMinimalBlock
   )[];
   seo?: {
     meta?: {
@@ -1276,281 +1337,6 @@ export interface Service {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroFullBlock".
- */
-export interface HeroFullBlock {
-  heading: string;
-  content: string;
-  size: 'full' | 'md' | 'sm';
-  colorScheme: 'background-image' | 'dark' | 'white' | 'primary' | 'secondary';
-  /**
-   * Optional background image for the hero section
-   */
-  backgroundImage?: (string | null) | Media;
-  buttons?:
-    | {
-        button: {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null)
-              | ({
-                  relationTo: 'team';
-                  value: string | Team;
-                } | null)
-              | ({
-                  relationTo: 'services';
-                  value: string | Service;
-                } | null);
-            url?: string | null;
-            label: string;
-          };
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero-full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TextImageBlock".
- */
-export interface TextImageBlock {
-  heading: string;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  image: string | Media;
-  imagePosition: 'left' | 'right';
-  buttons?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null)
-            | ({
-                relationTo: 'team';
-                value: string | Team;
-              } | null)
-            | ({
-                relationTo: 'services';
-                value: string | Service;
-              } | null);
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'text-image';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CirclesAnimationBlock".
- */
-export interface CirclesAnimationBlock {
-  /**
-   * Use <span> tags to designate text that should have the purple gradient effect. Example: 'Bridging Vision & <span>Execution</span>'
-   */
-  title: string;
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Exactly three words for the left circle
-   */
-  leftCircleWords: {
-    word: string;
-    id?: string | null;
-  }[];
-  /**
-   * Exactly three words for the right circle
-   */
-  rightCircleWords: {
-    word: string;
-    id?: string | null;
-  }[];
-  /**
-   * Text that appears at the bottom of the infographic
-   */
-  bottomText: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'circles-animation';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ServiceCardsListBlock".
- */
-export interface ServiceCardsListBlock {
-  /**
-   * Main heading for the services section. Use <span> tags for gradient text: 'Commercial, Operational <span>& Technology Services</span>'
-   */
-  heading: string;
-  /**
-   * Brief description of your services and value proposition
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Text that appears before the call-to-action button
-   */
-  text: string;
-  /**
-   * Button that links to more services or related content
-   */
-  button: {
-    /**
-     * Select the button variant
-     */
-    variant?:
-      | (
-          | 'default'
-          | 'outline'
-          | 'outlineDark'
-          | 'outlineGradient'
-          | 'phoneSelect'
-          | 'secondary'
-          | 'white'
-          | 'dark'
-          | 'ghost'
-          | 'link'
-        )
-      | null;
-    /**
-     * Select the button size
-     */
-    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
-    /**
-     * Select the button layout
-     */
-    layout?: ('default' | 'centered') | null;
-    /**
-     * Make this an icon-only button
-     */
-    icon?: boolean | null;
-    link: {
-      type?: ('reference' | 'custom') | null;
-      newTab?: boolean | null;
-      reference?:
-        | ({
-            relationTo: 'pages';
-            value: string | Page;
-          } | null)
-        | ({
-            relationTo: 'posts';
-            value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'team';
-            value: string | Team;
-          } | null)
-        | ({
-            relationTo: 'services';
-            value: string | Service;
-          } | null);
-      url?: string | null;
-      label: string;
-    };
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'service-cards-list';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock".
- */
-export interface TestimonialsBlock {
-  /**
-   * Main heading for testimonials. Use <span> tags for gradient text: 'Trusted By <span>Forward-Thinkers</span>'
-   */
-  heading: string;
-  /**
-   * Brief description about your testimonials and client success stories
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Select the testimonials to display in this section. They will appear in the order selected.
-   */
-  testimonials: (string | Testimonial)[];
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'testimonials';
-}
-/**
  * Client testimonials displayed on the website. Each testimonial includes a quote, client information, and company logo.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1587,611 +1373,6 @@ export interface Testimonial {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "InfoGridBlock".
- */
-export interface InfoGridBlock {
-  /**
-   * Main heading for the info grid section. Use <span> tags for gradient text: 'How We Turn <span>Strategy Into Results</span>'
-   */
-  heading: string;
-  /**
-   * Brief description of your process and approach that appears below the heading
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Choose background color scheme for the section
-   */
-  backgroundColorScheme: 'dark' | 'light';
-  /**
-   * Number of columns for the process steps grid
-   */
-  gridColumns: '2' | '3' | '4';
-  /**
-   * Add process steps for your methodology. Steps will be automatically numbered based on their order.
-   */
-  processSteps: {
-    title: string;
-    description: string;
-    id?: string | null;
-  }[];
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'info-grid';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LatestArticlesBlock".
- */
-export interface LatestArticlesBlock {
-  /**
-   * Main heading for the latest articles section. Use <span> tags for gradient text: 'Expert <span>Insights</span>'
-   */
-  heading: string;
-  /**
-   * Brief description about your thought leadership and expertise that appears below the heading
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Text that appears before the call-to-action button
-   */
-  text: string;
-  /**
-   * Button that links to view all articles or related content
-   */
-  button: {
-    /**
-     * Select the button variant
-     */
-    variant?:
-      | (
-          | 'default'
-          | 'outline'
-          | 'outlineDark'
-          | 'outlineGradient'
-          | 'phoneSelect'
-          | 'secondary'
-          | 'white'
-          | 'dark'
-          | 'ghost'
-          | 'link'
-        )
-      | null;
-    /**
-     * Select the button size
-     */
-    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
-    /**
-     * Select the button layout
-     */
-    layout?: ('default' | 'centered') | null;
-    /**
-     * Make this an icon-only button
-     */
-    icon?: boolean | null;
-    link: {
-      type?: ('reference' | 'custom') | null;
-      newTab?: boolean | null;
-      reference?:
-        | ({
-            relationTo: 'pages';
-            value: string | Page;
-          } | null)
-        | ({
-            relationTo: 'posts';
-            value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'team';
-            value: string | Team;
-          } | null)
-        | ({
-            relationTo: 'services';
-            value: string | Service;
-          } | null);
-      url?: string | null;
-      label: string;
-    };
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'latest-articles';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FullwidthCtaBlock".
- */
-export interface FullwidthCtaBlock {
-  /**
-   * Main heading text. You can use HTML tags for styling.
-   */
-  heading: string;
-  /**
-   * Choose text alignment
-   */
-  textAlignment: 'left' | 'center' | 'right';
-  /**
-   * Choose overlay color scheme
-   */
-  colorScheme: 'gradient' | 'dark';
-  /**
-   * Supporting description text
-   */
-  description: string;
-  /**
-   * Background image for the CTA section
-   */
-  backgroundImage: string | Media;
-  /**
-   * Configure the CTA button
-   */
-  button: {
-    /**
-     * Select the button variant
-     */
-    variant?:
-      | (
-          | 'default'
-          | 'outline'
-          | 'outlineDark'
-          | 'outlineGradient'
-          | 'phoneSelect'
-          | 'secondary'
-          | 'white'
-          | 'dark'
-          | 'ghost'
-          | 'link'
-        )
-      | null;
-    /**
-     * Select the button size
-     */
-    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
-    /**
-     * Select the button layout
-     */
-    layout?: ('default' | 'centered') | null;
-    /**
-     * Make this an icon-only button
-     */
-    icon?: boolean | null;
-    link: {
-      type?: ('reference' | 'custom') | null;
-      newTab?: boolean | null;
-      reference?:
-        | ({
-            relationTo: 'pages';
-            value: string | Page;
-          } | null)
-        | ({
-            relationTo: 'posts';
-            value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'team';
-            value: string | Team;
-          } | null)
-        | ({
-            relationTo: 'services';
-            value: string | Service;
-          } | null);
-      url?: string | null;
-      label: string;
-    };
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'fullwidth-cta';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "GlobeLocationsBlock".
- */
-export interface GlobeLocationsBlock {
-  /**
-   * Main heading for the locations section. Use <span> tags for gradient text.
-   */
-  heading: string;
-  /**
-   * Brief description of your global presence and office locations
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'globe-locations';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactFormBlock".
- */
-export interface ContactFormBlock {
-  /**
-   * Main heading for the form section. Use <span> tags for gradient text.
-   */
-  heading: string;
-  /**
-   * Brief description that appears above the form
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Select the form to display
-   */
-  form: string | Form;
-  /**
-   * Visual style based on background
-   */
-  variant?: ('white' | 'dark' | 'neutral' | 'transparent') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'contact-form';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CtaFormBlock".
- */
-export interface CtaFormBlock {
-  /**
-   * Main heading for the CTA form section. Use <span> tags for gradient text: 'Ready to get started? <span>Let's talk</span>'
-   */
-  heading: string;
-  /**
-   * Brief description that appears below the heading in the left column
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Choose background color scheme for the section
-   */
-  backgroundColorScheme: 'dark' | 'light' | 'neutral' | 'image';
-  /**
-   * Visual style for the form based on background
-   */
-  variant?: ('dark' | 'light' | 'neutral' | 'transparent') | null;
-  /**
-   * Background image for the CTA form section
-   */
-  backgroundImage?: (string | null) | Media;
-  /**
-   * Select the form to display in the right column
-   */
-  form: string | Form;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta-form';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeadingLeftContentBlock".
- */
-export interface HeadingLeftContentBlock {
-  /**
-   * Main heading for the section. Use <span> tags for gradient text: 'Our Vision for a <span>Better Digital Future</span>'
-   */
-  heading: string;
-  /**
-   * Choose background color scheme for the section
-   */
-  backgroundColorScheme: 'dark' | 'light' | 'neutral';
-  /**
-   * Control the width ratio between heading and content columns
-   */
-  ratio: '1/2' | '1/1' | '2/1';
-  /**
-   * Rich text content to display in the right column
-   */
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'heading-left-content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SimpleTextBlock".
- */
-export interface SimpleTextBlock {
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'simple-text';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostHeroBlock".
- */
-export interface PostHeroBlock {
-  /**
-   * Show author information
-   */
-  showAuthor?: boolean | null;
-  /**
-   * Show publish date
-   */
-  showPublishDate?: boolean | null;
-  /**
-   * Show post categories
-   */
-  showCategories?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'post-hero';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostContentBlock".
- */
-export interface PostContentBlock {
-  /**
-   * Show breadcrumb navigation
-   */
-  showBreadcrumbs?: boolean | null;
-  /**
-   * Show author information at the end of the post
-   */
-  showAuthorInfo?: boolean | null;
-  /**
-   * Control the size of the post content text
-   */
-  proseSize?: ('base' | 'lg' | 'xl' | '2xl') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'post-content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostsArchiveBlock".
- */
-export interface PostsArchiveBlock {
-  /**
-   * Main heading for the blog archive. Use <span> tags for gradient text: 'Latest <span>Articles</span>'
-   */
-  heading: string;
-  /**
-   * Brief description that appears below the heading
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Number of posts to display per page
-   */
-  postsPerPage?: number | null;
-  /**
-   * Choose how posts are displayed
-   */
-  layout?: ('grid' | 'list') | null;
-  /**
-   * Number of columns for grid layout
-   */
-  columns?: ('two' | 'three' | 'four') | null;
-  /**
-   * Show pagination controls
-   */
-  showPagination?: boolean | null;
-  /**
-   * Show page range information (e.g., 'Showing 1-12 of 24 posts')
-   */
-  showPageRange?: boolean | null;
-  /**
-   * Filter posts by specific categories (leave empty to show all)
-   */
-  categoryFilter?: (string | Category)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'posts-archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RelatedPostsBlock".
- */
-export interface RelatedPostsBlock {
-  /**
-   * Heading for related posts section. Use <span> tags for gradient text: '<span>Related</span> Posts'
-   */
-  heading: string;
-  /**
-   * Optional description that appears below the heading
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Maximum number of related posts to display
-   */
-  maxPosts?: number | null;
-  /**
-   * Choose how related posts are displayed
-   */
-  layout?: ('grid' | 'list') | null;
-  /**
-   * Number of columns for grid layout
-   */
-  columns?: ('two' | 'three' | 'four') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'related-posts';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroSimpleBlock".
- */
-export interface HeroSimpleBlock {
-  heading: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  align: 'left' | 'center';
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero-simple';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactFormSimpleBlock".
- */
-export interface ContactFormSimpleBlock {
-  form: string | Form;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'contact-form-simple';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "templates".
  */
 export interface Template {
@@ -2208,27 +1389,14 @@ export interface Template {
    * Pre-configured sections with default content
    */
   sections: (
-    | HeroPrimaryBlock
-    | HeroFullBlock
-    | TextImageBlock
-    | CirclesAnimationBlock
-    | ServiceCardsListBlock
-    | TestimonialsBlock
-    | InfoGridBlock
-    | LatestArticlesBlock
-    | FullwidthCtaBlock
-    | GlobeLocationsBlock
-    | ContactFormBlock
-    | CtaFormBlock
-    | HeadingLeftContentBlock
-    | SimpleTextBlock
-    | PostHeroBlock
-    | PostContentBlock
-    | PostsArchiveBlock
-    | RelatedPostsBlock
     | HeroSimpleBlock
     | ContentBlock
     | ContactFormSimpleBlock
+    | PostsListBlock
+    | PostBodyBlock
+    | PostHeroMinimalBlock
+    | PostContentMinimalBlock
+    | RelatedPostsMinimalBlock
   )[];
   updatedAt: string;
   createdAt: string;
@@ -2619,27 +1787,14 @@ export interface PagesSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
-        'hero-full'?: T | HeroFullBlockSelect<T>;
-        'text-image'?: T | TextImageBlockSelect<T>;
-        'circles-animation'?: T | CirclesAnimationBlockSelect<T>;
-        'service-cards-list'?: T | ServiceCardsListBlockSelect<T>;
-        testimonials?: T | TestimonialsBlockSelect<T>;
-        'info-grid'?: T | InfoGridBlockSelect<T>;
-        'latest-articles'?: T | LatestArticlesBlockSelect<T>;
-        'fullwidth-cta'?: T | FullwidthCtaBlockSelect<T>;
-        'globe-locations'?: T | GlobeLocationsBlockSelect<T>;
-        'contact-form'?: T | ContactFormBlockSelect<T>;
-        'cta-form'?: T | CtaFormBlockSelect<T>;
-        'heading-left-content'?: T | HeadingLeftContentBlockSelect<T>;
-        'simple-text'?: T | SimpleTextBlockSelect<T>;
-        'post-hero'?: T | PostHeroBlockSelect<T>;
-        'post-content'?: T | PostContentBlockSelect<T>;
-        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
-        'related-posts'?: T | RelatedPostsBlockSelect<T>;
         'hero-simple'?: T | HeroSimpleBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
+        'posts-list'?: T | PostsListBlockSelect<T>;
+        'post-body'?: T | PostBodyBlockSelect<T>;
+        'post-hero-minimal'?: T | PostHeroMinimalBlockSelect<T>;
+        'post-content-minimal'?: T | PostContentMinimalBlockSelect<T>;
+        'related-posts-minimal'?: T | RelatedPostsMinimalBlockSelect<T>;
       };
   seo?:
     | T
@@ -2701,340 +1856,6 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroPrimaryBlock_select".
- */
-export interface HeroPrimaryBlockSelect<T extends boolean = true> {
-  heading?: T;
-  content?: T;
-  usp?: T;
-  backgroundImage?: T;
-  buttons?:
-    | T
-    | {
-        button?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                  };
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroFullBlock_select".
- */
-export interface HeroFullBlockSelect<T extends boolean = true> {
-  heading?: T;
-  content?: T;
-  size?: T;
-  colorScheme?: T;
-  backgroundImage?: T;
-  buttons?:
-    | T
-    | {
-        button?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                  };
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TextImageBlock_select".
- */
-export interface TextImageBlockSelect<T extends boolean = true> {
-  heading?: T;
-  content?: T;
-  image?: T;
-  imagePosition?: T;
-  buttons?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CirclesAnimationBlock_select".
- */
-export interface CirclesAnimationBlockSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  leftCircleWords?:
-    | T
-    | {
-        word?: T;
-        id?: T;
-      };
-  rightCircleWords?:
-    | T
-    | {
-        word?: T;
-        id?: T;
-      };
-  bottomText?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ServiceCardsListBlock_select".
- */
-export interface ServiceCardsListBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  text?: T;
-  button?:
-    | T
-    | {
-        variant?: T;
-        size?: T;
-        layout?: T;
-        icon?: T;
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock_select".
- */
-export interface TestimonialsBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  testimonials?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "InfoGridBlock_select".
- */
-export interface InfoGridBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  backgroundColorScheme?: T;
-  gridColumns?: T;
-  processSteps?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LatestArticlesBlock_select".
- */
-export interface LatestArticlesBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  text?: T;
-  button?:
-    | T
-    | {
-        variant?: T;
-        size?: T;
-        layout?: T;
-        icon?: T;
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FullwidthCtaBlock_select".
- */
-export interface FullwidthCtaBlockSelect<T extends boolean = true> {
-  heading?: T;
-  textAlignment?: T;
-  colorScheme?: T;
-  description?: T;
-  backgroundImage?: T;
-  button?:
-    | T
-    | {
-        variant?: T;
-        size?: T;
-        layout?: T;
-        icon?: T;
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "GlobeLocationsBlock_select".
- */
-export interface GlobeLocationsBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactFormBlock_select".
- */
-export interface ContactFormBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  form?: T;
-  variant?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CtaFormBlock_select".
- */
-export interface CtaFormBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  backgroundColorScheme?: T;
-  variant?: T;
-  backgroundImage?: T;
-  form?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeadingLeftContentBlock_select".
- */
-export interface HeadingLeftContentBlockSelect<T extends boolean = true> {
-  heading?: T;
-  backgroundColorScheme?: T;
-  ratio?: T;
-  content?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SimpleTextBlock_select".
- */
-export interface SimpleTextBlockSelect<T extends boolean = true> {
-  content?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostHeroBlock_select".
- */
-export interface PostHeroBlockSelect<T extends boolean = true> {
-  showAuthor?: T;
-  showPublishDate?: T;
-  showCategories?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostContentBlock_select".
- */
-export interface PostContentBlockSelect<T extends boolean = true> {
-  showBreadcrumbs?: T;
-  showAuthorInfo?: T;
-  proseSize?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostsArchiveBlock_select".
- */
-export interface PostsArchiveBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  postsPerPage?: T;
-  layout?: T;
-  columns?: T;
-  showPagination?: T;
-  showPageRange?: T;
-  categoryFilter?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RelatedPostsBlock_select".
- */
-export interface RelatedPostsBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
-  maxPosts?: T;
-  layout?: T;
-  columns?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "HeroSimpleBlock_select".
  */
 export interface HeroSimpleBlockSelect<T extends boolean = true> {
@@ -3059,6 +1880,54 @@ export interface ContentBlockSelect<T extends boolean = true> {
  */
 export interface ContactFormSimpleBlockSelect<T extends boolean = true> {
   form?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsListBlock_select".
+ */
+export interface PostsListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  description?: T;
+  postsPerPage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostBodyBlock_select".
+ */
+export interface PostBodyBlockSelect<T extends boolean = true> {
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostHeroMinimalBlock_select".
+ */
+export interface PostHeroMinimalBlockSelect<T extends boolean = true> {
+  showAuthor?: T;
+  showPublishDate?: T;
+  showCategories?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostContentMinimalBlock_select".
+ */
+export interface PostContentMinimalBlockSelect<T extends boolean = true> {
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedPostsMinimalBlock_select".
+ */
+export interface RelatedPostsMinimalBlockSelect<T extends boolean = true> {
+  heading?: T;
+  maxPosts?: T;
   id?: T;
   blockName?: T;
 }
@@ -3369,27 +2238,14 @@ export interface ServicesSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
-        'hero-full'?: T | HeroFullBlockSelect<T>;
-        'text-image'?: T | TextImageBlockSelect<T>;
-        'circles-animation'?: T | CirclesAnimationBlockSelect<T>;
-        'service-cards-list'?: T | ServiceCardsListBlockSelect<T>;
-        testimonials?: T | TestimonialsBlockSelect<T>;
-        'info-grid'?: T | InfoGridBlockSelect<T>;
-        'latest-articles'?: T | LatestArticlesBlockSelect<T>;
-        'fullwidth-cta'?: T | FullwidthCtaBlockSelect<T>;
-        'globe-locations'?: T | GlobeLocationsBlockSelect<T>;
-        'contact-form'?: T | ContactFormBlockSelect<T>;
-        'cta-form'?: T | CtaFormBlockSelect<T>;
-        'heading-left-content'?: T | HeadingLeftContentBlockSelect<T>;
-        'simple-text'?: T | SimpleTextBlockSelect<T>;
-        'post-hero'?: T | PostHeroBlockSelect<T>;
-        'post-content'?: T | PostContentBlockSelect<T>;
-        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
-        'related-posts'?: T | RelatedPostsBlockSelect<T>;
         'hero-simple'?: T | HeroSimpleBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
+        'posts-list'?: T | PostsListBlockSelect<T>;
+        'post-body'?: T | PostBodyBlockSelect<T>;
+        'post-hero-minimal'?: T | PostHeroMinimalBlockSelect<T>;
+        'post-content-minimal'?: T | PostContentMinimalBlockSelect<T>;
+        'related-posts-minimal'?: T | RelatedPostsMinimalBlockSelect<T>;
       };
   seo?:
     | T
@@ -3464,27 +2320,14 @@ export interface TemplatesSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        'hero-primary'?: T | HeroPrimaryBlockSelect<T>;
-        'hero-full'?: T | HeroFullBlockSelect<T>;
-        'text-image'?: T | TextImageBlockSelect<T>;
-        'circles-animation'?: T | CirclesAnimationBlockSelect<T>;
-        'service-cards-list'?: T | ServiceCardsListBlockSelect<T>;
-        testimonials?: T | TestimonialsBlockSelect<T>;
-        'info-grid'?: T | InfoGridBlockSelect<T>;
-        'latest-articles'?: T | LatestArticlesBlockSelect<T>;
-        'fullwidth-cta'?: T | FullwidthCtaBlockSelect<T>;
-        'globe-locations'?: T | GlobeLocationsBlockSelect<T>;
-        'contact-form'?: T | ContactFormBlockSelect<T>;
-        'cta-form'?: T | CtaFormBlockSelect<T>;
-        'heading-left-content'?: T | HeadingLeftContentBlockSelect<T>;
-        'simple-text'?: T | SimpleTextBlockSelect<T>;
-        'post-hero'?: T | PostHeroBlockSelect<T>;
-        'post-content'?: T | PostContentBlockSelect<T>;
-        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
-        'related-posts'?: T | RelatedPostsBlockSelect<T>;
         'hero-simple'?: T | HeroSimpleBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
+        'posts-list'?: T | PostsListBlockSelect<T>;
+        'post-body'?: T | PostBodyBlockSelect<T>;
+        'post-hero-minimal'?: T | PostHeroMinimalBlockSelect<T>;
+        'post-content-minimal'?: T | PostContentMinimalBlockSelect<T>;
+        'related-posts-minimal'?: T | RelatedPostsMinimalBlockSelect<T>;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -4230,27 +3073,14 @@ export interface AiSetting {
     sectionGuidance?:
       | {
           sectionSlug:
-            | 'circles-animation'
-            | 'contact-form'
             | 'contact-form-simple'
             | 'content'
-            | 'cta-form'
-            | 'fullwidth-cta'
-            | 'globe-locations'
-            | 'heading-left-content'
-            | 'hero-full'
-            | 'hero-primary'
             | 'hero-simple'
-            | 'info-grid'
-            | 'latest-articles'
-            | 'post-content'
-            | 'post-hero'
-            | 'posts-archive'
-            | 'related-posts'
-            | 'service-cards-list'
-            | 'simple-text'
-            | 'testimonials'
-            | 'text-image';
+            | 'post-body'
+            | 'post-content-minimal'
+            | 'post-hero-minimal'
+            | 'posts-list'
+            | 'related-posts-minimal';
           includeInDesigns?: boolean | null;
           /**
            * Describe ideal use cases, required content, or sequencing notes that the AI should follow when selecting this section.
