@@ -315,15 +315,7 @@ function normalizeStoredMessage(message: UIMessage): UIMessage {
       if (!part || typeof (part as any).type !== "string") {
         return part as UIMessage["parts"][number]
       }
-      const currentType = (part as any).type as string
-      if (currentType.startsWith("data-tool")) {
-        const restoredType = currentType.replace(/^data-/, "") as UIMessage["parts"][number]["type"]
-        return {
-          ...(part as Record<string, unknown>),
-          type: restoredType,
-        } as UIMessage["parts"][number]
-      }
-      return part as UIMessage["parts"][number]
+      return restorePartFromData(part as UIMessage["parts"][number])
     })
   }
   const withInvocations = cloned as UIMessage & {
@@ -339,6 +331,36 @@ function normalizeStoredMessage(message: UIMessage): UIMessage {
     })
   }
   return withInvocations
+}
+
+function restorePartFromData(part: UIMessage["parts"][number]): UIMessage["parts"][number] {
+  const record = part as Record<string, unknown>
+  const typeValue = typeof record.type === "string" ? (record.type as string) : ""
+  if (!typeValue.startsWith("data-")) {
+    return part
+  }
+
+  const fallbackType = typeValue.replace(/^data-/, "")
+  const payload = (record as { data?: unknown }).data
+
+  if (payload && typeof payload === "object") {
+    const restored = { ...(payload as Record<string, unknown>) }
+    const originalType = typeof restored.originalType === "string" ? (restored.originalType as string) : fallbackType
+    delete restored.originalType
+    if (!("type" in restored)) {
+      (restored as any).type = originalType
+    }
+    const idValue = typeof (record as any).id === "string" ? ((record as any).id as string) : undefined
+    if (idValue && !("id" in restored)) {
+      restored.id = idValue
+    }
+    return restored as UIMessage["parts"][number]
+  }
+
+  const fallback = { ...record }
+  ;(fallback as any).type = fallbackType
+  delete (fallback as any).data
+  return fallback as UIMessage["parts"][number]
 }
 
 interface ToolInvocationSnapshot {
