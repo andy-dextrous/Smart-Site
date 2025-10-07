@@ -16,6 +16,8 @@ import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const postsConfig: CollectionConfig = {
   slug: "posts",
+  enableQueryPresets: true,
+  trash: true,
   access: {
     create: authenticated,
     delete: authenticated,

@@ -6,6 +6,8 @@ import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 export const Categories: CollectionConfig = {
   slug: "categories",
+  enableQueryPresets: true,
+  trash: true,
   access: {
     create: authenticated,
     delete: authenticated,

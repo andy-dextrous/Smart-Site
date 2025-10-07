@@ -186,6 +186,9 @@ function ConversationAutoStick({ focusSignal, isActive, status, messages }: Conv
     }
     const focusChanged = lastFocusRef.current !== focusSignal
     lastFocusRef.current = focusSignal
+    if (focusChanged && status === "idle" && messages.length > 0) {
+      return
+    }
     if (!focusChanged && !isAtBottom) {
       return
     }

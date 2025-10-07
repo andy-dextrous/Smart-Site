@@ -1,5 +1,6 @@
 import React, { Fragment } from "react"
 import { sectionsMap } from "@/components/sections/sections-map"
+import { sanitizePayloadData } from "@/admin/utilities/sanitize-payload-data"
 
 /*************************************************************************/
 /*  PAGE DATA TYPE - AVAILABLE TO ALL SECTIONS
@@ -21,11 +22,7 @@ export interface PageData {
 /*  to all sections as optional props for dynamic content access
 /*************************************************************************/
 
-export const RenderSections: React.FC<
-  {
-    sections: any[]
-  } & PageData
-> = props => {
+export function RenderSections(props: { sections: any[] } & PageData) {
   const { sections, document, collection, breadcrumbs, searchParams, params } = props
 
   const hasSections = sections && Array.isArray(sections) && sections.length > 0
@@ -40,15 +37,14 @@ export const RenderSections: React.FC<
             const Section = sectionsMap[blockType]
 
             if (Section) {
-              // Pass document, collection, breadcrumbs, and Next.js page props to ALL sections as optional props
-              const sectionProps = {
+              const sectionProps = sanitizePayloadData({
                 ...section,
                 document,
                 collection,
                 breadcrumbs,
                 searchParams,
                 params,
-              }
+              })
 
               return <Section {...sectionProps} key={index} />
             }

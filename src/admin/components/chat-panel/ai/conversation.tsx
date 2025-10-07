@@ -212,13 +212,15 @@ export function Conversation({
   tabIndex = 0,
   role = "log",
   "aria-label": ariaLabel = "Chat conversation",
+  initial = false,
+  resize = "smooth",
   ...props
 }: ConversationProps) {
   return (
     <StickToBottom
       className={cn("chat-conversation relative flex-1", className)}
-      initial="instant"
-      resize="smooth"
+      initial={initial}
+      resize={resize}
       role={role}
       tabIndex={tabIndex}
       aria-label={ariaLabel}

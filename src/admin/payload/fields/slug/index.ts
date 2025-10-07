@@ -33,9 +33,8 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
     },
     hooks: {
       beforeValidate: [
-        ({ data, operation, value }) => {
-          // Reset lock to true (locked) after any publish operation
-          if (operation === "update" && data?._status === "published") {
+        ({ data, value }) => {
+          if (data?._status === "published") {
             return true
           }
           return value

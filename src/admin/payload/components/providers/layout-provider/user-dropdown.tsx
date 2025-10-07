@@ -19,19 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/admin/components/ui/avata
 
 export default function UserDropdown() {
   const cmsURL = getClientSideURL()
-  const { user, logOut } = useAuth()
-
-  /*************************************************************************/
-  /*  LOGOUT HANDLER
-  /*************************************************************************/
-
-  async function handleLogout() {
-    try {
-      await logOut()
-    } catch (error) {
-      console.error("Failed to logout:", error)
-    }
-  }
+  const { user } = useAuth()
 
   if (!user) {
     return (
@@ -79,7 +67,9 @@ export default function UserDropdown() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer px-4 py-2.5 text-base"
-          onClick={handleLogout}
+          onClick={() => {
+            window.location.href = `${cmsURL}/admin/logout`
+          }}
         >
           <LogOut className="size-5" />
           Logout

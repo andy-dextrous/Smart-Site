@@ -94,12 +94,15 @@ export async function updateURI({
     const normalizedPreviousURI =
       previousURI && previousURI !== uri ? previousURI : undefined
 
+    const slugChanged = Boolean(normalizedPreviousURI)
+
     let redirectSource = normalizedPreviousURI
 
     const publishedEntry = existingEntries.docs.find((doc: any) => doc.status === "published")
     const draftEntry = existingEntries.docs.find((doc: any) => doc.status === "draft")
-    const targetStatus = status
-    const targetEntry = targetStatus === "draft" ? draftEntry : publishedEntry
+
+    const targetEntry = publishedEntry || draftEntry
+    const indexStatus = publishedEntry ? "published" : status
 
     const indexData = {
       uri,
@@ -109,7 +112,7 @@ export async function updateURI({
         relationTo: collection as any,
         value: formatIdForRelationship(documentId),
       },
-      status,
+      status: indexStatus,
       templateId: resolvedTemplateId,
       breadcrumbs: resolvedBreadcrumbs || [],
       previousURIs:
@@ -148,36 +151,35 @@ export async function updateURI({
       }
     }
 
-    /**
-     * After successfully updating the URI index, create an automatic redirect
-     */
-    const redirectBaseline = status === "published" ? publishedEntry : targetEntry
+    if (status === "published" && slugChanged) {
+      const redirectBaseline = publishedEntry || targetEntry
 
-    if (!redirectSource && redirectBaseline && status === "published") {
-      const historicalURI = redirectBaseline.previousURIs?.find(
-        (prev: any) => prev?.uri && prev.uri !== uri
-      )?.uri
+      if (!redirectSource && redirectBaseline) {
+        const historicalURI = redirectBaseline.previousURIs?.find(
+          (prev: any) => prev?.uri && prev.uri !== uri
+        )?.uri
 
-      if (historicalURI) {
-        redirectSource = historicalURI
+        if (historicalURI) {
+          redirectSource = historicalURI
+        }
       }
-    }
 
-    if (
-      !redirectSource &&
-      redirectBaseline &&
-      redirectBaseline.uri &&
-      redirectBaseline.uri !== uri
-    ) {
-      redirectSource = redirectBaseline.uri
-    }
+      if (
+        !redirectSource &&
+        redirectBaseline &&
+        redirectBaseline.uri &&
+        redirectBaseline.uri !== uri
+      ) {
+        redirectSource = redirectBaseline.uri
+      }
 
-    if (status === "published" && redirectSource && redirectSource !== uri) {
-      const redirectResult = await createAutomaticRedirect(redirectSource, uri)
-      if (redirectResult.success) {
-        payload.logger.info(`✅ Automatic redirect created: ${redirectSource} → ${uri}`)
-      } else {
-        payload.logger.warn(`⚠️ Automatic redirect skipped: ${redirectResult.message}`)
+      if (redirectSource && redirectSource !== uri) {
+        const redirectResult = await createAutomaticRedirect(redirectSource, uri)
+        if (redirectResult.success) {
+          payload.logger.info(`✅ Automatic redirect created: ${redirectSource} → ${uri}`)
+        } else {
+          payload.logger.warn(`⚠️ Automatic redirect skipped: ${redirectResult.message}`)
+        }
       }
     }
   } catch (error) {

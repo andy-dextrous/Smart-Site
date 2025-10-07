@@ -42,6 +42,35 @@ function buildFormatOptions(quality?: number): ImageUploadFormatOptions | undefi
   }
 }
 
+function resolveMediaProvider(): "local" | "vercel-blob" {
+  const smartSiteConfig = getSmartSiteConfig()
+  const mediaConfig = (smartSiteConfig.collections.media as any) || {}
+  const provider = mediaConfig.provider as string | undefined
+
+  if (provider === "vercel-blob") {
+    if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.VERCEL_BLOB_TOKEN) {
+      console.error(
+        "❌ Media provider set to 'vercel-blob' in smartsite.config.ts but BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN not found in environment"
+      )
+    }
+    return "vercel-blob"
+  }
+
+  return "local"
+}
+
+function resolveMediaDir(): string | undefined {
+  const smartSiteConfig = getSmartSiteConfig()
+  const mediaConfig = (smartSiteConfig.collections.media as any) || {}
+  if (resolveMediaProvider() !== "local") return undefined
+  return resolveLocalStaticDir(mediaConfig.staticDir)
+}
+
+export const mediaInfo = {
+  provider: resolveMediaProvider(),
+  dir: resolveMediaDir(),
+}
+
 function createUploadConfig(): UploadConfig {
   const smartSiteConfig = getSmartSiteConfig()
   const mediaConfig = smartSiteConfig.collections.media as any
@@ -79,15 +108,7 @@ function createUploadConfig(): UploadConfig {
     : imageSizes[0]?.name
 
   const baseFormatOptions = buildFormatOptions(qualityMap.default)
-  let provider = mediaConfig?.provider
-
-  if (!provider) {
-    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN) {
-      provider = "vercel-blob"
-    } else {
-      provider = "local"
-    }
-  }
+  const provider = mediaInfo.provider
 
   if (provider !== "local") {
     return {
@@ -98,7 +119,7 @@ function createUploadConfig(): UploadConfig {
     } as UploadConfig
   }
 
-  const staticDir = resolveLocalStaticDir(mediaConfig.staticDir)
+  const staticDir = mediaInfo.dir || resolveLocalStaticDir(mediaConfig.staticDir)
 
   return {
     staticDir,

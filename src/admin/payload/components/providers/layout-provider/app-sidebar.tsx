@@ -338,7 +338,12 @@ export function AppSidebar() {
           icon={groups.business.icon}
           isCollapsed={isCollapsed}
           isOpen={openGroups.business}
-          onToggle={() => setOpenGroups(prev => ({ ...prev, business: !prev.business }))}
+          onToggle={() => {
+            if (isCollapsed) {
+              setIsCollapsed(false)
+            }
+            setOpenGroups(prev => ({ ...prev, business: !prev.business }))
+          }}
         >
           {[...visibleCollections, ...visibleGlobals]
             .filter(item => groups.business.items.includes(item.slug))
@@ -427,7 +432,12 @@ export function AppSidebar() {
           icon={groups.forms.icon}
           isCollapsed={isCollapsed}
           isOpen={openGroups.forms}
-          onToggle={() => setOpenGroups(prev => ({ ...prev, forms: !prev.forms }))}
+          onToggle={() => {
+            if (isCollapsed) {
+              setIsCollapsed(false)
+            }
+            setOpenGroups(prev => ({ ...prev, forms: !prev.forms }))
+          }}
         >
           {visibleCollections
             .filter(col => groups.forms.items.includes(col.slug))
@@ -463,7 +473,12 @@ export function AppSidebar() {
           icon={groups.settings.icon}
           isCollapsed={isCollapsed}
           isOpen={openGroups.settings}
-          onToggle={() => setOpenGroups(prev => ({ ...prev, settings: !prev.settings }))}
+          onToggle={() => {
+            if (isCollapsed) {
+              setIsCollapsed(false)
+            }
+            setOpenGroups(prev => ({ ...prev, settings: !prev.settings }))
+          }}
         >
           {groups.settings.items.map(itemSlug => {
             // Regular item handling

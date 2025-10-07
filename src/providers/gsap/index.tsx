@@ -44,6 +44,7 @@ const omittedPaths = [] as string[]
 const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const [smootherInstance, setSmootherInstance] = useState<ScrollSmoother | null>(null)
+  const [gsapLoaded, setGsapLoaded] = useState(false)
 
   /*************************************************************************/
   /*  SCROLL TO TOP UTILITY FUNCTION
@@ -57,28 +58,55 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadGSAP() {
+      await initializeGSAP()
+      if (isMounted) {
+        setGsapLoaded(true)
+      }
+    }
+
+    if (canUseDOM) {
+      loadGSAP()
+    }
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   useGSAP(
     () => {
       const config = getSmartSiteConfig()
-      if (config.gsap.scrollSmoother && !omittedPaths.includes(pathname)) {
-        const smoother = ScrollSmoother.create({
-          smooth: 1.8,
-          effects: true,
-          normalizeScroll: true,
-        })
-        setSmootherInstance(smoother)
+      if (!gsapLoaded || !config.gsap.scrollSmoother || omittedPaths.includes(pathname)) {
+        return
+      }
 
-        // Scroll to top on route change
-        smoother.scrollTo(0, true)
+      // Ensure ScrollSmoother is available before creating
+      if (typeof ScrollSmoother?.create !== "function") {
+        console.warn("ScrollSmoother plugin not available; skipping smooth scroll initialization")
+        return
+      }
 
-        return () => {
-          smoother?.kill()
-          setSmootherInstance(null)
-        }
+      const smoother = ScrollSmoother.create({
+        smooth: 1.8,
+        effects: true,
+        normalizeScroll: true,
+      })
+      setSmootherInstance(smoother)
+
+      // Scroll to top on route change
+      smoother.scrollTo(0, true)
+
+      return () => {
+        smoother?.kill()
+        setSmootherInstance(null)
       }
     },
     {
-      dependencies: [pathname],
+      dependencies: [pathname, gsapLoaded],
       revertOnUpdate: true,
     }
   )
@@ -138,6 +166,7 @@ export { ScrollSmoother } from "gsap/ScrollSmoother"
 export { ScrollToPlugin } from "gsap/ScrollToPlugin"
 export { ScrollTrigger } from "gsap/ScrollTrigger"
 export { TextPlugin } from "gsap/TextPlugin"
+export { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin"
 export { GSAPContext }
 
 export * from "@gsap/react"

@@ -650,7 +650,6 @@ async function proxyToPayload(req: PayloadRequest, targetPath: string): Promise<
 async function revalidateRegistry(payload: PayloadRequest["payload"], contextLabel: string) {
   try {
     revalidateTag(REGISTRY_TAG)
-    payload.logger.info(`[ai-bridge] Revalidated ${REGISTRY_TAG} after ${contextLabel}`)
   } catch (error) {
     payload.logger.error(`[ai-bridge] Failed to revalidate ${REGISTRY_TAG} after ${contextLabel}`, error)
   }

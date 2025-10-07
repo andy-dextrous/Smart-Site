@@ -5,6 +5,8 @@ import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 export const Testimonials: CollectionConfig = {
   slug: "testimonials",
+  enableQueryPresets: true,
+  trash: true,
   access: {
     create: canEditContent,
     delete: canEditContent,

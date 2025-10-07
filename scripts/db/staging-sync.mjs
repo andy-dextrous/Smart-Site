@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs"
+import { existsSync, mkdtempSync, readFileSync, rmSync, mkdirSync, readdirSync, statSync } from "node:fs"
 import os from "node:os"
 import path from "node:path"
 import process from "node:process"
 import { fileURLToPath } from "node:url"
+import dotenv from "dotenv"
 
 const DEFAULT_PROTECTED_COLLECTIONS = [
   "form-submissions",
@@ -20,6 +21,8 @@ const DEFAULT_PROTECTED_COLLECTIONS = [
 
 const DEFAULT_PROTECTED_PATTERNS = ["payload-*", "payload_*", "_payload*"]
 
+const DEFAULT_BACKUP_RETENTION = 5
+
 /*************************************************************************/
 /*  CONFIGURATION HELPERS
 /*************************************************************************/
@@ -27,6 +30,18 @@ const DEFAULT_PROTECTED_PATTERNS = ["payload-*", "payload_*", "_payload*"]
 function resolveProjectRoot() {
   const currentDir = fileURLToPath(new URL(".", import.meta.url))
   return path.resolve(currentDir, "..", "..")
+}
+
+function loadEnv(projectRoot) {
+  const candidates = [
+    path.join(projectRoot, ".env.local"),
+    path.join(projectRoot, ".env"),
+  ]
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      dotenv.config({ path: p })
+    }
+  }
 }
 
 function loadSyncConfig(projectRoot) {
@@ -172,6 +187,62 @@ function cleanupTempDir(tempDir) {
 }
 
 /*************************************************************************/
+/*  BACKUP UTILITIES
+/*************************************************************************/
+
+function getBackupsRoot(projectRoot) {
+  const dir = path.join(projectRoot, "backups")
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true })
+  }
+  return dir
+}
+
+function timestamp() {
+  const d = new Date()
+  const pad = n => String(n).padStart(2, "0")
+  const yyyy = d.getFullYear()
+  const mm = pad(d.getMonth() + 1)
+  const dd = pad(d.getDate())
+  const hh = pad(d.getHours())
+  const mi = pad(d.getMinutes())
+  const ss = pad(d.getSeconds())
+  return `${yyyy}${mm}${dd}-${hh}${mi}${ss}`
+}
+
+function pruneOldBackups(backupsRoot, retention = DEFAULT_BACKUP_RETENTION) {
+  try {
+    const entries = readdirSync(backupsRoot)
+      .map(name => ({ name, full: path.join(backupsRoot, name), stat: statSync(path.join(backupsRoot, name)) }))
+      .filter(e => e.stat.isDirectory())
+      .sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs)
+
+    const toDelete = entries.slice(retention)
+    for (const entry of toDelete) {
+      rmSync(entry.full, { recursive: true, force: true })
+    }
+  } catch {}
+}
+
+function backupDatabaseFull(source, backupsRoot, label) {
+  const dirName = `${timestamp()}-${label}-${source.name}`
+  const backupDir = path.join(backupsRoot, dirName)
+  mkdirSync(backupDir, { recursive: true })
+
+  const args = [
+    "--uri",
+    source.uri,
+    "--out",
+    backupDir,
+    "--db",
+    source.name,
+  ]
+
+  run("mongodump", args)
+  return backupDir
+}
+
+/*************************************************************************/
 /*  SYNC OPERATIONS
 /*************************************************************************/
 
@@ -225,6 +296,20 @@ function pullProductionIntoStaging(environment, config) {
   const tempDir = createTempDir()
 
   try {
+    const projectRoot = resolveProjectRoot()
+    const backupsRoot = getBackupsRoot(projectRoot)
+    const retention = Number.parseInt(process.env.STAGING_SYNC_RETENTION || "" + DEFAULT_BACKUP_RETENTION)
+    const skipBackup = process.env.STAGING_SYNC_SKIP_BACKUP === "1" || process.env.STAGING_SYNC_SKIP_BACKUP === "true"
+
+    if (!skipBackup) {
+      console.log("💾 Creating backup of STAGING before pull…")
+      const backupDir = backupDatabaseFull(environment.staging, backupsRoot, "staging-backup")
+      console.log(`✅ Staging backup stored at: ${backupDir}`)
+      pruneOldBackups(backupsRoot, Number.isFinite(retention) ? retention : DEFAULT_BACKUP_RETENTION)
+    } else {
+      console.log("⚠️  Skipping backup (STAGING_SYNC_SKIP_BACKUP set)")
+    }
+
     dumpDatabase(environment.production, tempDir, config)
     const dumpDir = path.join(tempDir, environment.production.name)
     restoreDatabase(environment.staging, dumpDir, config)
@@ -237,6 +322,20 @@ function pushStagingIntoProduction(environment, config) {
   const tempDir = createTempDir()
 
   try {
+    const projectRoot = resolveProjectRoot()
+    const backupsRoot = getBackupsRoot(projectRoot)
+    const retention = Number.parseInt(process.env.STAGING_SYNC_RETENTION || "" + DEFAULT_BACKUP_RETENTION)
+    const skipBackup = process.env.STAGING_SYNC_SKIP_BACKUP === "1" || process.env.STAGING_SYNC_SKIP_BACKUP === "true"
+
+    if (!skipBackup) {
+      console.log("💾 Creating backup of PRODUCTION before push…")
+      const backupDir = backupDatabaseFull(environment.production, backupsRoot, "production-backup")
+      console.log(`✅ Production backup stored at: ${backupDir}`)
+      pruneOldBackups(backupsRoot, Number.isFinite(retention) ? retention : DEFAULT_BACKUP_RETENTION)
+    } else {
+      console.log("⚠️  Skipping backup (STAGING_SYNC_SKIP_BACKUP set)")
+    }
+
     dumpDatabase(environment.staging, tempDir, config)
     const dumpDir = path.join(tempDir, environment.staging.name)
     restoreDatabase(environment.production, dumpDir, config)
@@ -258,6 +357,7 @@ function main() {
   }
 
   const projectRoot = resolveProjectRoot()
+  loadEnv(projectRoot)
   const config = loadSyncConfig(projectRoot)
   const environment = resolveEnvironment(config)
 

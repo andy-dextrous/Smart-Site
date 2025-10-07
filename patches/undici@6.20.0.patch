@@ -1,13 +1,13 @@
 diff --git a/index.js b/index.js
 index 7a68d04abb358c824c8a88b631ba0e34674143ed..767d1cc42b3902fd758e5bc3225e5f125c4cade4 100644
 --- a/index.js
-+++ b/index.js	
-@@ -132,7 +132,9 @@ const { kConstruct } = require('./lib/web/cache/symbols')
- 
++++ b/index.js
+@@ -132,7 +132,7 @@ const { kConstruct } = require('./lib/web/cache/symbols')
+
  // Cache & CacheStorage are tightly coupled with fetch. Even if it may run
  // in an older version of Node, it doesn't have any use without fetch.
 -module.exports.caches = new CacheStorage(kConstruct)
 +module.exports.caches = undefined
- 
+
  const { deleteCookie, getCookies, getSetCookies, setCookie } = require('./lib/web/cookies')
- 
+

@@ -269,6 +269,15 @@ export function ChatThreadsProvider({ children, isOpen, scope }: ChatThreadsProv
     recordSelection(null)
   }, [pathname, recordSelection])
 
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[chat-threads] current messages", getActiveMessages)
+    }
+  }, [isOpen, getActiveMessages])
+
   /**
    * Persistence helpers
    */
@@ -311,15 +320,23 @@ export function ChatThreadsProvider({ children, isOpen, scope }: ChatThreadsProv
 function normalizeStoredMessage(message: UIMessage): UIMessage {
   const cloned = { ...message }
   if (Array.isArray(cloned.parts)) {
-    cloned.parts = cloned.parts.map(part => {
-      if (!part || typeof (part as any).type !== "string") {
-        return part as UIMessage["parts"][number]
-      }
-      return restorePartFromData(part as UIMessage["parts"][number])
-    })
+    cloned.parts = cloned.parts
+      .map(part => {
+        if (!part || typeof (part as any).type !== "string") {
+          return part as UIMessage["parts"][number]
+        }
+        return restorePartFromData(part as UIMessage["parts"][number])
+      })
+      .filter(part => {
+        const type = typeof (part as any)?.type === "string" ? ((part as any).type as string) : ""
+        return type !== "tool-invocation"
+      })
   }
   const withInvocations = cloned as UIMessage & {
     toolInvocations?: Array<Record<string, unknown>>
+  }
+  if ("toolInvocations" in withInvocations) {
+    delete withInvocations.toolInvocations
   }
   if (Array.isArray(withInvocations.toolInvocations)) {
     withInvocations.toolInvocations = withInvocations.toolInvocations.map(invocation => {

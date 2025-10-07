@@ -50,6 +50,7 @@ type CollectionStructure = {
   hasCustomSEO: boolean
   hasExistingTabs: boolean
   hasBlockContent: boolean
+  primaryLabelField?: string
 }
 
 /*************************************************************************/
@@ -81,9 +82,11 @@ export function enableFrontend<TSlug extends CollectionSlug>(
 
   registeredCollections.set(config.slug, collection)
 
+  const slugSourceField = structure.primaryLabelField ?? "title"
+
   return {
     ...config,
-    fields: [...enhancedFields, ...slugField()],
+    fields: [...enhancedFields, ...slugField(slugSourceField)],
     admin: {
       ...config.admin,
       // Add preview functionality automatically when enabled
@@ -170,42 +173,69 @@ export function applyFrontendWrapper(
 /*************************************************************************/
 
 function analyzeCollectionStructure(config: CollectionConfig): CollectionStructure {
+  const preferredLabelField = resolvePrimaryLabelField(config)
+
   return {
-    hasTitle: hasFieldRecursive(config.fields, ["title", "name"]),
-    hasCustomSEO: hasFieldRecursive(config.fields, ["meta", "seo"]),
+    hasTitle: Boolean(preferredLabelField),
+    hasCustomSEO: Boolean(findFieldNameRecursive(config.fields, ["meta", "seo"])),
     hasExistingTabs: config.fields.some(field => field.type === "tabs"),
     hasBlockContent: config.fields.some(field => field.type === "blocks"),
+    primaryLabelField: preferredLabelField,
   }
 }
 
-function hasFieldRecursive(fields: Field[], fieldNames: string[]): boolean {
+function resolvePrimaryLabelField(config: CollectionConfig): string | undefined {
+  const adminLabelField =
+    typeof config.admin?.useAsTitle === "string" ? config.admin.useAsTitle : undefined
+
+  if (adminLabelField && fieldExists(config.fields, adminLabelField)) {
+    return adminLabelField
+  }
+
+  return findFieldNameRecursive(config.fields, ["title", "name"])
+}
+
+function fieldExists(fields: Field[], fieldName: string): boolean {
+  return Boolean(findFieldNameRecursive(fields, [fieldName]))
+}
+
+function findFieldNameRecursive(fields: Field[], fieldNames: string[]): string | undefined {
   for (const field of fields) {
     if ("name" in field && fieldNames.includes(field.name)) {
-      return true
+      return field.name
     }
 
-    if (field.type === "row" && "fields" in field) {
-      if (hasFieldRecursive(field.fields, fieldNames)) {
-        return true
-      }
-    }
-
-    if (field.type === "collapsible" && "fields" in field) {
-      if (hasFieldRecursive(field.fields, fieldNames)) {
-        return true
+    if ("fields" in field && Array.isArray((field as any).fields)) {
+      const nestedField = findFieldNameRecursive((field as any).fields, fieldNames)
+      if (nestedField) {
+        return nestedField
       }
     }
 
     if (field.type === "tabs" && "tabs" in field) {
       for (const tab of field.tabs) {
-        if ("fields" in tab && hasFieldRecursive(tab.fields, fieldNames)) {
-          return true
+        if ("fields" in tab) {
+          const nestedField = findFieldNameRecursive(tab.fields, fieldNames)
+          if (nestedField) {
+            return nestedField
+          }
+        }
+      }
+    }
+
+    if (field.type === "blocks" && "blocks" in field) {
+      for (const block of field.blocks) {
+        if ("fields" in block) {
+          const nestedField = findFieldNameRecursive(block.fields, fieldNames)
+          if (nestedField) {
+            return nestedField
+          }
         }
       }
     }
   }
 
-  return false
+  return undefined
 }
 
 function buildEnhancedFields(

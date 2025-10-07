@@ -32,7 +32,7 @@ export default function EitCurrentPage() {
   return metaData ? (
     <div>
       <Link
-        href={`${process.env.NEXT_PUBLIC_URL}/admin/collections/${metaData?.collection}/${metaData?.id}/preview`}
+        href={`${process.env.NEXT_PUBLIC_URL}/admin/collections/${metaData?.collection}/${metaData?.id}`}
         className="admin-bar__edit-link"
       >
         Edit Page

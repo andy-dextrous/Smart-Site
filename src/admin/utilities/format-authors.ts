@@ -1,4 +1,11 @@
-import { Post } from "@/admin/payload/payload-types"
+import { Post, Team, User } from "@/admin/payload/payload-types"
+
+type PopulatedAuthorProfile = NonNullable<Post["populatedAuthors"]>
+type EnrichedAuthor = NonNullable<PopulatedAuthorProfile>[number] & {
+  user?: User | null
+  teamMember?: Team | null
+  lastName?: string | null
+}
 
 /**
  * Formats an array of populatedAuthors from Posts into a prettified string.
@@ -10,11 +17,37 @@ import { Post } from "@/admin/payload/payload-types"
  * [Author1, Author2, Author3] becomes 'Author1, Author2, and Author3'
  *
  */
-export const formatAuthors = (
-  authors: NonNullable<NonNullable<Post["populatedAuthors"]>[number]>[]
-) => {
-  // Ensure we don't have any authors without a name
-  const authorNames = authors.map(author => author.name).filter(Boolean)
+export const formatAuthors = (authors: NonNullable<Post["populatedAuthors"]>[number][]) => {
+  const enriched = authors as unknown as EnrichedAuthor[]
+
+  const authorNames = enriched
+    .map(author => {
+      const team = author.teamMember && typeof author.teamMember === "object" ? author.teamMember : null
+      const user = author.user && typeof author.user === "object" ? author.user : null
+
+      if (team?.name) {
+        return team.name
+      }
+
+      const nameParts = [author.name, author.lastName ?? user?.lastName]
+        .filter(part => typeof part === "string" && part.trim() !== "")
+        .map(part => part as string)
+
+      if (nameParts.length > 0) {
+        return nameParts.join(" ")
+      }
+
+      if (user?.username) {
+        return user.username
+      }
+
+      if (user?.email) {
+        return user.email
+      }
+
+      return author.name || null
+    })
+    .filter((name): name is string => Boolean(name))
 
   if (authorNames.length === 0) return ""
   if (authorNames.length === 1) return authorNames[0]

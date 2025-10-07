@@ -62,6 +62,15 @@ export const Users: CollectionConfig = {
       ],
     },
     {
+      name: "teamMember",
+      type: "relationship",
+      relationTo: "team",
+      admin: {
+        description: "Link this user to their public team profile for shared bios and SEO attribution.",
+        position: "sidebar",
+      },
+    },
+    {
       name: "role",
       type: "select",
       required: true,
@@ -100,67 +109,6 @@ export const Users: CollectionConfig = {
       type: "textarea",
       label: "Bio",
       maxLength: 500,
-    },
-    {
-      type: "array",
-      name: "education",
-      label: "Education",
-      fields: [
-        {
-          name: "degree",
-          type: "text",
-          label: "Degree/Qualification",
-          required: true,
-          admin: {
-            placeholder: "e.g., Bachelor of Health Science (Nutritional Medicine)",
-          },
-        },
-        {
-          name: "institution",
-          type: "text",
-          label: "Institution",
-          admin: {
-            placeholder: "e.g., University of Technology Sydney",
-          },
-        },
-        {
-          name: "year",
-          type: "number",
-          label: "Year Completed",
-          admin: {
-            placeholder: "e.g., 2020",
-          },
-        },
-      ],
-      admin: {
-        description: "Add educational qualifications and certifications",
-      },
-    },
-    {
-      type: "array",
-      name: "socialLinks",
-      label: "Social Links",
-      fields: [
-        {
-          name: "platform",
-          type: "select",
-          options: [
-            "twitter",
-            "facebook",
-            "instagram",
-            "linkedin",
-            "youtube",
-            "twitch",
-            "tiktok",
-            "github",
-            "website",
-          ],
-        },
-        {
-          name: "url",
-          type: "text",
-        },
-      ],
     },
   ],
   timestamps: true,

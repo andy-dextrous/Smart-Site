@@ -1,4 +1,4 @@
-import type { CollectionConfig } from "payload"
+import type { CollectionConfig, Field, Where } from "payload"
 
 import { sections } from "@/components/sections/config"
 import { authenticated } from "@/admin/payload/access/authenticated"
@@ -10,8 +10,77 @@ import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const applyDefaultTemplate = createApplyDefaultTemplateHook("services")
 
+function shouldShowParentField(
+  _data: unknown,
+  siblingData?: { isTopLevel?: boolean | null }
+): boolean {
+  return siblingData?.isTopLevel === false
+}
+
+function buildParentFilter({
+  id,
+}: {
+  id?: string | number | null
+}): Where {
+  const query: Where = {
+    isTopLevel: {
+      equals: true,
+    },
+  }
+
+  if (typeof id !== "undefined" && id !== null) {
+    query.id = {
+      not_equals: id,
+    }
+  }
+
+  return query
+}
+
+function validateParentSelection(
+  value: unknown,
+  {
+    siblingData,
+  }: {
+    siblingData?: { isTopLevel?: boolean | null }
+  }
+): true | string {
+  if (siblingData?.isTopLevel === false && !value) {
+    return "Select a parent service."
+  }
+
+  return true
+}
+
+const serviceHierarchyFields: Field[] = [
+  {
+    name: "isTopLevel",
+    type: "checkbox",
+    label: "Top-level service",
+    defaultValue: true,
+    admin: {
+      position: "sidebar",
+      description: "Uncheck to nest this service under a parent.",
+    },
+  },
+  {
+    name: "parentService",
+    type: "relationship",
+    relationTo: "services",
+    hasMany: false,
+    admin: {
+      position: "sidebar",
+      condition: shouldShowParentField,
+    },
+    filterOptions: buildParentFilter,
+    validate: validateParentSelection,
+  },
+]
+
 const servicesConfig: CollectionConfig = {
   slug: "services",
+  enableQueryPresets: true,
+  trash: true,
   access: {
     create: authenticated,
     delete: authenticated,
@@ -22,9 +91,20 @@ const servicesConfig: CollectionConfig = {
     title: true,
     slug: true,
     uri: true,
+    isTopLevel: true,
+    parentService: true,
   },
   admin: {
-    defaultColumns: ["title", "featuredImage", "slug", "updatedAt", "id", "status"],
+    defaultColumns: [
+      "title",
+      "featuredImage",
+      "slug",
+      "updatedAt",
+      "id",
+      "status",
+      "isTopLevel",
+      "parentService",
+    ],
     description:
       "Services represent the core business offerings of the company that should have a page dedicated to them for converting specific leads and customers. They are a great addition for SEO and marketing.",
     hideAPIURL: process.env.NODE_ENV === "production",
@@ -64,6 +144,7 @@ const servicesConfig: CollectionConfig = {
         position: "sidebar",
       },
     },
+    ...serviceHierarchyFields,
     {
       type: "tabs",
       tabs: [

@@ -71,6 +71,31 @@ export interface ServiceSchema extends BaseSchema {
   serviceType?: string
 }
 
+type EnrichedAuthor = {
+  id?: string | null
+  name?: string | null
+  lastName?: string | null
+  user?: {
+    name?: string | null
+    lastName?: string | null
+    username?: string | null
+    email?: string | null
+    bio?: string | null
+    avatar?: {
+      url?: string | null
+    } | null
+  } | null
+  teamMember?: {
+    id?: string | null
+    name?: string | null
+    role?: string | null
+    bio?: string | null
+    image?: {
+      url?: string | null
+    } | null
+  } | null
+}
+
 /*************************************************************************/
 /*  STRUCTURED DATA GENERATOR
 /*************************************************************************/
@@ -235,10 +260,64 @@ function generateArticleSchema(
 
   // Add authors if available
   if (doc.populatedAuthors && doc.populatedAuthors.length > 0) {
-    schema.author = doc.populatedAuthors.map((author: any) => ({
-      "@type": "Person" as const,
-      name: author.name || "Anonymous",
-    }))
+    const authors = doc.populatedAuthors as EnrichedAuthor[]
+
+    schema.author = authors.map(author => {
+      const team = author?.teamMember || null
+      const user = author?.user || null
+
+      const resolvedName = (() => {
+        if (team?.name) {
+          return team.name
+        }
+
+        const nameParts = [author?.name, author?.lastName ?? user?.lastName]
+          .filter((part): part is string => typeof part === "string" && part.trim() !== "")
+
+        if (nameParts.length > 0) {
+          return nameParts.join(" ")
+        }
+
+        if (user?.username) {
+          return user.username
+        }
+
+        if (user?.email) {
+          return user.email
+        }
+
+        return author?.name || null
+      })()
+
+      const person: {
+        "@type": "Person"
+        name: string
+        jobTitle?: string
+        description?: string
+        image?: string
+      } = {
+        "@type": "Person",
+        name: resolvedName ?? "Anonymous",
+      }
+
+      if (team?.role) {
+        person.jobTitle = team.role
+      }
+
+      if (team?.bio) {
+        person.description = team.bio
+      } else if (user?.bio) {
+        person.description = user.bio
+      }
+
+      if (team?.image?.url) {
+        person.image = `${baseURL}${team.image.url}`
+      } else if (user?.avatar?.url) {
+        person.image = `${baseURL}${user.avatar.url}`
+      }
+
+      return person
+    })
   }
 
   if (organization) {

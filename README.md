@@ -1540,11 +1540,11 @@ Smart Site can deploy to any Node.js hosting platform:
 <a id="staging-environments"></a>
 ## 🧪 Staging Environments
 
-- **Purpose**: Allow teams to validate new sections and workflows against a staging MongoDB cluster (`STAGING_DATABASE_URL`) without touching the live site referenced by `DATABASE_URL`.
-- **Automatic selection**: Development servers and preview deploys prefer staging when the staging URI exists. Override with `SMARTSITE_DATABASE_TARGET=staging` to force staging or `SMARTSITE_DATABASE_TARGET=prod` when you must inspect production.
-- **Sync commands**: The bundled helper (`pnpm staging:pull`, `pnpm staging:push`) wraps `mongodump`/`mongorestore` to move content between environments. Install the MongoDB Database Tools locally before running the commands.
-- **Protection rules**: Customize `staging-sync.config.json` to set database names and declare protected collections. By default the script skips users, submissions, and all `payload-*` internals so operational data stays intact.
-- **Export ready**: Because `scripts/db/staging-sync.mjs` lives inside the Starter, any project generated from the template inherits the same staging workflow without Turborepo dependencies.
+- **Purpose**: Maintain a clean separation between production (`DATABASE_URL`) and any staging cluster referenced via `STAGING_DATABASE_URL` while you harden new features.
+- **Automatic selection**: Whenever `STAGING_DATABASE_URL` is defined, development servers and preview deploys fall back to staging automatically. Override the behaviour explicitly with `SMARTSITE_DATABASE_TARGET=staging` or `SMARTSITE_DATABASE_TARGET=prod`.
+- **Sync commands**: `pnpm staging:pull` copies production content into staging; `pnpm staging:push` promotes staging back to production. Both commands require the MongoDB Database Tools (`mongodump`, `mongorestore`) to be installed locally.
+- **Protection rules**: Default exclusions (users, submissions, `payload-*` collections) live in `staging-sync.config.json`. Extend that file per client to prevent accidental overwrites of operational data.
+- **Portable workflow**: The helper script (`scripts/db/staging-sync.mjs`) ships with Smart Site and is copied to the Starter and client repos during sync, ensuring every exported site keeps the same commands.
 
 ---
 

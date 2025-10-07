@@ -12,6 +12,8 @@ import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const pageConfig: CollectionConfig = {
   slug: "pages",
+  enableQueryPresets: true,
+  trash: true,
   access: {
     create: authenticated,
     delete: authenticated,

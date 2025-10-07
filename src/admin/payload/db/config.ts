@@ -19,6 +19,19 @@ function resolveDatabaseUrl(): string {
 
 const connectionUrl = resolveDatabaseUrl()
 
+function resolveDatabaseTarget(): "prod" | "staging" | "default" {
+  if (process.env.SMARTSITE_DATABASE_TARGET === "prod") return "prod"
+  if (process.env.SMARTSITE_DATABASE_TARGET === "staging") return "staging"
+  if (process.env.STAGING_DATABASE_URL && process.env.NODE_ENV !== "production") return "staging"
+  return "prod"
+}
+
+export const databaseInfo = {
+  target: resolveDatabaseTarget(),
+  provider: process.env.DATABASE_PROVIDER === "mongoose" ? "mongoose" : "postgres",
+  url: connectionUrl,
+}
+
 const pg = postgresAdapter({
   pool: {
     connectionString: connectionUrl,

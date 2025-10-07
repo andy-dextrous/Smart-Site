@@ -138,6 +138,7 @@ const GSAPConfigSchema = z.object({
   customEase: z.boolean(),
   physics2D: z.boolean(),
   textPlugin: z.boolean(),
+  scrambleText: z.boolean(),
   globalAnimations: z.boolean(),
 })
 
@@ -190,7 +191,7 @@ const ExtensionsConfigSchema = z.object({
 })
 
 export const SmartSiteConfigSchema = z.object({
-  collections: z.record(z.union([CollectionConfigSchema, MediaCollectionConfigSchema])),
+  collections: z.record(z.union([MediaCollectionConfigSchema, CollectionConfigSchema])),
   features: FeaturesConfigSchema,
   admin: z.object({
     theme: AdminThemeSchema,
@@ -459,6 +460,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     customEase: false,
     physics2D: false,
     textPlugin: false,
+    scrambleText: false,
     globalAnimations: false,
   },
 

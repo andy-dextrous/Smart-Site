@@ -6,6 +6,8 @@ import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
 
 const teamConfig: CollectionConfig = {
   slug: "team",
+  enableQueryPresets: true,
+  trash: true,
   access: {
     create: canEditContent,
     delete: canEditContent,
@@ -66,7 +68,10 @@ const teamConfig: CollectionConfig = {
     {
       type: "array",
       name: "socialLinks",
-      label: "Social Links",
+      label: "Social Profiles",
+      admin: {
+        description: "Optional profile links displayed with this team member.",
+      },
       fields: [
         {
           name: "platform",
@@ -86,6 +91,31 @@ const teamConfig: CollectionConfig = {
         {
           name: "url",
           type: "text",
+        },
+      ],
+    },
+    {
+      type: "array",
+      name: "education",
+      label: "Education",
+      admin: {
+        description: "Optional qualifications and certifications for this team member.",
+      },
+      fields: [
+        {
+          name: "degree",
+          type: "text",
+          label: "Degree/Qualification",
+        },
+        {
+          name: "institution",
+          type: "text",
+          label: "Institution",
+        },
+        {
+          name: "year",
+          type: "number",
+          label: "Year Completed",
         },
       ],
     },

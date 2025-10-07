@@ -58,11 +58,11 @@ const iconLoaders: Record<string, () => Promise<any>> = {
 const componentCache = new Map<string, ComponentType<{ className?: string }>>()
 
 function createDynamicIcon(config: IconConfig): ComponentType<{ className?: string }> {
-  const cacheKey = config.type === "lucide" 
+  const cacheKey = config.type === "lucide"
     ? `lucide:${config.name}`
     : config.type === "react-icons"
     ? `ri:${config.name}`
-    : `custom:${config.path}`
+    : `custom:${config.mediaId ?? config.url ?? "unknown"}`
   
   // Check cache first
   if (componentCache.has(cacheKey)) {

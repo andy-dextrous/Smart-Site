@@ -138,7 +138,9 @@ export async function cleanupAutomaticRedirect(uri: string): Promise<void> {
   try {
     const payload = await getPayload({ config: configPromise })
 
-    const result = await payload.find({
+    const redirectsToDelete: any[] = []
+
+    const outboundRedirects = await payload.find({
       collection: "redirects",
       where: {
         and: [{ from: { equals: uri } }, { type: { equals: "automatic" } }],
@@ -146,16 +148,39 @@ export async function cleanupAutomaticRedirect(uri: string): Promise<void> {
       limit: 1,
     })
 
-    if (result.docs.length > 0) {
-      await payload.delete({
-        collection: "redirects",
-        id: result.docs[0].id,
-      })
+    redirectsToDelete.push(...outboundRedirects.docs)
+
+    const inboundRedirects = await payload.find({
+      collection: "redirects",
+      where: {
+        and: [{ "to.url": { equals: uri } }, { type: { equals: "automatic" } }],
+      },
+      limit: 10,
+    })
+
+    redirectsToDelete.push(...inboundRedirects.docs)
+
+    if (redirectsToDelete.length > 0) {
+      const uniqueRedirects = redirectsToDelete.filter(
+        (redirect, index, self) => index === self.findIndex(item => item.id === redirect.id)
+      )
+
+      await Promise.all(
+        uniqueRedirects.map(async redirectDoc => {
+          await payload.delete({
+            collection: "redirects",
+            id: redirectDoc.id,
+          })
+
+          revalidateTag(`redirect:${redirectDoc.from}`)
+        })
+      )
 
       revalidateTag("collection:redirects")
-      revalidateTag(`redirect:${uri}`) // Invalidate specific URI redirect cache
 
-      payload.logger.info(`Cleaned up automatic redirect for deleted content: ${uri}`)
+      payload.logger.info(
+        `Cleaned up ${uniqueRedirects.length} automatic redirect(s) related to deleted content: ${uri}`
+      )
     }
   } catch (error) {
     const payload = await getPayload({ config: configPromise })

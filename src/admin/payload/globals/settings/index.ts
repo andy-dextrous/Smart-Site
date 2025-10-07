@@ -1,5 +1,6 @@
 import type { GlobalConfig } from "payload"
 import { socialLinks } from "@/components/fields/social-links/social-links"
+import { getTimeZoneOptions } from "@/admin/utilities/timezones"
 import { afterSettingsChange } from "@/admin/payload/hooks/globals/settings/after-change"
 import { generateRoutingFields } from "@/admin/utilities/routing"
 import { authenticated } from "@/admin/payload/access/authenticated"
@@ -49,6 +50,11 @@ export const Settings: GlobalConfig = {
               minRows: 1,
               fields: [
                 {
+                  name: "label",
+                  label: "Location Label",
+                  type: "text",
+                },
+                {
                   name: "street",
                   type: "text",
                 },
@@ -78,6 +84,15 @@ export const Settings: GlobalConfig = {
                   type: "text",
                   admin: {
                     description: "Full Google Maps URL for this location",
+                  },
+                },
+                {
+                  name: "timeZone",
+                  label: "Time Zone",
+                  type: "select",
+                  options: getTimeZoneOptions(),
+                  admin: {
+                    description: "IANA time zone (e.g., Europe/London, Asia/Dubai)",
                   },
                 },
                 {

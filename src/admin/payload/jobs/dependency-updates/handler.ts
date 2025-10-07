@@ -144,6 +144,57 @@ export async function uriDependentUpdatesHandler({
           `Processing operation: ${operation.operation} for entity ${operation.entityId}`
         )
 
+        if (operation.operation === "template-content-change") {
+          const templateId = operation.additionalData?.templateId ?? operation.entityId
+
+          if (!templateId) {
+            const message =
+              "Template content change operation missing template identifier"
+            logger.error(message)
+            result.errors.push(`template-content-change: ${message}`)
+            result.operationsProcessed.push(
+              `${operation.operation}:${operation.entityId}`
+            )
+            continue
+          }
+
+          try {
+            const templateResult = await processTemplateContentChange(
+              templateId,
+              operation.additionalData
+            )
+
+            result.cacheEntriesCleared += templateResult.cacheEntriesCleared
+            result.documentsUpdated += templateResult.documentsUpdated
+            result.redirectsCreated += templateResult.redirectsCreated
+
+            if (templateResult.errors.length > 0) {
+              result.errors.push(
+                ...templateResult.errors.map(error =>
+                  `template-content-change: ${error}`
+                )
+              )
+            }
+
+            if (templateResult.success) {
+              logger.info(`Template content change processed for template ${templateId}`)
+            }
+          } catch (error) {
+            logger.error(
+              `Failed to process template content change for template ${templateId}:`,
+              error
+            )
+            result.errors.push(
+              `template-content-change: ${error instanceof Error ? error.message : String(error)}`
+            )
+          }
+
+          result.operationsProcessed.push(
+            `${operation.operation}:${operation.entityId}`
+          )
+          continue
+        }
+
         const operationResult = await getDocumentUpdatesForOperation(operation, payload)
 
         // Collect unique document updates

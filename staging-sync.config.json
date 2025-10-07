@@ -1,7 +1,7 @@
 {
   "database": {
-    "prod": "smart-site-starter-prod",
-    "staging": "smart-site-starter-staging"
+    "prod": "smart-site-prod",
+    "staging": "smart-site-staging"
   },
   "protectedCollections": [
     "users",

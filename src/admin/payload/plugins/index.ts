@@ -82,10 +82,15 @@ const redirects = redirectsPlugin({
     },
     hooks: {
       afterChange: [
-        ({ doc, req: { payload } }) => {
+        ({ doc, previousDoc, req: { payload } }) => {
           payload.logger.info(`Revalidating redirects`)
 
-          revalidateTag("redirects")
+          if (previousDoc?.from && previousDoc.from !== doc.from) {
+            revalidateTag(`redirect:${previousDoc.from}`)
+          }
+
+          revalidateTag(`redirect:${doc.from}`)
+          revalidateTag("collection:redirects")
 
           return doc
         },

@@ -23,7 +23,11 @@ export interface ReactIconConfig extends BaseIconConfig {
 
 export interface CustomIconConfig extends BaseIconConfig {
   type: "custom"
-  path: string // Not currently supported - use lucide or react-icons instead
+  mediaId: string
+  url?: string
+  alt?: string
+  width?: number
+  height?: number
 }
 
 export type IconConfig = LucideIconConfig | ReactIconConfig | CustomIconConfig
