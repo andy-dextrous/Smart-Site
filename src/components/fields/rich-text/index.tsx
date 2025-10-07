@@ -5,6 +5,10 @@ import {
   SerializedLinkNode,
   type DefaultTypedEditorState,
 } from "@payloadcms/richtext-lexical"
+import type {
+  SerializedEditorState,
+  SerializedLexicalNode,
+} from "@payloadcms/richtext-lexical/lexical"
 import {
   JSXConvertersFunction,
   LinkJSXConverter,
@@ -61,7 +65,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
 })
 
 type Props = {
-  data: DefaultTypedEditorState
+  data: DefaultTypedEditorState | SerializedEditorState<SerializedLexicalNode>
   enableGutter?: boolean
   variant?: "default" | "prose"
   textColor?: "inherit" | "dark" | "white" | "muted" | "primary" | "secondary"

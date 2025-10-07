@@ -8,8 +8,6 @@ export const seedUser = (): Omit<User, "updatedAt" | "id" | "createdAt"> => {
     email: process.env.PAYLOAD_ADMIN_EMAIL!,
     password: process.env.PAYLOAD_ADMIN_PASSWORD!,
     username: "scrivo", // Simple alphanumeric username
-    socialLinks: [],
-    education: [],
     loginAttempts: 0,
     // Note: Avatar will be assigned after media creation
   }
