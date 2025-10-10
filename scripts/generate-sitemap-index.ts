@@ -3,7 +3,6 @@
 import fs from "fs"
 import path from "path"
 import dotenv from "dotenv"
-import { getFrontendCollections } from "../src/admin/config/index"
 
 dotenv.config()
 
@@ -27,14 +26,30 @@ ${sitemapEntries}
 </sitemapindex>`
 }
 
-function main() {
+async function loadFrontendCollections() {
+  const module = (await import("../src/admin/config/index")) as {
+    getFrontendCollections?: () => Record<string, { label: string }>
+    default?: { getFrontendCollections?: () => Record<string, { label: string }> }
+  }
+  const getter =
+    module.getFrontendCollections ||
+    module.default?.getFrontendCollections
+
+  if (!getter) {
+    throw new Error("getFrontendCollections export not found in config index")
+  }
+
+  return getter()
+}
+
+async function main() {
   try {
     // Determine site URL with Vercel auto-detection
     const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
     console.log(`🔧 Generating sitemap index for: ${siteUrl}`)
 
     // Get frontend collections from config and transform to array format
-    const collectionsObject = getFrontendCollections()
+    const collectionsObject = await loadFrontendCollections()
     const collections = Object.entries(collectionsObject).map(([slug, collection]) => ({
       slug,
       label: collection.label,

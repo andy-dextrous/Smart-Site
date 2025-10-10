@@ -1,3 +1,5 @@
+- Build: Sitemap generator now loads Smart Site config with a dynamic import so it works in production builds
+  - `scripts/generate-sitemap-index.ts`
 - Admin: Added `payload-query-presets` to the sidebar omit list so auto-generated preset collections stay hidden in the admin navigation
   - `src/admin/payload/components/providers/layout-provider/app-sidebar.tsx`
 - Layout: Only render `smooth-wrapper` and `smooth-content` containers when ScrollSmoother is enabled in the Smart Site config
