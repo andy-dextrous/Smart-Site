@@ -45,6 +45,10 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
 
   const uriIndexUpdated = await updateURIIndex(doc, previousDoc, collection, payload)
 
+  /**
+   * Only revalidate when the published version actually changes
+   * Draft edits of published pages should NOT trigger cache revalidation
+   */
   const isPublishing = doc._status === "published" && previousDoc?._status === "draft"
   const isUnpublishing = doc._status === "draft" && previousDoc?._status === "published"
   const isPublishedUpdate = doc._status === "published" && previousDoc?._status === "published"
@@ -124,6 +128,10 @@ async function updateURIIndex(
 ): Promise<boolean> {
   if (!doc.uri) return false
 
+  /**
+   * Only update URI index on explicit publish/unpublish events
+   * Draft autosaves (even with slug changes) should NOT trigger URI index updates
+   */
   const isPublishing = doc._status === "published" && previousDoc?._status === "draft"
   const isUnpublishing = doc._status === "draft" && previousDoc?._status === "published"
   const isPublishedUpdate = doc._status === "published" && previousDoc?._status === "published"

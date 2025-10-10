@@ -1,0 +1,11 @@
+- Admin: Added `payload-query-presets` to the sidebar omit list so auto-generated preset collections stay hidden in the admin navigation
+  - `src/admin/payload/components/providers/layout-provider/app-sidebar.tsx`
+- Layout: Only render `smooth-wrapper` and `smooth-content` containers when ScrollSmoother is enabled in the Smart Site config
+  - `src/app/(frontend)/layout.tsx`
+- AI Provider: Removed the `AIProviderWithoutContainer` alias and use the core provider with `withContainer={false}` in the frontend layout for clearer usage
+  - `src/admin/payload/components/providers/ai-provider.tsx`
+  - `src/app/(frontend)/layout.tsx`
+- Admin Bar: Scoped admin design tokens to the toolbar and removed the global admin bundle from the frontend layout to stop typography CSS variable clashes
+  - `src/admin/payload/components/backend/admin-bar/theme.css`
+  - `src/admin/payload/components/backend/admin-bar/index.tsx`
+  - `src/app/(frontend)/layout.tsx`

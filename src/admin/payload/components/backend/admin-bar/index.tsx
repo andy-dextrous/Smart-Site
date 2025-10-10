@@ -4,7 +4,7 @@ import { ChevronDown, PlusIcon, User } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link.js"
 import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, type CSSProperties } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,7 @@ import type { Setting, User as PayloadUser } from "@/admin/payload/payload-types
 import ClearCache from "./clear-cache"
 import EditCurrentPage from "./edit-current-page"
 import ExitPreview from "./exit-preview"
+import "./theme.css"
 import "./styles.scss"
 
 interface AdminBarProps {
@@ -28,6 +29,13 @@ export const revalidate = 0
 
 // Get config once at module level for client component
 const smartSiteConfig = getSmartSiteConfig()
+
+const toasterThemeStyles = {
+  "--normal-bg": "#202023",
+  "--normal-text": "#ebebed",
+  "--normal-border": "#505056",
+  background: "linear-gradient(90deg, #18181a 0%, #1c1c1f 100%)",
+} as CSSProperties
 
 /*************************************************************************/
 /*  smart site ADMIN BAR - CLIENT-SIDE AUTH & PREVIEW DETECTION
@@ -101,7 +109,7 @@ export function SmartSiteAdminBar({ settings }: AdminBarProps) {
   if (isLoading || !user || isLivePreview) return null
 
   return (
-    <>
+    <div className="admin-bar-theme" data-theme="dark">
       <div className="admin-bar">
         {/* Left Menu Items */}
         <div className="admin-bar__left-menu">
@@ -122,16 +130,14 @@ export function SmartSiteAdminBar({ settings }: AdminBarProps) {
       {/* Toaster For Cache */}
       <Toaster
         position="bottom-right"
-        style={{
-          background: "linear-gradient(90deg, #18181a 0%, #1c1c1f 100%)",
-        }}
+        style={toasterThemeStyles}
         icons={{
           success: <FaCheckCircle className="admin-bar__toaster-success-icon" />,
           error: <FaExclamationCircle className="admin-bar__toaster-error-icon" />,
         }}
         className="admin-bar-toaster"
       />
-    </>
+    </div>
   )
 }
 

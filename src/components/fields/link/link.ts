@@ -4,10 +4,11 @@ import { getFrontendCollections } from "@/admin/config/frontend"
 
 type LinkType = (options?: {
   disableLabel?: boolean
+  optional?: boolean
   overrides?: Partial<GroupField>
 }) => Field
 
-export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) => {
+export const link: LinkType = ({ disableLabel = false, optional = false, overrides = {} } = {}) => {
   const linkResult: GroupField = {
     name: "link",
     label: false,
@@ -66,7 +67,7 @@ export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) =>
       relationTo: getFrontendCollections().map(
         collection => collection.slug
       ) as CollectionSlug[],
-      required: true,
+      required: !optional,
     },
     {
       name: "url",
@@ -75,18 +76,17 @@ export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) =>
         condition: (_, siblingData) => siblingData?.type === "custom",
       },
       label: "Custom URL",
-      required: true,
+      required: !optional,
     },
   ]
 
   if (!disableLabel) {
-    linkTypes.map(linkType => ({
-      ...linkType,
-      admin: {
-        ...linkType.admin,
+    linkTypes.forEach(linkField => {
+      linkField.admin = {
+        ...(linkField.admin || {}),
         width: "50%",
-      },
-    }))
+      }
+    })
 
     linkResult.fields.push({
       type: "row",
@@ -97,9 +97,12 @@ export const link: LinkType = ({ disableLabel = false, overrides = {} } = {}) =>
           type: "text",
           admin: {
             width: "50%",
+          components: {
+            Field: "@/admin/components/fields/link/link-label-field#LinkLabelField",
+          },
           },
           label: "Label",
-          required: true,
+          required: !optional,
         },
       ],
     })

@@ -230,6 +230,7 @@ export function AppSidebar() {
     "payload-locked-documents",
     "search",
     "payload-folders",
+    "payload-query-presets",
   ]
 
   const visibleCollections = collections.filter(

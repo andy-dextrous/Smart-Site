@@ -6,11 +6,11 @@ import { Header } from "@/components/header"
 import parse from "html-react-parser"
 import Providers from "@/providers"
 import React from "react"
-import { AIProviderWithoutContainer } from "@/admin/payload/components/providers/ai-provider"
-import "./css/globals.css"
-import "@/admin/css/styles.css"
+import { AIProvider } from "@/admin/payload/components/providers/ai-provider"
 import { getSmartSiteConfig } from "@/admin/config"
 import { getI18nConfig } from "@/admin/config/features"
+
+import "./css/globals.css"
 
 /*************************************************************************/
 /*  ROOT LAYOUT
@@ -21,6 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { integrations } = settings
   const smartSiteConfig = getSmartSiteConfig()
   const i18n = getI18nConfig()
+  const smoothScrollEnabled = Boolean(smartSiteConfig.gsap.scrollSmoother)
   /**
   /*  Get code in head and body end from settings
   */
@@ -45,19 +46,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
 
-        <AIProviderWithoutContainer>
+        <AIProvider withContainer={false}>
           <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
             <SmartSiteAdminBar settings={settings} />
             <Header />
-            <div id="smooth-wrapper">
-              <div id="smooth-content">
+            {smoothScrollEnabled ? (
+              <div id="smooth-wrapper">
+                <div id="smooth-content">
+                  {children}
+                  <Footer />
+                </div>
+              </div>
+            ) : (
+              <>
                 {children}
                 <Footer />
-              </div>
-            </div>
+              </>
+            )}
             {bodyEnd && parse(bodyEnd)}
           </Providers>
-        </AIProviderWithoutContainer>
+        </AIProvider>
       </body>
     </html>
   )

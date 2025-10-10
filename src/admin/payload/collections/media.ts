@@ -47,6 +47,7 @@ function resolveMediaProvider(): "local" | "vercel-blob" {
   const mediaConfig = (smartSiteConfig.collections.media as any) || {}
   const provider = mediaConfig.provider as string | undefined
 
+  // Config is the source of truth - default to "local" if not specified
   if (provider === "vercel-blob") {
     if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.VERCEL_BLOB_TOKEN) {
       console.error(

@@ -20,8 +20,4 @@ export async function AIProvider({ children, withContainer = true }: AIProviderP
   )
 }
 
-export async function AIProviderWithoutContainer({ children }: { children: ReactNode }) {
-  return <AIProvider withContainer={false}>{children}</AIProvider>
-}
-
 export { useAIContext }

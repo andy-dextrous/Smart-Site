@@ -103,6 +103,8 @@ export default function RichText(props: Props) {
           "max-w-[75ch] mx-auto": enableGutter,
           "max-w-none": !enableGutter,
         },
+        // Global p tag spacing
+        "[&_p]:mb-8",
         // Color classes
         colorClasses[textColor],
         className

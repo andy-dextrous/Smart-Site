@@ -269,7 +269,7 @@ export async function uriDependentUpdatesHandler({
 
         const { batchRevalidate } = await import("@/admin/cache")
         const invalidationResults = await batchRevalidate({ operations })
-        result.cacheEntriesCleared = invalidationResults.operations.reduce(
+        result.cacheEntriesCleared += invalidationResults.operations.reduce(
           (total: number, res: any) => total + (res.tagsInvalidated?.length || 0),
           0
         )
