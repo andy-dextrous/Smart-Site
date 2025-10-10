@@ -562,9 +562,3 @@ export function getArchivePageIdFromSettings(
   const fieldName = getArchivePageFieldName(collection)
   return getSettingsFieldValue(settings, fieldName)
 }
-
-/*************************************************************************/
-/*  EXPORTED COLLECTIONS ARRAY
-/*************************************************************************/
-
-export const frontendCollections = getFrontendCollections()

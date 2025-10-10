@@ -1,6 +1,6 @@
 import configPromise from "@payload-config"
 import { getPayload } from "payload"
-import { frontendCollections } from "@/admin/config/frontend"
+import { getFrontendCollections } from "@/admin/config/frontend"
 import { routingEngine, BreadcrumbItem } from "./uri-engine"
 import { createAutomaticRedirect } from "@/admin/redirects/auto-redirects"
 import { formatIdForText, formatIdForRelationship } from "@/admin/payload/db/id-utils"
@@ -267,6 +267,8 @@ export async function checkURIConflict(
       return { hasConflict: false }
     }
 
+    const frontendCollections = getFrontendCollections()
+
     const collectionPriorities = frontendCollections.reduce(
       (acc, collection, index) => {
         acc[collection.slug] = index
@@ -359,6 +361,8 @@ export async function regenerateURIs(context?: any): Promise<PopulationStats> {
     errors: 0,
     collections: {},
   }
+
+  const frontendCollections = getFrontendCollections()
 
   try {
     const payload = await getPayload({ config: configPromise })

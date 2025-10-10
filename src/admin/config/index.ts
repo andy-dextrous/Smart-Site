@@ -6,6 +6,7 @@ import { SMARTSITE_DEFAULTS, type SmartSiteConfig, type CollectionConfig, type U
 import { deepMerge, deepFreeze } from "./deep-merge"
 import userConfig from "@/smartsite.config"
 import { emitValidationWarnings, validateMergedConfig, validateUserConfig } from "./validator"
+import * as extensions from "@/extensions"
 
 let cachedConfig: SmartSiteConfig | null = null
 let validatedUserConfig: UserConfig | null = null
@@ -17,6 +18,11 @@ const warnedFrontendDisabled = new Set<string>()
  * Works in server, client, and build contexts
  */
 export function getSmartSiteConfig(): SmartSiteConfig {
+  if (process.env.NODE_ENV !== "production") {
+    cachedConfig = null
+    validatedUserConfig = null
+  }
+
   if (!cachedConfig) {
     const overrides = validatedUserConfig ?? validateUserConfig(userConfig)
     validatedUserConfig = overrides
@@ -44,6 +50,7 @@ export function getSmartSiteConfig(): SmartSiteConfig {
 export function getFrontendCollections(): Record<string, CollectionConfig> {
   const config = getSmartSiteConfig()
   const frontend: Record<string, CollectionConfig> = {}
+  const enabledExtensionCollections = new Set(config.extensions?.collections || [])
   
   for (const [slug, collection] of Object.entries(config.collections)) {
     if (collection.frontend && collection.enabled === false) {
@@ -57,6 +64,20 @@ export function getFrontendCollections(): Record<string, CollectionConfig> {
     }
 
     if (collection.frontend && collection.enabled) {
+      const isDefaultCollection = Object.prototype.hasOwnProperty.call(
+        SMARTSITE_DEFAULTS.collections,
+        slug
+      )
+      const isExtensionRegistered = Boolean(extensions.collections[slug])
+      const isExtensionEnabled = enabledExtensionCollections.has(slug)
+
+      if (
+        !isDefaultCollection &&
+        (!isExtensionRegistered || !isExtensionEnabled)
+      ) {
+        continue
+      }
+
       frontend[slug] = collection
     }
   }

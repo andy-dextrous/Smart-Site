@@ -2,7 +2,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import { Users } from "@/admin/payload/collections/users"
 import components from "@/admin/payload/components/config"
-import { frontendCollections } from "@/admin/config/frontend"
+import { getFrontendCollections } from "@/admin/config/frontend"
 import { generatePreviewPath } from "@/admin/utilities/generate-preview-path"
 import { getSmartSiteConfig } from "@/admin/config"
 import type {
@@ -18,6 +18,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const config = getSmartSiteConfig()
+const frontendCollections = getFrontendCollections()
 
 const admin = {
   user: Users.slug,

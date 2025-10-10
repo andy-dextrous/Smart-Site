@@ -7,12 +7,17 @@ import { Team } from "@/admin/payload/collections/team"
 import { Services } from "@/admin/payload/collections/services"
 import { Testimonials } from "@/admin/payload/collections/testimonials"
 import { Templates } from "@/admin/payload/collections/templates"
-import { URIIndex } from "@/admin/payload/collections/uri-index"
-import { CollectionConfig } from "payload"
+import { getURIIndexCollection } from "@/admin/payload/collections/uri-index"
+import { getFrontendCollections } from "@/admin/config/frontend"
+import { CollectionConfig, CollectionSlug } from "payload"
 
 /*************************************************************************/
 /*  COLLECTIONS
 /*************************************************************************/
+
+const frontendRelationSlugs = getFrontendCollections().map(
+  collection => collection.slug as CollectionSlug
+)
 
 const collections: CollectionConfig[] = [
   Pages,
@@ -24,7 +29,7 @@ const collections: CollectionConfig[] = [
   Media,
   Categories,
   Users,
-  URIIndex,
+  getURIIndexCollection(frontendRelationSlugs),
 ]
 
 export default collections

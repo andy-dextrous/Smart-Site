@@ -1,3 +1,5 @@
+- Base CSS: Added a smooth-scroll section tweak so full-width sections don’t flicker when ScrollSmoother is enabled
+  - `src/app/(frontend)/css/base.css`
 - Build: Sitemap generator now loads Smart Site config with a dynamic import so it works in production builds
   - `scripts/generate-sitemap-index.ts`
 - Admin: Added `payload-query-presets` to the sidebar omit list so auto-generated preset collections stay hidden in the admin navigation
@@ -11,3 +13,7 @@
   - `src/admin/payload/components/backend/admin-bar/theme.css`
   - `src/admin/payload/components/backend/admin-bar/index.tsx`
   - `src/app/(frontend)/layout.tsx`
+- Admin Config: Frontend collection lookups now rely on the live extension registry so toggling or removing dev extensions stops leaking stale relationship slugs into Payload types
+  - `src/admin/config/index.ts`
+  - `src/admin/config/resolver.ts`
+  - `src/admin/payload/collections/index.ts`

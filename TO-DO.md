@@ -23,12 +23,9 @@
 
 ## Starter
 
-- sitemaps and schema manifest not building in vercel with tsx
-- fix: once an extension is in place, can't remove without breaking import map and ts
 - documentation: spacing variables and their rules better. CSS rules in general actually
 - seeding should auto clear cache because hooks are disabled
 - bring over the smart sections with filters like paginated blog, featured posts etc
-- staging push and pull should include all collections by default
 - consider the minimal starter and its core sections. Hero, Form, Posts Grid, Post Hero and Post content (with premade components, table of contents, author card, scroll indicator)
 - auto screenshots of sections
 - SEO fields all organised and no dynamic "content" field

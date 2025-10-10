@@ -1,6 +1,6 @@
 // server-only - removed for type generation compatibility
 import type { SmartSiteConfig } from "./defaults"
-import type { CollectionConfig, GlobalConfig, Block, Plugin } from "payload"
+import type { CollectionConfig, GlobalConfig, Block, Plugin, CollectionSlug } from "payload"
 import { applyFrontendWrapper } from "./frontend"
 
 import { Users } from "@/admin/payload/collections/users"
@@ -12,7 +12,7 @@ import { Team } from "@/admin/payload/collections/team"
 import { Services } from "@/admin/payload/collections/services"
 import { Testimonials } from "@/admin/payload/collections/testimonials"
 import { Templates } from "@/admin/payload/collections/templates"
-import { URIIndex } from "@/admin/payload/collections/uri-index"
+import { getURIIndexCollection } from "@/admin/payload/collections/uri-index"
 
 import { Header } from "@/admin/payload/globals/header/config"
 import { Footer } from "@/admin/payload/globals/footer/config"
@@ -39,8 +39,7 @@ const defaultCollectionMap: Record<string, CollectionConfig> = {
   team: Team,
   services: Services,
   testimonials: Testimonials,
-  templates: Templates,
-  "uri-index": URIIndex
+  templates: Templates
 }
 
 const defaultGlobalMap: Record<string, GlobalConfig> = {
@@ -82,7 +81,7 @@ export function resolveConfiguration(config: SmartSiteConfig) {
 /*************************************************************************/
 
 // System collections that must always be included for the app to function
-const SYSTEM_COLLECTIONS = ["uri-index", "users", "templates"]
+const SYSTEM_COLLECTIONS = ["users", "templates"]
 
 const COLLECTION_DEPENDENCY_WARNINGS: Record<string, string> = {
   categories:
@@ -132,7 +131,7 @@ function resolveCollections(
   }
   
   for (const slug of config.extensions?.collections || []) {
-    if (Object.keys(defaultCollectionMap).includes(slug)) {
+    if (Object.keys(defaultCollectionMap).includes(slug) || slug === "uri-index") {
       continue
     }
     
@@ -152,6 +151,21 @@ function resolveCollections(
     resolved.push(finalCollection)
   }
   
+  const frontendRelationSlugs = resolved
+    .filter(collection => {
+      const collectionConfig = config.collections[collection.slug]
+      return collectionConfig?.frontend && collectionConfig?.enabled
+    })
+    .map(collection => collection.slug as CollectionSlug)
+
+  const uriIndexOverride = extensions.collections["uri-index"]
+  const uriIndexCollection = uriIndexOverride || getURIIndexCollection(frontendRelationSlugs)
+
+  if (!slugs.has("uri-index")) {
+    resolved.push(uriIndexCollection)
+    slugs.add("uri-index")
+  }
+
   return resolved
 }
 

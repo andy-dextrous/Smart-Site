@@ -1,4 +1,4 @@
-import { frontendCollections } from "@/admin/config/frontend"
+import { getFrontendCollections } from "@/admin/config/frontend"
 import type { Field } from "payload"
 
 /*************************************************************************/
@@ -39,6 +39,8 @@ export function generateReadingSettingsFields(): Field[] {
 /*************************************************************************/
 
 export function generateCollectionRoutingFields(): Field[] {
+  const frontendCollections = getFrontendCollections()
+
   const fields: Field[] = frontendCollections
     .filter(collection => collection.slug !== "pages")
     .map(collection => {

@@ -1,5 +1,5 @@
 import { getSettings, getHomepage } from "@/admin/data/globals"
-import { isFrontendCollection, frontendCollections } from "@/admin/config/frontend"
+import { isFrontendCollection, getFrontendCollections } from "@/admin/config/frontend"
 import type { ChangeDetection } from "./change-detection"
 
 export interface NavigationImpact {
@@ -83,7 +83,8 @@ async function isArchivePage(pageId: string): Promise<boolean> {
     const routing = settings.routing
     if (!routing) return false
 
-    // Dynamically check all frontend collections for archive page assignments
+    const frontendCollections = getFrontendCollections()
+
     const archivePages = frontendCollections
       .map(collection => {
         const archivePropertyName = `${collection.slug}ArchivePage`
@@ -110,7 +111,8 @@ export async function getCollectionsUsingArchive(
     const routing = settings.routing
     if (!routing) return []
 
-    // Dynamically check all frontend collections for matching archive pages
+    const frontendCollections = getFrontendCollections()
+
     const collections = frontendCollections
       .map(collection => {
         const archivePropertyName = `${collection.slug}ArchivePage`
