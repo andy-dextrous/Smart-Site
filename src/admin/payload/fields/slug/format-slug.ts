@@ -9,30 +9,56 @@ export const formatSlug = (val: string): string =>
 export const formatSlugHook =
   (fallback: string): FieldHook =>
   ({ data, operation, value, originalDoc }) => {
+    const providedValue = typeof value === "string" ? value.trim() : ""
+
     // If user provided a value, always use it (formatted)
-    if (typeof value === "string" && value.trim() !== "") {
-      return formatSlug(value)
+    if (providedValue !== "") {
+      return formatSlug(providedValue)
     }
 
-    // Check if document is published (has _status !== 'draft' or no _status field)
-    const isPublished =
-      originalDoc?._status === "published" || (originalDoc && !originalDoc._status)
+    const incomingStatus = data?._status
+    const previousStatus = originalDoc?._status
+    const isPublishing = incomingStatus === "published"
+    const wasPublished = previousStatus === "published"
+    const isFirstPublish = isPublishing && !wasPublished
 
-    // For new documents or unpublished documents, auto-generate from title
-    // But only if no existing slug and not locked
-    const shouldAutoGenerate =
-      (operation === "create" || !isPublished) &&
-      !data?.slugLock &&
-      (!originalDoc?.slug || originalDoc.slug === "")
+    const fallbackValue =
+      (typeof data?.[fallback] === "string" && data[fallback]?.trim() !== ""
+        ? data[fallback]
+        : undefined) ??
+      (typeof originalDoc?.[fallback] === "string" && originalDoc[fallback]?.trim() !== ""
+        ? originalDoc[fallback]
+        : undefined)
 
-    if (shouldAutoGenerate) {
-      const fallbackData = data?.[fallback]
+    const existingSlug =
+      (typeof originalDoc?.slug === "string" && originalDoc.slug.trim() !== ""
+        ? originalDoc.slug
+        : undefined) ??
+      (typeof data?.slug === "string" && data.slug.trim() !== "" ? data.slug : undefined)
 
-      if (fallbackData && typeof fallbackData === "string") {
-        return formatSlug(fallbackData)
+    if (isFirstPublish) {
+      if (fallbackValue) {
+        return formatSlug(fallbackValue)
       }
+
+      if (existingSlug) {
+        return formatSlug(existingSlug)
+      }
+
+      throw new Error(
+        "Slug cannot be empty when publishing. Please add a title or manually specify a slug."
+      )
     }
 
-    // Preserve existing slug for published documents or when locked
-    return originalDoc?.slug || value || ""
+    if (isPublishing && !existingSlug) {
+      if (fallbackValue) {
+        return formatSlug(fallbackValue)
+      }
+
+      throw new Error(
+        "Slug cannot be empty when publishing. Please provide a slug before publishing."
+      )
+    }
+
+    return existingSlug || ""
   }

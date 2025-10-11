@@ -1,5 +1,5 @@
 import type { Field } from "payload"
-import { button } from "../buttons/buttons"
+import { link } from "@/components/fields/link/link"
 import { sectionCtaDefault } from "./defaults"
 
 /*************************************************************************/
@@ -41,13 +41,17 @@ export const sectionCta = (
           description: textDescription,
         },
       },
-      button({
-        name: "button",
-        label: "CTA Button",
-        required: buttonRequired,
-        defaultValue: sectionCtaDefault.button,
-        admin: {
-          description: buttonDescription,
+      link({
+        optional: !buttonRequired,
+        defaultAppearance: "button",
+        overrides: {
+          name: "button",
+          label: "CTA Button",
+          required: buttonRequired,
+          defaultValue: sectionCtaDefault.button,
+          admin: {
+            description: buttonDescription,
+          },
         },
       }),
     ],

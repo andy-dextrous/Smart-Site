@@ -66,7 +66,6 @@ export interface Config {
     users: UserAuthOperations;
   };
   blocks: {
-    code: CodeBlock;
     formBlock: FormBlock;
     mediaBlock: MediaBlock;
   };
@@ -170,7 +169,7 @@ export interface UserAuthOperations {
   registerFirstUser: {
     password: string;
     username: string;
-    email?: string;
+    email: string;
   };
   unlock:
     | {
@@ -179,17 +178,6 @@ export interface UserAuthOperations {
     | {
         username: string;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CodeBlock".
- */
-export interface CodeBlock {
-  language?: ('typescript' | 'javascript' | 'css') | null;
-  code: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'code';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -528,14 +516,13 @@ export interface Page {
   categories?: (string | Category)[] | null;
   sections?:
     | (
-        | HeroSimpleBlock
+        | HeroBlock
         | ContentBlock
-        | ContactFormSimpleBlock
-        | PostsListBlock
-        | PostBodyBlock
-        | PostHeroMinimalBlock
-        | PostContentMinimalBlock
-        | RelatedPostsMinimalBlock
+        | ContactFormBlock
+        | PostsArchiveBlock
+        | PostsHeroBlock
+        | PostsContentBlock
+        | PostsRelatedBlock
       )[]
     | null;
   seo?: {
@@ -693,11 +680,15 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroSimpleBlock".
+ * via the `definition` "HeroBlock".
  */
-export interface HeroSimpleBlock {
+export interface HeroBlock {
+  eyebrow?: string | null;
   heading: string;
-  content?: {
+  /**
+   * Use this for a short paragraph beneath the heading.
+   */
+  supportingText?: {
     root: {
       type: string;
       children: {
@@ -712,120 +703,104 @@ export interface HeroSimpleBlock {
     };
     [k: string]: unknown;
   } | null;
-  align: 'left' | 'center';
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero-simple';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
+  /**
+   * Optional highlight or USP line displayed below the main copy.
+   */
+  highlight?: string | null;
+  /**
+   * Optional background image that fills the hero.
+   */
+  backgroundImage?: (string | null) | Media;
+  size?: ('full' | 'large' | 'medium' | 'small') | null;
+  alignment?: ('left' | 'center') | null;
+  /**
+   * Optional call-to-action buttons displayed beneath the hero copy.
+   */
+  buttons?:
+    | {
+        button?: {
+          type?: ('reference' | 'custom') | null;
+          appearance?: ('link' | 'button') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'team';
+                value: string | Team;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: string | Service;
+              } | null);
+          url?: string | null;
+          label?: string | null;
+          /**
+           * Select the button variant
+           */
+          variant?:
+            | (
+                | 'default'
+                | 'outline'
+                | 'outlineDark'
+                | 'outlineGradient'
+                | 'phoneSelect'
+                | 'secondary'
+                | 'white'
+                | 'dark'
+                | 'ghost'
+                | 'link'
+              )
+            | null;
+          /**
+           * Select the button size
+           */
+          size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+          /**
+           * Select the button layout
+           */
+          layout?: ('default' | 'centered') | null;
+          /**
+           * Upload an SVG icon to display within the button.
+           */
+          icon?: (string | null) | Media;
+          iconPosition?: ('left' | 'right') | null;
+          /**
+           * Render the button as icon-only with optional label for screen readers.
+           */
+          iconOnly?: boolean | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactFormSimpleBlock".
- */
-export interface ContactFormSimpleBlock {
-  form: string | Form;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'contact-form-simple';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostsListBlock".
- */
-export interface PostsListBlock {
-  /**
-   * Main heading for the posts list
-   */
-  heading?: string | null;
-  /**
-   * Optional description shown below the heading
-   */
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Number of posts to show
-   */
-  postsPerPage?: number | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'posts-list';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostBodyBlock".
- */
-export interface PostBodyBlock {
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'post-body';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostHeroMinimalBlock".
- */
-export interface PostHeroMinimalBlock {
-  showAuthor?: boolean | null;
-  showPublishDate?: boolean | null;
-  showCategories?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'post-hero-minimal';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostContentMinimalBlock".
- */
-export interface PostContentMinimalBlock {
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'post-content-minimal';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RelatedPostsMinimalBlock".
- */
-export interface RelatedPostsMinimalBlock {
-  heading?: string | null;
-  maxPosts?: number | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'related-posts-minimal';
+  blockType: 'hero';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -836,7 +811,7 @@ export interface Post {
   title: string;
   relatedPosts?: (string | Post)[] | null;
   categories?: (string | Category)[] | null;
-  heroImage?: (string | null) | Media;
+  featuredImage?: (string | null) | Media;
   content?: {
     root: {
       type: string;
@@ -989,21 +964,20 @@ export interface Post {
  */
 export interface User {
   id: string;
-  name?: string | null;
-  lastName?: string | null;
+  name: string;
+  lastName: string;
   /**
    * Link this user to their public team profile for shared bios and SEO attribution.
    */
   teamMember?: (string | null) | Team;
-  role: 'admin' | 'editor' | 'ai-agent';
+  role: 'admin' | 'editor' | 'developer' | 'ai-agent';
   avatar?: (string | null) | Media;
-  bio?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
-  email?: string | null;
+  email: string;
   username: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1214,14 +1188,13 @@ export interface Service {
   isTopLevel?: boolean | null;
   parentService?: (string | null) | Service;
   sections: (
-    | HeroSimpleBlock
+    | HeroBlock
     | ContentBlock
-    | ContactFormSimpleBlock
-    | PostsListBlock
-    | PostBodyBlock
-    | PostHeroMinimalBlock
-    | PostContentMinimalBlock
-    | RelatedPostsMinimalBlock
+    | ContactFormBlock
+    | PostsArchiveBlock
+    | PostsHeroBlock
+    | PostsContentBlock
+    | PostsRelatedBlock
   )[];
   seo?: {
     meta?: {
@@ -1347,6 +1320,318 @@ export interface Service {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  layout?: ('stacked' | 'split' | 'columns') | null;
+  alignment?: ('start' | 'center') | null;
+  showMedia?: boolean | null;
+  media: string | Media;
+  mediaPosition?: ('left' | 'right') | null;
+  showButton?: boolean | null;
+  button?: {
+    type?: ('reference' | 'custom') | null;
+    appearance?: ('link' | 'button') | null;
+    newTab?: boolean | null;
+    reference?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'team';
+          value: string | Team;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
+        } | null);
+    url?: string | null;
+    label?: string | null;
+    /**
+     * Select the button variant
+     */
+    variant?:
+      | (
+          | 'default'
+          | 'outline'
+          | 'outlineDark'
+          | 'outlineGradient'
+          | 'phoneSelect'
+          | 'secondary'
+          | 'white'
+          | 'dark'
+          | 'ghost'
+          | 'link'
+        )
+      | null;
+    /**
+     * Select the button size
+     */
+    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+    /**
+     * Select the button layout
+     */
+    layout?: ('default' | 'centered') | null;
+    /**
+     * Upload an SVG icon to display within the button.
+     */
+    icon?: (string | null) | Media;
+    iconPosition?: ('left' | 'right') | null;
+    /**
+     * Render the button as icon-only with optional label for screen readers.
+     */
+    iconOnly?: boolean | null;
+  };
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactFormBlock".
+ */
+export interface ContactFormBlock {
+  /**
+   * Optional copy displayed alongside the form.
+   */
+  supportingContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  layout?: ('split' | 'stacked') | null;
+  /**
+   * Select the form to display
+   */
+  form: string | Form;
+  /**
+   * Visual style based on background
+   */
+  variant?: ('white' | 'dark' | 'neutral' | 'transparent') | null;
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contact-form';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsArchiveBlock".
+ */
+export interface PostsArchiveBlock {
+  postsPerPage?: number | null;
+  layout?: ('grid' | 'list') | null;
+  columns?: ('two' | 'three' | 'four') | null;
+  showExcerpt?: boolean | null;
+  showCategories?: boolean | null;
+  showPublishedDate?: boolean | null;
+  showReadingTime?: boolean | null;
+  showPagination?: boolean | null;
+  showPageRange?: boolean | null;
+  categoryFilter?: (string | Category)[] | null;
+  /**
+   * Skip the first N posts (useful when a hero post leads the page).
+   */
+  offset?: number | null;
+  sort?: ('-publishedAt' | 'publishedAt' | 'title' | '-title') | null;
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts-archive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsHeroBlock".
+ */
+export interface PostsHeroBlock {
+  showCategories?: boolean | null;
+  showAuthor?: boolean | null;
+  showPublishDate?: boolean | null;
+  showReadingTime?: boolean | null;
+  showFeaturedImage?: boolean | null;
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts-hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsContentBlock".
+ */
+export interface PostsContentBlock {
+  showBreadcrumbs?: boolean | null;
+  showReadingProgress?: boolean | null;
+  showTableOfContents?: boolean | null;
+  showAuthorCard?: boolean | null;
+  tocHeading?: string | null;
+  tocMode?: ('auto' | 'manual') | null;
+  tocItems?:
+    | {
+        label: string;
+        /**
+         * Matches the id attribute on the relevant heading.
+         */
+        anchorId: string;
+        id?: string | null;
+      }[]
+    | null;
+  proseSize?: ('md' | 'lg' | 'xl') | null;
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts-content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostsRelatedBlock".
+ */
+export interface PostsRelatedBlock {
+  maxPosts?: number | null;
+  /**
+   * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
+   */
+  sectionSettings?: {
+    /**
+     * Add arbitrary HTML attributes. Useful for IDs, custom classes, ARIA labels, or data attributes.
+     */
+    attributes?:
+      | {
+          key: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
+    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
+    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'posts-related';
+}
+/**
  * Client testimonials displayed on the website. Each testimonial includes a quote, client information, and company logo.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1400,14 +1685,13 @@ export interface Template {
    * Pre-configured sections with default content
    */
   sections: (
-    | HeroSimpleBlock
+    | HeroBlock
     | ContentBlock
-    | ContactFormSimpleBlock
-    | PostsListBlock
-    | PostBodyBlock
-    | PostHeroMinimalBlock
-    | PostContentMinimalBlock
-    | RelatedPostsMinimalBlock
+    | ContactFormBlock
+    | PostsArchiveBlock
+    | PostsHeroBlock
+    | PostsContentBlock
+    | PostsRelatedBlock
   )[];
   updatedAt: string;
   createdAt: string;
@@ -1846,14 +2130,13 @@ export interface PagesSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        'hero-simple'?: T | HeroSimpleBlockSelect<T>;
+        hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
-        'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
-        'posts-list'?: T | PostsListBlockSelect<T>;
-        'post-body'?: T | PostBodyBlockSelect<T>;
-        'post-hero-minimal'?: T | PostHeroMinimalBlockSelect<T>;
-        'post-content-minimal'?: T | PostContentMinimalBlockSelect<T>;
-        'related-posts-minimal'?: T | RelatedPostsMinimalBlockSelect<T>;
+        'contact-form'?: T | ContactFormBlockSelect<T>;
+        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
+        'posts-hero'?: T | PostsHeroBlockSelect<T>;
+        'posts-content'?: T | PostsContentBlockSelect<T>;
+        'posts-related'?: T | PostsRelatedBlockSelect<T>;
       };
   seo?:
     | T
@@ -1916,12 +2199,52 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroSimpleBlock_select".
+ * via the `definition` "HeroBlock_select".
  */
-export interface HeroSimpleBlockSelect<T extends boolean = true> {
+export interface HeroBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
-  content?: T;
-  align?: T;
+  supportingText?: T;
+  highlight?: T;
+  backgroundImage?: T;
+  size?: T;
+  alignment?: T;
+  buttons?:
+    | T
+    | {
+        button?:
+          | T
+          | {
+              type?: T;
+              appearance?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              variant?: T;
+              size?: T;
+              layout?: T;
+              icon?: T;
+              iconPosition?: T;
+              iconOnly?: T;
+            };
+        id?: T;
+      };
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1931,63 +2254,194 @@ export interface HeroSimpleBlockSelect<T extends boolean = true> {
  */
 export interface ContentBlockSelect<T extends boolean = true> {
   content?: T;
+  layout?: T;
+  alignment?: T;
+  showMedia?: T;
+  media?: T;
+  mediaPosition?: T;
+  showButton?: T;
+  button?:
+    | T
+    | {
+        type?: T;
+        appearance?: T;
+        newTab?: T;
+        reference?: T;
+        url?: T;
+        label?: T;
+        variant?: T;
+        size?: T;
+        layout?: T;
+        icon?: T;
+        iconPosition?: T;
+        iconOnly?: T;
+      };
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactFormSimpleBlock_select".
+ * via the `definition` "ContactFormBlock_select".
  */
-export interface ContactFormSimpleBlockSelect<T extends boolean = true> {
+export interface ContactFormBlockSelect<T extends boolean = true> {
+  supportingContent?: T;
+  layout?: T;
   form?: T;
+  variant?: T;
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostsListBlock_select".
+ * via the `definition` "PostsArchiveBlock_select".
  */
-export interface PostsListBlockSelect<T extends boolean = true> {
-  heading?: T;
-  description?: T;
+export interface PostsArchiveBlockSelect<T extends boolean = true> {
   postsPerPage?: T;
+  layout?: T;
+  columns?: T;
+  showExcerpt?: T;
+  showCategories?: T;
+  showPublishedDate?: T;
+  showReadingTime?: T;
+  showPagination?: T;
+  showPageRange?: T;
+  categoryFilter?: T;
+  offset?: T;
+  sort?: T;
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostBodyBlock_select".
+ * via the `definition` "PostsHeroBlock_select".
  */
-export interface PostBodyBlockSelect<T extends boolean = true> {
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostHeroMinimalBlock_select".
- */
-export interface PostHeroMinimalBlockSelect<T extends boolean = true> {
+export interface PostsHeroBlockSelect<T extends boolean = true> {
+  showCategories?: T;
   showAuthor?: T;
   showPublishDate?: T;
-  showCategories?: T;
+  showReadingTime?: T;
+  showFeaturedImage?: T;
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "PostContentMinimalBlock_select".
+ * via the `definition` "PostsContentBlock_select".
  */
-export interface PostContentMinimalBlockSelect<T extends boolean = true> {
+export interface PostsContentBlockSelect<T extends boolean = true> {
+  showBreadcrumbs?: T;
+  showReadingProgress?: T;
+  showTableOfContents?: T;
+  showAuthorCard?: T;
+  tocHeading?: T;
+  tocMode?: T;
+  tocItems?:
+    | T
+    | {
+        label?: T;
+        anchorId?: T;
+        id?: T;
+      };
+  proseSize?: T;
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RelatedPostsMinimalBlock_select".
+ * via the `definition` "PostsRelatedBlock_select".
  */
-export interface RelatedPostsMinimalBlockSelect<T extends boolean = true> {
-  heading?: T;
+export interface PostsRelatedBlockSelect<T extends boolean = true> {
   maxPosts?: T;
+  sectionSettings?:
+    | T
+    | {
+        attributes?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        containerWidth?: T;
+        colorScheme?: T;
+        paddingX?: T;
+        paddingY?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1999,7 +2453,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   relatedPosts?: T;
   categories?: T;
-  heroImage?: T;
+  featuredImage?: T;
   content?: T;
   seo?:
     | T
@@ -2163,7 +2617,6 @@ export interface UsersSelect<T extends boolean = true> {
   teamMember?: T;
   role?: T;
   avatar?: T;
-  bio?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -2297,14 +2750,13 @@ export interface ServicesSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        'hero-simple'?: T | HeroSimpleBlockSelect<T>;
+        hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
-        'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
-        'posts-list'?: T | PostsListBlockSelect<T>;
-        'post-body'?: T | PostBodyBlockSelect<T>;
-        'post-hero-minimal'?: T | PostHeroMinimalBlockSelect<T>;
-        'post-content-minimal'?: T | PostContentMinimalBlockSelect<T>;
-        'related-posts-minimal'?: T | RelatedPostsMinimalBlockSelect<T>;
+        'contact-form'?: T | ContactFormBlockSelect<T>;
+        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
+        'posts-hero'?: T | PostsHeroBlockSelect<T>;
+        'posts-content'?: T | PostsContentBlockSelect<T>;
+        'posts-related'?: T | PostsRelatedBlockSelect<T>;
       };
   seo?:
     | T
@@ -2381,14 +2833,13 @@ export interface TemplatesSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        'hero-simple'?: T | HeroSimpleBlockSelect<T>;
+        hero?: T | HeroBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
-        'contact-form-simple'?: T | ContactFormSimpleBlockSelect<T>;
-        'posts-list'?: T | PostsListBlockSelect<T>;
-        'post-body'?: T | PostBodyBlockSelect<T>;
-        'post-hero-minimal'?: T | PostHeroMinimalBlockSelect<T>;
-        'post-content-minimal'?: T | PostContentMinimalBlockSelect<T>;
-        'related-posts-minimal'?: T | RelatedPostsMinimalBlockSelect<T>;
+        'contact-form'?: T | ContactFormBlockSelect<T>;
+        'posts-archive'?: T | PostsArchiveBlockSelect<T>;
+        'posts-hero'?: T | PostsHeroBlockSelect<T>;
+        'posts-content'?: T | PostsContentBlockSelect<T>;
+        'posts-related'?: T | PostsRelatedBlockSelect<T>;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2749,6 +3200,7 @@ export interface Header {
         item: {
           link: {
             type?: ('reference' | 'custom') | null;
+            appearance?: ('link' | 'button') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -2769,6 +3221,40 @@ export interface Header {
                 } | null);
             url?: string | null;
             label: string;
+            /**
+             * Select the button variant
+             */
+            variant?:
+              | (
+                  | 'default'
+                  | 'outline'
+                  | 'outlineDark'
+                  | 'outlineGradient'
+                  | 'phoneSelect'
+                  | 'secondary'
+                  | 'white'
+                  | 'dark'
+                  | 'ghost'
+                  | 'link'
+                )
+              | null;
+            /**
+             * Select the button size
+             */
+            size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+            /**
+             * Select the button layout
+             */
+            layout?: ('default' | 'centered') | null;
+            /**
+             * Upload an SVG icon to display within the button.
+             */
+            icon?: (string | null) | Media;
+            iconPosition?: ('left' | 'right') | null;
+            /**
+             * Render the button as icon-only with optional label for screen readers.
+             */
+            iconOnly?: boolean | null;
           };
           hasDropdown?: boolean | null;
           subItems?:
@@ -2776,6 +3262,7 @@ export interface Header {
                 child: {
                   link: {
                     type?: ('reference' | 'custom') | null;
+                    appearance?: ('link' | 'button') | null;
                     newTab?: boolean | null;
                     reference?:
                       | ({
@@ -2796,12 +3283,47 @@ export interface Header {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Select the button variant
+                     */
+                    variant?:
+                      | (
+                          | 'default'
+                          | 'outline'
+                          | 'outlineDark'
+                          | 'outlineGradient'
+                          | 'phoneSelect'
+                          | 'secondary'
+                          | 'white'
+                          | 'dark'
+                          | 'ghost'
+                          | 'link'
+                        )
+                      | null;
+                    /**
+                     * Select the button size
+                     */
+                    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+                    /**
+                     * Select the button layout
+                     */
+                    layout?: ('default' | 'centered') | null;
+                    /**
+                     * Upload an SVG icon to display within the button.
+                     */
+                    icon?: (string | null) | Media;
+                    iconPosition?: ('left' | 'right') | null;
+                    /**
+                     * Render the button as icon-only with optional label for screen readers.
+                     */
+                    iconOnly?: boolean | null;
                   };
                   hasChildren?: boolean | null;
                   subItems?:
                     | {
                         link: {
                           type?: ('reference' | 'custom') | null;
+                          appearance?: ('link' | 'button') | null;
                           newTab?: boolean | null;
                           reference?:
                             | ({
@@ -2822,6 +3344,40 @@ export interface Header {
                               } | null);
                           url?: string | null;
                           label: string;
+                          /**
+                           * Select the button variant
+                           */
+                          variant?:
+                            | (
+                                | 'default'
+                                | 'outline'
+                                | 'outlineDark'
+                                | 'outlineGradient'
+                                | 'phoneSelect'
+                                | 'secondary'
+                                | 'white'
+                                | 'dark'
+                                | 'ghost'
+                                | 'link'
+                              )
+                            | null;
+                          /**
+                           * Select the button size
+                           */
+                          size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+                          /**
+                           * Select the button layout
+                           */
+                          layout?: ('default' | 'centered') | null;
+                          /**
+                           * Upload an SVG icon to display within the button.
+                           */
+                          icon?: (string | null) | Media;
+                          iconPosition?: ('left' | 'right') | null;
+                          /**
+                           * Render the button as icon-only with optional label for screen readers.
+                           */
+                          iconOnly?: boolean | null;
                         };
                         id?: string | null;
                       }[]
@@ -2850,6 +3406,7 @@ export interface Footer {
           | {
               link: {
                 type?: ('reference' | 'custom') | null;
+                appearance?: ('link' | 'button') | null;
                 newTab?: boolean | null;
                 reference?:
                   | ({
@@ -2870,6 +3427,40 @@ export interface Footer {
                     } | null);
                 url?: string | null;
                 label: string;
+                /**
+                 * Select the button variant
+                 */
+                variant?:
+                  | (
+                      | 'default'
+                      | 'outline'
+                      | 'outlineDark'
+                      | 'outlineGradient'
+                      | 'phoneSelect'
+                      | 'secondary'
+                      | 'white'
+                      | 'dark'
+                      | 'ghost'
+                      | 'link'
+                    )
+                  | null;
+                /**
+                 * Select the button size
+                 */
+                size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+                /**
+                 * Select the button layout
+                 */
+                layout?: ('default' | 'centered') | null;
+                /**
+                 * Upload an SVG icon to display within the button.
+                 */
+                icon?: (string | null) | Media;
+                iconPosition?: ('left' | 'right') | null;
+                /**
+                 * Render the button as icon-only with optional label for screen readers.
+                 */
+                iconOnly?: boolean | null;
               };
               id?: string | null;
             }[]
@@ -2881,6 +3472,7 @@ export interface Footer {
     | {
         link: {
           type?: ('reference' | 'custom') | null;
+          appearance?: ('link' | 'button') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -2901,6 +3493,40 @@ export interface Footer {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Select the button variant
+           */
+          variant?:
+            | (
+                | 'default'
+                | 'outline'
+                | 'outlineDark'
+                | 'outlineGradient'
+                | 'phoneSelect'
+                | 'secondary'
+                | 'white'
+                | 'dark'
+                | 'ghost'
+                | 'link'
+              )
+            | null;
+          /**
+           * Select the button size
+           */
+          size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+          /**
+           * Select the button layout
+           */
+          layout?: ('default' | 'centered') | null;
+          /**
+           * Upload an SVG icon to display within the button.
+           */
+          icon?: (string | null) | Media;
+          iconPosition?: ('left' | 'right') | null;
+          /**
+           * Render the button as icon-only with optional label for screen readers.
+           */
+          iconOnly?: boolean | null;
         };
         id?: string | null;
       }[]
@@ -3596,14 +4222,13 @@ export interface AiSetting {
     sectionGuidance?:
       | {
           sectionSlug:
-            | 'contact-form-simple'
+            | 'contact-form'
             | 'content'
-            | 'hero-simple'
-            | 'post-body'
-            | 'post-content-minimal'
-            | 'post-hero-minimal'
-            | 'posts-list'
-            | 'related-posts-minimal';
+            | 'hero'
+            | 'posts-archive'
+            | 'posts-content'
+            | 'posts-hero'
+            | 'posts-related';
           includeInDesigns?: boolean | null;
           /**
            * Describe ideal use cases, required content, or sequencing notes that the AI should follow when selecting this section.
@@ -3631,10 +4256,17 @@ export interface HeaderSelect<T extends boolean = true> {
                 | T
                 | {
                     type?: T;
+                    appearance?: T;
                     newTab?: T;
                     reference?: T;
                     url?: T;
                     label?: T;
+                    variant?: T;
+                    size?: T;
+                    layout?: T;
+                    icon?: T;
+                    iconPosition?: T;
+                    iconOnly?: T;
                   };
               hasDropdown?: T;
               subItems?:
@@ -3647,10 +4279,17 @@ export interface HeaderSelect<T extends boolean = true> {
                             | T
                             | {
                                 type?: T;
+                                appearance?: T;
                                 newTab?: T;
                                 reference?: T;
                                 url?: T;
                                 label?: T;
+                                variant?: T;
+                                size?: T;
+                                layout?: T;
+                                icon?: T;
+                                iconPosition?: T;
+                                iconOnly?: T;
                               };
                           hasChildren?: T;
                           subItems?:
@@ -3660,10 +4299,17 @@ export interface HeaderSelect<T extends boolean = true> {
                                   | T
                                   | {
                                       type?: T;
+                                      appearance?: T;
                                       newTab?: T;
                                       reference?: T;
                                       url?: T;
                                       label?: T;
+                                      variant?: T;
+                                      size?: T;
+                                      layout?: T;
+                                      icon?: T;
+                                      iconPosition?: T;
+                                      iconOnly?: T;
                                     };
                                 id?: T;
                               };
@@ -3693,10 +4339,17 @@ export interface FooterSelect<T extends boolean = true> {
                 | T
                 | {
                     type?: T;
+                    appearance?: T;
                     newTab?: T;
                     reference?: T;
                     url?: T;
                     label?: T;
+                    variant?: T;
+                    size?: T;
+                    layout?: T;
+                    icon?: T;
+                    iconPosition?: T;
+                    iconOnly?: T;
                   };
               id?: T;
             };
@@ -3709,10 +4362,17 @@ export interface FooterSelect<T extends boolean = true> {
           | T
           | {
               type?: T;
+              appearance?: T;
               newTab?: T;
               reference?: T;
               url?: T;
               label?: T;
+              variant?: T;
+              size?: T;
+              layout?: T;
+              icon?: T;
+              iconPosition?: T;
+              iconOnly?: T;
             };
         id?: T;
       };

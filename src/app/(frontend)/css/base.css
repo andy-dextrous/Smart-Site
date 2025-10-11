@@ -9,11 +9,6 @@
     @apply bg-white text-dark font-sans;
   }
 
-  /* Not Toaster from sonner */
-  section:not([aria-label="Notifications alt+T"]) {
-    @apply px-section-x py-section-y relative w-full;
-  }
-
   /* Smooth Scroll - fixes the visible flicker between sections in smooth scroll */
   #smooth-wrapper section:not([aria-label="Notifications alt+T"]) {
     @apply mb-[-1px];

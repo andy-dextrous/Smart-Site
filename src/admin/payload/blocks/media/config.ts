@@ -1,14 +1,1 @@
-import type { Block } from 'payload'
-
-export const MediaBlock: Block = {
-  slug: 'mediaBlock',
-  interfaceName: 'MediaBlock',
-  fields: [
-    {
-      name: 'media',
-      type: 'upload',
-      relationTo: 'media',
-      required: true,
-    },
-  ],
-}
+export { MediaBlockConfig as MediaBlock } from "@/components/fields/media/block-config"

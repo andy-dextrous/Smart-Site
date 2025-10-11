@@ -31,10 +31,13 @@ export const beforeUniversalChange: CollectionBeforeChangeHook = async ({
     return data
   }
 
+  const nextSlug =
+    typeof data?.slug === "string" && data.slug.trim() !== "" ? data.slug : undefined
+
   try {
     const newURI = await routingEngine.generateURI({
       collection: collection.slug,
-      slug: data.slug,
+      slug: nextSlug || (typeof originalDoc?.slug === "string" ? originalDoc.slug : undefined),
       data,
       originalDoc,
     })
@@ -58,7 +61,15 @@ export const beforeUniversalChange: CollectionBeforeChangeHook = async ({
 
 function publishingOrSlugChanged(data: any, originalDoc: any): boolean {
   const isPublishing = data._status === "published" && originalDoc?._status === "draft"
-  const slugChanged = data.slug !== originalDoc?.slug
+
+  const nextSlug =
+    typeof data?.slug === "string" && data.slug.trim() !== "" ? data.slug : undefined
+  const previousSlug =
+    typeof originalDoc?.slug === "string" && originalDoc.slug.trim() !== ""
+      ? originalDoc.slug
+      : undefined
+
+  const slugChanged = Boolean(nextSlug) && nextSlug !== previousSlug
   const parentChanged = data.parent !== originalDoc?.parent
 
   return isPublishing || slugChanged || parentChanged

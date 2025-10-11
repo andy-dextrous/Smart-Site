@@ -1,7 +1,7 @@
 import { CMSLink } from "@/components/fields/link"
-import { Button, type ButtonProps } from "@/components/ui/button"
+import { normalizeLinkField } from "@/components/fields/link/normalize-link"
 import { cn } from "@/utilities/ui"
-import ArrowRightIcon from "@/components/icons/arrow-right"
+import { ArrowRight } from "lucide-react"
 
 /*************************************************************************/
 /*  SECTION CTA COMPONENT
@@ -9,28 +9,27 @@ import ArrowRightIcon from "@/components/icons/arrow-right"
 
 interface SectionCtaProps {
   text?: string
-  button?: {
-    variant?: ButtonProps["variant"] | null
-    size?: ButtonProps["size"] | null
-    layout?: ButtonProps["layout"] | null
-    icon?: boolean | null
-    link?: {
-      type?: ("reference" | "custom") | null
-      newTab?: boolean | null
-      reference?: any | null
-      url?: string | null
-      label: string
-    } | null
-  } | null
+  button?: Record<string, unknown> | null
   containerClassName?: string
 }
 
-export const SectionCta: React.FC<SectionCtaProps> = ({
-  text,
-  button,
-  containerClassName,
-}) => {
+export const SectionCta: React.FC<SectionCtaProps> = ({ text, button, containerClassName }) => {
   if (!text && !button) return null
+
+  const buttonLink = normalizeLinkField(button as Record<string, any>)
+  const shouldRenderButton =
+    buttonLink && (buttonLink.label || buttonLink.iconOnly || buttonLink.icon)
+  const showArrow =
+    shouldRenderButton && !buttonLink?.icon && !buttonLink?.iconOnly && Boolean(buttonLink?.label)
+
+  const buttonChildren = showArrow
+    ? (
+        <>
+          <span>{buttonLink?.label}</span>
+          <ArrowRight className="ml-2 size-4" />
+        </>
+      )
+    : undefined
 
   return (
     <div
@@ -41,17 +40,14 @@ export const SectionCta: React.FC<SectionCtaProps> = ({
     >
       {text && <p className="text-current">{text}</p>}
 
-      {button?.link && (
+      {shouldRenderButton ? (
         <CMSLink
-          {...button.link}
-          appearance={button.variant || "default"}
-          size={button.size || "lg"}
-          className="md:shrink-0"
+          {...(buttonLink as any)}
+          className="md:shrink-0 inline-flex items-center gap-2"
         >
-          {button.link.label}
-          {!button.icon && <ArrowRightIcon className="!h-[14px] !w-[24px]" />}
+          {buttonChildren}
         </CMSLink>
-      )}
+      ) : null}
     </div>
   )
 }

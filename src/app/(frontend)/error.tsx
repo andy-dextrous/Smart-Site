@@ -1,6 +1,6 @@
 "use client"
 
-import LogomarkOutline from "@/components/logos/logomark-outline"
+import LogoPrimary from "@/components/logos/logo"
 import { Button } from "@/components/ui/button"
 import { useEffect } from "react"
 
@@ -20,16 +20,16 @@ export default function Error({
   }, [error])
 
   return (
-    <section className="bg-dark-950 center fixed inset-0 z-50 h-screen w-screen">
-      <div className="flex flex-col items-center justify-center gap-8">
-        <LogomarkOutline width={200} height={330} className="w-auto" />
-        <p className="text-primary text-xs font-light tracking-[0.4em] uppercase">
+    <main className="bg-zinc-50">
+      <section className="container flex min-h-[60vh] flex-col items-center justify-center gap-4 py-16 text-center md:py-24">
+        <LogoPrimary className="h-10 w-auto" aria-hidden />
+        <p className="text-primary text-xs font-medium uppercase tracking-[0.4em]">
           Something went wrong
         </p>
         <Button onClick={reset} size="sm">
           Try again
         </Button>
-      </div>
-    </section>
+      </section>
+    </main>
   )
 }

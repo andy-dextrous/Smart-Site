@@ -11,6 +11,7 @@ import {
 
 // Import all data functions
 import { regenerateURIs } from "@/admin/routing/index-manager"
+import { revalidateAll } from "@/admin/cache/revalidation"
 import { disableSyncHooks, enableSyncHooks } from "@/admin/utilities/prevent-hooks"
 import { formatIdForText, formatIdForRelationship } from "@/admin/payload/db/id-utils"
 import { primaryContactForm } from "./forms/primary-contact"
@@ -70,7 +71,7 @@ class DynamicSeedManager {
   private mediaFiles: Map<string, any> = new Map()
   private context: any = {}
   private profile: SeedProfile
-  private blogEnabled: boolean = false
+  private blogEnabled: boolean = true
   private postTemplateId: string | null = null
   private readonly siteName: string
 
@@ -89,7 +90,7 @@ class DynamicSeedManager {
   async seedDatabase(options?: SeedOptions): Promise<SeedResult> {
     // Minimal-only profile
     this.profile = minimalProfile
-    this.blogEnabled = !!options?.blog
+    this.blogEnabled = options?.blog !== false
     
     this.payload.logger.info(`Using seed profile: ${this.profile.name} - ${this.profile.description}`)
     const startTime = Date.now()
@@ -153,12 +154,14 @@ class DynamicSeedManager {
       
       // Pages - handle minimal vs demo
       seededPages = await this.seedMinimalPages(seededForms)
+      await this.attachContactButtonsToHeroes(seededPages)
 
       // Optional blog seeding
       if (this.blogEnabled) {
         this.postTemplateId = await this.seedPostTemplate()
         blogPages = await this.seedBlogPages()
         blogPosts = await this.seedBlogPosts(seededUsers)
+        await this.attachContactButtonsToHeroes(blogPages)
       }
       
       // Globals - minimal-only
@@ -254,8 +257,42 @@ class DynamicSeedManager {
         
         stats.created.users += 1 // Add AI agent to user count
       } catch (error) {
-        this.payload.logger.error("Failed to create AI agent user:", error)
-        stats.errors.push(`AI agent creation failed: ${error}`)
+        const rawMessage =
+          error instanceof Error ? error.message : typeof error === "string" ? error : ""
+        const message = (rawMessage ?? "").trim()
+
+        const diagnosticDetails =
+          message ||
+          (error instanceof Error
+            ? error.stack || error.toString()
+            : typeof error === "object"
+            ? JSON.stringify(error)
+            : String(error))
+
+        this.payload.logger.info(
+          `[seed] AI agent provisioning diagnostic: ${diagnosticDetails}`
+        )
+
+        const normalized = message.toLowerCase()
+
+        const expectedDuplicate =
+          message.length === 0 ||
+          normalized.includes("already exists") ||
+          normalized.includes("already provisioned") ||
+          normalized.includes("api key is not available") ||
+          normalized.includes("registration secret missing") ||
+          normalized.includes("endpoint is not configured") ||
+          normalized.includes("not found") ||
+          normalized.includes("404")
+
+        if (expectedDuplicate) {
+          this.payload.logger.info(
+            `AI agent already provisioned; skipping new credentials (${message || "no details"})`
+          )
+        } else {
+          this.payload.logger.error("Failed to create AI agent user:", error)
+          stats.errors.push(`AI agent creation failed: ${message || error}`)
+        }
         // Don't fail the entire seeding if AI agent creation fails
       }
 
@@ -263,6 +300,11 @@ class DynamicSeedManager {
        * Step 9: Re-enable sync hooks only at the very end
        */
       enableSyncHooks(this.payload, this.context)
+
+      /**
+       * Step 10: Clear caches now that hooks are reinstated
+       */
+      await this.clearCachesAfterSeeding()
 
       const duration = Date.now() - startTime
       this.payload.logger.info(`Database seeding completed in ${duration}ms`)
@@ -298,6 +340,26 @@ class DynamicSeedManager {
         stats,
         duration,
       }
+    }
+  }
+
+  /*************************************************************************/
+  /*  CLEAR CACHES AFTER SEEDING COMPLETES
+  /*************************************************************************/
+
+  private async clearCachesAfterSeeding(): Promise<void> {
+    try {
+      const cacheResult = await revalidateAll()
+      if (cacheResult.success) {
+        const invalidated = cacheResult.result?.tagsInvalidated.length ?? 0
+        this.payload.logger.info(
+          `Cleared cached content after seeding (invalidated ${invalidated} tags)`
+        )
+      } else {
+        this.payload.logger.warn("Cache clear after seeding reported failure state")
+      }
+    } catch (error) {
+      this.payload.logger.error("Failed to clear cache after seeding:", error)
     }
   }
 
@@ -519,6 +581,95 @@ class DynamicSeedManager {
     return pages
   }
 
+  /*************************************************************************/
+  /*  ATTACH CONTACT CTA TO HERO SECTIONS
+  /*************************************************************************/
+
+  private async attachContactButtonsToHeroes(pages: any[]): Promise<void> {
+    if (!Array.isArray(pages) || pages.length === 0) {
+      return
+    }
+
+    let contactPage = pages.find(page => page?.slug === "contact")
+
+    if (!contactPage) {
+      try {
+        const contactLookup = await this.payload.find({
+          collection: "pages",
+          where: {
+            slug: {
+              equals: "contact",
+            },
+          },
+          limit: 1,
+          context: this.context,
+        })
+        contactPage = contactLookup.docs?.[0]
+      } catch (error) {
+        this.payload.logger.error("Failed to locate contact page for hero button injection:", error)
+        return
+      }
+    }
+
+    if (!contactPage?.id) {
+      this.payload.logger.warn("Contact page not found; skipping hero button attachment.")
+      return
+    }
+
+    for (let index = 0; index < pages.length; index += 1) {
+      const page = pages[index]
+      const sections = Array.isArray(page?.sections) ? page.sections : []
+      let requiresUpdate = false
+
+      const updatedSections = sections.map((section: any) => {
+        if (!section || section.blockType !== "hero") {
+          return section
+        }
+
+        requiresUpdate = true
+
+        return {
+          ...section,
+          buttons: [
+            {
+              button: {
+                appearance: "button",
+                type: "reference",
+                newTab: false,
+                label: "Contact us",
+                reference: {
+                  relationTo: "pages",
+                  value: contactPage.id,
+                },
+              },
+            },
+          ],
+        }
+      })
+
+      if (!requiresUpdate) {
+        continue
+      }
+
+      try {
+        const updatedPage = await this.payload.update({
+          collection: "pages",
+          id: page.id,
+          data: {
+            sections: updatedSections,
+          },
+          context: this.context,
+        })
+        pages[index] = updatedPage
+      } catch (error) {
+        this.payload.logger.error(
+          `Failed to attach contact button to page "${page?.slug ?? page?.id}":`,
+          error
+        )
+      }
+    }
+  }
+
   // (Demo pages are not used in minimal starter)
 
   /*************************************************************************/
@@ -530,21 +681,8 @@ class DynamicSeedManager {
     const globals = []
 
     try {
-      const headerData = minimalHeaderGlobal()
-      if (this.blogEnabled) {
-        try {
-          const insights = pages.find(p => p.slug === "insights")
-          if (insights) {
-            headerData.navItems.splice(1, 0, {
-              item: {
-                link: { type: "custom", newTab: false, url: "/insights", label: "Insights" },
-                subItems: [],
-              },
-            })
-          }
-        } catch {}
-      }
-        
+      const headerData = minimalHeaderGlobal({ includeInsights: this.blogEnabled })
+
       const header = await this.payload.updateGlobal({
         slug: "header",
         data: headerData,
@@ -569,8 +707,10 @@ class DynamicSeedManager {
       // Mirror primary header links into a simple footer menu
       try {
         const homeLink = { type: "custom", newTab: false, url: "/", label: "Home" }
+        const aboutLink = { type: "custom", newTab: false, url: "/about", label: "About" }
         const contactLink = { type: "custom", newTab: false, url: "/contact", label: "Contact" }
-        const links = [homeLink]
+
+        const links = [homeLink, aboutLink]
         if (this.blogEnabled) {
           links.push({ type: "custom", newTab: false, url: "/insights", label: "Insights" })
         }

@@ -144,6 +144,8 @@ async function updateURIIndex(
   const templateId = await getTemplateIdForCollection(collection.slug, payload)
 
   try {
+    const previouslyPublished = previousDoc?._status === "published"
+
     await updateURI({
       uri: doc.uri,
       collection: collection.slug,
@@ -153,6 +155,7 @@ async function updateURIIndex(
       templateId: templateId || undefined,
       data: doc,
       originalDoc: previousDoc,
+      skipRedirect: !previouslyPublished,
     })
 
     payload.logger.info(

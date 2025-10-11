@@ -1,15 +1,9 @@
 import type { AccessArgs } from "payload"
+import type { User } from "@/admin/payload/payload-types"
+import { hasMinimumRole } from "@/admin/payload/access/roles"
 
-// Checks if the user is an editor or admin
-export const isEditorOrAdmin = ({ req: { user } }: AccessArgs<any>): boolean => {
-  return Boolean(
-    user?.role === "editor" || user?.role === "admin" || user?.role === "ai-agent"
-  )
-}
+export const isEditorOrAdmin = hasMinimumRole("editor")
 
-// Collection access for editors - can access Pages, Posts, Menus
-export const canEditContent = ({ req: { user } }: AccessArgs<any>): boolean => {
-  return Boolean(
-    user?.role === "editor" || user?.role === "admin" || user?.role === "ai-agent"
-  )
+export function canEditContent(args: AccessArgs<User>): boolean {
+  return isEditorOrAdmin(args)
 }

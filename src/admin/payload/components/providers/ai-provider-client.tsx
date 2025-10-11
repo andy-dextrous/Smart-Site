@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo } from "react"
+import { usePathname } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
 import {
   closeChatPanel,
@@ -11,6 +12,7 @@ import {
   useChatStore,
 } from "@/admin/components/chat-panel/chat-store"
 import { ChatExperienceMount } from "@/admin/components/chat-panel/chat-experience-mount"
+import { isAuthBootstrapRoute } from "@/admin/payload/components/providers/provider-routes"
 
 interface AIContextType {
   isEnabled: boolean
@@ -31,6 +33,13 @@ interface AIProviderClientProps {
 }
 
 export function AIProviderClient({ children, enabled, reason, withContainer = true }: AIProviderClientProps) {
+  const pathname = usePathname()
+  const bypassProviders = isAuthBootstrapRoute(pathname)
+
+  if (bypassProviders) {
+    return <>{children}</>
+  }
+
   useEffect(() => {
     initializeChatStore()
   }, [])

@@ -175,15 +175,21 @@ export async function getRelatedPosts({
 /*  GET POSTS WITH PAGINATION
 /*************************************************************************/
 
+interface PostsPaginationOptions {
+  limit?: number
+  page?: number
+  categoryFilter?: string[]
+  offset?: number
+  sort?: string | string[]
+}
+
 export async function getPostsWithPagination({
   limit = 12,
   page = 1,
   categoryFilter,
-}: {
-  limit?: number
-  page?: number
-  categoryFilter?: string[]
-} = {}): Promise<{
+  offset = 0,
+  sort = "-publishedAt",
+}: PostsPaginationOptions = {}): Promise<{
   docs: Post[]
   totalDocs: number
   totalPages: number
@@ -201,12 +207,70 @@ export async function getPostsWithPagination({
     }
   }
 
-  return cache.getCollectionWithPagination("posts", {
-    limit,
-    page,
-    sort: "-publishedAt",
+  const normalizedLimit = Math.max(limit, 1)
+  const normalizedPage = Math.max(page, 1)
+  const normalizedOffset = Math.max(offset, 0)
+
+  const baseOptions = {
+    limit: normalizedLimit,
+    sort,
     where: whereConditions,
     depth: 1,
     overrideAccess: false,
-  })
+  }
+
+  if (normalizedOffset === 0) {
+    return cache.getCollectionWithPagination("posts", {
+      ...baseOptions,
+      page: normalizedPage,
+    })
+  }
+
+  const totalSkip = normalizedOffset + (normalizedPage - 1) * normalizedLimit
+  const initialPage = Math.floor(totalSkip / normalizedLimit) + 1
+  const initialSkip = totalSkip % normalizedLimit
+
+  let remaining = normalizedLimit
+  let pageCursor = initialPage
+  const aggregatedDocs: Post[] = []
+  let baseResult: { totalDocs: number; totalPages: number } | null = null
+
+  while (remaining > 0) {
+    const result = await cache.getCollectionWithPagination("posts", {
+      ...baseOptions,
+      page: pageCursor,
+    })
+
+    if (!baseResult) {
+      baseResult = {
+        totalDocs: result.totalDocs,
+        totalPages: result.totalPages,
+      }
+    }
+
+    if (!result.docs.length) {
+      break
+    }
+
+    const sliceStart = pageCursor === initialPage ? initialSkip : 0
+    const docsForPage = result.docs.slice(sliceStart, sliceStart + remaining)
+    aggregatedDocs.push(...(docsForPage as Post[]))
+    remaining -= docsForPage.length
+
+    if (pageCursor >= result.totalPages) {
+      break
+    }
+
+    pageCursor += 1
+  }
+
+  const totalAvailable = Math.max((baseResult?.totalDocs ?? 0) - normalizedOffset, 0)
+  const totalPagesAfterOffset = totalAvailable > 0 ? Math.ceil(totalAvailable / normalizedLimit) : 0
+
+  return {
+    docs: aggregatedDocs,
+    totalDocs: totalAvailable,
+    totalPages: totalPagesAfterOffset,
+    page: normalizedPage,
+  }
 }

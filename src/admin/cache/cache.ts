@@ -608,18 +608,40 @@ export const cache = {
       async () => {
         const payload = await getPayload({ config: configPromise })
 
-        const result = await payload.find({
-          collection: "uri-index",
-          where: {
-            status: { equals: draft ? "draft" : "published" },
-          },
-          limit: 2000,
-          depth: 0,
-          select: { uri: true },
-        })
+        const PAGE_SIZE = 500
+        let page = 1
+        const collectedURIs: string[] = []
 
-        const uris = result.docs.map((doc: any) => doc.uri).filter(Boolean)
-        return [...new Set(uris)]
+        while (true) {
+          const result = await payload.find({
+            collection: "uri-index",
+            where: {
+              status: { equals: draft ? "draft" : "published" },
+            },
+            limit: PAGE_SIZE,
+            page,
+            depth: 0,
+            select: { uri: true },
+          })
+
+          if (result.docs.length === 0) {
+            break
+          }
+
+          result.docs.forEach((doc: any) => {
+            if (doc.uri) {
+              collectedURIs.push(doc.uri)
+            }
+          })
+
+          if (!result.hasNextPage) {
+            break
+          }
+
+          page = result.nextPage || page + 1
+        }
+
+        return [...new Set(collectedURIs)]
       },
       cacheKey,
       { tags }

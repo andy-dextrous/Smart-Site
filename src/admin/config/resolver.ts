@@ -19,7 +19,6 @@ import { Footer } from "@/admin/payload/globals/footer/config"
 import { Settings } from "@/admin/payload/globals/settings"
 import { AISettings } from "@/admin/payload/globals/ai-settings"
 
-import { Code } from "@/admin/payload/blocks/code/config"
 import { FormBlock } from "@/admin/payload/blocks/form/config"
 import { MediaBlock } from "@/admin/payload/blocks/media/config"
 
@@ -50,7 +49,6 @@ const defaultGlobalMap: Record<string, GlobalConfig> = {
 }
 
 const defaultBlockMap: Record<string, Block> = {
-  code: Code,
   form: FormBlock,
   media: MediaBlock
 }

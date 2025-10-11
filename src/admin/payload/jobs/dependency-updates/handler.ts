@@ -11,6 +11,7 @@ import {
 import { updateURI } from "@/admin/routing/index-manager"
 import { routingEngine } from "@/admin/routing/uri-engine"
 import { detectChanges } from "@/admin/cache/change-detection"
+import { cleanupAutomaticRedirect } from "@/admin/redirects/auto-redirects"
 
 /*************************************************************************/
 /*  DEPENDENT UPDATES JOB TYPES
@@ -73,6 +74,8 @@ interface DocumentUpdateInfo {
   templateId?: string
   operation: string
   doc: any
+  skipAutomaticRedirect?: boolean
+  redirectsToCleanup?: string[]
 }
 
 /*************************************************************************/
@@ -395,9 +398,13 @@ async function getDocumentUpdatesForOperation(
     }
 
     case "homepage-change": {
-      // Get the old and new homepage documents
       const oldHomepageId = operation.additionalData?.oldHomepage
-      const newHomepageId = operation.entityId
+      const newHomepageId =
+        operation.entityId &&
+        operation.entityId !== "unknown" &&
+        operation.entityId !== "undefined"
+          ? operation.entityId
+          : undefined
 
       // Handle old homepage transition (/ → /slug)
       if (oldHomepageId) {
@@ -410,17 +417,52 @@ async function getDocumentUpdatesForOperation(
           })
 
           if (oldHomepage) {
-            const oldURI = "/"
-            const newURI = `/${oldHomepage.slug}`
+            const fallbackSlug = oldHomepage.slug || "page"
+            const oldURI = oldHomepage.uri || "/"
+
+            let generatedURI: string | undefined
+            try {
+              generatedURI = await routingEngine.generateURI({
+                collection: "pages",
+                slug: fallbackSlug,
+                data: oldHomepage,
+              })
+            } catch (error) {
+              payload.logger.warn(
+                `Failed to generate canonical URI for demoted homepage ${oldHomepage.id}:`,
+                error
+              )
+            }
+
+            const newURI =
+              generatedURI && generatedURI !== "/"
+                ? generatedURI
+                : `/${fallbackSlug}`
+
+            const status = oldHomepage._status === "draft" ? "draft" : "published"
+            const redirectCleanupTargets = new Set<string>()
+
+            if (oldURI === "/") {
+              redirectCleanupTargets.add("/")
+            }
+
+            if (oldURI !== newURI) {
+              redirectCleanupTargets.add(newURI)
+            }
 
             documentUpdates.push({
               collection: "pages",
               documentId: oldHomepage.id,
               oldURI,
               newURI,
-              status: oldHomepage._status || "published",
+              status,
               operation: operation.operation,
               doc: oldHomepage,
+              skipAutomaticRedirect: oldURI === "/",
+              redirectsToCleanup:
+                redirectCleanupTargets.size > 0
+                  ? Array.from(redirectCleanupTargets)
+                  : undefined,
             })
 
             const changes = detectChanges(
@@ -596,6 +638,7 @@ async function executeDocumentUpdate(
     templateId: update.templateId,
     data: updatedDoc,
     originalDoc: previousDoc,
+    skipRedirect: update.skipAutomaticRedirect,
   })
 
   // Update the actual document with new URI
@@ -610,6 +653,24 @@ async function executeDocumentUpdate(
       preventHooks: true, // Prevent triggering URI generation hooks again
     },
   })
+
+  if (update.redirectsToCleanup?.length) {
+    const uniqueRedirects = Array.from(
+      new Set(update.redirectsToCleanup.filter(uri => typeof uri === "string" && uri.length > 0))
+    )
+
+    for (const uri of uniqueRedirects) {
+      try {
+        await cleanupAutomaticRedirect(uri)
+        payload.logger.info(`🧹 Cleaned up automatic redirects after homepage update: ${uri}`)
+      } catch (error) {
+        payload.logger.warn(
+          `Failed to cleanup automatic redirects for ${uri} during homepage update:`,
+          error
+        )
+      }
+    }
+  }
 
   payload.logger.info(
     `📍 ${update.operation} → URI updated: ${update.collection}/${update.doc.slug} (${update.oldURI} → ${update.newURI})`

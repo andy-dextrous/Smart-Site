@@ -61,6 +61,33 @@ interface GenerateIndexDataProps {
 /*  DOCUMENT INDEX DATA GENERATION (MAIN ROUTER)
 /*************************************************************************/
 
+async function resolveHomepageSlug(payload: any, routingSettings: any): Promise<string | null> {
+  const homepageSetting = routingSettings?.homepage
+
+  if (!homepageSetting) {
+    return null
+  }
+
+  const homepageId = typeof homepageSetting === "object" ? homepageSetting.id : homepageSetting
+  if (!homepageId) {
+    return null
+  }
+
+  try {
+    const homepage = await payload.findByID({
+      collection: "pages",
+      id: homepageId,
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    return homepage?.slug || null
+  } catch (error) {
+    payload.logger.warn("Failed to resolve homepage slug during URI generation:", error)
+    return null
+  }
+}
+
 async function generateDocumentIndexData({
   collection,
   slug,
@@ -73,8 +100,17 @@ async function generateDocumentIndexData({
   // In the Smart Site, Pages are a special collection. They are equivalent to "pages" in WordPress
   // All other frontend collections are treated as "custom post types" in WordPress
 
+  const homepageSlug = await resolveHomepageSlug(payload, settings)
+
   if (collection === "pages") {
-    return await generatePageIndexData({ slug, data, originalDoc, payload, mode })
+    return await generatePageIndexData({
+      slug,
+      data,
+      originalDoc,
+      payload,
+      mode,
+      homepageSlug,
+    })
   }
 
   return await generateCollectionIndexData({
@@ -85,6 +121,7 @@ async function generateDocumentIndexData({
     settings,
     payload,
     mode,
+    homepageSlug,
   })
 }
 
@@ -98,6 +135,7 @@ async function generatePageIndexData({
   originalDoc,
   payload,
   mode,
+  homepageSlug,
   _visited = new Set<string>(), // Cycle detection
   _depth = 0, // Depth protection
 }: {
@@ -106,6 +144,7 @@ async function generatePageIndexData({
   originalDoc?: any
   payload: any
   mode: IndexDataMode
+  homepageSlug?: string | null
   _visited?: Set<string>
   _depth?: number
 }): Promise<IndexData> {
@@ -113,29 +152,6 @@ async function generatePageIndexData({
   const parent = data?.parent || originalDoc?.parent
   const title = data?.title || originalDoc?.title || slug
   const currentDocId = data?.id || originalDoc?.id || slug
-
-  // Get homepage directly from database
-  const settings = await payload.findGlobal({
-    slug: "settings",
-    depth: 0,
-    overrideAccess: true,
-  })
-  const homepageId = settings.routing?.homepage
-  let homePageSlug = null
-
-  if (homepageId) {
-    try {
-      const homepage = await payload.findByID({
-        collection: "pages",
-        id: typeof homepageId === "object" ? homepageId.id : homepageId,
-        depth: 0,
-        overrideAccess: true,
-      })
-      homePageSlug = homepage?.slug
-    } catch (error) {
-      // Homepage not found, continue without it
-    }
-  }
 
   /**
    * INFINITE LOOP PROTECTION: Check for maximum depth
@@ -159,7 +175,7 @@ async function generatePageIndexData({
   /**
    * Homepage special case
    */
-  if (slug === homePageSlug) {
+  if (homepageSlug && slug === homepageSlug) {
     _visited.delete(currentDocId) // Cleanup
     return {
       uri: mode === "breadcrumbs" ? undefined : "/",
@@ -204,6 +220,7 @@ async function generatePageIndexData({
       data: parentDoc,
       payload,
       mode: "both", // We need both URI and breadcrumbs from parent
+      homepageSlug,
       _visited: new Set(_visited), // Copy to prevent mutation between branches
       _depth: _depth + 1,
     })
@@ -278,6 +295,7 @@ async function generateCollectionIndexData({
   settings,
   payload,
   mode,
+  homepageSlug,
 }: {
   collection: string
   slug: string
@@ -286,6 +304,7 @@ async function generateCollectionIndexData({
   settings: any
   payload: any
   mode: IndexDataMode
+  homepageSlug?: string | null
 }): Promise<IndexData> {
   const archivePageField = `${collection}ArchivePage`
   const title = data?.title || originalDoc?.title || slug
@@ -313,6 +332,7 @@ async function generateCollectionIndexData({
             data: archivePage,
             payload,
             mode: "uri",
+            homepageSlug,
             _visited: new Set<string>(),
             _depth: 0,
           })
@@ -331,6 +351,7 @@ async function generateCollectionIndexData({
               data: archivePage,
               payload,
               mode: "breadcrumbs",
+              homepageSlug,
               _visited: new Set<string>(), // Fresh protection for archive page hierarchy
               _depth: 0,
             })

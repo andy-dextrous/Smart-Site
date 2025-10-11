@@ -2,6 +2,7 @@ import { getPayload } from "payload"
 import { DynamicSeedManager } from "@/admin/payload/endpoints/seed"
 import config from "@payload-config"
 import { headers } from "next/headers"
+import { userHasMinimumRole } from "@/admin/payload/access/roles"
 
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
 
@@ -38,16 +39,34 @@ export async function POST(request: Request): Promise<Response> {
   // If no users exist, this is initial setup - allow seed to create first admin
   if (userCount.totalDocs === 0) {
     payload.logger.info("No users found - allowing initial seed to create first admin")
+  } else {
+    if (!user || !userHasMinimumRole(user, "developer")) {
+      return Response.json(
+        { success: false, message: "Only developer accounts can seed the database" },
+        { status: 403 }
+      )
+    }
+
+    payload.logger.info(
+      `Seed request approved for developer ${user.email} (${user.id})`
+    )
   }
 
   try {
-    let blog = false
+    let blog = true
     let siteName: string | undefined
     try {
       const body = await request.json()
       if (typeof body?.blog === "boolean") blog = body.blog
       if (typeof body?.siteName === "string") siteName = body.siteName.trim()
     } catch {}
+
+    if ((!siteName || siteName.length === 0) && typeof process.env.SMARTSITE_SITE_NAME === "string") {
+      const envSiteName = process.env.SMARTSITE_SITE_NAME.trim()
+      if (envSiteName.length > 0) {
+        siteName = envSiteName
+      }
+    }
 
     if (!siteName) {
       throw new Error("Seed request must include a siteName string")

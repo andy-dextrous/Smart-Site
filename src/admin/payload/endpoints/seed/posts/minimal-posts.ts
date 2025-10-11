@@ -27,17 +27,17 @@ export function sampleMinimalPosts(authorRel?: any): Array<
 
   return [
     {
-      title: "Getting started with your blog",
-      slug: "getting-started",
-      content: baseContent("This is a starter post. Replace with your own content."),
+      title: "Welcome to your new blog",
+      slug: "welcome-to-your-new-blog",
+      content: baseContent("Swap this draft with your own story once you are ready to publish."),
       authors: authorRel ? [authorRel] : [],
       _status: "published",
       publishedAt: new Date().toISOString(),
     } as any,
     {
-      title: "Writing in Smart Site",
-      slug: "writing-in-smart-site",
-      content: baseContent("Use the Posts collection to publish articles."),
+      title: "Publishing with Smart Site",
+      slug: "publishing-with-smart-site",
+      content: baseContent("Draft posts in the CMS, preview them, then publish when satisfied."),
       authors: authorRel ? [authorRel] : [],
       _status: "published",
       publishedAt: new Date().toISOString(),

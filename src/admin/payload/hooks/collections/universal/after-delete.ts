@@ -37,6 +37,46 @@ export const afterUniversalDelete: CollectionAfterDeleteHook = async ({
           `Cleaned up automatic redirects for deleted document: ${doc.uri}`
         )
       }
+
+      if (collection.slug === "pages") {
+        const settings = await payload.findGlobal({
+          slug: "settings",
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        const homepageRelation = settings?.routing?.homepage
+        let homepageId: string | undefined
+
+        if (typeof homepageRelation === "string") {
+          homepageId = homepageRelation
+        } else if (homepageRelation && typeof homepageRelation === "object") {
+          const relationObject = homepageRelation as { id?: unknown; value?: unknown }
+
+          if ("id" in relationObject && typeof relationObject.id === "string") {
+            homepageId = relationObject.id
+          } else if ("value" in relationObject && typeof relationObject.value === "string") {
+            homepageId = relationObject.value
+          }
+        }
+
+        if (homepageId && homepageId === doc.id) {
+          await payload.updateGlobal({
+            slug: "settings",
+            data: {
+              routing: {
+                ...(settings?.routing || {}),
+                homepage: null,
+              },
+            },
+            overrideAccess: true,
+          })
+
+          payload.logger.info(
+            `Cleared homepage designation after deleting page ${doc.id}`
+          )
+        }
+      }
     } catch (error) {
       payload.logger.error(
         `URI index cleanup failed for ${collection.slug}/${doc.id}:`,

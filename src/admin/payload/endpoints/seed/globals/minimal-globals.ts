@@ -6,38 +6,40 @@ import type { Page } from "@/admin/payload/payload-types"
 /*  Creates minimal header, footer, and settings for minimal profile
 /*************************************************************************/
 
-export const minimalHeaderGlobal = (): any => {
+type HeaderOptions = {
+  includeInsights?: boolean
+}
+
+export const minimalHeaderGlobal = (options: HeaderOptions = {}): any => {
+  const items: Array<{ url: string; label: string }> = [
+    { url: "/", label: "Home" },
+    { url: "/about", label: "About" },
+  ]
+
+  if (options.includeInsights) {
+    items.push({ url: "/insights", label: "Insights" })
+  }
+
+  items.push({ url: "/contact", label: "Contact" })
+
   return {
-    navItems: [
-      {
-        item: {
-          link: {
-            type: "custom",
-            newTab: false,
-            url: "/",
-            label: "Home",
-          },
-          subItems: [],
+    navItems: items.map(link => ({
+      item: {
+        link: {
+          type: "custom",
+          newTab: false,
+          url: link.url,
+          label: link.label,
         },
+        subItems: [],
       },
-      {
-        item: {
-          link: {
-            type: "custom",
-            newTab: false,
-            url: "/contact",
-            label: "Contact",
-          },
-          subItems: [],
-        },
-      },
-    ],
+    })),
   }
 }
 
 export const minimalFooterGlobal = (): any => {
   return {
-    menus: [],  // No menus in minimal footer
+    menus: [],
     legals: [
       {
         link: {
@@ -62,8 +64,8 @@ export const minimalFooterGlobal = (): any => {
 export const minimalSettingsGlobal = (homePage: Page): any => {
   return {
     general: {
-      siteName: "Smart Site",
-      siteDescription: "A modern website built with Smart Site",
+      siteName: "Your Company",
+      siteDescription: "A fresh Smart Site starter ready for custom content.",
     },
     social: {
       socialLinks: [], // No social links in minimal
@@ -89,9 +91,9 @@ export const minimalSettingsGlobal = (homePage: Page): any => {
     },
     seo: {
       organization: {
-        name: "Smart Site",
+        name: "Your Company",
         type: "Organization",
-        description: "A modern website built with Smart Site",
+        description: "A fresh Smart Site starter ready for custom content.",
         foundingDate: new Date().getFullYear().toString() + "-01-01",
       },
       verification: {

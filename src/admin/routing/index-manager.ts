@@ -31,6 +31,7 @@ export interface URIIndexUpdate {
   breadcrumbs?: BreadcrumbItem[]
   data?: any
   originalDoc?: any
+  skipRedirect?: boolean
 }
 
 /*************************************************************************/
@@ -47,6 +48,7 @@ export async function updateURI({
   breadcrumbs,
   data,
   originalDoc,
+  skipRedirect,
 }: URIIndexUpdate): Promise<void> {
   try {
     const payload = await getPayload({ config: configPromise })
@@ -151,7 +153,7 @@ export async function updateURI({
       }
     }
 
-    if (status === "published" && slugChanged) {
+    if (!skipRedirect && status === "published" && slugChanged) {
       const redirectBaseline = publishedEntry || targetEntry
 
       if (!redirectSource && redirectBaseline) {
@@ -254,11 +256,10 @@ export async function checkURIConflict(
     })
 
     const actualConflicts = conflicts.docs.filter((doc: any) => {
-      if (excludeCollection && excludeDocumentId) {
-        return !(
-          doc.sourceCollection === excludeCollection &&
-          doc.documentId === normalizedExcludeId
-        )
+      if (normalizedExcludeId && doc.documentId === normalizedExcludeId) {
+        if (!excludeCollection || doc.sourceCollection === excludeCollection) {
+          return false
+        }
       }
       return true
     })
@@ -427,55 +428,71 @@ async function processCollectionBatch(
       getTemplateIdForCollection(collection.slug),
     ])
 
-    /**
-     * Fetch all documents for this collection
-     */
-    const documents = await payload.find({
-      collection: collection.slug as any,
-      where: {
-        and: [{ slug: { exists: true } }, { slug: { not_equals: "" } }],
-      },
-      limit: 2000,
-      depth: 1,
-      context,
-    })
+    const PAGE_SIZE = 200
+    let page = 1
+    let hasMore = true
 
-    collectionStats.found = documents.docs.length
-
-    if (documents.docs.length === 0) {
-      return collectionStats
-    }
-
-    // Process documents in batches
-    for (let i = 0; i < documents.docs.length; i += BATCH_SIZE) {
-      const batch = documents.docs.slice(i, i + BATCH_SIZE)
-
-      const batchResults = await Promise.allSettled(
-        batch.map(
-          (doc: { id: string; slug: string; _status?: string; [key: string]: any }) =>
-            processDocumentOptimized(
-              doc,
-              collection.slug,
-              hasStatusField,
-              templateId,
-              payload,
-              context
-            )
-        )
-      )
-
-      batchResults.forEach((result, batchIndex) => {
-        if (result.status === "fulfilled") {
-          collectionStats.populated++
-        } else {
-          const doc = batch[batchIndex]
-          console.error(
-            `  ❌ Failed to process ${collection.slug}/${doc.slug}:`,
-            result.reason
-          )
-          collectionStats.errors++
-        }
+    while (hasMore) {
+      const documents = await payload.find({
+        collection: collection.slug as any,
+        where: {
+          and: [{ slug: { exists: true } }, { slug: { not_equals: "" } }],
+        },
+        limit: PAGE_SIZE,
+        page,
+        depth: 1,
+        context,
       })
+
+      if (typeof documents.totalDocs === "number") {
+        if (page === 1) {
+          collectionStats.found = documents.totalDocs
+        }
+      } else {
+        collectionStats.found += documents.docs.length
+      }
+
+      if (documents.docs.length === 0) {
+        return collectionStats
+      }
+
+      // Process documents in batches
+      for (let i = 0; i < documents.docs.length; i += BATCH_SIZE) {
+        const batch = documents.docs.slice(i, i + BATCH_SIZE)
+
+        const batchResults = await Promise.allSettled(
+          batch.map(
+            (doc: { id: string; slug: string; _status?: string; [key: string]: any }) =>
+              processDocumentOptimized(
+                doc,
+                collection.slug,
+                hasStatusField,
+                templateId,
+                payload,
+                context
+              )
+          )
+        )
+
+        batchResults.forEach((result, batchIndex) => {
+          if (result.status === "fulfilled") {
+            collectionStats.populated++
+          } else {
+            const doc = batch[batchIndex]
+            console.error(
+              `  ❌ Failed to process ${collection.slug}/${doc.slug}:`,
+              result.reason
+            )
+            collectionStats.errors++
+          }
+        })
+      }
+
+      if (!documents.hasNextPage) {
+        hasMore = false
+      } else {
+        page = documents.nextPage || page + 1
+      }
     }
 
     return collectionStats

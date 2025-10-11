@@ -306,8 +306,6 @@ function generateArticleSchema(
 
       if (team?.bio) {
         person.description = team.bio
-      } else if (user?.bio) {
-        person.description = user.bio
       }
 
       if (team?.image?.url) {

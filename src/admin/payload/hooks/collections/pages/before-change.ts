@@ -34,6 +34,10 @@ export const beforePageChange: CollectionBeforeChangeHook = async ({
     return data
   }
 
+  if (!data?.id) {
+    return data
+  }
+
   // Store fresh page data in context for job processing
   if (!context.freshData) {
     ;(context as any).freshData = {}

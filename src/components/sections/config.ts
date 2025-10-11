@@ -5,24 +5,22 @@
 /*  Admin gets sectionBlocks, RenderSections gets importMap
 /*************************************************************************/
 
-import { HeroSimple } from "@/components/sections/hero-simple/config"
 import { Content } from "@/components/sections/content/config"
-import { ContactFormSimple } from "@/components/sections/contact-form-simple/config"
-import { PostsList } from "@/components/sections/posts-list/config"
-import { PostBody } from "@/components/sections/post-body/config"
-import { PostHeroMinimal } from "@/components/sections/post-hero-minimal/config"
-import { PostContentMinimal } from "@/components/sections/post-content-minimal/config"
-import { RelatedPostsMinimal } from "@/components/sections/related-posts-minimal/config"
+import { Hero } from "@/components/sections/hero/config"
+import { ContactForm } from "@/components/sections/contact-form/config"
+import { PostsArchive } from "@/components/sections/posts/archive/config"
+import { PostsRelated } from "@/components/sections/posts/related/config"
+import { PostsHero } from "@/components/sections/posts/hero/config"
+import { PostsContent } from "@/components/sections/posts/content/config"
 
 export const sections = {
   sectionBlocks: [
-    HeroSimple,
+    Hero,
     Content,
-    ContactFormSimple,
-    PostsList,
-    PostBody,
-    PostHeroMinimal,
-    PostContentMinimal,
-    RelatedPostsMinimal,
+    ContactForm,
+    PostsArchive,
+    PostsHero,
+    PostsContent,
+    PostsRelated,
   ],
 }

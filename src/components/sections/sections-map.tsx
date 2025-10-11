@@ -1,11 +1,10 @@
-import { HeroSimpleComponent } from "@/components/sections/hero-simple/Component"
 import { ContentComponent } from "@/components/sections/content/Component"
-import { ContactFormSimpleComponent } from "@/components/sections/contact-form-simple/Component"
-import { PostsListComponent } from "@/components/sections/posts-list/Component"
-import { PostBodyComponent } from "@/components/sections/post-body/Component"
-import { PostHeroMinimalComponent } from "@/components/sections/post-hero-minimal/Component"
-import { PostContentMinimalComponent } from "@/components/sections/post-content-minimal/Component"
-import { RelatedPostsMinimalComponent } from "@/components/sections/related-posts-minimal/Component"
+import { HeroComponent } from "@/components/sections/hero/Component"
+import { ContactFormComponent } from "@/components/sections/contact-form/Component"
+import { PostsArchiveComponent } from "@/components/sections/posts/archive/Component"
+import { PostsHeroComponent } from "@/components/sections/posts/hero/Component"
+import { PostsContentComponent } from "@/components/sections/posts/content/Component"
+import { PostsRelatedComponent } from "@/components/sections/posts/related/Component"
 import React from "react"
 
 /*************************************************************************/
@@ -16,12 +15,11 @@ import React from "react"
 /*************************************************************************/
 
 export const sectionsMap: Record<string, React.ComponentType<any>> = {
-  "hero-simple": HeroSimpleComponent,
-  "content": ContentComponent,
-  "contact-form-simple": ContactFormSimpleComponent,
-  "posts-list": PostsListComponent,
-  "post-body": PostBodyComponent,
-  "post-hero-minimal": PostHeroMinimalComponent,
-  "post-content-minimal": PostContentMinimalComponent,
-  "related-posts-minimal": RelatedPostsMinimalComponent,
+  hero: HeroComponent,
+  content: ContentComponent,
+  "contact-form": ContactFormComponent,
+  "posts-archive": PostsArchiveComponent,
+  "posts-hero": PostsHeroComponent,
+  "posts-content": PostsContentComponent,
+  "posts-related": PostsRelatedComponent,
 }

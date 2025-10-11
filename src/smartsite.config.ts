@@ -37,7 +37,7 @@ const config: UserConfig = {
     },
   },
   features: {
-    analytics: true,
+    analytics: false,
     darkMode: false,
     i18n: false,
     search: true,
@@ -45,7 +45,7 @@ const config: UserConfig = {
   },
   gsap: {
     scrollTrigger: true,
-    scrollSmoother: true,
+    scrollSmoother: false,
     splitText: false,
     globalAnimations: false,
   },

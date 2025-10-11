@@ -1,8 +1,58 @@
-import type { CollectionConfig } from "payload"
+import type { AccessArgs, CollectionBeforeChangeHook, CollectionConfig } from "payload"
 
 import { authenticated } from "@/admin/payload/access/authenticated"
 import { isAdmin, isAdminOrSelf } from "@/admin/payload/access/admin"
+import { userHasMinimumRole } from "@/admin/payload/access/roles"
 import { CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
+import type { User } from "@/admin/payload/payload-types"
+
+function canReadUsers(args: AccessArgs<User>) {
+  const {
+    req: { user },
+  } = args
+
+  if (!user) {
+    return false
+  }
+
+  return {
+    role: {
+      not_in: userHasMinimumRole(user, "admin")
+        ? ["ai-agent"]
+        : ["ai-agent", "developer"],
+    },
+  }
+}
+
+function enforceDeveloperRoleGuard(args: Parameters<CollectionBeforeChangeHook>[0]) {
+  const { data, req, originalDoc } = args
+  const actingUser = req?.user as User | undefined
+
+  if (userHasMinimumRole(actingUser, "developer")) {
+    return data
+  }
+
+  if (!actingUser) {
+    return data
+  }
+
+  const targetIsSelf =
+    typeof originalDoc?.id === "string" && actingUser.id === originalDoc.id
+
+  if (targetIsSelf) {
+    return data
+  }
+
+  if (data?.role === "developer") {
+    throw new Error("Only developers can assign the developer role.")
+  }
+
+  if (originalDoc?.role === "developer") {
+    throw new Error("Only developers can modify developer accounts.")
+  }
+
+  return data
+}
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -10,17 +60,7 @@ export const Users: CollectionConfig = {
     admin: authenticated,
     create: isAdmin,
     delete: isAdmin,
-    read: ({ req }) => {
-      // Allow server-side access with overrideAccess
-      if (!req.user) return false
-      
-      // For client-side requests, filter out AI agent users
-      return {
-        role: {
-          not_equals: "ai-agent",
-        },
-      }
-    },
+    read: canReadUsers,
     update: isAdminOrSelf,
   },
   admin: {
@@ -42,7 +82,7 @@ export const Users: CollectionConfig = {
     lockTime: 600 * 1000, // 10 minutes
     loginWithUsername: {
       allowEmailLogin: true,
-      requireEmail: false,
+      requireEmail: true,
     },
   },
   fields: [
@@ -53,11 +93,21 @@ export const Users: CollectionConfig = {
           name: "name",
           label: "First Name",
           type: "text",
+          required: true,
+          validate: (value: unknown) =>
+            typeof value === "string" && value.trim() !== ""
+              ? true
+              : "First name is required",
         },
         {
           name: "lastName",
           label: "Last Name",
           type: "text",
+          required: true,
+          validate: (value: unknown) =>
+            typeof value === "string" && value.trim() !== ""
+              ? true
+              : "Last name is required",
         },
       ],
     },
@@ -85,6 +135,10 @@ export const Users: CollectionConfig = {
           value: "editor",
         },
         {
+          label: "Developer",
+          value: "developer",
+        },
+        {
           label: "AI Agent",
           value: "ai-agent",
         },
@@ -104,12 +158,9 @@ export const Users: CollectionConfig = {
         position: "sidebar",
       },
     },
-    {
-      name: "bio",
-      type: "textarea",
-      label: "Bio",
-      maxLength: 500,
-    },
   ],
   timestamps: true,
+  hooks: {
+    beforeChange: [enforceDeveloperRoleGuard],
+  },
 }

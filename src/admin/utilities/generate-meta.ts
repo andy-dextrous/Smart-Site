@@ -12,6 +12,23 @@ import { isExternalUrl } from "./url-helpers"
 
 type UniversalDocument = Partial<Config["collections"][keyof Config["collections"]]>
 
+function ensureLeadingSlash(path: string): string {
+  if (!path) return "/"
+  return path.startsWith("/") ? path : `/${path}`
+}
+
+function buildAbsoluteUrl(pathOrUrl: string | undefined, baseUrl: string): string | undefined {
+  if (!pathOrUrl) {
+    return undefined
+  }
+
+  if (isExternalUrl(pathOrUrl)) {
+    return pathOrUrl
+  }
+
+  return `${baseUrl}${ensureLeadingSlash(pathOrUrl)}`
+}
+
 /*************************************************************************/
 /*  UTILITY FUNCTIONS
 /*************************************************************************/
@@ -209,6 +226,7 @@ export async function generateMeta(args: {
   const collectionConfig = getCollectionConfig(collection)
   const docAny = doc as any
   const globalSettings = settings as any
+  const baseUrl = getServerSideURL()
 
   // Build base metadata
   const title = buildTitle(doc, settings, collectionConfig)
@@ -248,9 +266,11 @@ export async function generateMeta(args: {
   }
 
   // Handle canonical URL
-  const canonicalUrl = docAny?.seo?.meta?.canonicalUrl
-  const alternates =
-    canonicalUrl && !isExternalUrl(canonicalUrl) ? { canonical: canonicalUrl } : undefined
+  const canonicalUrl =
+    buildAbsoluteUrl(docAny?.seo?.meta?.canonicalUrl, baseUrl) ||
+    (docAny?.uri ? `${baseUrl}${ensureLeadingSlash(docAny.uri)}` : baseUrl)
+
+  const alternates = canonicalUrl ? { canonical: canonicalUrl } : undefined
 
   // Build enhanced metadata object
   const metadata: Metadata = {
@@ -263,7 +283,7 @@ export async function generateMeta(args: {
       title: ogTitle,
       description: ogDescription,
       images: [{ url: ogImageUrl }],
-      url: docAny?.uri || "/",
+      url: canonicalUrl,
       siteName: globalSettings?.general?.siteName,
       type: docAny?.seo?.socialMedia?.openGraph?.type || "website",
     }),

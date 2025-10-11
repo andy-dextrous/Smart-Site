@@ -109,7 +109,7 @@ const postsConfig: CollectionConfig = {
       relationTo: "categories",
     },
     {
-      name: "heroImage",
+      name: "featuredImage",
       label: "Featured Image",
       type: "upload",
       relationTo: "media",

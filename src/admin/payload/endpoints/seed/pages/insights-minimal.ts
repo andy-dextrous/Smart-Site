@@ -7,12 +7,31 @@ export function insightsMinimalPage() {
     _status: "published",
     sections: [
       {
-        blockType: "hero-simple",
+        blockType: "hero",
         heading: "Insights",
-        content: createRichText([paragraph("Latest articles and updates from your team.")]),
-        align: "center",
+        supportingText: createRichText([
+          paragraph("Latest articles and updates from your team."),
+        ]),
+        alignment: "left",
+        size: "medium",
+        sectionSettings: {
+          colorScheme: "neutral",
+        },
       },
-      { blockType: "posts-list", postsPerPage: 6 },
+      {
+        blockType: "posts-archive",
+        postsPerPage: 6,
+        layout: "grid",
+        columns: "three",
+        showExcerpt: true,
+        showCategories: true,
+        showPublishedDate: true,
+        showPagination: true,
+        showPageRange: true,
+        sectionSettings: {
+          colorScheme: "light",
+        },
+      },
     ],
     publishedAt: new Date().toISOString(),
   }

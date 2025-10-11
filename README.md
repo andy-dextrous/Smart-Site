@@ -322,8 +322,8 @@ pnpm type-check       # Run TypeScript checks
 
 # Database & Content Management
 pnpm db:schema        # Generate database schema
-pnpm db:reset         # Reset database and run the demo seed profile
 pnpm seed             # Seed demo content (requires dev server at :3000)
+# Run the two commands above sequentially to rebuild the schema and reseed
 pnpm regenerate-uris  # Regenerate URI index for routing
 
 # Payload CMS Commands
@@ -1417,8 +1417,8 @@ The merge order is: defaults → registry overrides → user config (`smartsite.
 pnpm dev                # Main dev server
 
 # Database management
+pnpm db:schema         # Regenerate database schema
 pnpm seed              # Seed with sample data
-pnpm db:reset          # Reset and reseed
 
 # Type generation
 pnpm generate:types    # Generate TypeScript types
@@ -1468,7 +1468,8 @@ PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts pnpm exec payload migr
 pnpm regenerate-uris
 
 # Reset everything
-pnpm db:reset
+pnpm db:schema
+pnpm seed
 
 # View MongoDB databases
 mongo --eval "db.adminCommand('listDatabases')"

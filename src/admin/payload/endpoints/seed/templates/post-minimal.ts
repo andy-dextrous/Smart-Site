@@ -8,9 +8,36 @@ export async function postMinimalTemplate(payload: Payload, context?: any): Prom
         name: "Post - Minimal",
         description: "Minimal post template",
         sections: [
-          { blockType: "post-hero-minimal", showAuthor: true, showPublishDate: true, showCategories: true },
-          { blockType: "post-content-minimal" },
-          { blockType: "related-posts-minimal", heading: "Related Posts", maxPosts: 3 },
+          {
+            blockType: "posts-hero",
+            showAuthor: true,
+            showPublishDate: true,
+            showCategories: true,
+            showReadingTime: true,
+            showFeaturedImage: true,
+            sectionSettings: {
+              colorScheme: "neutral",
+            },
+          },
+          {
+            blockType: "posts-content",
+            showBreadcrumbs: true,
+            showTableOfContents: true,
+            showAuthorCard: true,
+            showReadingProgress: false,
+            proseSize: "lg",
+            sectionSettings: {
+              colorScheme: "light",
+            },
+          },
+          {
+            blockType: "posts-related",
+            heading: "Related Posts",
+            maxPosts: 3,
+            sectionSettings: {
+              colorScheme: "light",
+            },
+          },
         ],
       } as any),
       context,

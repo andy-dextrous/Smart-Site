@@ -454,11 +454,9 @@ function analyzeImages(doc: any, options: SEOAnalysisOptions): SEOComponentScore
   const featuredImage =
     "featuredImage" in doc
       ? doc.featuredImage
-      : "heroImage" in doc
-        ? doc.heroImage
-        : "image" in doc
-          ? (doc as any).content?.image
-          : null
+      : "image" in doc
+        ? (doc as any).content?.image
+        : null
 
   if (!featuredImage) {
     issues.push("No featured image found")

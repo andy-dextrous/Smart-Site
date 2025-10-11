@@ -1,14 +1,26 @@
 import type { CollectionSlug, Field, GroupField } from "payload"
 import deepMerge from "@/admin/utilities/deep-merge"
 import { getFrontendCollections } from "@/admin/config/frontend"
+import { iconPickerField } from "@/admin/payload/fields/icon-picker"
+import { getButtonVariantOptions } from "./button-options"
+
+const { variantOptions, layoutOptions, sizeOptions } = getButtonVariantOptions()
+
+type LinkAppearance = "link" | "button"
 
 type LinkType = (options?: {
   disableLabel?: boolean
   optional?: boolean
+  defaultAppearance?: LinkAppearance
   overrides?: Partial<GroupField>
 }) => Field
 
-export const link: LinkType = ({ disableLabel = false, optional = false, overrides = {} } = {}) => {
+export const link: LinkType = ({
+  disableLabel = false,
+  optional = false,
+  defaultAppearance = "link",
+  overrides = {},
+} = {}) => {
   const linkResult: GroupField = {
     name: "link",
     label: false,
@@ -25,7 +37,7 @@ export const link: LinkType = ({ disableLabel = false, optional = false, overrid
             type: "radio",
             admin: {
               layout: "horizontal",
-              width: "50%",
+              width: "40%",
             },
             defaultValue: "reference",
             options: [
@@ -40,6 +52,19 @@ export const link: LinkType = ({ disableLabel = false, optional = false, overrid
             ],
           },
           {
+            name: "appearance",
+            type: "radio",
+            defaultValue: defaultAppearance,
+            options: [
+              { label: "Text link", value: "link" },
+              { label: "Button", value: "button" },
+            ],
+            admin: {
+              layout: "horizontal",
+              width: "40%",
+            },
+          },
+          {
             name: "newTab",
             type: "checkbox",
             defaultValue: false,
@@ -47,7 +72,7 @@ export const link: LinkType = ({ disableLabel = false, optional = false, overrid
               style: {
                 alignSelf: "flex-end",
               },
-              width: "50%",
+              width: "20%",
             },
             label: "Open in new tab",
           },
@@ -109,6 +134,97 @@ export const link: LinkType = ({ disableLabel = false, optional = false, overrid
   } else {
     linkResult.fields = [...linkResult.fields, ...linkTypes]
   }
+
+  linkResult.fields.push({
+    type: "row",
+    admin: {
+      condition: (_, siblingData) => siblingData?.appearance === "button",
+    },
+    fields: [
+      {
+        name: "variant",
+        type: "select",
+        label: "Button variant",
+        defaultValue: "default",
+        options: variantOptions,
+        admin: {
+          width: "33%",
+          description: "Select the button variant",
+        },
+      },
+      {
+        name: "size",
+        type: "select",
+        label: "Button size",
+        defaultValue: "lg",
+        options: sizeOptions,
+        admin: {
+          width: "33%",
+          description: "Select the button size",
+        },
+      },
+      {
+        name: "layout",
+        type: "select",
+        label: "Button layout",
+        defaultValue: "default",
+        options: layoutOptions,
+        admin: {
+          width: "34%",
+          description: "Select the button layout",
+        },
+      },
+    ],
+  })
+
+  const iconField = iconPickerField({
+    name: "icon",
+    label: "Button icon",
+    adminDescription: "Upload an SVG icon to display within the button.",
+    adminWidth: "50%",
+  })
+
+  linkResult.fields.push({
+    type: "row",
+    admin: {
+      condition: (_, siblingData) => siblingData?.appearance === "button",
+    },
+    fields: [
+      iconField,
+      {
+        name: "iconPosition",
+        type: "select",
+        label: "Icon position",
+        defaultValue: "left",
+        options: [
+          { label: "Left of text", value: "left" },
+          { label: "Right of text", value: "right" },
+        ],
+        admin: {
+          width: "50%",
+        },
+      },
+    ],
+  })
+
+  linkResult.fields.push({
+    type: "row",
+    admin: {
+      condition: (_, siblingData) => siblingData?.appearance === "button",
+    },
+    fields: [
+      {
+        name: "iconOnly",
+        type: "checkbox",
+        label: "Icon button",
+        defaultValue: false,
+        admin: {
+          description: "Render the button as icon-only with optional label for screen readers.",
+          width: "50%",
+        },
+      },
+    ],
+  })
 
   return deepMerge(linkResult, overrides)
 }

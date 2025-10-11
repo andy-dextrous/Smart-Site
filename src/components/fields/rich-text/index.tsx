@@ -1,4 +1,4 @@
-import { MediaBlock } from "@/components/blocks/media/Component"
+import { MediaBlock } from "@/components/fields/media/block"
 import {
   DefaultNodeTypes,
   SerializedBlockNode,
@@ -15,11 +15,9 @@ import {
   RichText as ConvertRichText,
 } from "@payloadcms/richtext-lexical/react"
 
-import { CodeBlock, CodeBlockProps } from "@/components/blocks/code/Component"
-
 import { cn } from "@/utilities/ui"
 
-type NodeTypes = DefaultNodeTypes | SerializedBlockNode<any | CodeBlockProps>
+type NodeTypes = DefaultNodeTypes | SerializedBlockNode<any>
 
 /*************************************************************************/
 /*  INTERNAL LINK RESOLVER - URI-FIRST ARCHITECTURE
@@ -60,7 +58,6 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
         disableInnerContainer={true}
       />
     ),
-    code: ({ node }) => <CodeBlock className="col-start-2" {...node.fields} />,
   },
 })
 
@@ -100,11 +97,9 @@ export default function RichText(props: Props) {
           "prose prose-lg max-w-none": variant === "prose",
 
           // Gutter controls - converted from SCSS
-          "max-w-[75ch] mx-auto": enableGutter,
+          "mx-auto max-w-[75ch]": enableGutter,
           "max-w-none": !enableGutter,
         },
-        // Global p tag spacing
-        "[&_p]:mb-8",
         // Color classes
         colorClasses[textColor],
         className

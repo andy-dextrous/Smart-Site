@@ -4,7 +4,7 @@ export const seedUser = (): Omit<User, "updatedAt" | "id" | "createdAt"> => {
   return {
     name: "Andrew",
     lastName: "Scrivens",
-    role: "admin",
+    role: "developer",
     email: process.env.PAYLOAD_ADMIN_EMAIL!,
     password: process.env.PAYLOAD_ADMIN_PASSWORD!,
     username: "scrivo", // Simple alphanumeric username

@@ -229,12 +229,45 @@ export function detectHierarchyChanges(
 /*  GLOBAL SETTINGS ANALYSIS
 /*************************************************************************/
 
+function resolveHomepageId(settings: any): string | undefined {
+  const homepage = settings?.routing?.homepage
+
+  if (!homepage) {
+    return undefined
+  }
+
+  if (typeof homepage === "string") {
+    return homepage
+  }
+
+  if (Array.isArray(homepage)) {
+    const first = homepage[0]
+    if (typeof first === "string") {
+      return first
+    }
+    if (first && typeof first === "object" && typeof first.id === "string") {
+      return first.id
+    }
+  }
+
+  if (typeof homepage === "object") {
+    if (typeof homepage.id === "string") {
+      return homepage.id
+    }
+    if (typeof homepage.value === "string") {
+      return homepage.value
+    }
+  }
+
+  return undefined
+}
+
 export function detectHomepageChange(
   oldSettings: any,
   newSettings: any
 ): { changed: boolean; oldHomepage?: string; newHomepage?: string } {
-  const oldHomepage = oldSettings?.routing?.homepage?.id
-  const newHomepage = newSettings?.routing?.homepage?.id
+  const oldHomepage = resolveHomepageId(oldSettings)
+  const newHomepage = resolveHomepageId(newSettings)
 
   return {
     changed: oldHomepage !== newHomepage,

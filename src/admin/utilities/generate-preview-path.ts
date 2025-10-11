@@ -21,5 +21,9 @@ export const generatePreviewPath = ({ collection, slug, data }: Props): string =
     previewSecret: process.env.PREVIEW_SECRET || "",
   })
 
+  if (data?.id) {
+    encodedParams.set("documentId", String(data.id))
+  }
+
   return `${baseURL}/api/preview?${encodedParams.toString()}`
 }

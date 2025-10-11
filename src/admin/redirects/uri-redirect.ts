@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation"
 import { cache } from "@/admin/cache"
+import { getPayload } from "payload"
+import configPromise from "@payload-config"
+import type { CollectionSlug } from "payload"
 
 /*************************************************************************/
 /*  URI REDIRECT HANDLER
@@ -32,31 +35,11 @@ export async function handleURIRedirect(uri: string): Promise<boolean> {
   // Handle internal document reference redirect
   let redirectUrl: string | null = null
 
-  if (typeof redirectItem.to?.reference?.value === "string") {
-    // Reference by slug - fetch document to get URI
-    const collection = redirectItem.to?.reference?.relationTo
-    const slug = redirectItem.to?.reference?.value
-
-    const document = await cache.getBySlug(collection, slug)
-
-    // Priority 1: Use URI field if available
-    if (document?.uri) {
-      redirectUrl = document.uri
-    } else if (document?.slug) {
-      // Fallback: Basic slug construction
-      redirectUrl = `/${document.slug}`
-    }
-  } else if (typeof redirectItem.to?.reference?.value === "object") {
-    // Direct reference object
-    const doc = redirectItem.to?.reference?.value
-
-    // Priority 1: Use URI field if available
-    if (doc?.uri) {
-      redirectUrl = doc.uri
-    } else if (doc?.slug) {
-      // Fallback: Basic slug construction
-      redirectUrl = `/${doc.slug}`
-    }
+  const resolvedReference = await resolveReferenceTarget(redirectItem.to?.reference)
+  if (resolvedReference?.uri) {
+    redirectUrl = resolvedReference.uri
+  } else if (resolvedReference?.slug) {
+    redirectUrl = `/${resolvedReference.slug}`
   }
 
   if (redirectUrl) {
@@ -66,4 +49,66 @@ export async function handleURIRedirect(uri: string): Promise<boolean> {
   // If we get here, redirect was found but couldn't be resolved
   // Return true to indicate redirect was attempted
   return true
+}
+
+async function resolveReferenceTarget(reference: any) {
+  if (!reference) {
+    return null
+  }
+
+  const collection = reference.relationTo as CollectionSlug | undefined
+  if (!collection) {
+    return null
+  }
+
+  const value = reference.value
+
+  if (typeof value === "string") {
+    // Most Payload redirects store document IDs as strings
+    const document = await fetchDocumentById(collection, value)
+    if (document) {
+      return document
+    }
+
+    // Backward compat: treat as slug if ID lookup failed
+    const documentBySlug = await cache.getBySlug(collection as any, value)
+    if (documentBySlug) {
+      return documentBySlug
+    }
+  } else if (typeof value === "object" && value !== null) {
+    if (value.uri || value.slug) {
+      return value
+    }
+
+    if (value.id) {
+      const document = await fetchDocumentById(collection, value.id)
+      if (document) {
+        return document
+      }
+    }
+
+    return value
+  }
+
+  return null
+}
+
+async function fetchDocumentById(collection: CollectionSlug, id: string) {
+  if (!id) {
+    return null
+  }
+
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const document = await payload.findByID({
+      collection,
+      id,
+      depth: 2,
+      overrideAccess: true,
+    })
+
+    return document || null
+  } catch {
+    return null
+  }
 }

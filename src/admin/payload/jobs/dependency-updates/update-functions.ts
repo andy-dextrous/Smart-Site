@@ -7,6 +7,7 @@ import { updateURI } from "@/admin/routing/index-manager"
 import { routingEngine } from "@/admin/routing/uri-engine"
 import { batchRevalidate } from "@/admin/cache"
 import { detectChanges } from "@/admin/cache/change-detection"
+import { cleanupAutomaticRedirect } from "@/admin/redirects/auto-redirects"
 import configPromise from "@payload-config"
 import { getPayload } from "payload"
 
@@ -282,7 +283,14 @@ export async function processHomepageChange(
 
   try {
     const payload = await getPayload({ config: configPromise })
+
+    const normalizedNewHomepageId =
+      newHomepageId && newHomepageId !== "unknown" && newHomepageId !== "undefined"
+        ? newHomepageId
+        : undefined
+
     const batchUpdates = []
+    const redirectCleanupTargets = new Set<string>()
 
     // Handle old homepage (if exists)
     if (additionalData?.oldHomepage) {
@@ -293,69 +301,120 @@ export async function processHomepageChange(
         overrideAccess: true,
       })
       if (oldHomepage) {
-        const oldURI = "/"
-        const generatedURI = await routingEngine.generateURI({
-          collection: "pages",
-          slug: oldHomepage.slug || "home",
-          data: oldHomepage,
-        })
-        const newURI = generatedURI ?? `/${oldHomepage.slug || "page"}`
+        const fallbackSlug = oldHomepage.slug || "page"
+        const oldURI = oldHomepage.uri || "/"
+
+        let generatedURI: string | undefined
+        try {
+          generatedURI = await routingEngine.generateURI({
+            collection: "pages",
+            slug: fallbackSlug,
+            data: oldHomepage,
+          })
+        } catch (error) {
+          payload.logger.warn(
+            `Failed to generate canonical URI for demoted homepage ${oldHomepage.id}:`,
+            error
+          )
+        }
+
+        const newURI =
+          generatedURI && generatedURI !== "/"
+            ? generatedURI
+            : `/${fallbackSlug}`
+
+        const status = oldHomepage._status === "draft" ? "draft" : "published"
 
         await updateURI({
-          uri: newURI || `/${oldHomepage.slug || "page"}`,
+          uri: newURI,
           collection: "pages",
           documentId: oldHomepage.id,
-          status: oldHomepage._status || "published",
-          previousURI: oldURI,
+          status,
+          previousURI: oldURI !== newURI ? oldURI : undefined,
+          skipRedirect: oldURI === "/",
+        })
+
+        await payload.update({
+          collection: "pages",
+          id: oldHomepage.id,
+          data: {
+            uri: newURI,
+          },
+          overrideAccess: true,
+          context: {
+            preventHooks: true,
+          },
         })
 
         const changes = detectChanges(
-          { ...oldHomepage, uri: newURI || `/${oldHomepage.slug || "page"}` },
+          { ...oldHomepage, uri: newURI },
           { ...oldHomepage, uri: oldURI }
         )
 
         batchUpdates.push({
           collection: "pages",
-          doc: { ...oldHomepage, uri: newURI || `/${oldHomepage.slug || "page"}` },
+          doc: { ...oldHomepage, uri: newURI },
+          changes,
+        })
+
+        result.documentsUpdated++
+
+        if (oldURI === "/") {
+          redirectCleanupTargets.add("/")
+        }
+
+        if (oldURI !== newURI) {
+          redirectCleanupTargets.add(newURI)
+        }
+      }
+    }
+
+    // Handle new homepage (if one is assigned)
+    if (normalizedNewHomepageId) {
+      const newHomepage = await payload.findByID({
+        collection: "pages",
+        id: normalizedNewHomepageId,
+        depth: 1,
+        overrideAccess: true,
+      })
+
+      if (newHomepage) {
+        const oldURI = newHomepage.uri || undefined
+        const newURI = "/"
+
+        await updateURI({
+          uri: newURI,
+          collection: "pages",
+          documentId: newHomepage.id,
+          status: newHomepage._status === "draft" ? "draft" : "published",
+          previousURI: oldURI,
+        })
+
+        await payload.update({
+          collection: "pages",
+          id: newHomepage.id,
+          data: {
+            uri: newURI,
+          },
+          overrideAccess: true,
+          context: {
+            preventHooks: true,
+          },
+        })
+
+        const changes = detectChanges(
+          { ...newHomepage, uri: newURI },
+          { ...newHomepage, uri: oldURI }
+        )
+
+        batchUpdates.push({
+          collection: "pages",
+          doc: { ...newHomepage, uri: newURI },
           changes,
         })
 
         result.documentsUpdated++
       }
-    }
-
-    // Handle new homepage
-    const newHomepage = await payload.findByID({
-      collection: "pages",
-      id: newHomepageId,
-      depth: 1,
-      overrideAccess: true,
-    })
-    if (newHomepage) {
-      const oldURI = newHomepage.uri || ""
-      const newURI = "/"
-
-      // Update new homepage URI (from "/page-slug" to "/")
-      await updateURI({
-        uri: newURI,
-        collection: "pages",
-        documentId: newHomepage.id,
-        status: newHomepage._status || "published",
-        previousURI: oldURI || undefined,
-      })
-
-      const changes = detectChanges(
-        { ...newHomepage, uri: newURI },
-        { ...newHomepage, uri: oldURI }
-      )
-
-      batchUpdates.push({
-        collection: "pages",
-        doc: { ...newHomepage, uri: newURI },
-        changes,
-      })
-
-      result.documentsUpdated++
     }
 
     // Batch process cache invalidation
@@ -372,6 +431,23 @@ export async function processHomepageChange(
       result.cacheEntriesCleared = invalidationResults.operations.reduce(
         (total: number, res: any) => total + (res.tagsInvalidated?.length || 0),
         0
+      )
+    }
+
+    if (redirectCleanupTargets.size > 0) {
+      const cleanupTargets = Array.from(redirectCleanupTargets)
+
+      await Promise.allSettled(
+        cleanupTargets.map(async target => {
+          try {
+            await cleanupAutomaticRedirect(target)
+          } catch (error) {
+            payload.logger.warn(
+              `Failed to cleanup automatic redirect for ${target} during homepage change:`,
+              error
+            )
+          }
+        })
       )
     }
 

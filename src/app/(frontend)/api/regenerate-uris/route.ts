@@ -1,3 +1,4 @@
+import { validateSameOriginRequest } from "@/admin/utilities/request-guards"
 import { regenerateURIs } from "@/admin/routing/index-manager"
 import { getPayload } from "payload"
 import config from "@payload-config"
@@ -12,108 +13,65 @@ export const maxDuration = 300 // 5 minutes for large sites
  * with existing published content.
  *
  * Usage:
- *   GET http://localhost:3000/api/populate-uri-index
+ *   POST http://localhost:3000/api/regenerate-uris
  *
- * Security: Admin authentication required
+ * Security: Authenticated admin/developer session + same-origin guard
  *
  * TODO: Remove this endpoint after successful migration
  */
 
-export async function GET(): Promise<Response> {
-  const payload = await getPayload({ config })
-  const requestHeaders = await headers()
-
-  // Authenticate by passing request headers
-  const { user } = await payload.auth({ headers: requestHeaders })
-
-  if (!user) {
-    return Response.json(
-      { error: "You must be logged in to perform this action" },
-      { status: 401 }
-    )
-  }
-
-  try {
-    const stats = await regenerateURIs()
-
-    // Return detailed results
-    return Response.json(
-      {
-        success: true,
-        message: "URI Index populated successfully",
-        stats,
-        timestamp: new Date().toISOString(),
-        user: user.email,
-      },
-      {
-        status: 200,
-      }
-    )
-  } catch (error) {
-    console.error("💥 URI Index Population failed:", error)
-
-    const errorMessage = error instanceof Error ? error.message : "Unknown error"
-
-    return Response.json(
-      {
-        success: false,
-        error: "URI Index population failed",
-        details: errorMessage,
-        timestamp: new Date().toISOString(),
-      },
-      {
-        status: 500,
-      }
-    )
-  }
-}
-
-// Also support POST for tools that prefer it
 export async function POST(): Promise<Response> {
   const payload = await getPayload({ config })
   const requestHeaders = await headers()
 
-  // Authenticate by passing request headers
   const { user } = await payload.auth({ headers: requestHeaders })
 
   if (!user) {
     return Response.json(
-      { error: "You must be logged in to perform this action" },
+      { success: false, message: "You must be logged in to perform this action" },
       { status: 401 }
+    )
+  }
+
+  const csrfCheck = validateSameOriginRequest(requestHeaders)
+
+  if (!csrfCheck.valid) {
+    return Response.json(
+      {
+        success: false,
+        message: "Request blocked for security reasons",
+        details: csrfCheck.message,
+      },
+      { status: 403 }
     )
   }
 
   try {
     const stats = await regenerateURIs()
 
-    // Return detailed results
     return Response.json(
       {
         success: true,
-        message: "URI Index populated successfully",
+        message: "URI index populated successfully",
         stats,
         timestamp: new Date().toISOString(),
         user: user.email,
       },
-      {
-        status: 200,
-      }
+      { status: 200 }
     )
   } catch (error) {
-    console.error("💥 URI Index Population failed:", error)
+    console.error("💥 URI index population failed:", error)
 
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
 
     return Response.json(
       {
         success: false,
-        error: "URI Index population failed",
+        error: "URI index population failed",
         details: errorMessage,
         timestamp: new Date().toISOString(),
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     )
   }
 }

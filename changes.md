@@ -1,7 +1,57 @@
+- Routing: Homepage reassignment now regenerates canonical URIs, skips stray redirects, and cleans up automatic redirect chains when the homepage changes or is removed
+  - `src/admin/payload/jobs/dependency-updates/handler.ts`
+  - `src/admin/payload/jobs/dependency-updates/update-functions.ts`
+  - `src/admin/routing/index-manager.ts`
+- Settings: Deleting the active homepage clears `settings.routing.homepage` so the CMS no longer shows stale references, with robust relation parsing across all Payload formats
+  - `src/admin/payload/hooks/collections/universal/after-delete.ts`
+- Slug Field: Initial slug generation only occurs on the first publish; drafts stay empty until publish time, and publishing now hard-blocks blank slugs by falling back to the title or throwing a descriptive error
+  - `src/admin/payload/fields/slug/format-slug.ts`
+- Routing Hooks: First-time publishes no longer create `/ → slug` automatic redirects, slug change detection ignores empty drafts, and dependent update jobs skip pages that Payload hasn’t assigned an ID yet
+  - `src/admin/payload/hooks/collections/universal/after-change.ts`
+  - `src/admin/payload/hooks/collections/universal/before-change.ts`
+  - `src/admin/payload/hooks/collections/pages/before-change.ts`
+- Redirects: Deleting a redirect now revalidates redirect-specific cache tags and the collection listing so removed rules disappear immediately
+  - `src/admin/payload/plugins/index.ts`
+- Revalidation Endpoint: `/api/revalidate` now requires an authenticated admin/developer session, reusing Payload auth so only privileged users can trigger full cache clears
+  - `src/app/(frontend)/api/revalidate/route.ts`
+- URI Migration Endpoint: `/api/regenerate-uris` now runs as POST-only, verifies same-origin requests, and blocks cross-site attempts before regenerating URIs
+  - `src/app/(frontend)/api/regenerate-uris/route.ts`
+  - `src/admin/utilities/request-guards.ts`
+  - `apps/**/package.json`
+- Seed Endpoint: Only developer accounts can run `/api/seed` after the initial bootstrap, requests may omit `siteName` (pulling from env), and duplicate AI-agent provisioning now logs instead of failing
+  - `src/app/(frontend)/api/seed/route.ts`
+  - `src/admin/payload/endpoints/seed/index.ts`
+- Role Access: Centralised minimum-role helpers, developer-only protections, and developer seeding updates
+  - `src/admin/payload/access/roles.ts`
+  - `src/admin/payload/access/admin.ts`
+  - `src/admin/payload/access/editor.ts`
+  - `src/admin/payload/collections/users.ts`
+  - `src/admin/payload/payload-types.ts`
+  - `src/admin/payload/endpoints/seed/users/user.ts`
+- Users: Removed legacy bio field since team profiles own public bios
+  - `src/admin/payload/collections/users.ts`
+  - `src/components/posts/post-author-info.tsx`
+  - `src/admin/utilities/structured-data.ts`
+  - `src/admin/css/partials/_create-user.scss`
+- Admin Providers: Skip layout and AI wrappers on bootstrap routes so login and first-user screens stay clean
+  - `src/admin/payload/components/providers/provider-routes.ts`
+  - `src/admin/payload/components/providers/layout-provider/index.tsx`
+  - `src/admin/payload/components/providers/ai-provider-client.tsx`
+- Seed: Clear caches after re-enabling hooks so freshly seeded content is visible immediately
+  - `src/admin/payload/endpoints/seed/index.ts`
+- Seed: Minimal profile now includes Home, About, Contact, lean navigation, and two starter posts without media; blog seeding wires Insights links automatically
+  - `src/admin/payload/endpoints/seed/pages/minimal-pages.ts`
+  - `src/admin/payload/endpoints/seed/globals/minimal-globals.ts`
+  - `src/admin/payload/endpoints/seed/index.ts`
+  - `src/admin/payload/endpoints/seed/posts/minimal-posts.ts`
+- Seed: Blog content now seeds by default unless `{ blog: false }` is passed to the API
+  - `src/app/(frontend)/api/seed/route.ts`
+  - `src/admin/payload/endpoints/seed/index.ts`
 - Base CSS: Added a smooth-scroll section tweak so full-width sections don’t flicker when ScrollSmoother is enabled
   - `src/app/(frontend)/css/base.css`
-- Build: Sitemap generator now loads Smart Site config with a dynamic import so it works in production builds
+- Build: Sitemap generator now loads Smart Site config with a dynamic import so it works in production builds. Moved generation to build script
   - `scripts/generate-sitemap-index.ts`
+  - `package.json`
 - Admin: Added `payload-query-presets` to the sidebar omit list so auto-generated preset collections stay hidden in the admin navigation
   - `src/admin/payload/components/providers/layout-provider/app-sidebar.tsx`
 - Layout: Only render `smooth-wrapper` and `smooth-content` containers when ScrollSmoother is enabled in the Smart Site config
@@ -17,3 +67,94 @@
   - `src/admin/config/index.ts`
   - `src/admin/config/resolver.ts`
   - `src/admin/payload/collections/index.ts`
+- Routing: Reuse resolved routing settings and paginate URI index queries so regeneration covers every document without hammering globals
+  - `src/admin/routing/uri-engine.ts`
+  - `src/admin/routing/index-manager.ts`
+  - `src/admin/cache/cache.ts`
+- Preview: Passing preview collection/document hints keeps live preview working for unpublished drafts without relying on the URI index
+  - `src/admin/utilities/generate-preview-path.ts`
+  - `src/app/(frontend)/api/preview/route.ts`
+  - `src/admin/components/uri-renderer.tsx`
+  - `src/admin/data/draft.ts`
+- API: `/api/keep-alive` now falls back to `NEXT_PUBLIC_URL` (or a protocol-safe Vercel URL) and reports failures instead of crashing when no base URL is set
+  - `src/app/(frontend)/api/keep-alive/route.ts`
+- Redirects: Resolver now understands relationship targets stored as IDs, falling back to slugs so manual redirects keep working across plugin versions
+  - `src/admin/redirects/uri-redirect.ts`
+- URI Conflicts: The conflict checker drops the current document even when the collection isn’t provided, preventing self-collisions in cache-only checks
+  - `src/admin/routing/index-manager.ts`
+- Posts: Renamed the hero image field to `featuredImage`, migrated legacy values at read time, and updated cards/heroes so SEO fallbacks find the right media
+  - `src/admin/payload/collections/posts.ts`
+  - `src/components/posts/post-hero.tsx`
+  - `src/components/posts/post-card.tsx`
+  - `src/admin/payload/payload-types.ts`
+- Structured Data: Page renderer now emits JSON-LD scripts for docs with structured data enabled, using global settings for organization info
+  - `src/admin/components/uri-renderer.tsx`
+- SEO Canonicals: Metadata generation normalises canonical/OpenGraph URLs to absolute links and supplies a default when none is configured
+  - `src/admin/utilities/generate-meta.ts`
+- Users: First/last name fields now require non-empty values and email is mandatory for account creation/login
+  - `src/admin/payload/collections/users.ts`
+  - `src/admin/payload/payload-types.ts`
+- Brand Cleanup: Removed Elvora-specific logo, icon, layout, and post components, switched shared sections to lucide icons, and left a placeholder for future shared assets
+  - `src/components/blocks/related-posts/Component.tsx`
+  - `src/components/fields/section-cta/index.tsx`
+  - `src/components/icons/icons.txt`
+  - `src/components/icons/*.tsx`
+  - `src/components/layout/*.tsx`
+  - `src/components/logos/*.tsx`
+  - `src/components/posts/*.tsx`
+  - `src/lib/icon-library.tsx`
+- Fallback UI: 404 and error routes now render inside the site layout with the shared logo and neutral messaging
+  - `src/app/(frontend)/error.tsx`
+  - `src/app/(frontend)/not-found.tsx`
+- URL Utilities: Consolidated client-side URL helper usage under the admin utilities module
+  - `src/components/blocks/form/component.tsx`
+  - `src/admin/utilities/get-url.ts`
+  - `src/utilities/get-url.ts`
+- Animations: Removed the GSAP title reveal effect and its supporting utility class for a neutral default experience
+  - `src/providers/gsap/effects.ts`
+  - `src/app/(frontend)/css/utilities.css`
+  - `src/components/fields/section-intro/index.tsx`
+- Config: Disabled analytics feature by default in the Smart Site config
+  - `src/smartsite.config.ts`
+- Sections: Introduced a universal `Section` wrapper and `sectionSettings` field, moved default padding into component-level utilities, and removed the legacy minimal section set in favour of production-ready hero/content/contact and posts archives built on the new surface
+  - `src/components/fields/section/component.tsx`
+  - `src/components/fields/section/section-settings.ts`
+  - `src/components/fields/section/types.ts`
+  - `src/app/(frontend)/css/base.css`
+  - `src/app/(frontend)/css/utilities.css`
+  - `src/components/sections/config.ts`
+  - `src/components/sections/sections-map.tsx`
+  - `src/components/sections/hero/*`
+  - `src/components/sections/content/*`
+  - `src/components/sections/contact-form/*`
+  - `src/components/sections/posts/**`
+  - `src/components/posts/*`
+  - `src/components/blocks/related-posts/Component.tsx`
+  - `src/admin/data/posts.ts`
+  - `src/admin/payload/endpoints/seed/pages/insights-minimal.ts`
+  - `src/admin/payload/endpoints/seed/pages/minimal-pages.ts`
+  - `src/admin/payload/endpoints/seed/templates/post-minimal.ts`
+  - `src/admin/payload/payload-types.ts`
+- Links & CTAs: Replaced the legacy button helper with an enhanced link field that carries button variants, sizing, icon upload/placement, and auto-normalises older data; updated `CMSLink`, sections, Section CTA defaults, seeds/templates, and removed the redundant buttons utilities
+  - `src/components/fields/link/link.ts`
+  - `src/components/fields/link/index.tsx`
+  - `src/components/fields/link/button-options.ts`
+  - `src/components/fields/link/normalize-link.ts`
+  - `src/components/sections/hero/*`
+  - `src/components/sections/content/*`
+  - `src/components/fields/section-cta/*`
+  - `src/admin/payload/endpoints/seed/pages/minimal-pages.ts`
+  - `src/admin/payload/endpoints/seed/pages/insights-minimal.ts`
+  - `src/admin/payload/endpoints/seed/templates/post-minimal.ts`
+  - `src/admin/payload/payload-types.ts`
+  - `src/components/fields/buttons/*`
+- Blocks: Collapsed the legacy front-end blocks directory by relocating the reusable form/media renderers into `components/fields`, removing the unused related-posts presenter, and dropping the code block from the default Payload block registry
+  - `src/components/fields/form/**/*`
+  - `src/components/fields/media/block.tsx`
+  - `src/components/fields/media/block-config.ts`
+  - `src/components/fields/rich-text/index.tsx`
+  - `src/admin/payload/blocks/{config.ts,form/config.ts,media/config.ts}`
+  - `src/admin/config/resolver.ts`
+  - `src/components/blocks/*`
+- Breadcrumbs: Consolidated header navigation primitives into a single shared component at the root so sections and posts reuse one implementation
+  - `src/components/breadcrumbs.tsx`

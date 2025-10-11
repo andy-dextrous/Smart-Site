@@ -14,6 +14,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const path = searchParams.get("path")
   const collection = searchParams.get("collection") as CollectionSlug
   const previewSecret = searchParams.get("previewSecret")
+  const documentId = searchParams.get("documentId")
 
   // Validate preview secret
   if (previewSecret !== process.env.PREVIEW_SECRET) {
@@ -48,9 +49,18 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   // CRITICAL CHANGE: Instead of enabling draftMode, redirect with preview parameter
   // This keeps the response cacheable while enabling preview mode
-  const previewUrl = `${path}?preview=true`
+  const previewTarget = new URL(path, request.url)
+  previewTarget.searchParams.set("preview", "true")
 
-  const response = NextResponse.redirect(new URL(previewUrl, request.url), 307)
+  if (collection) {
+    previewTarget.searchParams.set("previewCollection", collection)
+  }
+
+  if (documentId) {
+    previewTarget.searchParams.set("previewDocumentId", documentId)
+  }
+
+  const response = NextResponse.redirect(previewTarget, 307)
   response.cookies.set("__prerender_bypass", "true", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

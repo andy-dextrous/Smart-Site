@@ -3,8 +3,6 @@
 import RichText from "@/components/fields/rich-text"
 import { cn } from "@/utilities/ui"
 import { parseHeadingGradient } from "@/components/heading-gradient"
-import { gsap, useGSAP } from "@/providers/gsap"
-import { useRef } from "react"
 
 /*************************************************************************/
 /*  SECTION INTRO COMPONENT
@@ -27,26 +25,7 @@ export const SectionIntro: React.FC<SectionIntroProps> = ({
   descriptionClassName,
   containerClassName,
 }) => {
-  const titleRef = useRef<HTMLHeadingElement>(null)
-
-  // Parse heading and convert span tags to gradient elements
   const parsedHeading = parseHeadingGradient(heading)
-
-  /****************************************************
-   * GSAP Animation
-   ****************************************************/
-
-  useGSAP(() => {
-    if (titleRef.current) {
-      gsap.effects.titleReveal(titleRef.current, {
-        trigger: {
-          trigger: titleRef.current,
-          start: "top 90%",
-          end: "bottom 40%",
-        },
-      })
-    }
-  })
 
   if (!heading && !description) return null
 
@@ -59,7 +38,7 @@ export const SectionIntro: React.FC<SectionIntroProps> = ({
       )}
     >
       {heading && (
-        <h2 ref={titleRef} className={cn("title-hidden", headingClassName)}>
+        <h2 className={cn("text-balance text-3xl font-semibold leading-tight sm:text-4xl", headingClassName)}>
           {parsedHeading}
         </h2>
       )}

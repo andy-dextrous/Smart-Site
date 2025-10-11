@@ -10,7 +10,10 @@ dotenv.config()
 /*  SITEMAP INDEX GENERATOR - POST BUILD SCRIPT
 /*************************************************************************/
 
-function generateSitemapIndex(siteUrl: string, collections: Array<{ slug: string; label: string }>) {
+function generateSitemapIndex(
+  siteUrl: string,
+  collections: Array<{ slug: string; label: string }>
+) {
   const sitemapEntries = collections
     .map(
       collection => `  <sitemap>
@@ -27,13 +30,12 @@ ${sitemapEntries}
 }
 
 async function loadFrontendCollections() {
-  const module = (await import("../src/admin/config/index")) as {
+  const configModule = (await import("../src/admin/config/index")) as {
     getFrontendCollections?: () => Record<string, { label: string }>
     default?: { getFrontendCollections?: () => Record<string, { label: string }> }
   }
   const getter =
-    module.getFrontendCollections ||
-    module.default?.getFrontendCollections
+    configModule.getFrontendCollections || configModule.default?.getFrontendCollections
 
   if (!getter) {
     throw new Error("getFrontendCollections export not found in config index")
@@ -54,7 +56,7 @@ async function main() {
       slug,
       label: collection.label,
     }))
-    
+
     const sitemapIndexXML = generateSitemapIndex(siteUrl, collections)
 
     const outputPath = path.join(process.cwd(), "public", "sitemap.xml")

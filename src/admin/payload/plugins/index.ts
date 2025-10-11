@@ -95,6 +95,19 @@ const redirects = redirectsPlugin({
           return doc
         },
       ],
+      afterDelete: [
+        ({ doc, req: { payload } }) => {
+          payload.logger.info(`Revalidating redirects after delete`)
+
+          if (doc?.from) {
+            revalidateTag(`redirect:${doc.from}`)
+          }
+
+          revalidateTag("collection:redirects")
+
+          return doc
+        },
+      ],
     },
   },
 })
