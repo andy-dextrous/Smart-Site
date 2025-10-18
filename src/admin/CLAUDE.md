@@ -1,217 +1,73 @@
-# Admin Layer System
+# Admin Layer System – Claude Guide
 
-The admin layer (`src/admin/`) is a **critical foundation** that provides the complete Payload CMS admin interface, dashboard components, and backend infrastructure. This system is automatically replaced during updates and represents the whole smart site backend.
+The `src/admin/` directory ships the full Smart Site backend: Payload CMS configuration, routing engine, cache, AI integration, and the admin UI. It is versioned independently, synced to client sites through the SmartSite CLI, and must stay in lockstep with the starter README’s **Admin Layer System** section. Only update this layer inside the starter or the master demo, never in generated client sites.
 
-Changes to the admin folder must only be done when working on the actual smart-site app inside the turborepo. If this is a client site, whether standalone or inside the clients folder, STRICTLY DO NOT edit the admin folder directly. It is only to be edited inside the apps/smart-site app inisde the main ai-product-studio turborepo. If a user asks you to modify it outside of this context, guide them to make their changes through the smartsite.config.ts or to submit a PR on the product studio repo.
-
-## Directory Structure
-
-````
-admin/
-├── index.ts                              # 🔑 Public API exports
-├── config.ts                             # 🔑 SmartSite configuration system
-│
-├── css/                                  # Backend-only styling (SCSS + Tailwind hybrid)
-│   ├── admin.scss                        # Main SCSS entry for Payload UI
-│   ├── styles.css                        # Tailwind v4 for admin only
-│   ├── theme.css                         # Admin CSS variables
-│   └── partials/                         # SCSS modules for backend UI
-│
-├── lib/                                  # Core business logic
-│   ├── mastra-client.ts                  # 🔑 AI client integration
-│   ├── cache/                            # Caching & revalidation
-│   ├── data/                             # Data access layer
-│   ├── routing/                          # URI engine
-│   └── sitemaps/                         # SEO generation
-│
-├── payload/                              # CMS configuration
-│   ├── payload.config.ts                 # 🔑 Main Payload config
-│   ├── components/
-│   │   ├── providers/                    # 🔑 Context providers
-│   │   │   ├── ai-provider.tsx           # AI chat state
-│   │   │   └── layout-provider/
-│   │   │       └── chat-panel.tsx        # Chat UI
-│   │   ├── assistant-ui/                 # 🔑 Chat components
-│   │   ├── backend/                      # Admin UI
-│   │   ├── frontend/                     # Public components
-│   │   └── ui/                           # Shared UI library
-│   ├── collections/                      # CMS collections
-│   ├── globals/                          # Global configs
-│   ├── blocks/                           # Content blocks
-│   └── hooks/                            # Lifecycle hooks
-│
-└── utilities/                            # Helper functions
-
-## Technical Architecture
-
-**Core Files**:
-- `payload/payload.config.ts` - Central Payload configuration
-- `app/(payload)/layout.tsx` - CSS entry point for Payload backend
-- `css/admin.scss` - SCSS root for Payload UI overrides
-- `css/styles.css` - Tailwind v4 configuration with theme layer
-- `css/theme.css` - Custom theme variables using @theme layer
-
-**CSS Loading Flow**:
-```typescript
-/* app/(payload)/layout.tsx - Actual entry point */
-import "@payloadcms/next/css"
-import "@/admin/css/admin.scss"
-import "@/admin/css/styles.css"
-````
-
-**CSS Processing Order**:
-
-1. Payload's base CSS (`@payloadcms/next/css`)
-2. Admin SCSS overrides (`admin.scss`)
-3. Tailwind v4 with theme variables (`styles.css`)
-
-**What the backend styling system provides**:
-✅ Complete Payload admin interface styling
-✅ Custom CSS variable system via Tailwind @theme (backend only)
-✅ SCSS partials for Payload-specific overrides
-✅ Hybrid Tailwind + SCSS for backend components only
-✅ Dark/light theme support with CSS variables
-❌ NO frontend styling - completely separate system
-
-## Integration Points
-
-### 1. Backend CSS Architecture (Tailwind v4 + SCSS Hybrid)
-
-⚠️ **CRITICAL: Backend and Frontend CSS are completely separate systems**
-
-**Backend CSS** (admin only):
-
-- **Hybrid system**: SCSS + Tailwind v4
-- **Location**: `/admin/css/` directory only
-- **Usage**: Payload admin interface ONLY
-- **Never imports**: Frontend styles or components
-
-The admin uses a **hybrid CSS system** that combines:
-
-- **Tailwind v4** for variable injection and utility classes (admin-specific)
-- **SCSS** for complex Payload UI overrides
-- **CSS custom properties** for admin theme consistency
-
-```typescript
-/* Component example - button.tsx */
-import { cn } from "@/admin/utilities/ui"
-
-const buttonVariants = cva("bg-admin-150 text-admin-900 hover:bg-admin-200", {
-  variants: {
-    variant: {
-      default: "border-admin-150 dark:bg-admin-800",
-      secondary: "bg-admin-accent text-admin-0",
-    },
-  },
-})
+---
+## 1. Directory Overview
+```
+src/admin/
+├── ai/                # Managed AI integration helpers
+├── cache/             # Universal cache + revalidation engine
+├── config/            # Defaults, resolver, frontend config surface
+├── css/               # Admin-only Tailwind v4 + SCSS theme
+├── data/              # Data access helpers
+├── package.json       # Admin manifest (version + shared deps)
+├── payload/           # Payload CMS config, collections, globals, hooks
+├── routing/           # URI index + hierarchy jobs
+├── sitemaps/          # URI-driven sitemap generator
+├── utilities/         # Shared helpers used by admin subsystems
+└── README.md          # Extended docs (mirror this guide)
 ```
 
-### 2. Component System
+- `app/(payload)/layout.tsx` (generated by Payload) imports admin CSS in order: `@payloadcms/next/css` → `css/admin.scss` → `css/styles.css`.
+- Admin UI styles live exclusively under `css/`. They combine Tailwind v4 utilities (powered by `css/theme.css` tokens) and SCSS partials for complex Payload overrides.
+- The frontend (Next.js app) never imports admin code or styles.
 
-**UI Components** (`components/ui/`):
+---
+## 2. Manifest & Versioning Rules
+The admin layer publishes its own manifest at `src/admin/package.json`. Whenever you change anything inside `src/admin/`:
 
-- Use Tailwind classes with CSS variable references
-- Import `cn` utility from `@/admin/utilities/ui`
-- Follow shadcn/ui patterns with admin-specific variables
+1. Increment `version`.
+2. Update `releaseDate`.
+3. Record new packages in `sharedDependencies`.
+4. Confirm `peerDependencies` still match the framework versions expected by the README (e.g., Next 15, Payload 3).
 
-**Backend Components** (`components/backend/`):
+This manifest is consumed during:
+- `pnpm sync:to-starter` (mirrors admin from demo into the starter).
+- SmartSite CLI updates (push changes to client repos).
+- Release workflows (tagging external Smart Site builds).
 
-- Dashboard, navigation, and admin-specific UI
-- Use SCSS modules for complex layouts
-- Integrate with Payload's component system
+Failing to bump the version or shared dependencies breaks the distribution pipeline.
 
-### 3. Theme Variable System
+---
+## 3. Development Boundaries
+- **Starter or master only**: modify `src/admin/` here (or in `apps/smart-site/`) when building platform features. Client sites (`apps/clients/*`) must extend via `src/extensions` and `smartsite.config.ts` instead of editing admin files.
+- **No shortcuts**: follow existing patterns—review the README and current implementations before adding new helpers.
+- **Testing expectation**: validate changes with `pnpm lint`, `pnpm type-check`, and any relevant integration checks before handing off.
+- **Docs sync**: maintain `src/admin/README.md` and this CLAUDE guide alongside functional changes so the starter always reflects the latest architecture.
 
-**Variable naming convention**:
+---
+## 4. Key Subsystems (align with README)
+- **Config stack** (`config/`): merges `defaults.ts` with user overrides from `smartsite.config.ts`. `frontend.ts` exposes derived settings to the Next.js app.
+- **Payload CMS** (`payload/`): houses collections, globals, field groups, blocks, hooks, and admin components. `payload.config.ts` is the canonical configuration file.
+- **Routing engine** (`routing/`): manages the URI index, hierarchy updates, archive relationships, breadcrumbs, and redirect orchestration.
+- **Cache + Revalidation** (`cache/`): exposes `getByURI`, `getCollection`, and surgical invalidation utilities consumed by the frontend.
+- **AI integration** (`ai/` + `payload/components/providers`): checks connection health, exposes chat providers, and proxies requests through `/app/(frontend)/api/ai/*`.
+- **Sitemaps** (`sitemaps/`): builds URI-driven sitemaps, integrates with cache tags, and powers the post-build sitemap index script.
+- **Data layer** (`data/`): shared queries for admin dashboards and background jobs.
 
-```css
---color-admin-[0-1000]    /* Grayscale palette */
---color-admin-accent      /* Primary brand color */
---color-admin-error       /* Destructive actions */
---spacing-admin-*         /* Layout spacing */
---sidebar-*               /* Sidebar-specific */
-```
+---
+## 5. CSS & Component Rules
+- Admin CSS is isolated: Tailwind v4 utilities derive from `css/theme.css` tokens; SCSS partials live under `css/partials`.
+- Reuse `@/admin/utilities/ui` helpers (`cn`, design tokens) and maintain shadcn-style component patterns.
+- Do not import frontend components into the admin or vice versa.
 
-### 4. Layout-Based CSS Integration
+---
+## 6. Update Flow Recap
+1. Build features inside `apps/smart-site/` or `apps/smart-site-starter/`.
+2. Bump the version and manifest metadata in `src/admin/package.json`.
+3. Run `pnpm lint` and `pnpm type-check`.
+4. Sync to the starter (`pnpm sync:to-starter` when originating from demo).
+5. Release via the SmartSite CLI / GitHub workflow so client sites can pull the update.
 
-The CSS is loaded through the `app/(payload)/layout.tsx` file which:
-
-- Is auto-generated by Payload
-- Imports CSS files in specific order
-- Should not be modified directly (will be overwritten)
-
-## Risk-Based Development Guidelines
-
-### ⚠️ High-Impact Files
-
-- `payload.config.ts` - Affects entire CMS
-- `css/styles.css` - Global CSS entry point
-- `css/theme.css` - All theme variables
-- `admin/index.ts` - Admin configuration
-
-### ✅ Recommended Patterns
-
-**CSS Organization**:
-
-```scss
-/* Use SCSS partials for complex styles */
-@import "partials/_forms";
-@import "partials/_buttons";
-
-/* Use Tailwind for simple utilities */
-.nav-item {
-  @apply flex items-center px-4 py-2;
-
-  &:hover {
-    background-color: var(--color-admin-850);
-  }
-}
-```
-
-**Component Styling**:
-
-```typescript
-// ✅ Use CSS variables for theming
-className="bg-admin-accent text-admin-0"
-
-// ✅ Use cn() for conditional classes
-className={cn("base-class", variant && variantClass)}
-
-// ❌ Don't hardcode colors
-className="bg-purple-500 text-white"
-```
-
-### ⚠️ High-Risk Modifications
-
-**Never modify these directly**:
-
-- `app/(payload)/layout.tsx` - Auto-generated
-- Core admin routing logic
-- Payload UI base components
-- Authentication flow
-- CSS import order in layout
-
-## Utility Functions Reference
-
-### 🔧 CSS Utilities
-
-```typescript
-import { cn } from "@/admin/utilities/ui"
-// Merges Tailwind classes with conflict resolution
-```
-
-**Component Files** (100+ total):
-
-- UI components: shadcn/ui adaptations
-- Backend components: Dashboard, navigation, forms
-- Field components: Custom Payload fields
-
-## Critical Warnings
-
-⚠️ **ENTIRE ADMIN FOLDER IS REPLACED ON UPDATES** - Never store frontend website code here
-⚠️ **BACKEND CSS ONLY** - Admin CSS is completely separate from frontend styling
-⚠️ **CSS LOADED VIA (payload)/layout.tsx** - This file is auto-generated
-⚠️ **CSS IMPORT ORDER MATTERS** - Payload CSS → admin.scss → styles.css
-⚠️ **BACKEND: TAILWIND + SCSS HYBRID** - Frontend uses pure Tailwind v4
-
-Remember: The admin layer is core product infrastructure. Custom code must live outside the admin folder to survive updates. Backend and frontend styling systems must remain completely separate.
+Keep this guide aligned with the README. If documentation drifts, update both immediately.
