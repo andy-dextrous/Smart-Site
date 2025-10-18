@@ -1,3 +1,4 @@
+import { LinkLabelField as LinkLabelField_fcfbfa303a249c0c5df3db459c69e782 } from '@/admin/components/fields/link/link-label-field'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -22,7 +23,6 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HeadingFeatureClient as HeadingFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { LinkLabelField as LinkLabelField_fcfbfa303a249c0c5df3db459c69e782 } from '@/admin/components/fields/link/link-label-field'
 import { default as default_d1988c653dbb7de5dc8bb77db36a0ffc } from '@/admin/payload/components/backend/assign-template'
 import { SlugComponent as SlugComponent_6c420b1b8714748be3eba61478399bf0 } from '@/admin/payload/fields/slug/slug-component'
 import { FolderTableCell as FolderTableCell_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
@@ -49,6 +49,7 @@ import { AILayoutProvider as AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45 }
 import { Dashboard as Dashboard_2318927de43c97f7df38b2e062d88eaf } from '@/admin/payload/components/backend/dashboard'
 
 export const importMap = {
+  "@/admin/components/fields/link/link-label-field#LinkLabelField": LinkLabelField_fcfbfa303a249c0c5df3db459c69e782,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -73,7 +74,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HeadingFeatureClient": HeadingFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ParagraphFeatureClient": ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "@/admin/components/fields/link/link-label-field#LinkLabelField": LinkLabelField_fcfbfa303a249c0c5df3db459c69e782,
   "@/admin/payload/components/backend/assign-template#default": default_d1988c653dbb7de5dc8bb77db36a0ffc,
   "@/admin/payload/fields/slug/slug-component#SlugComponent": SlugComponent_6c420b1b8714748be3eba61478399bf0,
   "@payloadcms/ui/rsc#FolderTableCell": FolderTableCell_ab83ff7e88da8d3530831f296ec4756a,

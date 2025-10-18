@@ -66,7 +66,7 @@ export function Hamburger({ isOpen, onClick, className }: HamburgerProps) {
       onClick={onClick}
       className={cn(
         "relative z-[1001] flex h-12 w-12 flex-col items-center justify-center rounded-full transition-colors duration-200 lg:hidden",
-        "hover:bg-zinc-100",
+        "hover:bg-neutral",
         className
       )}
       aria-label={isOpen ? "Close menu" : "Open menu"}
@@ -74,20 +74,20 @@ export function Hamburger({ isOpen, onClick, className }: HamburgerProps) {
       <div className="flex flex-col justify-center">
         <span
           className={cn(
-            "hamburger-line-1 mb-1.5 block h-0.5 w-6 transform transition-all duration-300",
-            "bg-zinc-900"
+            "hamburger-line-1 mb-control-sm block h-0.5 w-6 transform transition-all duration-300",
+            "bg-dark"
           )}
         />
         <span
           className={cn(
-            "hamburger-line-2 mb-1.5 block h-0.5 w-6 transform transition-all duration-300",
-            "bg-zinc-900"
+            "hamburger-line-2 mb-control-sm block h-0.5 w-6 transform transition-all duration-300",
+            "bg-dark"
           )}
         />
         <span
           className={cn(
             "hamburger-line-3 block h-0.5 w-6 transform transition-all duration-300",
-            "bg-zinc-900"
+            "bg-dark"
           )}
         />
       </div>

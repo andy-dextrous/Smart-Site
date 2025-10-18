@@ -681,7 +681,7 @@ class DynamicSeedManager {
     const globals = []
 
     try {
-      const headerData = minimalHeaderGlobal({ includeInsights: this.blogEnabled })
+      const headerData = minimalHeaderGlobal({ includeInsights: this.blogEnabled, pages })
 
       const header = await this.payload.updateGlobal({
         slug: "header",
@@ -702,19 +702,64 @@ class DynamicSeedManager {
     }
 
     try {
-      const footerData = minimalFooterGlobal()
+      const footerData = minimalFooterGlobal({ pages })
 
-      // Mirror primary header links into a simple footer menu
+      // Mirror primary header links into a simple footer menu using document references
       try {
-        const homeLink = { type: "custom", newTab: false, url: "/", label: "Home" }
-        const aboutLink = { type: "custom", newTab: false, url: "/about", label: "About" }
-        const contactLink = { type: "custom", newTab: false, url: "/contact", label: "Contact" }
+        const homePage = pages.find(p => p?.slug === "home")
+        const aboutPage = pages.find(p => p?.slug === "about")
+        const insightsPage = pages.find(p => p?.slug === "insights")
+        const contactPage = pages.find(p => p?.slug === "contact")
 
-        const links = [homeLink, aboutLink]
-        if (this.blogEnabled) {
-          links.push({ type: "custom", newTab: false, url: "/insights", label: "Insights" })
+        const links: any[] = []
+
+        if (homePage) {
+          links.push({
+            type: "reference",
+            newTab: false,
+            reference: {
+              relationTo: "pages",
+              value: homePage.id,
+            },
+            label: "Home",
+          })
         }
-        links.push(contactLink)
+
+        if (aboutPage) {
+          links.push({
+            type: "reference",
+            newTab: false,
+            reference: {
+              relationTo: "pages",
+              value: aboutPage.id,
+            },
+            label: "About",
+          })
+        }
+
+        if (this.blogEnabled && insightsPage) {
+          links.push({
+            type: "reference",
+            newTab: false,
+            reference: {
+              relationTo: "pages",
+              value: insightsPage.id,
+            },
+            label: "Insights",
+          })
+        }
+
+        if (contactPage) {
+          links.push({
+            type: "reference",
+            newTab: false,
+            reference: {
+              relationTo: "pages",
+              value: contactPage.id,
+            },
+            label: "Contact",
+          })
+        }
 
         footerData.menus = [
           {

@@ -43,7 +43,7 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
     return doc
   }
 
-  const uriIndexUpdated = await updateURIIndex(doc, previousDoc, collection, payload)
+  const uriIndexUpdated = await updateURIIndex(doc, previousDoc, collection, payload, context)
 
   /**
    * Only revalidate when the published version actually changes
@@ -124,7 +124,8 @@ async function updateURIIndex(
   doc: any,
   previousDoc: any,
   collection: any,
-  payload: any
+  payload: any,
+  context: any
 ): Promise<boolean> {
   if (!doc.uri) return false
 
@@ -146,6 +147,19 @@ async function updateURIIndex(
   try {
     const previouslyPublished = previousDoc?._status === "published"
 
+    const redirectPreference =
+      typeof context?.createAutomaticRedirect === "boolean"
+        ? context.createAutomaticRedirect
+        : undefined
+
+    const slugChanged = Boolean(
+      doc?.slug &&
+        previousDoc?.slug &&
+        typeof doc.slug === "string" &&
+        typeof previousDoc.slug === "string" &&
+        doc.slug !== previousDoc.slug
+    )
+
     await updateURI({
       uri: doc.uri,
       collection: collection.slug,
@@ -155,7 +169,10 @@ async function updateURIIndex(
       templateId: templateId || undefined,
       data: doc,
       originalDoc: previousDoc,
-      skipRedirect: !previouslyPublished,
+      skipRedirect:
+        slugChanged && redirectPreference !== undefined
+          ? !redirectPreference
+          : !previouslyPublished,
     })
 
     payload.logger.info(

@@ -3,14 +3,13 @@ import type { Field } from "payload"
 import type {
   SectionColorScheme,
   SectionContainerWidth,
-  SectionPaddingX,
-  SectionPaddingY,
+  SectionPaddingValue,
 } from "./types"
 
 const containerWidthOptions: Array<{ label: string; value: SectionContainerWidth }> = [
-  { label: "Compact", value: "sm" },
-  { label: "Standard", value: "md" },
-  { label: "Wide", value: "lg" },
+  { label: "Container (standard)", value: "lg" },
+  { label: "Container medium", value: "md" },
+  { label: "Container small", value: "sm" },
   { label: "Full width", value: "full" },
 ]
 
@@ -18,20 +17,9 @@ const colorSchemeOptions: Array<{ label: string; value: SectionColorScheme }> = 
   { label: "Light", value: "light" },
   { label: "Neutral", value: "neutral" },
   { label: "Dark", value: "dark" },
-  { label: "Surface", value: "surface" },
-  { label: "Transparent", value: "transparent" },
 ]
 
-const paddingXOptions: Array<{ label: string; value: SectionPaddingX }> = [
-  { label: "Default", value: "default" },
-  { label: "None", value: "none" },
-  { label: "Compact", value: "xs" },
-  { label: "Narrow", value: "sm" },
-  { label: "Wide", value: "lg" },
-  { label: "Extra Wide", value: "xl" },
-]
-
-const paddingYOptions: Array<{ label: string; value: SectionPaddingY }> = [
+const paddingOptions: Array<{ label: string; value: SectionPaddingValue }> = [
   { label: "Default", value: "default" },
   { label: "None", value: "none" },
   { label: "Extra Small", value: "xs" },
@@ -101,7 +89,7 @@ export function sectionSettings(options: SectionSettingsOptions = {}): Field {
             name: "containerWidth",
             label: "Container width",
             type: "select",
-            defaultValue: "md",
+            defaultValue: "lg",
             options: containerWidthOptions,
           },
           {
@@ -115,23 +103,43 @@ export function sectionSettings(options: SectionSettingsOptions = {}): Field {
             type: "row",
             fields: [
               {
-                name: "paddingX",
-                label: "Horizontal padding",
+                name: "paddingTop",
+                label: "Padding top",
                 type: "select",
                 defaultValue: "default",
-                options: paddingXOptions,
+                options: paddingOptions,
                 admin: {
-                  width: "50%",
+                  width: "25%",
                 },
               },
               {
-                name: "paddingY",
-                label: "Vertical padding",
+                name: "paddingRight",
+                label: "Padding right",
                 type: "select",
                 defaultValue: "default",
-                options: paddingYOptions,
+                options: paddingOptions,
                 admin: {
-                  width: "50%",
+                  width: "25%",
+                },
+              },
+              {
+                name: "paddingBottom",
+                label: "Padding bottom",
+                type: "select",
+                defaultValue: "default",
+                options: paddingOptions,
+                admin: {
+                  width: "25%",
+                },
+              },
+              {
+                name: "paddingLeft",
+                label: "Padding left",
+                type: "select",
+                defaultValue: "default",
+                options: paddingOptions,
+                admin: {
+                  width: "25%",
                 },
               },
             ],

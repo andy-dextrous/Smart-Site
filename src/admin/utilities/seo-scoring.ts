@@ -167,7 +167,11 @@ function analyzeDescription(doc: any, options: SEOAnalysisOptions): SEOComponent
 
   const metaDescription = (doc.seo as any)?.meta?.description
   const fallbackDescription =
-    "description" in doc ? doc.description : "bio" in doc ? (doc as any).content?.bio : ""
+    "description" in doc
+      ? doc.description
+      : "bio" in doc
+        ? (doc as any).bio ?? (doc as any).content?.bio ?? ""
+        : ""
   const description = metaDescription || fallbackDescription
   const focusKeyword = (doc.seo as any)?.meta?.focusKeywords || options.focusKeyword
 
@@ -333,14 +337,15 @@ function analyzeContent(doc: any, options: SEOAnalysisOptions): SEOComponentScor
   let content = ""
   let wordCount = 0
 
-  if ("content" in doc && doc.content) {
+  if ("content" in doc && doc.content && typeof doc.content === "object" && "root" in doc.content) {
     // Extract text from rich text content
     content = extractTextFromRichText(doc.content)
   } else if ("sections" in doc && doc.sections) {
     // Extract text from sections/blocks
     content = extractTextFromSections(doc.sections)
-  } else if ("bio" in doc && (doc as any).content?.bio) {
-    content = (doc as any).content.bio
+  } else if ("bio" in doc) {
+    const bio = (doc as any).bio ?? (doc as any).content?.bio
+    content = bio || ""
   }
 
   wordCount = content.split(/\s+/).filter(word => word.length > 0).length
@@ -451,12 +456,14 @@ function analyzeImages(doc: any, options: SEOAnalysisOptions): SEOComponentScore
   let score = 0
 
   // Featured/main image (40 points)
-  const featuredImage =
-    "featuredImage" in doc
-      ? doc.featuredImage
-      : "image" in doc
-        ? (doc as any).content?.image
-        : null
+  let featuredImage: unknown = null
+  if ("featuredImage" in doc && doc.featuredImage) {
+    featuredImage = doc.featuredImage
+  } else if ("image" in doc && (doc as any).image) {
+    featuredImage = (doc as any).image
+  } else if ((doc as any).content?.image) {
+    featuredImage = (doc as any).content.image
+  }
 
   if (!featuredImage) {
     issues.push("No featured image found")

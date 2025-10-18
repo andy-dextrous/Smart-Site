@@ -1,27 +1,150 @@
-@layer frontend-components {
+@layer frontend-theme {
   /*
-    Typography
+  /*  TYPOGRAPHY: CONFIGURABLE TOKENS
+  /*
+  /*
+    Update this section when you want to retune the type system.
+    - Set font families, weights, and colours to match the brand.
+    - Control the fluid scale with `--fluid-text-base-*` and the min/max ratio tokens.
+      Example: bump `--fluid-text-base-min` to 18px and set
+      `--fluid-text-scale-min/max` to 1.2 / 1.28 for a tighter hierarchy that still
+      respects the shared viewport range.
+    - Common ratios:
+        • 1.067 – minor second (tight UI copy)
+        • 1.125 – major second
+        • 1.2   – minor third
+        • 1.25  – major third
+        • 1.333 – perfect fourth (our default)
+        • 1.414 – augmented fourth
+        • 1.5   – perfect fifth (dramatic hero)
+    - Heading line heights sit here so designers can adjust rhythm in one place.
+    - Viewport bounds inherit from spacing tokens so type and spacing share the same
+      responsive curve—override `--fluid-space-viewport-*` if you need different targets.
+
+    Keep these inputs declarative; avoid referencing other custom properties so the
+    math block below stays predictable.
   */
 
-  /* https://www.fluid-type-scale.com/ */
+  @theme {
+    --font-fallback-sans:
+      ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+      "Apple Color Emoji", "Segoe UI Emoji";
+    --font-sans: var(--font-fallback-sans);
+    --font-body: var(--font-fallback-sans);
+    --font-body-weight: 300;
+    --line-height-body: 1.5;
+    --letter-spacing-body: 0em;
+    --color-body: var(--color-dark-950);
+    --color-link: var(--color-primary-500);
+
+    --font-heading: var(--font-fallback-sans);
+    --font-heading-weight: 300;
+    --letter-spacing-heading: 0;
+    --color-heading: var(--color-dark-950);
+
+    --line-height-h1: 1.05;
+    --line-height-h2: 1.1;
+    --line-height-h3: 1.3;
+    --line-height-h4: 1.43;
+    --line-height-h5: 1.2;
+    --line-height-h6: 1.2;
+
+    --fluid-text-base-min: 16px;
+    --fluid-text-base-max: 18px;
+    --fluid-text-viewport-min: var(--fluid-space-viewport-min, 20rem);
+    --fluid-text-viewport-max: var(--fluid-space-viewport-max, 90rem);
+    --fluid-text-scale-min: 1.2;
+    --fluid-text-scale-max: 1.25;
+  }
 
   @theme {
-    /* Fallbacks; actual font set via next/font variables on <html> */
-    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-      "Apple Color Emoji", "Segoe UI Emoji";
-    --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-      "Apple Color Emoji", "Segoe UI Emoji";
+    /*
+    /*  TYPOGRAPHY: DERIVED SCALE (READ ONLY)
+    /*
+    /*
+      The calculations in this block convert the tunable tokens above into the
+      fluid type ramp consumed by Tailwind (`text-sm`, `text-4xl`, etc.).
+      Do not modify these expressions directly—change the inputs instead so every
+      consumer stays in sync. Add new steps by following the same pattern if the
+      design calls for additional sizes.
+    */
 
-    --text-h1: clamp(2.986rem, 1.5253rem + 7.3033vw, 8.5rem);
-    --text-h2: clamp(2.488rem, 1.4914rem + 4.9828vw, 6.25rem);
-    --text-h3: clamp(2.074rem, 1.7956rem + 1.3921vw, 3.125rem);
-    --text-h4: clamp(1.728rem, 1.6612rem + 0.3338vw, 1.98rem);
-    --text-h5: clamp(1.44rem, 5vw, 1.68rem);
-    --text-h6: clamp(1.2rem, 5vw, 1.414rem);
-    --text-base: clamp(1.0625rem, 1.0294rem + 0.1656vw, 1.1875rem);
-    --text-sm: clamp(0.833rem, 0.191vw + 0.837rem, 1rem);
-    --text-xs: clamp(0.694rem, 5vw, 0.875rem);
+    /* Fluid Text Progress */
+    --fluid-text-viewport-span: max(
+      1,
+      calc((var(--fluid-text-viewport-max) - var(--fluid-text-viewport-min)) / 1px)
+    );
+    --fluid-text-progress: var(
+      --fluid-space-progress,
+      clamp(
+        0,
+        calc(
+          ((100vw - var(--fluid-text-viewport-min)) / 1px) /
+            var(--fluid-text-viewport-span)
+        ),
+        1
+      )
+    );
+
+    /* Fluid Text Base */
+    --fluid-text-base-fluid: calc(
+      var(--fluid-text-base-min) +
+        (var(--fluid-text-base-max) - var(--fluid-text-base-min)) *
+        var(--fluid-text-progress)
+    );
+    --fluid-text-base: clamp(
+      var(--fluid-text-base-min),
+      var(--fluid-text-base-fluid),
+      var(--fluid-text-base-max)
+    );
+
+    /* Fluid Text Steps */
+    --fluid-text-scale-fluid: calc(
+      var(--fluid-text-scale-min) +
+        (var(--fluid-text-scale-max) - var(--fluid-text-scale-min)) *
+        var(--fluid-text-progress)
+    );
+    --fluid-text-scale: clamp(
+      var(--fluid-text-scale-min),
+      var(--fluid-text-scale-fluid),
+      var(--fluid-text-scale-max)
+    );
+
+    --fluid-text-step--2: calc(
+      var(--fluid-text-base) / (var(--fluid-text-scale) * var(--fluid-text-scale))
+    );
+    --fluid-text-step--1: calc(var(--fluid-text-base) / var(--fluid-text-scale));
+    --fluid-text-step-0: var(--fluid-text-base);
+    --fluid-text-step-1: calc(var(--fluid-text-step-0) * var(--fluid-text-scale));
+    --fluid-text-step-2: calc(var(--fluid-text-step-1) * var(--fluid-text-scale));
+    --fluid-text-step-3: calc(var(--fluid-text-step-2) * var(--fluid-text-scale));
+    --fluid-text-step-4: calc(var(--fluid-text-step-3) * var(--fluid-text-scale));
+    --fluid-text-step-5: calc(var(--fluid-text-step-4) * var(--fluid-text-scale));
+    --fluid-text-step-6: calc(var(--fluid-text-step-5) * var(--fluid-text-scale));
+
+    --text-xs: var(--fluid-text-step--2);
+    --text-sm: var(--fluid-text-step--1);
+    --text-base: var(--fluid-text-step-0);
+    --text-lg: var(--fluid-text-step-1);
+    --text-xl: var(--fluid-text-step-2);
+    --text-2xl: var(--fluid-text-step-3);
+    --text-3xl: var(--fluid-text-step-4);
+    --text-4xl: var(--fluid-text-step-5);
+    --text-5xl: var(--fluid-text-step-6);
+
+    --text-h6: var(--fluid-text-step-0);
+    --text-h5: var(--fluid-text-step-1);
+    --text-h4: var(--fluid-text-step-2);
+    --text-h3: var(--fluid-text-step-3);
+    --text-h2: var(--fluid-text-step-4);
+    --text-h1: var(--fluid-text-step-6);
   }
+}
+
+@layer frontend-components {
+  /*
+    Typography application
+  */
 
   .text-gradient {
     color: var(--color-primary-600);
@@ -31,126 +154,116 @@
     color: var(--color-primary-600);
   }
 
-  /* Sitewide Typography Customizations */
+  body {
+    font-family: var(--font-body);
+    font-weight: var(--font-body-weight);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-body);
+    color: var(--color-body);
+    font-size: var(--text-base);
+  }
 
   h1 {
-    font-family: inherit;
+    font-family: var(--font-heading);
     font-size: var(--text-h1);
-    color: var(--color-dark-950);
-    line-height: 1.05;
-    font-weight: 300;
-    letter-spacing: 0;
+    color: var(--color-heading);
+    line-height: var(--line-height-h1);
+    font-weight: var(--font-heading-weight);
+    letter-spacing: var(--letter-spacing-heading);
   }
 
   h2 {
-    font-family: inherit;
+    font-family: var(--font-heading);
     font-size: var(--text-h2);
-    color: var(--color-dark-950);
-    line-height: 1.1;
-    font-weight: 300;
-    letter-spacing: 0;
+    color: var(--color-heading);
+    line-height: var(--line-height-h2);
+    font-weight: var(--font-heading-weight);
+    letter-spacing: var(--letter-spacing-heading);
   }
 
   h3 {
-    font-family: inherit;
+    font-family: var(--font-heading);
     font-size: var(--text-h3);
-    color: var(--color-dark-950);
-    line-height: 1.3;
-    font-weight: 300;
-    letter-spacing: 0;
+    color: var(--color-heading);
+    line-height: var(--line-height-h3);
+    font-weight: var(--font-heading-weight);
+    letter-spacing: var(--letter-spacing-heading);
   }
 
   h4 {
-    font-family: inherit;
+    font-family: var(--font-heading);
     font-size: var(--text-h4);
-    color: var(--color-dark-950);
-    line-height: 1.43;
-    font-weight: 300;
-    letter-spacing: 0;
+    color: var(--color-heading);
+    line-height: var(--line-height-h4);
+    font-weight: var(--font-heading-weight);
+    letter-spacing: var(--letter-spacing-heading);
   }
 
   h5 {
-    font-family: inherit;
+    font-family: var(--font-heading);
     font-size: var(--text-h5);
-    color: var(--color-dark-950);
-    line-height: 1.2;
-    font-weight: 300;
-    letter-spacing: 0;
+    color: var(--color-heading);
+    line-height: var(--line-height-h5);
+    font-weight: var(--font-heading-weight);
+    letter-spacing: var(--letter-spacing-heading);
   }
 
   h6 {
-    font-family: inherit;
+    font-family: var(--font-heading);
     font-size: var(--text-h6);
-    color: var(--color-dark-950);
-    line-height: 1.2;
-    font-weight: 300;
-    letter-spacing: 0;
+    color: var(--color-heading);
+    line-height: var(--line-height-h6);
+    font-weight: var(--font-heading-weight);
+    letter-spacing: var(--letter-spacing-heading);
   }
 
   p {
-    color: var(--color-dark-950);
-    font-family: inherit;
+    color: var(--color-body);
+    font-family: var(--font-body);
     font-size: var(--text-base);
-    line-height: 1.5;
-    font-weight: 300;
-    letter-spacing: 0;
+    line-height: var(--line-height-body);
+    font-weight: var(--font-body-weight);
+    letter-spacing: var(--letter-spacing-body);
   }
 
   p a {
-    color: var(--color-primary-500);
-    font-weight: 300;
+    color: var(--color-link);
+    font-weight: var(--font-body-weight);
     text-decoration: none;
   }
 
   ul {
-    color: var(--color-dark-950);
-    font-family: inherit;
+    color: var(--color-body);
+    font-family: var(--font-body);
     font-size: var(--text-base);
-    line-height: 1.5;
-    letter-spacing: 0;
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-body);
   }
 
   ol {
-    color: var(--color-dark-950);
-    font-family: inherit;
+    color: var(--color-body);
+    font-family: var(--font-body);
     font-size: var(--text-base);
-    line-height: 1.5;
-    letter-spacing: 0;
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-body);
   }
 
   li {
-    color: var(--color-dark-950);
-    font-family: inherit;
+    color: var(--color-body);
+    font-family: var(--font-body);
     font-size: var(--text-base);
-    line-height: 1.5;
-    letter-spacing: 0;
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-body);
   }
 
   blockquote {
-    color: var(--color-dark-950);
-    font-family: inherit;
+    color: var(--color-body);
+    font-family: var(--font-body);
     font-size: var(--text-base);
-    line-height: 1.5;
-    letter-spacing: 0;
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing-body);
   }
 
-  /* Rich Text Typography Customizations */
-
-  .prose {
-    --tw-prose-headings: var(--color-dark-950);
-
-    & h1,
-    & h2,
-    & h3,
-    & h4,
-    & h5,
-    & h6 {
-      font-weight: 300 !important;
-      color: var(--tw-prose-headings) !important;
-    }
-  }
-
-  /* Force white text on prose content */
   .prose-white {
     & h1,
     & h2,
@@ -196,4 +309,5 @@
       }
     }
   }
+
 }

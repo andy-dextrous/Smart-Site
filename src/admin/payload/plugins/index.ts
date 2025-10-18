@@ -13,8 +13,11 @@ import { markAsReadAfterRead } from "@/admin/payload/hooks/form-submissions"
 import { beforeSyncWithSearch } from "@/admin/payload/search/beforeSync"
 import { searchFields } from "@/admin/payload/search/fieldOverrides"
 import { getSmartSiteConfig } from "@/admin/config"
+import { getFrontendCollections } from "@/admin/config/frontend"
+import { getSearchConfig } from "@/admin/config/features"
 import { resolveStoragePlugins } from "@/admin/config/storage-resolver"
 import { aiBridgePlugin } from "@/admin/payload/plugins/ai-bridge"
+import { revalidateCollection } from "@/admin/cache"
 
 /*************************************************************************/
 /*  REDIRECTS PLUGIN
@@ -228,19 +231,46 @@ const forms = formBuilderPlugin({
 /*  SEARCH PLUGIN
 /*************************************************************************/
 
-const search = searchPlugin({
-  collections: ["pages", "posts"],
-  defaultPriorities: {
-    pages: 10,
-    posts: 20,
-  },
-  beforeSync: beforeSyncWithSearch,
-  searchOverrides: {
-    fields: ({ defaultFields }) => {
-      return [...defaultFields, ...searchFields]
-    },
-  },
-})
+const frontendCollections = getFrontendCollections()
+const searchCollections = frontendCollections
+  .filter(collection => (collection.searchEnabled ?? true) && collection.slug !== "uri-index")
+  .map(collection => collection.slug)
+  .sort((a, b) => {
+    if (a === "pages") return -1
+    if (b === "pages") return 1
+    return a.localeCompare(b)
+  })
+
+const defaultPriorities = searchCollections.reduce<Record<string, number>>((acc, slug, index) => {
+  acc[slug] = (index + 1) * 10
+  return acc
+}, {})
+
+const searchPluginInstance = searchCollections.length
+  ? searchPlugin({
+      collections: searchCollections,
+      defaultPriorities,
+      beforeSync: beforeSyncWithSearch,
+      searchOverrides: {
+        fields: ({ defaultFields }) => {
+          return [...defaultFields, ...searchFields]
+        },
+        hooks: {
+          afterChange: [
+            async ({ doc }) => {
+              await revalidateCollection("search", "search-index-change")
+              return doc
+            },
+          ],
+          afterDelete: [
+            async () => {
+              await revalidateCollection("search", "search-index-delete")
+            },
+          ],
+        },
+      },
+    })
+  : null
 
 /*************************************************************************/
 /*  NESTED DOCS PLUGIN
@@ -264,12 +294,13 @@ const nestedDocs = nestedDocsPlugin({
 /*************************************************************************/
 
 const smartSiteConfig = getSmartSiteConfig()
-const searchEnabled = smartSiteConfig.features.search
+const searchConfig = getSearchConfig()
+const searchEnabled = searchConfig.enabled
 
 export const plugins: Plugin[] = [
   redirects,
   forms,
-  ...(searchEnabled ? [search] : []),
+  ...(searchEnabled && searchPluginInstance ? [searchPluginInstance] : []),
   nestedDocs,
   aiBridgePlugin,
 ]
@@ -284,7 +315,7 @@ export function getPlugins(): Plugin[] {
   return [
     redirects,
     forms,
-    ...(searchEnabled ? [search] : []),
+    ...(searchEnabled && searchPluginInstance ? [searchPluginInstance] : []),
     ...storagePlugins,
     nestedDocs,
     aiBridgePlugin,

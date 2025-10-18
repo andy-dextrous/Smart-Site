@@ -19,12 +19,14 @@ import "./index.scss"
 type SlugComponentProps = {
   fieldToUse: string
   checkboxFieldPath: string
+  redirectFieldPath: string
 } & TextFieldClientProps
 
 export const SlugComponent: React.FC<SlugComponentProps> = ({
   field,
   fieldToUse,
   checkboxFieldPath: checkboxFieldPathFromProps,
+  redirectFieldPath: redirectFieldPathFromProps,
   path,
   readOnly: readOnlyFromProps,
 }) => {
@@ -34,19 +36,67 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
     ? `${path}.${checkboxFieldPathFromProps}`
     : checkboxFieldPathFromProps
 
+  const redirectFieldPath = path?.includes(".")
+    ? `${path}.${redirectFieldPathFromProps}`
+    : redirectFieldPathFromProps
+
   const { value, setValue } = useField<string>({ path: path || field.name })
+  const { value: redirectValue, setValue: setRedirectValue } = useField<boolean | undefined>({
+    path: redirectFieldPath,
+  })
 
   const { dispatchFields } = useForm()
-  const { id } = useDocumentInfo()
+  const documentInfo = useDocumentInfo()
+  const { id, hasPublishedDoc } = documentInfo
+  const savedSlug = (documentInfo as any)?.data?.slug as string | undefined
 
-  // Track if user has manually edited the slug
-  const hasManualEdit = useRef(false)
+  const baselineSlugRef = useRef<string | undefined>(undefined)
+  const lastPromptSlugRef = useRef<string | undefined>(undefined)
   const lastTargetValue = useRef<string>("")
 
   // The value of the checkbox
   const checkboxValue = useFormFields(([fields]) => {
     return fields[checkboxFieldPath]?.value as boolean
   })
+
+  useEffect(() => {
+    if (typeof savedSlug === "string" && savedSlug.length > 0) {
+      baselineSlugRef.current = savedSlug
+    } else if (!savedSlug) {
+      baselineSlugRef.current = undefined
+    }
+  }, [savedSlug])
+
+  useEffect(() => {
+    if (!baselineSlugRef.current && typeof value === "string" && value.length > 0) {
+      baselineSlugRef.current = value
+    }
+  }, [value])
+
+  const slugChangedFromBaseline = Boolean(
+    hasPublishedDoc &&
+      baselineSlugRef.current &&
+      typeof value === "string" &&
+      value.length > 0 &&
+      value !== baselineSlugRef.current
+  )
+
+  useEffect(() => {
+    if (!slugChangedFromBaseline) {
+      lastPromptSlugRef.current = undefined
+      if (redirectValue !== undefined) {
+        setRedirectValue(undefined)
+      }
+      return
+    }
+
+    if (value !== lastPromptSlugRef.current) {
+      lastPromptSlugRef.current = value
+      if (redirectValue !== true) {
+        setRedirectValue(true)
+      }
+    }
+  }, [redirectValue, setRedirectValue, slugChangedFromBaseline, value])
 
   // The value of the field we're listening to for the slug
   const targetFieldValue = useFormFields(([fields]) => {
@@ -119,6 +169,14 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   )
 
   const readOnly = readOnlyFromProps || checkboxValue
+  const redirectChecked = slugChangedFromBaseline ? redirectValue ?? true : undefined
+
+  const handleRedirectChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setRedirectValue(event.target.checked)
+    },
+    [setRedirectValue]
+  )
 
   return (
     <div className="field-type slug-field-component">
@@ -136,6 +194,24 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
         path={path || field.name}
         readOnly={Boolean(readOnly)}
       />
+
+      {slugChangedFromBaseline ? (
+        <div className="redirect-control">
+          <label className="redirect-checkbox" htmlFor={`${redirectFieldPath}-toggle`}>
+            <input
+              id={`${redirectFieldPath}-toggle`}
+              type="checkbox"
+              checked={Boolean(redirectChecked)}
+              onChange={handleRedirectChange}
+            />
+            <span>Create redirect from previous slug</span>
+          </label>
+
+          <p className="redirect-description">
+            Visitors using the old URL will be forwarded to this slug when enabled.
+          </p>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import LogoPrimary from "../logos/logo"
 import { MobileNavUpdated } from "./mobile-nav"
 import { getCurrentUser } from "@/admin/data/user"
 import { cn } from "@/utilities/ui"
+import { getSearchConfig } from "@/admin/config/features"
 
 export async function Header() {
   const [headerData, settingsData, user] = await Promise.all([
@@ -17,27 +18,26 @@ export async function Header() {
   ])
 
   const settings = settingsData as Setting
+  const searchConfig = getSearchConfig()
 
   return (
     <header
       className={cn(
-        "h-nav md:px-section-x bg-white fixed inset-x-0 z-[1000] border-b border-zinc-200 px-0",
-        // If user is logged in, add 32px to the top of the header to accomodate the admin bar
+        "h-nav min-h-nav max-h-nav border-dark-border fixed inset-x-0 z-[1000] border-b bg-white",
+        "px-section-x",
         user ? "top-[32px]" : "top-0"
       )}
     >
-      <div className="h-full px-8">
-        <div className="flex h-full items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center space-x-3"
-            aria-label="Return to homepage"
-          >
-            <LogoPrimary width={160} height={42} />
-          </Link>
-          <HeaderNavigation data={headerData} />
-          <MobileNavUpdated data={headerData} settings={settings} />
-        </div>
+      <div className="max-w-container gap-content mx-auto flex h-full w-full items-center justify-between">
+        <Link
+          href="/"
+          className="gap-content-sm flex items-center"
+          aria-label="Return to homepage"
+        >
+          <LogoPrimary className="h-logo w-auto" />
+        </Link>
+        <HeaderNavigation data={headerData} search={searchConfig} />
+        <MobileNavUpdated data={headerData} settings={settings} search={searchConfig} />
       </div>
     </header>
   )

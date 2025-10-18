@@ -1,0 +1,212 @@
+@layer frontend-theme {
+  /*
+  /*  THEME: CONFIGURABLE TOKENS
+  /*
+  /*
+    Adjust values in this block when tailoring a new project.
+    - Use the `--fluid-space-*` mins/maxes to set your base spacing rhythm.
+    - `--fluid-space-ratio-min/max` let you widen the hierarchy on desktop while
+      keeping mobile tighter (defaults keep behaviour identical until adjusted).
+    - Container widths control layout gutters; match them to design breakpoints.
+    - Logo/Nav height pairs let you define chrome sizing (example: tighten nav by
+      lowering `--spacing-nav-max` while keeping a generous minimum for mobile).
+    Everything here should remain human-readable numbers (px/rem) so designers can
+    reason about the system without hunting through calculated values.
+  */
+
+  @theme {
+    --fluid-space-base-min: 1rem;
+    --fluid-space-base-max: 1.5rem;
+    --fluid-space-viewport-min: 20rem;
+    --fluid-space-viewport-max: 90rem;
+    --fluid-space-ratio-min: 1.28;
+    --fluid-space-ratio-max: 1.36;
+
+    --control-scale-sm: 0.3;
+    --control-scale-md: 0.5;
+    --control-scale-lg: 0.75;
+    --control-scale-xl: 1.05;
+
+    --container-width-min: 19.375rem;
+    --container-width-max: 1360px;
+    --container-md-width-min: 17.5rem;
+    --container-md-width-max: 1080px;
+    --container-sm-width-min: 17.5rem;
+    --container-sm-width-max: 720px;
+
+    --spacing-logo-min: 30px;
+    --spacing-logo-max: 40px;
+    --spacing-nav-min: 50px;
+    --spacing-nav-max: 80px;
+  }
+
+  /*
+  /*  THEME: DERIVED TOKENS
+  /*
+  /*
+    Do not hand-edit the values below—treat them as read-only outputs.
+    They translate the tunable tokens above into the full spacing scale used by
+    Tailwind utilities and section helpers. If you need a new spacing size, update
+    the min/max inputs or add a new derived variable with the same pattern instead
+    of overriding individual results in components.
+  */
+
+  @theme {
+    --fluid-space-viewport-span: max(
+      1,
+      calc((var(--fluid-space-viewport-max) - var(--fluid-space-viewport-min)) / 1px)
+    );
+    --fluid-space-progress: clamp(
+      0,
+      calc(
+        ((100vw - var(--fluid-space-viewport-min)) / 1px) /
+          var(--fluid-space-viewport-span)
+      ),
+      1
+    );
+    --fluid-space-base-fluid: calc(
+      var(--fluid-space-base-min) +
+        (var(--fluid-space-base-max) - var(--fluid-space-base-min)) *
+        var(--fluid-space-progress)
+    );
+    --fluid-space-base: clamp(
+      var(--fluid-space-base-min),
+      var(--fluid-space-base-fluid),
+      var(--fluid-space-base-max)
+    );
+
+    --fluid-space-ratio-fluid: calc(
+      var(--fluid-space-ratio-min) +
+        (var(--fluid-space-ratio-max) - var(--fluid-space-ratio-min)) *
+        var(--fluid-space-progress)
+    );
+    --fluid-space-ratio: clamp(
+      var(--fluid-space-ratio-min),
+      var(--fluid-space-ratio-fluid),
+      var(--fluid-space-ratio-max)
+    );
+
+    --fluid-space-0: 0rem;
+    --fluid-space-1: calc(var(--fluid-space-base) / var(--fluid-space-ratio));
+    --fluid-space-2: var(--fluid-space-base);
+    --fluid-space-3: calc(var(--fluid-space-2) * var(--fluid-space-ratio));
+    --fluid-space-4: calc(var(--fluid-space-3) * var(--fluid-space-ratio));
+    --fluid-space-5: calc(var(--fluid-space-4) * var(--fluid-space-ratio));
+    --fluid-space-6: calc(var(--fluid-space-5) * var(--fluid-space-ratio));
+    --fluid-space-7: calc(var(--fluid-space-6) * var(--fluid-space-ratio));
+
+    --spacing-section-none: var(--fluid-space-0);
+    --spacing-section-xs: var(--fluid-space-3);
+    --spacing-section-sm: var(--fluid-space-4);
+    --spacing-section-md: var(--fluid-space-5);
+    --spacing-section-lg: var(--fluid-space-6);
+    --spacing-section-xl: var(--fluid-space-7);
+    --spacing-section-xxl: calc(var(--fluid-space-7) * var(--fluid-space-ratio));
+
+    --spacing-section-x: var(--spacing-section-md);
+    --spacing-section-y: var(--spacing-section-lg);
+
+    --spacing-content-xss: calc(var(--fluid-space-1) / var(--fluid-space-ratio));
+    --spacing-content-xs: var(--fluid-space-1);
+    --spacing-content-sm: var(--fluid-space-2);
+    --spacing-content: var(--fluid-space-3);
+    --spacing-content-lg: var(--fluid-space-4);
+    --spacing-content-xl: var(--fluid-space-5);
+    --spacing-content-xxl: var(--fluid-space-6);
+
+    /* Control-scale tokens stay leaner than content spacing for buttons/inputs */
+    --spacing-control-sm: calc(var(--fluid-space-base) * var(--control-scale-sm));
+    --spacing-control-md: calc(var(--fluid-space-base) * var(--control-scale-md));
+    --spacing-control-lg: calc(var(--fluid-space-base) * var(--control-scale-lg));
+    --spacing-control-xl: calc(var(--fluid-space-base) * var(--control-scale-xl));
+
+    --spacing-grid-xs: var(--spacing-content-xs);
+    --spacing-grid-sm: var(--spacing-content-sm);
+    --spacing-grid: var(--spacing-content);
+    --spacing-grid-lg: var(--spacing-content-lg);
+    --spacing-grid-xl: var(--spacing-content-xl);
+    --spacing-grid-xxl: var(--spacing-content-xxl);
+    --spacing-container-gap: var(--spacing-content-xl);
+
+    --spacing-logo-fluid: calc(
+      var(--spacing-logo-min) +
+        (var(--spacing-logo-max) - var(--spacing-logo-min)) * var(--fluid-space-progress)
+    );
+    --spacing-logo: clamp(
+      var(--spacing-logo-min),
+      var(--spacing-logo-fluid),
+      var(--spacing-logo-max)
+    );
+
+    --spacing-nav-fluid: calc(
+      var(--spacing-nav-min) +
+        (var(--spacing-nav-max) - var(--spacing-nav-min)) * var(--fluid-space-progress)
+    );
+    --spacing-nav: clamp(
+      var(--spacing-nav-min),
+      var(--spacing-nav-fluid),
+      var(--spacing-nav-max)
+    );
+
+    --layout-container-width: calc(
+      var(--container-width-min) +
+        (var(--container-width-max) - var(--container-width-min)) *
+        var(--fluid-space-progress)
+    );
+    --layout-container-md-width: calc(
+      var(--container-md-width-min) +
+        (var(--container-md-width-max) - var(--container-md-width-min)) *
+        var(--fluid-space-progress)
+    );
+    --layout-container-sm-width: calc(
+      var(--container-sm-width-min) +
+        (var(--container-sm-width-max) - var(--container-sm-width-min)) *
+        var(--fluid-space-progress)
+    );
+
+    --spacing-container: clamp(
+      var(--container-width-min),
+      var(--layout-container-width),
+      var(--container-width-max)
+    );
+    --spacing-container-md: clamp(
+      var(--container-md-width-min),
+      var(--layout-container-md-width),
+      var(--container-md-width-max)
+    );
+    --spacing-container-sm: clamp(
+      var(--container-sm-width-min),
+      var(--layout-container-sm-width),
+      var(--container-sm-width-max)
+    );
+  }
+
+  /*
+  /*  THEME: CUSTOM CALCS
+  /*
+  /*
+    Custom calculations for container offsets and first-section nav offsets.
+    These are not part of the core theme but are useful for common layout patterns.
+  */
+
+  /* This is the the offset padding to use to get a fullwidth element to
+  imitate where the edges of the containers would be. */
+
+  @theme {
+    --spacing-container-offset: calc(
+      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container)) / 2
+    );
+
+    --spacing-container-md-offset: calc(
+      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-md)) / 2
+    );
+
+    --spacing-container-sm-offset: calc(
+      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-sm)) / 2
+    );
+
+    --spacing-first-section-nav-offset: calc(
+      var(--spacing-section-y) + var(--spacing-nav)
+    );
+  }
+}

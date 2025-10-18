@@ -1,96 +1,152 @@
-import type { ContentBlock, Media as MediaType } from "@/admin/payload/payload-types"
+import type { ContentBlock } from "@/admin/payload/payload-types"
 import { Section } from "@/components/fields/section"
 import { Media } from "@/components/fields/media"
 import RichText from "@/components/fields/rich-text"
 import { CMSLink } from "@/components/fields/link"
-import { normalizeLinkField } from "@/components/fields/link/normalize-link"
-import { cn } from "@/utilities/ui"
+import { tv } from "tailwind-variants"
 
-type ContentLayout = "stacked" | "split" | "columns"
-type ContentAlignment = "start" | "center"
-
-interface ExtendedContentBlock extends ContentBlock {
-  layout?: ContentLayout
-  alignment?: ContentAlignment
-  showMedia?: boolean
-  mediaPosition?: "left" | "right"
-  showButton?: boolean
-}
+const contentVariants = tv({
+  slots: {
+    container: "flex flex-col gap-content-lg",
+    layout: "flex flex-col gap-content",
+    copy: "flex flex-col gap-content text-pretty",
+    media: "relative overflow-hidden border border-dark-border bg-neutral",
+    richText: "[&>*+*]:mt-content",
+    buttonContainer: "flex",
+    button: "inline-flex items-center gap-content-sm",
+  },
+  variants: {
+    layout: {
+      stacked: {},
+      split: {
+        layout: "grid gap-grid-lg md:grid-cols-2 md:items-start",
+      },
+      columns: {
+        layout: "flex flex-col gap-content lg:gap-content-lg",
+        richText: "lg:columns-2",
+      },
+    },
+    alignment: {
+      start: {},
+      center: {
+        copy: "items-center text-center",
+        richText: "text-center",
+        buttonContainer: "justify-center",
+      },
+    },
+    mediaPosition: {
+      left: {},
+      right: {},
+    },
+    mediaPresence: {
+      with: {},
+      without: {},
+    },
+  },
+  compoundVariants: [
+    {
+      layout: "split",
+      mediaPresence: "with",
+      mediaPosition: "right",
+      class: {
+        copy: "md:order-1 md:pr-content",
+        media: "md:order-2",
+      },
+    },
+    {
+      layout: "split",
+      mediaPresence: "with",
+      mediaPosition: "left",
+      class: {
+        copy: "md:order-2 md:pl-content",
+        media: "md:order-1",
+      },
+    },
+    {
+      layout: "split",
+      class: {
+        media: "w-full",
+      },
+    },
+  ],
+  defaultVariants: {
+    layout: "stacked",
+    alignment: "start",
+    mediaPosition: "right",
+    mediaPresence: "without",
+  },
+})
 
 export function ContentComponent(props: ContentBlock) {
   const {
     content,
-    layout = "stacked",
-    alignment = "start",
-    showMedia = false,
+    layout,
+    alignment,
+    showMedia,
     media,
-    mediaPosition = "right",
-    showButton = false,
-    button: buttonConfig,
+    mediaPosition,
+    showButton,
+    button,
     sectionSettings,
-  } = props as ExtendedContentBlock
+  } = props
 
-  const resolvedMedia =
-    showMedia && media && typeof media === "object" ? (media as MediaType) : null
+  const hasMedia = Boolean(showMedia && media)
+  const requestedLayout = layout ?? "stacked"
+  const effectiveLayout =
+    requestedLayout === "split" && !hasMedia ? "stacked" : requestedLayout
 
-  const isSplitLayout = layout === "split"
-  const isColumnLayout = layout === "columns"
+  const resolvedAlignment =
+    effectiveLayout === "split" ? "start" : alignment ?? "start"
+  const resolvedMediaPosition = hasMedia ? mediaPosition ?? "right" : "right"
+  const mediaPresence = hasMedia ? "with" : "without"
 
-  const buttonLink = normalizeLinkField(buttonConfig as Record<string, unknown>)
-  const shouldRenderButton =
-    showButton && buttonLink && (buttonLink.label || buttonLink.iconOnly || buttonLink.icon)
-
-  const contentWrapperClass = cn({
-    "grid gap-10 md:grid-cols-2 md:items-start": isSplitLayout,
-    "lg:columns-2 lg:gap-12 space-y-6": isColumnLayout,
-    "flex flex-col gap-8": layout === "stacked",
+  const {
+    container,
+    layout: layoutSlot,
+    copy,
+    media: mediaSlot,
+    richText,
+    button: buttonSlot,
+    buttonContainer,
+  } = contentVariants({
+    layout: effectiveLayout,
+    alignment: resolvedAlignment,
+    mediaPosition: resolvedMediaPosition,
+    mediaPresence,
   })
 
-  const mediaWrapperClass = cn(
-    "relative overflow-hidden rounded-2xl border border-dark-border bg-neutral",
-    isSplitLayout ? "w-full" : ""
-  )
+  const containerClassName = container()
+  const layoutClassName = layoutSlot()
+  const copyClassName = copy()
+  const mediaClassName = mediaSlot()
+  const richTextClassName = richText()
+  const buttonClassName = buttonSlot()
+  const buttonContainerClassName = buttonContainer()
 
   return (
-    <Section sectionSettings={sectionSettings} containerClassName="space-y-10">
-      <div className={contentWrapperClass}>
-        <div
-          className={cn(
-            "prose prose-lg max-w-none",
-            isSplitLayout ? "md:pr-6" : "",
-            alignment === "center" && !isSplitLayout ? "mx-auto text-center" : "",
-            isColumnLayout ? "lg:columns-2" : "",
-            isSplitLayout && mediaPosition === "left" ? "md:order-2" : isSplitLayout ? "md:order-1" : ""
-          )}
-        >
+    <Section sectionSettings={sectionSettings} containerClassName={containerClassName}>
+      <div className={layoutClassName}>
+        <div className={copyClassName}>
           <RichText
             data={content}
             enableGutter={false}
             textColor="inherit"
-            className="space-y-6"
+            className={richTextClassName}
           />
 
-          {shouldRenderButton ? (
-            <div
-              className={cn(
-                "mt-8 flex",
-                alignment === "center" ? "justify-center" : "justify-start"
-              )}
-            >
-              <CMSLink {...(buttonLink as any)} className="inline-flex items-center gap-2" />
+          {showButton && button ? (
+            <div className={buttonContainerClassName}>
+              <CMSLink {...button} className={buttonClassName} />
             </div>
           ) : null}
         </div>
 
-        {resolvedMedia ? (
-          <div
-            className={cn(
-              mediaWrapperClass,
-              isSplitLayout && mediaPosition === "left" ? "md:order-1" : isSplitLayout ? "md:order-2" : ""
-            )}
-          >
-            <Media resource={resolvedMedia} className="h-full w-full object-cover" />
-          </div>
+        {hasMedia ? (
+          <Media
+            resource={media}
+            className={mediaClassName}
+            imgClassName="h-full w-full object-cover"
+          />
         ) : null}
       </div>
     </Section>

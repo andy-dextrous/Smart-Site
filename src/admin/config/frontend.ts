@@ -33,6 +33,7 @@ export type FrontendCollection = {
   slug: string
   label: string
   hasSEO?: boolean
+  searchEnabled?: boolean
 }
 
 export type EnableFrontendOptions = {
@@ -59,6 +60,11 @@ type CollectionStructure = {
 
 const registeredCollections = new Map<string, FrontendCollection>()
 
+type EnhancedFieldsResult = {
+  fields: Field[]
+  usesContentGroup: boolean
+}
+
 /*************************************************************************/
 /*  ENHANCED CORE FACTORY FUNCTION
 /*************************************************************************/
@@ -77,16 +83,38 @@ export function enableFrontend<TSlug extends CollectionSlug>(
     seoEnabled = true,
   } = options || {}
   const structure = analyzeCollectionStructure(config)
-  const enhancedFields = buildEnhancedFields(config, structure, seoSchemaType, seoEnabled)
+  const enhanced = buildEnhancedFields(config, structure, seoSchemaType, seoEnabled)
   const collection = createFrontendCollection(config, label, structure, seoEnabled)
 
   registeredCollections.set(config.slug, collection)
 
   const slugSourceField = structure.primaryLabelField ?? "title"
 
+  const baseHooks = {
+    ...config.hooks,
+    beforeChange: customHooks
+      ? [...(config.hooks?.beforeChange || []), beforeUniversalChange]
+      : config.hooks?.beforeChange,
+    afterChange: customHooks
+      ? [...(config.hooks?.afterChange || []), afterUniversalChange]
+      : config.hooks?.afterChange,
+    afterDelete: customHooks
+      ? [...(config.hooks?.afterDelete || []), afterUniversalDelete]
+      : config.hooks?.afterDelete,
+    beforeOperation:
+      customHooks && slugLocked
+        ? [...(config.hooks?.beforeOperation || []), lockSlugAfterPublish]
+        : config.hooks?.beforeOperation,
+  }
+
+  if (enhanced.usesContentGroup) {
+    baseHooks.beforeValidate = appendHook(baseHooks.beforeValidate, normalizeContentBeforeValidate)
+    baseHooks.afterRead = appendHook(baseHooks.afterRead, normalizeContentAfterRead)
+  }
+
   return {
     ...config,
-    fields: [...enhancedFields, ...slugField(slugSourceField)],
+    fields: [...enhanced.fields, ...slugField(slugSourceField)],
     admin: {
       ...config.admin,
       // Add preview functionality automatically when enabled
@@ -117,22 +145,7 @@ export function enableFrontend<TSlug extends CollectionSlug>(
               })
             }),
     },
-    hooks: {
-      ...config.hooks,
-      beforeChange: customHooks
-        ? [...(config.hooks?.beforeChange || []), beforeUniversalChange]
-        : config.hooks?.beforeChange,
-      afterChange: customHooks
-        ? [...(config.hooks?.afterChange || []), afterUniversalChange]
-        : config.hooks?.afterChange,
-      afterDelete: customHooks
-        ? [...(config.hooks?.afterDelete || []), afterUniversalDelete]
-        : config.hooks?.afterDelete,
-      beforeOperation:
-        customHooks && slugLocked
-          ? [...(config.hooks?.beforeOperation || []), lockSlugAfterPublish]
-          : config.hooks?.beforeOperation,
-    },
+    hooks: baseHooks,
   }
 }
 
@@ -243,7 +256,7 @@ function buildEnhancedFields(
   structure: CollectionStructure,
   seoSchemaType: SEOSchemaType | undefined,
   seoEnabled: boolean
-): Field[] {
+): EnhancedFieldsResult {
   const fields = structure.hasTitle
     ? [...config.fields]
     : [titleField(), ...config.fields]
@@ -294,27 +307,33 @@ function addSEOToExistingTabs(
   structure: CollectionStructure,
   seoSchemaType: SEOSchemaType | undefined,
   seoEnabled: boolean
-): Field[] {
+): EnhancedFieldsResult {
   if (structure.hasCustomSEO || !seoEnabled) {
-    return fields
+    return {
+      fields,
+      usesContentGroup: false,
+    }
   }
 
-  return fields.map(field => {
-    if (field.type === "tabs") {
-      return {
-        ...field,
-        tabs: [
-          ...field.tabs,
+  return {
+    fields: fields.map(field => {
+      if (field.type === "tabs") {
+        return {
+          ...field,
+          tabs: [
+            ...field.tabs,
           {
             name: "seo",
             label: "SEO",
             fields: seoFields({ seoSchemaType }),
           },
         ],
+        }
       }
-    }
-    return field
-  })
+      return field
+    }),
+    usesContentGroup: false,
+  }
 }
 
 function createTabsWithSEO(
@@ -322,33 +341,34 @@ function createTabsWithSEO(
   structure: CollectionStructure,
   seoSchemaType: SEOSchemaType | undefined,
   seoEnabled: boolean
-): Field[] {
+): EnhancedFieldsResult {
   const { titleFields, contentFields } = extractTitleFields(fields)
 
   if (structure.hasCustomSEO || !seoEnabled) {
-    return [
-      ...titleFields,
-      {
-        type: "tabs",
-        tabs: [
-          {
-            name: "content",
-            label: "Content",
-            fields: contentFields,
-          },
-        ],
-      },
-    ]
+    return {
+      fields: [
+        ...titleFields,
+        {
+          type: "tabs",
+          tabs: [
+            {
+              label: "Content",
+              fields: contentFields,
+            },
+          ],
+        },
+      ],
+      usesContentGroup: true,
+    }
   }
 
-  return seoEnabled
-    ? [
+  return {
+    fields: [
       ...titleFields,
       {
         type: "tabs",
         tabs: [
           {
-            name: "content",
             label: "Content",
             fields: contentFields,
           },
@@ -359,20 +379,9 @@ function createTabsWithSEO(
           },
         ],
       },
-    ]
-    : [
-        ...titleFields,
-        {
-          type: "tabs",
-          tabs: [
-            {
-              name: "content",
-              label: "Content",
-              fields: contentFields,
-            },
-          ],
-        },
-      ]
+    ],
+    usesContentGroup: true,
+  }
 }
 
 function addSEOToSimpleLayout(
@@ -380,35 +389,77 @@ function addSEOToSimpleLayout(
   structure: CollectionStructure,
   seoSchemaType: SEOSchemaType | undefined,
   seoEnabled: boolean
-): Field[] {
+): EnhancedFieldsResult {
   if (structure.hasCustomSEO || !seoEnabled) {
-    return fields
+    return {
+      fields,
+      usesContentGroup: false,
+    }
   }
 
   const { titleFields, contentFields } = extractTitleFields(fields)
 
-  return [
-    ...titleFields,
-    {
-      type: "tabs",
-      tabs: [
-        {
-          name: "content",
-          label: "Content",
-          fields: contentFields,
-        },
-        ...(seoEnabled
-          ? [
-              {
-                name: "seo",
-                label: "SEO",
-                fields: seoFields({ seoSchemaType }),
-              },
-            ]
-          : []),
-      ],
-    },
-  ]
+  return {
+    fields: [
+      ...titleFields,
+      {
+        type: "tabs",
+        tabs: [
+          {
+            label: "Content",
+            fields: contentFields,
+          },
+          {
+            name: "seo",
+            label: "SEO",
+            fields: seoFields({ seoSchemaType }),
+          },
+        ],
+      },
+    ],
+    usesContentGroup: true,
+  }
+}
+
+function appendHook<T>(
+  existing: T[] | undefined,
+  hook: T
+): T[] {
+  return existing ? [...existing, hook] : [hook]
+}
+
+function normalizeContentBeforeValidate(args: { data?: Record<string, unknown> }): void {
+  if (args.data) {
+    flattenContentGroupData(args.data)
+  }
+}
+
+function normalizeContentAfterRead(args: { doc?: Record<string, unknown> | null }): Record<string, unknown> | undefined | null {
+  if (args.doc) {
+    flattenContentGroupData(args.doc)
+    return args.doc
+  }
+  return args.doc ?? undefined
+}
+
+function flattenContentGroupData(target: Record<string, unknown> | undefined): void {
+  if (!target || typeof target !== "object" || Array.isArray(target)) {
+    return
+  }
+
+  const carrier = target as Record<string, unknown> & { content?: unknown }
+  const content = carrier.content
+  if (!content || typeof content !== "object" || Array.isArray(content)) {
+    return
+  }
+
+  for (const [key, value] of Object.entries(content as Record<string, unknown>)) {
+    if (!(key in carrier)) {
+      carrier[key] = value
+    }
+  }
+
+  delete carrier.content
 }
 
 function createFrontendCollection(
@@ -438,6 +489,7 @@ export function getFrontendCollections(): FrontendCollection[] {
       slug,
       label: collection.label,
       hasSEO: collection.seo !== false,
+      searchEnabled: collection.search?.enabled !== false,
     })
   }
 
@@ -455,6 +507,7 @@ export function getFrontendCollection(slug: string): FrontendCollection | undefi
       slug,
       label: config.label,
       hasSEO: config.seo !== false,
+      searchEnabled: config.search?.enabled !== false,
     }
   }
   return undefined

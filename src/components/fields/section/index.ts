@@ -6,6 +6,5 @@ export type {
   SectionAttribute,
   SectionColorScheme,
   SectionContainerWidth,
-  SectionPaddingX,
-  SectionPaddingY,
+  SectionPaddingValue,
 } from "./types"

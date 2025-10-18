@@ -9,12 +9,11 @@ export function insightsMinimalPage() {
       {
         blockType: "hero",
         heading: "Insights",
-        supportingText: createRichText([
-          paragraph("Latest articles and updates from your team."),
-        ]),
+        supportingText: "Latest articles and updates from your team.",
         alignment: "left",
         size: "medium",
         sectionSettings: {
+          containerWidth: "lg",
           colorScheme: "neutral",
         },
       },
@@ -29,6 +28,7 @@ export function insightsMinimalPage() {
         showPagination: true,
         showPageRange: true,
         sectionSettings: {
+          containerWidth: "lg",
           colorScheme: "light",
         },
       },

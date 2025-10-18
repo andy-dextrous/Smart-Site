@@ -6,19 +6,14 @@
 @import "tailwindcss/preflight.css" layer(frontend-base);
 @import "tailwindcss/utilities.css" layer(frontend-utilities);
 
-/* Source exclusions */
-@source not "planning/**/*";
-@source not "demos/**/*";
-
 /* External Plugins */
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
-/* ShadCN UI */
-@import "./ui.css" layer(frontend-components);
-
 /* Custom Frontend Theme */
+@import "./colors.css" layer(frontend-theme);
 @import "./theme.css" layer(frontend-theme);
+@import "./spacing.css" layer(frontend-theme);
 
 /* Frontend Custom Layers */
 @import "./base.css" layer(frontend-base-custom);

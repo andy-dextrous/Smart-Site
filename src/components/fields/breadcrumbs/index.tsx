@@ -16,7 +16,7 @@ export function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        "text-dark-600 flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
+        "text-dark-600 flex flex-wrap items-center gap-content-xs text-sm break-words sm:gap-content-sm",
         className
       )}
       {...props}
@@ -28,7 +28,7 @@ export function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn("inline-flex items-center gap-1.5", className)}
+      className={cn("inline-flex items-center gap-content-xs", className)}
       {...props}
     />
   )
@@ -57,7 +57,7 @@ export function BreadcrumbPage({ className, ...props }: React.ComponentProps<"sp
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn("text-dark font-normal", className)}
+      className={cn("text-dark", className)}
       {...props}
     />
   )
@@ -149,10 +149,10 @@ export function Breadcrumbs({
       : processedBreadcrumbs
 
   return (
-    <Breadcrumb className={cn("mb-8", breadcrumbConfig.className, className)}>
+    <Breadcrumb className={cn("mb-content-lg", breadcrumbConfig.className, className)}>
       <BreadcrumbList className={cn("text-sm text-dark-600", breadcrumbConfig.className)}>
         {finalBreadcrumbs.map((crumb, index) => (
-          <div key={`${crumb.uri}-${index}`} className="flex items-center">
+          <div key={`${crumb.uri}-${index}`} className="flex items-center gap-content-xs">
             <BreadcrumbItem>
               {crumb.isCurrentPage ? (
                 <BreadcrumbPage className="text-dark">{crumb.label}</BreadcrumbPage>

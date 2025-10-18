@@ -18,18 +18,21 @@
 - Browse photo library and choose based on appropriateness and not being used before.
 - Optimise for GEO
 - Could chat work on frontend too??
+- make CRUD tools dynamic/workflows
+- documentation
 
 # Current Tasks
 
 ## Starter
 
-- functioning blocks library with navs, footers, every possible kind of section. allow install during setup and remotely using CLI
 - auto screenshots of sections
-- SEO fields all organised and no dynamic "content" field
-- change of slug does not create redirect
 - chat widget should only show if truly connected
+- Consider making beginner starter collections part of a Brochure Website starter theme, clean out backend and move all to CLI. 
+- Make header and footer globals slot-ready for any type of footer or header.
 
-# AI Brain
+## Blocks Library
 
-- make CRUD tools dynamic/workflows
-- documentation
+- Design full initial library (sections, components, field variations, animations, whole templates, themes, collections). Scan all existing websites built and also scan awwwards
+- Build to spec and refine
+- Develop CLI for full installability
+ Manifest v2 depth: registry entries list dependencies, but the richer graphs (fields → sections → migrations) and uninstall metadata referenced in the proposal aren’t fully codified yet. Extending the manifest schema and CLI automation will unlock bundles/themes.

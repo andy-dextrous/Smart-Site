@@ -228,7 +228,6 @@ export function AppSidebar() {
     "payload-migrations",
     "payload-jobs",
     "payload-locked-documents",
-    "search",
     "payload-folders",
     "payload-query-presets",
   ]
@@ -256,7 +255,16 @@ export function AppSidebar() {
     settings: {
       label: "Settings",
       icon: getNavIcon("settings"),
-      items: ["settings", "ai-settings", "header", "footer", "templates", "redirects", "categories"],
+      items: [
+        "settings",
+        "ai-settings",
+        "header",
+        "footer",
+        "templates",
+        "redirects",
+        "categories",
+        "search",
+      ],
     },
   }
 
@@ -289,6 +297,7 @@ export function AppSidebar() {
             "categories",
             "users",
             "media",
+            "search",
           ].includes(col.slug)
       )
       .map(col => ({

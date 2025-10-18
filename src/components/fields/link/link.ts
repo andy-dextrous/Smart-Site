@@ -135,48 +135,6 @@ export const link: LinkType = ({
     linkResult.fields = [...linkResult.fields, ...linkTypes]
   }
 
-  linkResult.fields.push({
-    type: "row",
-    admin: {
-      condition: (_, siblingData) => siblingData?.appearance === "button",
-    },
-    fields: [
-      {
-        name: "variant",
-        type: "select",
-        label: "Button variant",
-        defaultValue: "default",
-        options: variantOptions,
-        admin: {
-          width: "33%",
-          description: "Select the button variant",
-        },
-      },
-      {
-        name: "size",
-        type: "select",
-        label: "Button size",
-        defaultValue: "lg",
-        options: sizeOptions,
-        admin: {
-          width: "33%",
-          description: "Select the button size",
-        },
-      },
-      {
-        name: "layout",
-        type: "select",
-        label: "Button layout",
-        defaultValue: "default",
-        options: layoutOptions,
-        admin: {
-          width: "34%",
-          description: "Select the button layout",
-        },
-      },
-    ],
-  })
-
   const iconField = iconPickerField({
     name: "icon",
     label: "Button icon",
@@ -185,34 +143,51 @@ export const link: LinkType = ({
   })
 
   linkResult.fields.push({
-    type: "row",
+    type: "collapsible",
+    label: "Button options",
     admin: {
+      initCollapsed: true,
       condition: (_, siblingData) => siblingData?.appearance === "button",
     },
     fields: [
-      iconField,
       {
-        name: "iconPosition",
-        type: "select",
-        label: "Icon position",
-        defaultValue: "left",
-        options: [
-          { label: "Left of text", value: "left" },
-          { label: "Right of text", value: "right" },
+        type: "row",
+        fields: [
+          {
+            name: "variant",
+            type: "select",
+            label: "Button variant",
+            defaultValue: "default",
+            options: variantOptions,
+            admin: {
+              width: "33%",
+              description: "Select the button variant",
+            },
+          },
+          {
+            name: "size",
+            type: "select",
+            label: "Button size",
+            defaultValue: "lg",
+            options: sizeOptions,
+            admin: {
+              width: "33%",
+              description: "Select the button size",
+            },
+          },
+          {
+            name: "layout",
+            type: "select",
+            label: "Button layout",
+            defaultValue: "default",
+            options: layoutOptions,
+            admin: {
+              width: "34%",
+              description: "Select the button layout",
+            },
+          },
         ],
-        admin: {
-          width: "50%",
-        },
       },
-    ],
-  })
-
-  linkResult.fields.push({
-    type: "row",
-    admin: {
-      condition: (_, siblingData) => siblingData?.appearance === "button",
-    },
-    fields: [
       {
         name: "iconOnly",
         type: "checkbox",
@@ -220,8 +195,30 @@ export const link: LinkType = ({
         defaultValue: false,
         admin: {
           description: "Render the button as icon-only with optional label for screen readers.",
-          width: "50%",
+          width: "100%",
         },
+      },
+      {
+        type: "row",
+        admin: {
+          condition: (_, siblingData) => siblingData?.iconOnly === true,
+        },
+        fields: [
+          iconField,
+          {
+            name: "iconPosition",
+            type: "select",
+            label: "Icon position",
+            defaultValue: "left",
+            options: [
+              { label: "Left of text", value: "left" },
+              { label: "Right of text", value: "right" },
+            ],
+            admin: {
+              width: "50%",
+            },
+          },
+        ],
       },
     ],
   })

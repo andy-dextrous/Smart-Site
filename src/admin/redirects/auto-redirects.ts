@@ -1,29 +1,28 @@
 import { getPayload } from "payload"
 import configPromise from "@payload-config"
 import { revalidateTag } from "next/cache"
+import { formatIdForRelationship } from "@/admin/payload/db/id-utils"
 
 /*************************************************************************/
 /*  AUTOMATIC REDIRECT ENGINE
 /*************************************************************************/
 
 /**
- * Creates an automatic redirect from old URI to new URI
+ * Creates an automatic redirect from old URI to a document
+ * Uses document relationships for pages/posts, custom URLs for other collections
  * Checks for conflicts with existing manual redirects
- * Prevents redirect loops by cleaning up conflicting automatic redirects
  * Safe operation - won't fail if redirect creation fails
  */
 export async function createAutomaticRedirect(
   oldURI: string,
+  collection: string,
+  documentId: string,
   newURI: string
 ): Promise<{ success: boolean; message: string }> {
   const startTime = Date.now()
-  
+
   try {
     const payload = await getPayload({ config: configPromise })
-
-    if (oldURI === newURI) {
-      return { success: false, message: "URIs are identical, no redirect needed" }
-    }
 
     if (await hasManualRedirect(oldURI)) {
       return {
@@ -31,8 +30,6 @@ export async function createAutomaticRedirect(
         message: `Manual redirect already exists for ${oldURI} - not overriding`,
       }
     }
-
-    await cleanupConflictingRedirects(newURI)
 
     const existingAutoRedirect = await payload.find({
       collection: "redirects",
@@ -44,56 +41,82 @@ export async function createAutomaticRedirect(
 
     let redirectId: string | null = null
 
+    const buildRedirectData = (): any => {
+      if (collection === "pages") {
+        return {
+          to: {
+            type: "reference",
+            reference: {
+              relationTo: "pages",
+              value: formatIdForRelationship(documentId),
+            },
+          },
+          type: "automatic",
+          source: "uri-index",
+        }
+      } else if (collection === "posts") {
+        return {
+          to: {
+            type: "reference",
+            reference: {
+              relationTo: "posts",
+              value: formatIdForRelationship(documentId),
+            },
+          },
+          type: "automatic",
+          source: "uri-index",
+        }
+      } else {
+        return {
+          to: {
+            type: "custom",
+            url: newURI,
+          },
+          type: "automatic",
+          source: "uri-index",
+        }
+      }
+    }
+
+    const redirectData = buildRedirectData()
+
     if (existingAutoRedirect.docs.length > 0) {
       const existing = existingAutoRedirect.docs[0]
       await payload.update({
         collection: "redirects",
         id: existing.id,
-        data: {
-          to: {
-            type: "custom",
-            url: newURI,
-          },
-          type: "automatic",
-          source: "uri-index",
-        },
+        data: redirectData,
       })
       redirectId = existing.id
-      payload.logger.info(`Updated automatic redirect: ${oldURI} → ${newURI}`)
+      payload.logger.info(`Updated automatic redirect: ${oldURI} → ${collection}/${documentId}`)
     } else {
       const result = await payload.create({
         collection: "redirects",
         data: {
           from: oldURI,
-          to: {
-            type: "custom",
-            url: newURI,
-          },
-          type: "automatic",
-          source: "uri-index",
+          ...redirectData,
         },
       })
       redirectId = result.id
-      payload.logger.info(`Created automatic redirect: ${oldURI} → ${newURI}`)
+      payload.logger.info(`Created automatic redirect: ${oldURI} → ${collection}/${documentId}`)
     }
 
-    // Ensure the redirect caches are properly invalidated
     revalidateTag("collection:redirects")
-    revalidateTag(`redirect:${oldURI}`) // Invalidate specific URI redirect cache
-    
+    revalidateTag(`redirect:${oldURI}`)
+
     const executionTime = Date.now() - startTime
     payload.logger.info(
-      `Automatic redirect ${existingAutoRedirect.docs.length > 0 ? "updated" : "created"}: ${oldURI} → ${newURI} (${executionTime}ms)`
+      `Automatic redirect ${existingAutoRedirect.docs.length > 0 ? "updated" : "created"}: ${oldURI} → ${collection}/${documentId} (${executionTime}ms)`
     )
 
     return {
       success: true,
-      message: `Automatic redirect ${existingAutoRedirect.docs.length > 0 ? "updated" : "created"}: ${oldURI} → ${newURI}`,
+      message: `Automatic redirect ${existingAutoRedirect.docs.length > 0 ? "updated" : "created"}: ${oldURI} → ${collection}/${documentId}`,
     }
   } catch (error) {
     const payload = await getPayload({ config: configPromise })
     payload.logger.error(
-      `Failed to create automatic redirect ${oldURI} → ${newURI}:`,
+      `Failed to create automatic redirect ${oldURI} → ${collection}/${documentId}:`,
       error
     )
 

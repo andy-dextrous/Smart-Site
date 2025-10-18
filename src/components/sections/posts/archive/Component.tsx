@@ -4,12 +4,54 @@ import { getPostsWithPagination } from "@/admin/data/posts"
 import { Section } from "@/components/fields/section"
 import { PageRange } from "@/components/fields/pagination/page-range"
 import { PostCard } from "@/components/posts/post-card"
-import Link from "next/link"
+import { Pagination } from "@/components/fields/pagination"
+import { tv } from "tailwind-variants"
 
-import { cn } from "@/utilities/ui"
+type ArchiveLayout = NonNullable<PostsArchiveBlock["layout"]>
+type ArchiveColumns = NonNullable<PostsArchiveBlock["columns"]>
 
-type ArchiveLayout = "grid" | "list"
-type ArchiveColumns = "two" | "three" | "four"
+const archiveVariants = tv({
+  slots: {
+    container: "flex flex-col gap-content-lg",
+    grid: "",
+    controls: "flex flex-col gap-content",
+    range: "text-sm",
+    card: "",
+  },
+  variants: {
+    layout: {
+      grid: {
+        grid: "grid gap-grid",
+      },
+      list: {
+        grid: "flex flex-col gap-content",
+        card: "flex flex-col md:flex-row md:items-center md:gap-content",
+      },
+    },
+    columns: {
+      two: { grid: "md:grid-cols-2" },
+      three: { grid: "md:grid-cols-2 lg:grid-cols-3" },
+      four: { grid: "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" },
+    },
+    tone: {
+      light: {
+        range: "text-dark-600",
+      },
+      neutral: {
+        range: "text-dark-600",
+      },
+      dark: {
+        range: "text-white/70",
+      },
+    },
+  },
+  defaultVariants: {
+    layout: "grid",
+    columns: "three",
+    tone: "light",
+  },
+})
+
 function normalizeCategoryFilter(categoryFilter: PostsArchiveBlock["categoryFilter"]) {
   if (!categoryFilter) return undefined
 
@@ -24,73 +66,7 @@ function normalizeCategoryFilter(categoryFilter: PostsArchiveBlock["categoryFilt
     .filter((value): value is string => Boolean(value))
 }
 
-function appearanceFromColorScheme(colorScheme?: string | null) {
-  if (colorScheme === "dark") return "dark"
-  if (colorScheme === "light") return "light"
-  return "neutral"
-}
-
-function buildPageHref(base: string, page: number) {
-  if (page <= 1) return base
-  const separator = base.includes("?") ? "&" : "?"
-  return `${base}${separator}page=${page}`
-}
-
-function buildPaginationRange(current: number, total: number): Array<number | "ellipsis"> {
-  if (total <= 5) {
-    return Array.from({ length: total }, (_, index) => index + 1)
-  }
-
-  const range: Array<number | "ellipsis"> = [1]
-
-  const start = Math.max(2, current - 1)
-  const end = Math.min(total - 1, current + 1)
-
-  if (start > 2) {
-    range.push("ellipsis")
-  }
-
-  for (let page = start; page <= end; page += 1) {
-    range.push(page)
-  }
-
-  if (end < total - 1) {
-    range.push("ellipsis")
-  }
-
-  range.push(total)
-
-  return range
-}
-
-interface PaginationLinkButtonProps {
-  href: string
-  label: string
-  disabled?: boolean
-  active?: boolean
-}
-
-function PaginationLinkButton({ href, label, disabled, active }: PaginationLinkButtonProps) {
-  const baseClass = cn(
-    "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-    disabled
-      ? "pointer-events-none border border-dark-border/60 bg-neutral text-dark/50"
-      : "border border-dark-border bg-white text-dark hover:bg-neutral",
-    active && !disabled ? "border border-dark bg-dark text-white hover:bg-dark" : null
-  )
-
-  if (disabled) {
-    return <span className={baseClass}>{label}</span>
-  }
-
-  return (
-    <Link className={baseClass} href={href} prefetch={false}>
-      {label}
-    </Link>
-  )
-}
-
-export const PostsArchiveComponent: React.FC<PostsArchiveBlock & PageData> = async props => {
+export async function PostsArchiveComponent(props: PostsArchiveBlock & PageData) {
   const {
     postsPerPage,
     layout,
@@ -109,15 +85,21 @@ export const PostsArchiveComponent: React.FC<PostsArchiveBlock & PageData> = asy
     sectionSettings,
   } = props
 
+  const colorScheme = sectionSettings?.colorScheme ?? null
+  const tone: "light" | "neutral" | "dark" =
+    colorScheme === "dark" ? "dark" : colorScheme === "light" ? "light" : "neutral"
+  const appearance: "neutral" | "light" | "dark" = tone === "neutral" ? "neutral" : tone
+
   const resolvedLimit = postsPerPage ?? 9
-  const resolvedLayout = (layout ?? "grid") as ArchiveLayout
-  const resolvedColumns = (columns ?? "three") as ArchiveColumns
-  const shouldShowExcerpt = showExcerpt ?? true
-  const shouldShowCategories = showCategories ?? true
-  const shouldShowPublishedDate = showPublishedDate ?? true
-  const shouldShowReadingTime = showReadingTime ?? false
-  const shouldShowPagination = showPagination ?? true
-  const shouldShowPageRange = showPageRange ?? true
+  const requestedLayout = layout ?? "grid"
+  const resolvedLayout: ArchiveLayout = requestedLayout
+  const resolvedColumns: ArchiveColumns = columns ?? "three"
+  const shouldShowExcerpt = showExcerpt !== false
+  const shouldShowCategories = showCategories !== false
+  const shouldShowPublishedDate = showPublishedDate !== false
+  const shouldShowReadingTime = showReadingTime === true
+  const shouldShowPagination = showPagination !== false
+  const shouldShowPageRange = showPageRange !== false
   const normalizedOffset = offset ?? 0
   const normalizedSort = sort ?? "-publishedAt"
 
@@ -138,84 +120,59 @@ export const PostsArchiveComponent: React.FC<PostsArchiveBlock & PageData> = asy
   const archiveUri =
     document?.breadcrumbs?.[document.breadcrumbs.length - 1]?.url || "/posts"
 
-  const gridClass = cn({
-    "grid gap-8 md:grid-cols-2": resolvedLayout === "grid" && resolvedColumns === "two",
-    "grid gap-8 md:grid-cols-2 lg:grid-cols-3": resolvedLayout === "grid" && resolvedColumns === "three",
-    "grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4":
-      resolvedLayout === "grid" && resolvedColumns === "four",
-    "space-y-6": resolvedLayout === "list",
+  const {
+    container,
+    grid,
+    controls,
+    range,
+    card,
+  } = archiveVariants({
+    layout: resolvedLayout,
+    columns: resolvedLayout === "grid" ? resolvedColumns : undefined,
+    tone,
   })
 
-  const appearance = appearanceFromColorScheme(sectionSettings?.colorScheme)
+  const containerClassName = container()
+  const gridClassName = grid()
+  const controlsClassName = controls()
+  const rangeClassName = range()
+  const cardClassName = card()
 
   return (
-    <Section sectionSettings={sectionSettings} containerClassName="space-y-10">
-      <div className={gridClass}>
+    <Section sectionSettings={sectionSettings} containerClassName={containerClassName}>
+      <div className={gridClassName}>
         {posts.docs.map(post => (
           <PostCard
             key={(post as Post).id}
             post={post as Post}
-            appearance={appearance as any}
+            appearance={appearance}
             showExcerpt={shouldShowExcerpt}
             showCategories={shouldShowCategories}
             showPublishedDate={shouldShowPublishedDate}
             showReadingTime={shouldShowReadingTime}
-            className={
-              resolvedLayout === "list"
-                ? "flex flex-col md:flex-row md:items-center md:gap-6"
-                : undefined
-            }
+            className={cardClassName || undefined}
           />
         ))}
       </div>
 
       {shouldShowPagination && posts.totalPages > 1 ? (
-        <div className="space-y-4">
+        <div className={controlsClassName}>
           {shouldShowPageRange ? (
             <PageRange
               collection="posts"
               currentPage={posts.page}
               limit={resolvedLimit}
               totalDocs={posts.totalDocs}
+              className={rangeClassName}
             />
           ) : null}
 
-          <nav className="flex items-center gap-2" aria-label="Pagination">
-            <PaginationLinkButton
-              href={buildPageHref(archiveUri, posts.page - 1)}
-              disabled={posts.page <= 1}
-              label="Previous"
-            />
-
-            {buildPaginationRange(posts.page, posts.totalPages).map((item, index) => {
-              if (item === "ellipsis") {
-                return (
-                  <span
-                    key={`ellipsis-${posts.page}-${posts.totalPages}-${index}`}
-                    className="px-2 text-sm text-dark-600"
-                  >
-                    …
-                  </span>
-                )
-              }
-
-              const pageNumber = item as number
-              return (
-                <PaginationLinkButton
-                  key={`page-${pageNumber}`}
-                  href={buildPageHref(archiveUri, pageNumber)}
-                  label={String(pageNumber)}
-                  active={pageNumber === posts.page}
-                />
-              )
-            })}
-
-            <PaginationLinkButton
-              href={buildPageHref(archiveUri, posts.page + 1)}
-              disabled={posts.page >= posts.totalPages}
-              label="Next"
-            />
-          </nav>
+          <Pagination
+            page={posts.page}
+            totalPages={posts.totalPages}
+            archiveUri={archiveUri}
+            colorVariant={tone}
+          />
         </div>
       ) : null}
     </Section>

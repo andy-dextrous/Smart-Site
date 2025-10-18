@@ -224,9 +224,9 @@ const CountrySelect = ({
       <Button
         ref={buttonRef}
         type="button"
-        variant="phoneSelect"
-        size="phoneSelect"
-        className="border-r-0 focus:z-10"
+        variant="white"
+        size="md"
+        className="border border-dark-border border-r-0 rounded-r-none gap-control-sm focus:z-10"
         disabled={disabled}
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
@@ -235,16 +235,16 @@ const CountrySelect = ({
       >
         <FlagComponent country={selectedCountry} countryName={selectedCountry} />
         <ChevronsUpDown
-          className={cn("-mr-2 size-4 opacity-50", disabled ? "hidden" : "opacity-100")}
+          className={cn("-mr-control-sm size-4 opacity-50", disabled ? "hidden" : "opacity-100")}
         />
       </Button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 z-50 mt-1 w-[300px] rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950">
+        <div className="absolute top-full left-0 z-50 mt-control-sm w-[300px] rounded-md border border-dark-border bg-white shadow-lg">
           {/* Search Input */}
-          <div className="border-b border-gray-200 p-2 dark:border-gray-800">
+          <div className="border-b border-dark-border/60 p-control-md">
             <div className="relative">
-              <Search className="absolute top-1/2 left-2 size-4 -translate-y-1/2 transform text-gray-400" />
+              <Search className="absolute top-1/2 left-control-md size-4 -translate-y-1/2 transform text-dark-600/60" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -255,7 +255,7 @@ const CountrySelect = ({
                 }}
                 onKeyDown={handleSearchKeyDown}
                 placeholder="Search country..."
-                className="w-full rounded border border-gray-200 bg-transparent py-1.5 pr-2 pl-8 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-700"
+                className="w-full rounded border border-dark-border bg-transparent py-control-sm pr-control-md pl-control-lg text-sm text-dark focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>
@@ -264,7 +264,7 @@ const CountrySelect = ({
           <ScrollArea className="h-72" ref={scrollAreaRef}>
             <div ref={listRef}>
               {filteredCountries.length === 0 ? (
-                <div className="p-4 text-center text-sm text-gray-500">
+                <div className="p-control-md text-center text-sm text-dark-600">
                   No country found.
                 </div>
               ) : (
@@ -310,15 +310,15 @@ const CountrySelectOption = ({
   return (
     <div
       className={cn(
-        "flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800",
-        isHighlighted && "bg-gray-100 dark:bg-gray-800",
-        country === selectedCountry && "bg-blue-50 dark:bg-blue-950"
+        "flex cursor-pointer items-center gap-control-sm px-control-md py-control-sm hover:bg-neutral",
+        isHighlighted && "bg-neutral",
+        country === selectedCountry && "bg-primary/10"
       )}
       onClick={handleSelect}
     >
       <FlagComponent country={country} countryName={countryName} />
       <span className="flex-1 text-sm">{countryName}</span>
-      <span className="text-sm text-gray-500">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
+      <span className="text-sm text-dark-600">{`+${RPNInput.getCountryCallingCode(country)}`}</span>
       <CheckIcon
         className={cn(
           "ml-auto size-4",

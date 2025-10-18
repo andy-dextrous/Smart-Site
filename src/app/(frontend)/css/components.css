@@ -14,9 +14,11 @@
       1;
   }
 
-  /* Prevents flickering when using scroll smoother over dark sections*/
+  .min-h-nav {
+    min-height: var(--spacing-nav);
+  }
 
-  .flicker-mask-top::after { content: none !important; }
-
-  .flicker-mask-bottom::after { content: none !important; }
+  .max-h-nav {
+    max-height: var(--spacing-nav);
+  }
 }

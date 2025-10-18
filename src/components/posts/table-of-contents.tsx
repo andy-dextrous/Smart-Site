@@ -84,13 +84,13 @@ export function TableOfContents({
 
   return (
     <nav
-      className={cn("rounded-2xl border border-dark-border bg-white p-6 shadow-sm", className)}
+      className={cn("rounded-2xl border border-dark-border bg-white p-content-lg shadow-sm", className)}
       aria-label="Table of contents"
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-dark-600">
+      <p className="text-xs uppercase tracking-[0.18em] text-dark-600">
         {heading}
       </p>
-      <ul className="mt-4 space-y-2 text-sm text-dark-600">
+      <ul className="mt-content flex flex-col gap-content-sm text-sm text-dark-600">
         {items.map(item => (
           <li key={item.anchorId}>
             <button
@@ -101,8 +101,8 @@ export function TableOfContents({
                 element.scrollIntoView({ behavior: "smooth", block: "start" })
               }}
               className={cn(
-                "w-full rounded-xl px-3 py-2 text-left transition-colors hover:bg-neutral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-                activeId === item.anchorId ? "bg-neutral font-medium text-dark" : ""
+                "w-full rounded-xl px-content py-content-sm text-left transition-colors hover:bg-neutral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                activeId === item.anchorId ? "bg-neutral text-dark" : ""
               )}
             >
               {item.label}

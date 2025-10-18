@@ -13,101 +13,145 @@ import { cn } from "@/admin/utilities/ui"
 import { useRouter } from "next/navigation"
 import React from "react"
 
-/*************************************************************************/
-/*  PAGINATION COMPONENT - URI-FIRST ARCHITECTURE
-/*************************************************************************/
+type PaginationColorVariant = "light" | "neutral" | "dark"
 
-export const Pagination: React.FC<{
+interface PaginationProps {
   className?: string
   page: number
   totalPages: number
-  archiveUri?: string // Archive page URI passed from parent component
-}> = props => {
+  archiveUri?: string
+  colorVariant?: PaginationColorVariant
+}
+
+function buildPaginationUrl(baseUri: string, targetPage: number): string {
+  const [path, search = ""] = baseUri.split("?")
+  const params = new URLSearchParams(search)
+
+  if (targetPage <= 1) {
+    params.delete("page")
+  } else {
+    params.set("page", String(targetPage))
+  }
+
+  const query = params.toString()
+  return query ? `${path}?${query}` : path
+}
+
+const toneStyles: Record<
+  PaginationColorVariant,
+  { button: string; active: string; text: string }
+> = {
+  light: {
+    button: "border border-dark-border bg-white text-dark hover:bg-neutral",
+    active: "bg-dark text-white border border-dark-border",
+    text: "text-dark-600",
+  },
+  neutral: {
+    button: "border border-dark-border bg-white text-dark hover:bg-neutral",
+    active: "bg-dark text-white border border-dark-border",
+    text: "text-dark-600",
+  },
+  dark: {
+    button: "border border-white/20 bg-white/10 text-white hover:bg-white/20",
+    active: "bg-white text-dark border border-white",
+    text: "text-white/70",
+  },
+}
+
+const buttonBaseClasses =
+  "inline-flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+
+/*************************************************************************/
+/*  PAGINATION COMPONENT - QUERY-PARAM STRATEGY
+/*************************************************************************/
+
+export function Pagination(props: PaginationProps) {
+  const {
+    className,
+    page,
+    totalPages,
+    archiveUri = "/posts",
+    colorVariant = "light",
+  } = props
+
   const router = useRouter()
 
-  const { className, page, totalPages, archiveUri = "/insights" } = props
-  const hasNextPage = page < totalPages
   const hasPrevPage = page > 1
-
+  const hasNextPage = page < totalPages
   const hasExtraPrevPages = page - 1 > 1
   const hasExtraNextPages = page + 1 < totalPages
 
-  // Generate pagination URL
-  const getPaginationUrl = (pageNumber: number): string => {
-    return `${archiveUri}/page/${pageNumber}`
-  }
+  const palette = toneStyles[colorVariant] ?? toneStyles.light
+
+  const goToPage = React.useCallback(
+    (target: number) => {
+      const clamped = Math.min(Math.max(target, 1), totalPages)
+      router.push(buildPaginationUrl(archiveUri, clamped))
+    },
+    [archiveUri, router, totalPages]
+  )
 
   return (
-    <div className={cn("my-12", className)}>
+    <div className={cn("my-section-sm", className)}>
       <PaginationComponent>
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              size="sm"
               disabled={!hasPrevPage}
-              onClick={() => {
-                router.push(getPaginationUrl(page - 1))
-              }}
+              onClick={() => goToPage(page - 1)}
+              className={cn(buttonBaseClasses, palette.button)}
             />
           </PaginationItem>
 
-          {hasExtraPrevPages && (
+          {hasExtraPrevPages ? (
             <PaginationItem>
-              <PaginationEllipsis />
+              <PaginationEllipsis className={palette.text} />
             </PaginationItem>
-          )}
+          ) : null}
 
-          {hasPrevPage && (
+          {hasPrevPage ? (
             <PaginationItem>
               <PaginationLink
-                size="sm"
-                onClick={() => {
-                  router.push(getPaginationUrl(page - 1))
-                }}
+                onClick={() => goToPage(page - 1)}
+                className={cn(buttonBaseClasses, palette.button)}
               >
                 {page - 1}
               </PaginationLink>
             </PaginationItem>
-          )}
+          ) : null}
 
           <PaginationItem>
             <PaginationLink
               isActive
-              size="sm"
-              onClick={() => {
-                router.push(getPaginationUrl(page))
-              }}
+              onClick={() => goToPage(page)}
+              className={cn(buttonBaseClasses, palette.active)}
             >
               {page}
             </PaginationLink>
           </PaginationItem>
 
-          {hasNextPage && (
+          {hasNextPage ? (
             <PaginationItem>
               <PaginationLink
-                size="sm"
-                onClick={() => {
-                  router.push(getPaginationUrl(page + 1))
-                }}
+                onClick={() => goToPage(page + 1)}
+                className={cn(buttonBaseClasses, palette.button)}
               >
                 {page + 1}
               </PaginationLink>
             </PaginationItem>
-          )}
+          ) : null}
 
-          {hasExtraNextPages && (
+          {hasExtraNextPages ? (
             <PaginationItem>
-              <PaginationEllipsis />
+              <PaginationEllipsis className={palette.text} />
             </PaginationItem>
-          )}
+          ) : null}
 
           <PaginationItem>
             <PaginationNext
-              size="sm"
               disabled={!hasNextPage}
-              onClick={() => {
-                router.push(getPaginationUrl(page + 1))
-              }}
+              onClick={() => goToPage(page + 1)}
+              className={cn(buttonBaseClasses, palette.button)}
             />
           </PaginationItem>
         </PaginationContent>

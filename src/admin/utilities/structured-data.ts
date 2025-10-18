@@ -341,20 +341,19 @@ function generatePersonSchema(
     schema.email = doc.email
   }
 
-  if (doc.content?.role) {
-    schema.jobTitle = doc.content.role
+  const role = doc.role ?? doc.content?.role
+  if (role) {
+    schema.jobTitle = role
   }
 
-  if (doc.content?.bio) {
-    schema.description = doc.content.bio
+  const bio = doc.bio ?? doc.content?.bio
+  if (bio) {
+    schema.description = bio
   }
 
-  if (
-    doc.content?.image &&
-    typeof doc.content.image === "object" &&
-    doc.content.image.url
-  ) {
-    schema.image = `${baseURL}${doc.content.image.url}`
+  const image = doc.image ?? doc.content?.image
+  if (image && typeof image === "object" && image?.url) {
+    schema.image = `${baseURL}${image.url}`
   }
 
   if (organization) {
@@ -362,8 +361,9 @@ function generatePersonSchema(
   }
 
   // Add social media links
-  if (doc.content?.socialLinks && doc.content.socialLinks.length > 0) {
-    schema.sameAs = doc.content.socialLinks
+  const socialLinks = doc.socialLinks ?? doc.content?.socialLinks
+  if (Array.isArray(socialLinks) && socialLinks.length > 0) {
+    schema.sameAs = socialLinks
       .filter((link: any) => link.url)
       .map((link: any) => link.url!)
   }

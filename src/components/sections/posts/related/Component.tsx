@@ -3,14 +3,22 @@ import type { PageData } from "@/admin/components/render-sections"
 import { getRelatedPosts } from "@/admin/data/posts"
 import { Section } from "@/components/fields/section"
 import { PostCard } from "@/components/posts/post-card"
+import { tv } from "tailwind-variants"
 
-function appearanceFromColorScheme(colorScheme?: string | null) {
+const relatedVariants = tv({
+  slots: {
+    container: "flex flex-col gap-content-lg",
+    grid: "grid gap-grid md:grid-cols-3",
+  },
+})
+
+function resolveAppearance(colorScheme?: string | null) {
   if (colorScheme === "dark") return "dark"
   if (colorScheme === "light") return "light"
   return "neutral"
 }
 
-export const PostsRelatedComponent: React.FC<PostsRelatedBlock & PageData> = async props => {
+export async function PostsRelatedComponent(props: PostsRelatedBlock & PageData) {
   const {
     maxPosts = 3,
     document,
@@ -30,19 +38,23 @@ export const PostsRelatedComponent: React.FC<PostsRelatedBlock & PageData> = asy
     return null
   }
 
-  const appearance = appearanceFromColorScheme(sectionSettings?.colorScheme)
+  const appearance = resolveAppearance(sectionSettings?.colorScheme)
+
+  const { container, grid } = relatedVariants()
+  const containerClassName = container()
+  const gridClassName = grid()
 
   return (
-    <Section sectionSettings={sectionSettings} containerClassName="space-y-10">
-      <div className="grid gap-6 md:grid-cols-3">
+    <Section sectionSettings={sectionSettings} containerClassName={containerClassName}>
+      <div className={gridClassName}>
         {relatedPosts.map(post => (
           <PostCard
             key={post.id}
             post={post}
-            appearance={appearance as any}
-            showExcerpt={true}
-            showCategories={true}
-            showPublishedDate={true}
+            appearance={appearance}
+            showExcerpt
+            showCategories
+            showPublishedDate
           />
         ))}
       </div>

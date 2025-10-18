@@ -12,60 +12,10 @@
   @apply max-w-container-sm mx-auto w-full;
 }
 
-@utility px-section-none {
-  padding-inline: 0;
-}
-
-@utility px-section-xs {
-  padding-inline: var(--spacing-section-xs);
-}
-
-@utility px-section-sm {
-  padding-inline: var(--spacing-section-sm);
-}
-
-@utility px-section-x {
-  padding-inline: var(--spacing-section-x);
-}
-
-@utility px-section-lg {
-  padding-inline: var(--spacing-section-lg);
-}
-
-@utility px-section-xl {
-  padding-inline: var(--spacing-section-xl);
-}
-
-@utility py-section-none {
-  padding-block: 0;
-}
-
-@utility py-section-xs {
-  padding-block: var(--spacing-section-xs);
-}
-
-@utility py-section-sm {
-  padding-block: var(--spacing-section-sm);
-}
-
-@utility py-section-md {
-  padding-block: var(--spacing-section-md);
-}
-
-@utility py-section-y {
-  padding-block: var(--spacing-section-y);
-}
-
-@utility py-section-lg {
-  padding-block: var(--spacing-section-lg);
-}
-
-@utility py-section-xl {
-  padding-block: var(--spacing-section-xl);
-}
-
-@utility py-section-xxl {
-  padding-block: var(--spacing-section-xxl);
+@utility container-gap {
+  & > :is(.container, .container-md, .container-sm) + :is(.container, .container-md, .container-sm) {
+    margin-top: var(--spacing-container-gap);
+  }
 }
 
 @utility stop-scroll {

@@ -12,12 +12,11 @@ export const Email: React.FC<
   EmailField & {
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
-    variant?: string
   }
-> = ({ name, defaultValue, errors, label, register, required, width, variant }) => {
+> = ({ name, defaultValue, errors, label, register, required, width }) => {
   return (
     <Width width={width}>
-      <Label htmlFor={name} variant={variant as any}>
+      <Label htmlFor={name}>
         {label}
 
         {required && (
@@ -30,7 +29,6 @@ export const Email: React.FC<
         defaultValue={defaultValue}
         id={name}
         type="email"
-        variant={variant as any}
         {...register(name, {
           pattern: {
             message: "Please enter a valid email",

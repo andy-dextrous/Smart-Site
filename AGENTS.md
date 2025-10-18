@@ -103,7 +103,7 @@ Never run formatters manually (Prettier is automated). Do not start production b
 ---
 ## 4. Component Development Principles
 ### Styling (Tailwind v4, CSS-first)
-- Design tokens live in `theme.css`; reusable component classes go in `components.css`.
+- Design tokens live in `spacing.css` (layout) and `colors.css` (palette); reusable component classes go in `components.css`.
 - Prefer tokens/variables (`bg-primary-500`, `gap-content`) before composing raw Tailwind utilities.
 - Layout stacks should use flex + gap rather than individual margins.
 - Padding and typography come from the design system—use the section spacing classes (`px-section-x`, `py-section-y`, etc.) and typography utilities (`prose`, `text-balance`, `font-display`) instead of adding custom `p-*` or `text-*` values inside components.

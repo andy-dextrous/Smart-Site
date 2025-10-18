@@ -1,52 +1,26 @@
 import { CMSLink } from "@/components/fields/link"
-import { normalizeLinkField } from "@/components/fields/link/normalize-link"
-import { cn } from "@/utilities/ui"
-import { ArrowRight } from "lucide-react"
+import type { SectionCtaValue } from "./types"
 
-/*************************************************************************/
-/*  SECTION CTA COMPONENT
-/*************************************************************************/
-
-interface SectionCtaProps {
-  text?: string
-  button?: Record<string, unknown> | null
+interface SectionCtaComponentProps extends SectionCtaValue {
   containerClassName?: string
 }
 
-export const SectionCta: React.FC<SectionCtaProps> = ({ text, button, containerClassName }) => {
-  if (!text && !button) return null
+export function SectionCta(props: SectionCtaComponentProps) {
+  const { text, button, containerClassName } = props
 
-  const buttonLink = normalizeLinkField(button as Record<string, any>)
-  const shouldRenderButton =
-    buttonLink && (buttonLink.label || buttonLink.iconOnly || buttonLink.icon)
-  const showArrow =
-    shouldRenderButton && !buttonLink?.icon && !buttonLink?.iconOnly && Boolean(buttonLink?.label)
-
-  const buttonChildren = showArrow
-    ? (
-        <>
-          <span>{buttonLink?.label}</span>
-          <ArrowRight className="ml-2 size-4" />
-        </>
-      )
-    : undefined
+  if (!text && !button) {
+    return null
+  }
 
   return (
-    <div
-      className={cn(
-        "gap-content container-sm flex flex-col items-start space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0",
-        containerClassName
-      )}
-    >
-      {text && <p className="text-current">{text}</p>}
+    <div className={containerClassName}>
+      {text ? <p className="text-current">{text}</p> : null}
 
-      {shouldRenderButton ? (
+      {button ? (
         <CMSLink
-          {...(buttonLink as any)}
-          className="md:shrink-0 inline-flex items-center gap-2"
-        >
-          {buttonChildren}
-        </CMSLink>
+          {...(button as any)}
+          className="inline-flex items-center gap-content-sm md:shrink-0"
+        />
       ) : null}
     </div>
   )

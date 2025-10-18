@@ -49,7 +49,6 @@ export const ImageMedia: React.FC<MediaProps> = props => {
 
     const cacheTag = resource.updatedAt
 
-    // Check if URL is already absolute (Payload generates absolute URLs when serverURL is configured)
     if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
       src = `${url}?${cacheTag}`
     } else {
@@ -58,10 +57,10 @@ export const ImageMedia: React.FC<MediaProps> = props => {
   }
 
   const loading = loadingFromProps || (!priority ? "lazy" : undefined)
-  
+
   // Use breakpoints from props or fall back to config
   const breakpoints = breakpointsFromProps || defaultBreakpoints
-  
+
   // Determine quality based on context or props
   const quality = qualityFromProps || defaultQuality
 

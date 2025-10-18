@@ -61,10 +61,12 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
   },
 })
 
+type RichTextVariant = "default" | "article" | "prose"
+
 type Props = {
   data: DefaultTypedEditorState | SerializedEditorState<SerializedLexicalNode>
   enableGutter?: boolean
-  variant?: "default" | "prose"
+  variant?: RichTextVariant
   textColor?: "inherit" | "dark" | "white" | "muted" | "primary" | "secondary"
 } & React.HTMLAttributes<HTMLDivElement>
 
@@ -72,35 +74,32 @@ export default function RichText(props: Props) {
   const {
     className,
     enableGutter = true,
-    variant = "default", // Default inherits from typography.css
+    variant = "default", // Default uses sitewide typography tokens
     textColor = "inherit",
     ...rest
   } = props
+
+  const normalizedVariant = variant === "prose" ? "article" : variant
 
   // Color classes mapping
   const colorClasses = {
     inherit: "[&>*]:text-inherit",
     dark: "[&>*]:text-dark",
     white: "[&>*]:text-white",
-    muted: "[&>*]:text-gray-600 dark:[&>*]:text-gray-400",
+    muted: "[&>*]:text-dark-600 dark:[&>*]:text-white/70",
     primary: "[&>*]:text-primary",
     secondary: "[&>*]:text-secondary",
   }
+
+  const baseClass =
+    normalizedVariant === "article" ? "prose prose-lg max-w-none" : "rich-text max-w-none"
 
   return (
     <ConvertRichText
       converters={jsxConverters}
       className={cn(
-        {
-          // Default: No special classes - inherits from typography.css
-          // Prose: Use Tailwind prose for blog content
-          "prose prose-lg max-w-none": variant === "prose",
-
-          // Gutter controls - converted from SCSS
-          "mx-auto max-w-[75ch]": enableGutter,
-          "max-w-none": !enableGutter,
-        },
-        // Color classes
+        baseClass,
+        enableGutter ? "mx-auto max-w-[75ch]" : null,
         colorClasses[textColor],
         className
       )}

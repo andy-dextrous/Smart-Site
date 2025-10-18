@@ -40,14 +40,17 @@ const config: UserConfig = {
     analytics: false,
     darkMode: false,
     i18n: false,
-    search: true,
+    search: {
+      enabled: true,
+      mode: "hybrid",
+    },
     sitemaps: true,
   },
   gsap: {
     scrollTrigger: true,
     scrollSmoother: false,
     splitText: false,
-    globalAnimations: false,
+    globalAnimations: true,
   },
   extensions: {
     collections: [],

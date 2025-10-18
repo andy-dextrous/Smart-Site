@@ -1,11 +1,10 @@
-import { FormBlock, type FormVariant } from "./component"
+import { FormBlock } from "./component"
 import type { Form } from "@/admin/payload/payload-types"
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical"
 import React from "react"
 
 type CMSFormType = {
   form: Form | string | null
-  variant?: FormVariant | null
   enableIntro?: boolean | null
   introContent?: SerializedEditorState | null
   className?: string
@@ -13,7 +12,6 @@ type CMSFormType = {
 
 export const CMSForm: React.FC<CMSFormType> = ({
   form,
-  variant = "white",
   enableIntro = false,
   introContent,
   className,
@@ -27,7 +25,6 @@ export const CMSForm: React.FC<CMSFormType> = ({
     <div className={className}>
       <FormBlock
         form={form as any}
-        variant={variant as FormVariant}
         enableIntro={enableIntro || false}
         introContent={introContent || undefined}
       />

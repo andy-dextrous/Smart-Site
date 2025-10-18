@@ -1,0 +1,87 @@
+@layer frontend-theme {
+  /*
+  /*  COLORS: BRAND TOKENS
+  /*
+  /*
+    Update this section when branding changes. These values map Tailwind’s neutral
+    palette to project-specific roles so every component inherits consistent hues.
+    Example: swap the indigo references for your primary colour family and adjust
+    the neutral range to match the UI base. Keep the assignments declarative—avoid
+    mixing or calc() here so brand audits remain straightforward.
+  */
+
+  @theme {
+    /* Primary */
+    --color-primary: oklch(50.49% 0.17053 302.71);
+    --color-primary-50: oklch(84.874% 0.05254 306.59);
+    --color-primary-100: oklch(81.18% 0.06623 306.11);
+    --color-primary-200: oklch(73.216% 0.09477 305.94);
+    --color-primary-300: oklch(65.466% 0.12351 304.82);
+    --color-primary-400: oklch(57.734% 0.15374 304.17);
+    --color-primary-500: oklch(50.49% 0.17053 302.71);
+    --color-primary-600: oklch(42.279% 0.13755 303.23);
+    --color-primary-700: oklch(33.442% 0.10512 303.07);
+    --color-primary-800: oklch(24.235% 0.06669 304.31);
+    --color-primary-900: oklch(13.616% 0.02435 307.73);
+    --color-primary-950: oklch(0% 0 none);
+
+    /* Secondary */
+    --color-secondary: oklch(47.642% 0.29956 274.94);
+    --color-secondary-50: oklch(82.334% 0.1001 296.42);
+    --color-secondary-100: oklch(77.222% 0.13094 295.67);
+    --color-secondary-200: oklch(67.519% 0.18998 293.1);
+    --color-secondary-300: oklch(58.865% 0.24124 288.97);
+    --color-secondary-400: oklch(51.857% 0.2795 282.87);
+    --color-secondary-500: oklch(47.642% 0.29956 274.94);
+    --color-secondary-600: oklch(39.675% 0.24803 275.67);
+    --color-secondary-700: oklch(31.291% 0.19366 276.95);
+    --color-secondary-800: oklch(22.319% 0.13522 279.8);
+    --color-secondary-900: oklch(12.406% 0.07009 290.25);
+    --color-secondary-950: oklch(5.4633% 0.0287 302.89);
+
+    /* Neutral */
+    --color-neutral: oklch(96.229% 0.00532 286.3);
+    --color-neutral-50: oklch(99.703% 0 none);
+    --color-neutral-100: oklch(96.229% 0.00532 286.3);
+    --color-neutral-200: oklch(86.489% 0.01918 285.99);
+    --color-neutral-300: oklch(76.493% 0.03404 285.57);
+    --color-neutral-400: oklch(66.2% 0.05016 284.95);
+    --color-neutral-500: oklch(55.273% 0.06951 283.89);
+    --color-neutral-600: oklch(46.552% 0.06126 283.77);
+    --color-neutral-700: oklch(37.566% 0.04594 283.97);
+    --color-neutral-800: oklch(28.059% 0.03112 284.22);
+    --color-neutral-900: oklch(17.65% 0.01438 284.83);
+    --color-neutral-950: oklch(11.633% 0.00616 285.4);
+
+    /* Dark */
+    --color-dark: oklch(14.557% 0.00884 273.86);
+    --color-dark-50: oklch(79.477% 0.03015 275.05);
+    --color-dark-100: oklch(76.022% 0.03496 274.42);
+    --color-dark-200: oklch(68.722% 0.04654 273.76);
+    --color-dark-300: oklch(61.263% 0.05893 273.1);
+    --color-dark-400: oklch(53.958% 0.06884 272.87);
+    --color-dark-500: oklch(47.488% 0.05944 273.15);
+    --color-dark-600: oklch(40.789% 0.04966 273.56);
+    --color-dark-700: oklch(33.802% 0.03939 274.23);
+    --color-dark-800: oklch(26.696% 0.02684 272.11);
+    --color-dark-900: oklch(18.793% 0.01462 272.46);
+    --color-dark-950: oklch(14.557% 0.00884 273.86);
+
+    /* White */
+    --color-white: oklch(100% 0 0);
+  }
+
+  /*
+  /*  COLORS: CONTEXTUAL ROLES
+  /*
+  /*
+    Derived colour roles live here. Only extend this block when you need new
+    semantic tokens (e.g. subdued borders, elevated surfaces). Always source from
+    the brand variables above so themes stay swappable.
+  */
+
+  @theme {
+    --color-dark-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
+    --color-light-border: color-mix(in oklab, var(--color-white) 10%, transparent);
+  }
+}

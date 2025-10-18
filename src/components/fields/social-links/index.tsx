@@ -114,7 +114,7 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
   }
 
   const containerClass = cn(
-    "flex gap-4",
+    "flex gap-content",
     {
       "flex-row": orientation === "horizontal",
       "flex-col": orientation === "vertical",
@@ -129,19 +129,19 @@ export const SocialLinks: React.FC<SocialLinksProps> = ({
       case "button":
         return cn(
           linkBaseClass,
-          "inline-flex items-center space-x-2 rounded-lg bg-white/10 px-4 py-2 text-white hover:bg-white/20"
+          "inline-flex items-center gap-content-sm rounded-lg bg-white/10 px-content py-content-sm text-white hover:bg-white/20"
         )
       case "icon-button":
         return cn(
           linkBaseClass,
-          "flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/80 hover:border-white/40 hover:text-white"
+          "flex size-10 items-center justify-center rounded-full border border-white/20 text-white/80 hover:border-white/40 hover:text-white"
         )
       case "icon":
         return cn(linkBaseClass, "text-white/80 hover:text-white")
       default:
         return cn(
           linkBaseClass,
-          "flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white/80 hover:border-white/40 hover:text-white"
+          "flex size-10 items-center justify-center rounded-full border border-white/20 text-white/80 hover:border-white/40 hover:text-white"
         )
     }
   }

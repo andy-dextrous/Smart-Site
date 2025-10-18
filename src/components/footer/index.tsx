@@ -7,14 +7,6 @@ import Link from "next/link"
 
 /*************************************************************************/
 /*  FOOTER COMPONENT
-
-Animate the container
-
-Before
-- translate: none; rotate: none; scale: none; transform-origin: 50% 100%; opacity: 0; transform: translate(0%, -50%) rotateX(-5deg);
-
-After
-- translate: none; rotate: none; scale: none; transform-origin: 50% 100%; opacity: 1; transform: translate(0px, 0px);
 /*************************************************************************/
 
 export async function Footer() {
@@ -27,25 +19,25 @@ export async function Footer() {
   const settings = settingsData as Setting
 
   return (
-    <footer className="bg-zinc-50 border-t border-zinc-200">
-      <div className="container px-8 py-16">
+    <footer className="border-dark-border bg-neutral text-dark px-section-x py-section-lg border-t">
+      <div className="container">
         {/* Logo Row */}
-        <div className="pb-10">
+        <div className="pb-content-xl">
           <Link href="/" className="block">
-            <LogoPrimary className="h-10 w-auto" />
+            <LogoPrimary className="h-logo w-auto" />
           </Link>
         </div>
 
         {/* Navigation Columns */}
-        <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-section-sm gap-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           {/* CMS Menu Columns */}
           {footer?.menus?.map((menu, index) => (
             <div key={index}>
-              <h3 className="mb-4 text-base font-semibold text-zinc-900">{menu.title}</h3>
-              <ul className="space-y-3">
+              <h5 className="mb-content-sm text-dark">{menu.title}</h5>
+              <ul className="gap-content-xs flex flex-col">
                 {menu.menuItems?.map((item, itemIndex) => (
                   <li key={itemIndex}>
-                    <CMSLink {...item.link} className="text-sm text-zinc-600 hover:text-zinc-900">
+                    <CMSLink {...item.link} className="text-dark-600 hover:text-dark">
                       {item.link.label}
                     </CMSLink>
                   </li>
@@ -57,16 +49,21 @@ export async function Footer() {
           {/* Office Locations from Settings */}
           {settings?.locations?.locations?.map((location, index) => (
             <div key={`location-${index}`}>
-              <h3 className="mb-4 text-base font-semibold text-zinc-900">{location.country}</h3>
-              <div className="space-y-2">
+              <h5 className="mb-content-sm text-dark">{location.country}</h5>
+              <div className="gap-content-sm flex flex-col">
                 {/* Address with Google Maps Link */}
                 {location.street && (
                   <>
                     {location.googleMapsLink ? (
-                      <a href={location.googleMapsLink} target="_blank" rel="noopener noreferrer" className="block text-sm text-zinc-600 hover:text-zinc-900">
+                      <a
+                        href={location.googleMapsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-dark-600 hover:text-dark block"
+                      >
                         <p>{location.street}</p>
                         {location.city && (
-                          <p>
+                          <p className="text-dark-600">
                             {location.city}
                             {location.zip && `, ${location.zip}`}
                           </p>
@@ -74,9 +71,9 @@ export async function Footer() {
                       </a>
                     ) : (
                       <>
-                        <p className="text-sm text-zinc-600">{location.street}</p>
+                        <p className="text-dark-600">{location.street}</p>
                         {location.city && (
-                          <p className="text-sm text-zinc-600">
+                          <p className="text-dark-600">
                             {location.city}
                             {location.zip && `, ${location.zip}`}
                           </p>
@@ -88,14 +85,20 @@ export async function Footer() {
 
                 {/* Phone with tel link */}
                 {location.phone && (
-                  <a href={`tel:${location.phone}`} className="block text-sm text-zinc-600 hover:text-zinc-900">
+                  <a
+                    href={`tel:${location.phone}`}
+                    className="text-dark-600 hover:text-dark block"
+                  >
                     {location.phone}
                   </a>
                 )}
 
                 {/* Email with mailto link */}
                 {location.email && (
-                  <a href={`mailto:${location.email}`} className="block text-sm text-zinc-600 hover:text-zinc-900">
+                  <a
+                    href={`mailto:${location.email}`}
+                    className="text-dark-600 hover:text-dark block"
+                  >
                     {location.email}
                   </a>
                 )}
@@ -105,17 +108,19 @@ export async function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col space-y-6 border-t border-zinc-200 pt-6 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div className="gap-content border-dark-border pt-content flex flex-col border-t md:flex-row md:items-center md:justify-between">
           {/* Left Side - Legal Links */}
-          <div className="space-y-4">
+          <div className="gap-content-sm flex flex-col">
             {footer?.legals && footer.legals.length > 0 && (
-              <div className="flex flex-wrap justify-center gap-x-4 text-sm text-zinc-600 md:justify-start">
+              <div className="gap-content-sm text-sm text-dark-600 flex flex-wrap justify-center md:justify-start">
                 {footer.legals.map((legal, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <CMSLink {...legal.link} className="hover:text-zinc-900">
+                  <div key={index} className="gap-content-sm flex items-center">
+                    <CMSLink {...legal.link} className="hover:text-dark">
                       {legal.link.label}
                     </CMSLink>
-                    {index < footer.legals!.length - 1 && <span className="text-zinc-400">|</span>}
+                    {index < footer.legals!.length - 1 && (
+                      <span className="text-dark-600/60">|</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -123,8 +128,8 @@ export async function Footer() {
           </div>
 
           {/* Center - Copyright */}
-          <div className="text-center text-zinc-500">
-            <p className="text-sm">
+          <div className="text-dark-600 text-center">
+            <p className="text-sm text-dark-600">
               © {new Date().getFullYear()}{" "}
               {settings?.general?.siteName || "smart-site.info"} | All Rights Reserved
             </p>
@@ -134,7 +139,7 @@ export async function Footer() {
           <SocialLinks
             socialLinks={settings?.social?.socialLinks || []}
             variant="icon-button"
-            className="justify-center md:justify-end"
+            className="[&>a]:border-dark-border [&>a]:text-dark-600 [&>a]:hover:border-dark [&>a]:hover:text-dark justify-center md:justify-end"
           />
         </div>
       </div>

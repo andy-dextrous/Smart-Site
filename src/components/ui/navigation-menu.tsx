@@ -59,32 +59,32 @@ const NavigationMenuContext = createContext<{ theme: "light" | "dark" }>({
 const navigationMenu = tv({
   slots: {
     root: "relative z-10 flex max-w-max flex-1 items-center justify-center",
-    list: "group flex flex-1 list-none items-center justify-center space-x-1",
+    list: "group flex flex-1 list-none items-center justify-center gap-content-sm",
     trigger:
-      "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-base font-normal transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
+      "group inline-flex items-center justify-center gap-control-sm rounded-md px-control-lg py-control-sm text-sm transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50",
     content:
-      "data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 top-0 left-0 w-full text-base md:absolute md:w-auto",
+      "data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 top-0 left-0 w-full text-sm md:absolute md:w-auto",
     viewport:
-      "origin-top-center bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md shadow md:w-[var(--radix-navigation-menu-viewport-width)]",
+      "origin-top-center bg-white text-dark data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-control-sm h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md shadow md:w-[var(--radix-navigation-menu-viewport-width)]",
     indicator:
-      "data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden",
+      "data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-[1] flex h-control-sm items-end justify-center overflow-hidden",
     viewportWrapper: "absolute top-full left-0 flex justify-center",
     indicatorArrow:
       "bg-border relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm shadow-md",
     chevronIcon:
-      "relative top-[1px] ml-1 h-3 w-3 transition duration-300 group-data-[state=open]:rotate-180",
+      "relative top-[1px] ml-control-sm h-3 w-3 transition duration-300 group-data-[state=open]:rotate-180",
   },
   variants: {
     theme: {
       light: {
-        trigger: "focus:text-primary text-dark hover:text-primary font-normal",
+        trigger: "focus:text-primary text-dark hover:text-primary",
         chevronIcon: "text-dark",
         indicatorArrow: "bg-white",
         content: "bg-white text-dark",
       },
       dark: {
         trigger:
-          "text-white hover:text-white focus:text-white cursor-pointer bg-transparent font-normal",
+          "text-white hover:text-white focus:text-white cursor-pointer bg-transparent",
         chevronIcon: "text-white",
         indicatorArrow: "bg-white",
         content: "bg-dark text-white",
@@ -171,7 +171,7 @@ const NavigationMenuLink = React.forwardRef<
   <NavigationMenuLinkPrimitive
     ref={ref}
     className={cn(
-      "hover:text-primary focus:text-primary block space-y-1 rounded-md p-3 text-base leading-none font-normal no-underline transition-colors outline-none select-none",
+      "hover:text-primary focus:text-primary flex flex-col gap-content-xs rounded-md px-control-lg py-control-sm text-sm no-underline transition-colors outline-none select-none",
       className
     )}
     {...props}

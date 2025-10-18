@@ -10,7 +10,7 @@ type Overrides = {
 type Slug = (
   fieldToUse?: string,
   overrides?: Overrides
-) => [TextField, TextField, CheckboxField]
+) => [TextField, TextField, CheckboxField, CheckboxField]
 
 /*************************************************************************/
 /*  SLUG FIELD
@@ -44,6 +44,34 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
     ...checkboxOverrides,
   }
 
+  const redirectToggleField: CheckboxField = {
+    name: "createAutomaticRedirect",
+    type: "checkbox",
+    defaultValue: true,
+    admin: {
+      hidden: true,
+      position: "sidebar",
+    },
+    hooks: {
+      beforeValidate: [({ req, value }) => {
+        if (req) {
+          if (!req.context) {
+            req.context = {}
+          }
+
+          if (typeof value === "boolean") {
+            req.context.createAutomaticRedirect = value
+          } else if (req.context.createAutomaticRedirect !== undefined) {
+            delete req.context.createAutomaticRedirect
+          }
+        }
+
+        return value
+      }],
+      beforeChange: [() => undefined],
+    },
+  }
+
   /**
    *  SLUG FIELD
    */
@@ -67,6 +95,7 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
           clientProps: {
             fieldToUse,
             checkboxFieldPath: checkBoxField.name,
+            redirectFieldPath: redirectToggleField.name,
           },
         },
       },
@@ -95,5 +124,5 @@ export const slugField: Slug = (fieldToUse = "title", overrides = {}) => {
     },
   }
 
-  return [slugField, uriField, checkBoxField]
+  return [slugField, uriField, checkBoxField, redirectToggleField]
 }

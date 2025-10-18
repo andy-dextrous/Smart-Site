@@ -44,7 +44,7 @@ export function MediaBlock({
       {caption ? (
         <div
           className={cn(
-            "mt-6",
+            "mt-content",
             disableInnerContainer ? undefined : "container",
             captionClassName
           )}

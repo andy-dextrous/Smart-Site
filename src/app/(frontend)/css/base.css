@@ -1,4 +1,6 @@
-/* Base Styles are for element-level styles that are not part of a component */
+/*
+Base Styles are for element-level styles that are not part of a component.
+*/
 
 @layer frontend-base-custom {
   * {
@@ -6,10 +8,12 @@
   }
 
   body {
-    @apply bg-white text-dark font-sans;
+    @apply text-dark bg-white font-sans;
   }
 
-  /* Smooth Scroll - fixes the visible flicker between sections in smooth scroll */
+  /*
+  /* Smooth Scroll - fixes the visible flicker between sections in smooth scroll
+  */
   #smooth-wrapper section:not([aria-label="Notifications alt+T"]) {
     @apply mb-[-1px];
   }

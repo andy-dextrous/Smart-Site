@@ -2,12 +2,12 @@
 
 import { CMSLink } from "@/components/fields/link"
 import type { Header as HeaderType } from "@/admin/payload/payload-types"
-import { SearchIcon, ChevronDown, ChevronRight } from "lucide-react"
-import Link from "next/link"
+import { SearchCommandLauncher } from "@/components/search/search-dialog"
+import { ChevronDown, ChevronRight } from "lucide-react"
 import * as React from "react"
 
 type NavItemLink = NonNullable<HeaderType["navItems"]>[number]["item"]["link"]
-// Simplify the type definition to avoid index signature errors
+
 type ChildItemType = {
   link: NavItemLink
   hasChildren?: boolean | null
@@ -18,23 +18,41 @@ type SubItemType = {
   link: NavItemLink
 }
 
+type NavigationSearchConfig = {
+  enabled: boolean
+  mode: "page" | "modal" | "hybrid"
+}
+
+interface HeaderNavigationProps {
+  data: HeaderType
+  search: NavigationSearchConfig
+}
+
 /****************************************************
  * Header Navigation - Main Navigation Of Website
  ****************************************************/
 
-export const HeaderNavigation: React.FC<{ data: HeaderType }> = ({ data }) => {
+export const HeaderNavigation: React.FC<HeaderNavigationProps> = ({ data, search }) => {
   const navItems = data?.navItems || []
 
   return (
-    <nav className="hidden lg:flex">
-      <ul className="flex w-full flex-wrap items-center">
+    <nav className="hidden h-full items-center lg:flex">
+      <ul className="flex h-full flex-wrap items-center gap-content-sm">
         {navItems.map(({ item }, i: number) => {
           if (item?.hasDropdown && item?.subItems && item?.subItems?.length > 0) {
             return <NavItemWithDropdown key={i} item={item} />
-          } else {
-            return <NavItem key={i} link={item?.link} />
           }
+          return <NavItem key={i} link={item?.link} />
         })}
+        {search.enabled ? (
+          <li className="relative flex h-full items-center">
+            <SearchCommandLauncher
+              mode={search.mode}
+              variant="icon"
+              className="text-dark hover:text-dark flex h-full cursor-pointer items-center gap-content-xs no-underline transition-colors duration-100"
+            />
+          </li>
+        ) : null}
       </ul>
     </nav>
   )
@@ -46,9 +64,9 @@ export const HeaderNavigation: React.FC<{ data: HeaderType }> = ({ data }) => {
 
 const NavItem: React.FC<{ link: NavItemLink }> = ({ link }) => {
   return (
-    <li className="relative block">
+    <li className="relative flex h-full items-center">
       <CMSLink
-        className="mx-1 flex h-10 cursor-pointer items-center px-4 text-sm leading-10 font-medium text-zinc-800 no-underline transition-colors duration-100 hover:text-zinc-900"
+        className="text-dark hover:text-dark flex h-full cursor-pointer items-center gap-content-xs no-underline transition-colors duration-100"
         {...link}
       >
         {link?.label}
@@ -65,21 +83,19 @@ const NavItemWithDropdown: React.FC<{
   item: NonNullable<HeaderType["navItems"]>[number]["item"]
 }> = ({ item }) => {
   return (
-    <li className="group relative block">
+    <li className="group relative flex h-full items-center">
       <CMSLink
         {...item?.link}
-        className="mx-1 flex h-10 cursor-pointer items-center px-4 text-sm leading-10 font-medium text-zinc-800 no-underline transition-colors duration-100 hover:text-zinc-900"
+        className="text-dark hover:text-dark flex h-full cursor-pointer items-center gap-content-xs no-underline transition-colors duration-100"
       >
         <span>{item?.link?.label}</span>
-        <ChevronDown className="ml-2 h-4 w-4 text-zinc-500 transition-transform duration-300 group-hover:rotate-180" />
+        <ChevronDown className="text-dark-600 ml-content-xs h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
       </CMSLink>
 
-      {/* Invisible bridge to cover the gap */}
       <div className="absolute top-full left-0 h-1 w-full opacity-0 group-hover:opacity-100" />
 
-      <div className="pointer-events-none absolute top-auto left-0 z-30 mt-1 w-56 min-w-full translate-y-2 transform rounded-md border border-zinc-200 bg-white text-sm opacity-0 shadow-lg transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
-        {/* <span className="border-light-border bg-dark absolute top-0 left-0 -mt-1 ml-6 h-3 w-3 rotate-45 transform"></span> */}
-        <div className="relative z-10 w-full py-1">
+      <div className="border-dark-border pointer-events-none absolute top-auto left-0 z-30 mt-content-xs w-56 min-w-full translate-y-control-sm transform rounded-md border bg-white text-sm opacity-0 shadow-lg transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="py-content-sm relative z-10 w-full">
           <ul className="list-none">
             {item.subItems?.map((childItem, j: number) => {
               const child = childItem.child
@@ -104,20 +120,22 @@ const NavItemWithDropdown: React.FC<{
 const NestedDropdownItem: React.FC<{ child: ChildItemType }> = ({ child }) => {
   return (
     <li className="group/nested relative">
-      <div className="flex w-full cursor-pointer items-center px-4 py-2 text-sm font-normal text-zinc-800 no-underline transition-colors duration-100 hover:bg-zinc-50">
+      <div className="text-sm text-dark hover:bg-neutral flex w-full cursor-pointer items-center gap-content-xs px-content py-content-sm no-underline transition-colors duration-100">
         <span className="flex-1">{child?.link?.label}</span>
-        <ChevronRight className="ml-2 h-4 w-4 text-zinc-500" />
+        <ChevronRight className="text-dark-600 ml-content-xs h-4 w-4" />
       </div>
 
-      {/* Invisible bridge for nested dropdown */}
       <div className="absolute top-0 right-0 h-full w-1 opacity-0 group-hover/nested:opacity-100" />
 
-      <div className="pointer-events-none absolute top-0 left-full z-30 ml-1 w-56 min-w-full translate-y-2 transform rounded-md border border-zinc-200 bg-white text-sm opacity-0 shadow-md transition-all duration-300 group-hover/nested:pointer-events-auto group-hover/nested:translate-y-0 group-hover/nested:opacity-100">
-        <div className="relative z-10 w-full py-1">
+      <div className="border-dark-border pointer-events-none absolute top-0 left-full z-30 ml-content-xs w-56 min-w-full translate-y-control-sm transform rounded-md border bg-white text-sm opacity-0 shadow-md transition-all duration-300 group-hover/nested:pointer-events-auto group-hover/nested:translate-y-0 group-hover/nested:opacity-100">
+        <div className="py-content-sm relative z-10 w-full">
           <ul className="list-none">
             {child?.subItems?.map((subItem: SubItemType, k: number) => (
               <li key={k}>
-                <CMSLink className="flex w-full cursor-pointer items-center px-4 py-2 text-sm font-normal text-zinc-800 no-underline transition-colors duration-100 hover:bg-zinc-50" {...subItem.link}>
+                <CMSLink
+                  className="text-sm text-dark hover:bg-neutral flex w-full cursor-pointer items-center gap-content-xs px-content py-content-sm no-underline transition-colors duration-100"
+                  {...subItem.link}
+                >
                   <span className="flex-1">{subItem.link?.label}</span>
                 </CMSLink>
               </li>
@@ -136,24 +154,12 @@ const NestedDropdownItem: React.FC<{ child: ChildItemType }> = ({ child }) => {
 const DropdownLink: React.FC<{ child: ChildItemType }> = ({ child }) => {
   return (
     <li>
-      <CMSLink className="flex w-full cursor-pointer items-center px-4 py-2 text-sm font-normal text-zinc-800 no-underline transition-colors duration-100 hover:bg-zinc-50" {...child.link}>
+      <CMSLink
+        className="text-sm text-dark hover:bg-neutral flex w-full cursor-pointer items-center gap-content-xs px-content py-content-sm no-underline transition-colors duration-100"
+        {...child.link}
+      >
         <span className="flex-1">{child.link?.label}</span>
       </CMSLink>
-    </li>
-  )
-}
-
-/****************************************************
- * Search icon component
- ****************************************************/
-
-const SearchNavItem: React.FC = () => {
-  return (
-    <li className="relative block">
-      <Link href="/search" className="mx-1 flex h-10 cursor-pointer items-center px-4 leading-10 no-underline transition-colors duration-100">
-        <SearchIcon className="h-4 w-4 text-zinc-700" />
-        <span className="sr-only">Search</span>
-      </Link>
     </li>
   )
 }

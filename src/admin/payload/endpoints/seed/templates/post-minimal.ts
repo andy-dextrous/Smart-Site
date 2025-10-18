@@ -16,6 +16,7 @@ export async function postMinimalTemplate(payload: Payload, context?: any): Prom
             showReadingTime: true,
             showFeaturedImage: true,
             sectionSettings: {
+              containerWidth: "lg",
               colorScheme: "neutral",
             },
           },
@@ -27,6 +28,7 @@ export async function postMinimalTemplate(payload: Payload, context?: any): Prom
             showReadingProgress: false,
             proseSize: "lg",
             sectionSettings: {
+              containerWidth: "lg",
               colorScheme: "light",
             },
           },
@@ -35,6 +37,7 @@ export async function postMinimalTemplate(payload: Payload, context?: any): Prom
             heading: "Related Posts",
             maxPosts: 3,
             sectionSettings: {
+              containerWidth: "lg",
               colorScheme: "light",
             },
           },

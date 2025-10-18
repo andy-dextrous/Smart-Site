@@ -1,13 +1,7 @@
 import clsx from "clsx"
 import React, { forwardRef } from "react"
 
-import type {
-  SectionAttribute,
-  SectionContainerWidth,
-  SectionPaddingX,
-  SectionPaddingY,
-  SectionSettings,
-} from "./types"
+import type { SectionAttribute, SectionContainerWidth, SectionSettings } from "./types"
 
 export interface SectionProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
@@ -18,7 +12,7 @@ export interface SectionProps
 }
 
 const containerClassMap: Record<SectionContainerWidth | "default", string> = {
-  default: "container-md",
+  default: "container",
   sm: "container-sm",
   md: "container-md",
   lg: "container",
@@ -26,31 +20,40 @@ const containerClassMap: Record<SectionContainerWidth | "default", string> = {
 }
 
 const colorSchemeClassMap = {
-  light: "bg-white text-dark",
-  neutral: "bg-neutral text-dark",
-  dark: "bg-dark text-white",
-  surface: "bg-white text-dark shadow-sm border border-dark-border",
-  transparent: "bg-transparent text-inherit",
+  light: "bg-white text-dark border-neutral",
+  neutral: "bg-neutral text-dark border-dark-border",
+  dark: "bg-dark text-white border-dark-border",
 } satisfies Record<NonNullable<SectionSettings["colorScheme"]>, string>
 
-const paddingXClassMap: Record<SectionPaddingX | "default", string> = {
-  default: "px-section-x",
-  none: "px-section-none",
-  xs: "px-section-xs",
-  sm: "px-section-sm",
-  lg: "px-section-lg",
-  xl: "px-section-xl",
+type SectionPaddingValue = NonNullable<SectionSettings["paddingTop"]>
+
+const sectionPaddingSuffixMap: Record<Exclude<SectionPaddingValue, "default">, string> = {
+  none: "none",
+  xs: "xs",
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+  xl: "xl",
+  xxl: "xxl",
 }
 
-const paddingYClassMap: Record<SectionPaddingY | "default", string> = {
-  default: "py-section-y",
-  none: "py-section-none",
-  xs: "py-section-xs",
-  sm: "py-section-sm",
-  md: "py-section-md",
-  lg: "py-section-lg",
-  xl: "py-section-xl",
-  xxl: "py-section-xxl",
+const paddingSidePrefixMap = {
+  top: "pt",
+  bottom: "pb",
+  left: "pl",
+  right: "pr",
+} as const
+
+function resolvePaddingClass(
+  side: keyof typeof paddingSidePrefixMap,
+  value?: SectionPaddingValue | null
+): string | undefined {
+  if (!value || value === "default") {
+    return undefined
+  }
+
+  const suffix = sectionPaddingSuffixMap[value]
+  return `${paddingSidePrefixMap[side]}-section-${suffix}`
 }
 
 interface NormalizedAttributes {
@@ -112,16 +115,18 @@ export const Section = forwardRef<HTMLElement, SectionProps>(function Section(pr
   const colorSchemeClass =
     colorSchemeClassMap[sectionSettings?.colorScheme ?? "light"]
 
-  const paddingXClass =
-    paddingXClassMap[sectionSettings?.paddingX ?? "default"] ?? "px-section-x"
-
-  const paddingYClass =
-    paddingYClassMap[sectionSettings?.paddingY ?? "default"] ?? "py-section-y"
+  const paddingClasses = [
+    "px-section-x",
+    "py-section-y",
+    resolvePaddingClass("top", sectionSettings?.paddingTop),
+    resolvePaddingClass("bottom", sectionSettings?.paddingBottom),
+    resolvePaddingClass("left", sectionSettings?.paddingLeft),
+    resolvePaddingClass("right", sectionSettings?.paddingRight),
+  ]
 
   const combinedClassName = clsx(
-    "relative w-full",
-    paddingXClass,
-    paddingYClass,
+    "relative w-full border-b",
+    paddingClasses,
     colorSchemeClass,
     attributeClasses,
     className
@@ -129,10 +134,13 @@ export const Section = forwardRef<HTMLElement, SectionProps>(function Section(pr
 
   const content = disableContainer ? children : <div className={finalContainerClassName}>{children}</div>
 
+  const colorScheme = sectionSettings?.colorScheme ?? "light"
+
   return (
     <section
       ref={ref as any}
       className={combinedClassName}
+      data-section-scheme={colorScheme}
       {...attributes}
       {...rest}
     >

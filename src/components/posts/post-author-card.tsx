@@ -38,10 +38,37 @@ function resolvePrimaryAuthor(post: Post): ResolvedAuthor | null {
     user?.email ||
     "Anonymous"
 
-  const avatar = team?.content?.image || user?.avatar || null
-  const role = team?.content?.role || null
-  const bio = team?.content?.bio || null
-  const socials = team?.content?.socialLinks || null
+  const teamDetails = team as
+    | (Team & {
+        image?: MediaType | string | null
+        role?: string | null
+        bio?: string | null
+        socialLinks?: Array<{ platform?: string | null; url?: string | null } | null> | null
+      })
+    | null
+
+  const legacyContent =
+    teamDetails && typeof teamDetails === "object"
+      ? ((teamDetails as unknown as Record<string, unknown>).content as
+          | {
+              image?: MediaType | string | null
+              role?: string | null
+              bio?: string | null
+              socialLinks?: Array<{ platform?: string | null; url?: string | null } | null> | null
+            }
+          | null
+          | undefined)
+      : null
+
+  const avatar =
+    teamDetails?.image ??
+    legacyContent?.image ??
+    user?.avatar ??
+    null
+  const role = teamDetails?.role ?? legacyContent?.role ?? null
+  const bio = teamDetails?.bio ?? legacyContent?.bio ?? null
+  const socials =
+    teamDetails?.socialLinks ?? legacyContent?.socialLinks ?? null
 
   return {
     name,
@@ -67,30 +94,30 @@ export function PostAuthorCard({ post, className }: PostAuthorCardProps) {
   return (
     <aside
       className={cn(
-        "rounded-2xl border border-dark-border bg-white p-6 shadow-sm",
+        "rounded-2xl border border-dark-border bg-white p-content-lg shadow-sm",
         className
       )}
     >
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+      <div className="flex flex-col gap-content md:flex-row md:items-center md:gap-content-lg">
         {avatar ? (
           <div className="relative size-20 flex-shrink-0 overflow-hidden rounded-full border border-dark-border">
             <Media resource={avatar} className="size-full object-cover" />
           </div>
         ) : null}
 
-        <div className="flex-1 space-y-2">
+        <div className="flex flex-1 flex-col gap-content-sm">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-dark-600">
+            <p className="text-sm uppercase tracking-[0.18em] text-dark-600">
               Written By
             </p>
-            <h3 className="text-xl font-semibold text-dark">{name}</h3>
+            <h3 className="text-xl text-dark">{name}</h3>
             {role ? <p className="text-sm text-dark-600">{role}</p> : null}
           </div>
 
-          {bio ? <p className="text-base leading-relaxed text-dark-600">{bio}</p> : null}
+          {bio ? <p className="text-base text-dark-600">{bio}</p> : null}
 
           {filteredSocials.length > 0 ? (
-            <ul className="flex flex-wrap items-center gap-3 text-sm text-dark-600">
+            <ul className="flex flex-wrap items-center gap-content-sm text-sm text-dark-600">
               {filteredSocials.map(link => {
                 if (!link?.platform || !link.url) return null
                 return (

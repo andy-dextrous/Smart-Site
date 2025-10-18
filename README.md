@@ -371,7 +371,8 @@ Smart Site follows a **field-driven, section-first architecture** where:
 │   │   │   │   └── seed/                 # Database seeding
 │   │   │   └── css/                      # Tailwind v4 styles
 │   │   │       ├── globals.css           # Main entry point
-│   │   │       ├── theme.css             # Design tokens
+│   │   │       ├── spacing.css           # Fluid spacing scale
+│   │   │       ├── colors.css            # Brand palette tokens
 │   │   │       └── typography.css        # Typography system
 │   │   └── (payload)/                    # 🔐 Admin panel routes
 │   │       ├── admin/                    # Payload admin UI
@@ -690,30 +691,88 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 <a id="design-system"></a>
 ## 🎨 Design System
 
-Smart Site inherits the universal design system defined in `src/app/(frontend)/css`. These tokens mirror the Smart Site Starter, so the same spacing rhythm and color palette apply across every project.
+Smart Site ships a CSS‑first, tokenized design system under `src/app/(frontend)/css`. Tailwind v4 generates utilities directly from our `@theme` tokens, so you use simple classes instead of hand‑wiring `var(...)` in JSX. Change inputs, not outputs.
 
-### Token Sources
-- `theme.css` declares all spacing clamps, container widths, navigation offsets, and the shared color palette.
-- `base.css` applies global section padding (`px-section-x py-section-y`), sets the default background/text colors, and seeds border styling.
-- `typography.css` defines the fluid type scale, heading hierarchy, and default link treatments. Avoid reapplying these inside sections unless you are building an intentional variant.
-- `utilities.css` exposes container helpers (`container`, `container-md`, `container-sm`) that wrap the matching `max-w-*` tokens.
+### Sources
+- `theme.css` – radii, shadow elevations, motion timings/easings.
+- `spacing.css` – spacing scale, section/content/grid tokens, containers, nav/logo heights, control ratios, offsets.
+- `typography.css` – fluid type base/min/max, ratio, semantic steps (`--text-*`, `--text-h*`), body/heading roles.
+- `colors.css` – brand palette (`--color-*`) and role tokens (borders, surfaces).
+- `base.css` – global background/text colours, section paddings.
+- `utilities.css` – container helpers and small cross‑component utilities.
 
-### Spacing System
-- **Section rhythm**: Each `<section>` automatically receives the global horizontal and vertical padding together with positioning defaults. Reach for the section scale tokens only when a block needs intentionally tighter or looser vertical rhythm.
-- **Navigation offsets**: Apply the first-section offset token to clear the fixed header, and use the navigation-spacing variables on overlays that sit inside the hero grid.
-- **Containers & gutters**: The container tokens clamp readable widths, while the offset variables let full-bleed surfaces align their inner content back to the grid.
-- **Interior spacing**: The content spacing tokens control gaps between stacked elements and the inset padding inside cards or callouts. Prefer these over bespoke values to stay on the shared rhythm.
+### Tailwind v4: Automatic Classes from Tokens
+- Every `@theme` token becomes a utility. Examples:
+  - `--spacing-section-x` → `px-section-x`, `--spacing-section-y` → `py-section-y`
+  - `--spacing-content`, `--spacing-content-sm/lg/xl` → `gap-content`, `p-content`, etc.
+  - `--spacing-grid`, `--spacing-grid-lg` → `gap-grid`, `gap-grid-lg`
+  - `--text-sm`, `--text-lg`, `--text-h2` → `text-sm`, `text-lg`, `text-h2`
+- Do not write `px-[var(--spacing-content)]` or `text-[var(--text-h2)]`. Use the generated utilities.
+
+### Token Inventory (What You Can Control)
+- Typography (in `typography.css` @theme):
+  - `--fluid-text-base-min`, `--fluid-text-base-max`
+  - `--fluid-text-viewport-min`, `--fluid-text-viewport-max`
+  - `--fluid-text-scale-min`, `--fluid-text-scale-max`
+  - `--font-fallback-sans`, `--font-sans`, `--font-body`, `--font-heading`
+  - `--font-body-weight`, `--font-heading-weight`
+  - `--line-height-body`, `--line-height-h1..h6`
+  - `--letter-spacing-body`, `--letter-spacing-heading`
+  - `--color-body`, `--color-link`, `--color-heading`
+- Spacing (in `spacing.css` @theme):
+  - `--fluid-space-base-min`, `--fluid-space-base-max`
+  - `--fluid-space-viewport-min`, `--fluid-space-viewport-max`
+  - `--fluid-space-ratio-min`, `--fluid-space-ratio-max`
+  - Containers: `--container-width-*`, `--container-md-width-*`, `--container-sm-width-*`
+  - Chrome: `--spacing-logo-min/max`, `--spacing-nav-min/max`
+- Control ratios: `--control-scale-sm/md/lg/xl`
+- Theme primitives (in `theme.css` @theme):
+  - Radii: `--radius-xs` → `--radius-xl`
+  - Shadows: `--shadow-sm/md/lg`
+  - Motion: `--motion-duration-*`, `--motion-ease-*`
+  - Layering: `--layer-negative`, `--layer-base`, `--layer-sticky`, `--layer-dropdown`, `--layer-overlay`, `--layer-toast`, `--layer-tooltip`, `--layer-max`
+- Colors (in `colors.css` @theme):
+  - Brand: `--color-primary(-50..-600)`, `--color-secondary(-50..-700)`
+  - Neutral/dark: `--color-neutral`, `--color-dark(-50..-950)`, `--color-white`
+
+Note: The derived tokens (all the computed `--text-*`, `--spacing-*`, container offsets, progress helpers) are read‑only. Modify inputs only.
+
+### Typography Rules
+- Use the generated type utilities: `text-h1..h6`, `text-xs/sm/base/lg/xl/2xl/…`.
+- Do not hard‑code font sizes/weights/line‑heights in components. Avoid `font-*` and `leading-*` unless explicitly designing an effect.
+- Body text, headings, and links inherit from `typography.css`. If you need a special case (e.g., metric pre-heading), use utilities like `uppercase`/tracking with the existing size tokens.
+- Rich text: use the shared `RichText` wrapper (prose defaults are removed by design). Avoid adding `.prose` to non‑article sections.
+
+### Spacing Rules
+- Sections: always use `px-section-x` and `py-section-y` (or the `<Section>` wrapper). These map to `--spacing-section-x/y`.
+- Interior spacing: prefer the content scale – `gap-content(-xs|sm|lg|xl|xxl)`, `p-content(-xs|sm|lg|xl|xxl)`.
+- Controls (buttons/inputs): use the control scale – `px-control-*`, `py-control-*`, `gap-control-*`. Tune the underlying ratios in `spacing.css`.
+- Layers: pick a named z-index utility (`z-layer-dropdown`, `z-layer-overlay`, etc.) instead of hard-coding numbers.
+- Grids: only use the grid scale inside CSS grid layouts – `gap-grid(-sm|lg|xl|xxl)`.
+- Containers: use `container`, `container-md`, `container-sm`. For full‑bleed elements that align to the container, use the offset tokens (`--spacing-container-offset`) via provided helpers.
+- First section offset above a fixed header: rely on `--spacing-first-section-nav-offset`.
 
 ### Color Palette
-- **Primary** tokens define the dominant brand hue used for key actions, emphasis, and interactive states.
-- **Secondary** tokens supply a complementary accent for supporting highlights, gradients, or secondary CTAs.
-- **Neutral** tokens provide the light gray base for subtle backgrounds and dividers, while the **dark** scale spans text, elevated surfaces, and inverted sections.
-- **Role-based** tokens give you consistent border, form-outline, and translucent treatments without relying on ad-hoc opacity adjustments.
+- Use role tokens for backgrounds, text, and borders: `bg-white`, `bg-neutral`, `text-dark`, `text-dark-600`, `border-dark-border`, `border-light-border`.
+- Brand accents: `text-primary-500/600`, `bg-secondary-600`, gradients via existing helpers.
 
-### Usage Guidelines
-- Lean on the defaults from `base.css` and `typography.css`; stacking additional padding or text utilities on top of them typically doubles spacing or breaks the type scale.
-- Compose new sections with the shared building blocks so spacing and color tokens are applied consistently for you.
-- Reference the design system variables through the provided utilities rather than hard-coding values; this keeps Smart Site and the Starter aligned.
+### Quick Examples
+- Good: `section className="px-section-x py-section-lg"` (uses tokens)
+- Good: `div className="container gap-content-lg"`
+- Good: `h2 className="text-h2"`
+- Avoid: `p className="text-[15px] leading-[1.6]"`
+- Avoid: `div className="gap-[var(--spacing-content)]"`
+
+### AI Agents: Must‑Follow Rules
+- Use token utilities, not raw values. Never inject `var(--*)` into class names; Tailwind v4 already generates utilities.
+- Typography must inherit the system. Do not add `font-*` or `leading-*` to UI components unless a design requirement demands it and it’s documented.
+- Spacing comes from one of four ladders: section, content, grid, control. Pick the correct ladder; do not mix arbitrary `mt-*` and `mb-*` for rhythm.
+- Containers are mandatory for layout width. Do not hard‑code `max-w-*` values that duplicate container tokens.
+- Rich text lives in the `RichText` component. Do not reintroduce `.prose` in general sections.
+- If a size you need is missing, add a control input token and extend the derived block—do not hard‑code exceptions in components.
+- Before building, scan `spacing.css`, `typography.css`, `colors.css` to learn the available tokens; implement with utilities; validate with the design‑system preview route `(dev)/design-system-preview`.
+
+For deeper background and all token definitions, see `apps/smart-site-starter/DESIGN-SYSTEM.md`.
 
 <a id="settings"></a>
 ## 🛠 Settings
@@ -761,6 +820,10 @@ Keep templates lean—avoid hard-coded copy, and use placeholder text that nudge
 ## 📦 Building Sections
 
 Sections are the **core building blocks** of Smart Site. Start with a blank canvas, install audited patterns from the Smart Site Sections Library, or craft bespoke sections in this directory. Each section is a self-contained unit with its own fields and component.
+
+> 📘 **Before writing or reviewing a section**, read the canonical playbooks:
+> - [`SMARTSITE-SECTION-DESIGN.md`](./SMARTSITE-SECTION-DESIGN.md) — non-negotiable rules, examples, and implementation patterns.
+> - [`DESIGN-SYSTEM.md`](./DESIGN-SYSTEM.md) — the full token catalogue and typography/spacing guidance every section must use.
 
 ### Section Architecture
 
@@ -850,7 +913,7 @@ export const sectionsMap = {
 
 ### Design Tokens & Styling
 
-- **Spacing** (`theme.css`): use classes like `px-section-x`, `py-section-y`, `gap-content`, `gap-content-sm/lg`, and the container utilities (`container`, `container-md`, `container-sm`) to align with the layout grid.
+- **Spacing** (`spacing.css`): use classes like `px-section-x`, `py-section-y`, `gap-content`, `gap-content-sm/lg`, and the container utilities (`container`, `container-md`, `container-sm`) to align with the layout grid.
 - **Color tokens**: prefer palette utilities such as `bg-primary-500`, `text-secondary-600`, `text-dark-700`, `border-light-border`. Gradient helpers (e.g., `.gradient-border`) live in `components.css`.
 - **Utilities** (`utilities.css`): helpers like `stop-scroll`, `scrollbar-hidden`, `center`, `fill-abs`, and `title-hidden` handle cross-component behaviors.
 - **Animations**: mark animated components with `"use client"`, import `useGSAP`/`gsap` from `@/providers/gsap`, scope the animation with a ref, animate transforms/opacity, add `will-change` classes when animating, and toggle `gsap.globalAnimations` when you prefer drop-in data-attribute reveals.
@@ -939,7 +1002,7 @@ Smart Site provides **pre-built field groups** that ensure consistency:
 | `sectionIntro()`     | Optional heading   | Heading, description, alignment |
 | `image()`            | Media upload       | Image-only upload field         |
 
-Use only the helpers that fit a section’s content footprint—`sectionIntro()` is handy when you need a heading/eyebrow pair, but many sections can skip it entirely in favour of richer link or content fields.
+Use only the helpers that fit a section’s content footprint—`sectionIntro()` is handy when you need a heading/pre-heading pair, but many sections can skip it entirely in favour of richer link or content fields.
 
 ### Section Best Practices
 
@@ -1068,6 +1131,7 @@ Smart Site ships with a full set of first-party collections that already cover t
 - **Content collections** (`pages`, `posts`, `services`, `team`, `testimonials`, `categories`, `media`) stay on by default. Set `enabled: false` in `smartsite.config.ts` to hide one.
 - **Extensions** are only for new slugs that do not exist in the default registry. Declare the slug in `smartsite.config.ts → extensions` and provide the actual config in `src/extensions`. Do **not** add built-in collections such as `services` or `testimonials` to extensions—they already exist.
 - **Plugin collections** (`forms`, `form-submissions`, `redirects`, `search`, etc.) are installed automatically by the default plugin stack in `src/admin/payload/plugins`. They will appear in `payload-types.ts` without any manual configuration.
+- **Search controls**: The same plugin stack registers the `search` collection when `features.search.enabled` is `true`. Configure the command palette vs. results page behaviour through `features.search.mode` (`"page" | "modal" | "hybrid"`). The collection is grouped under **Settings → Search Results** in Payload admin so reindexing and manual inspection stay tidy.
 
 ### Inspecting the active Payload configuration
 
@@ -1112,7 +1176,8 @@ Each configurable collection (any slug inside `smartsite.config.ts → collectio
 | `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
 | `i18n`        | `boolean` | `false`          | Internationalization                                                            |
 | `analytics`   | `boolean` | `true`           | Analytics tracking                                                              |
-| `search`      | `boolean` | `true`           | Search functionality                                                            |
+| `search.enabled` | `boolean` | `true`       | Toggle the entire search stack (plugin registration, nav affordances, API)      |
+| `search.mode` | `"page" \| "modal" \| "hybrid"` | `"hybrid"` | Choose between full results page, command palette, or both                    |
 | `sitemaps`    | `boolean` | `true`           | XML sitemap generation                                                          |
 
 #### GSAP Configuration
@@ -1383,7 +1448,7 @@ The merge order is: defaults → registry overrides → user config (`smartsite.
 1. **Start with sections** - 90% of development is building sections
 2. **Use reusable fields** - Leverage pre-built field patterns
 3. **Test in admin** - Verify fields work in Payload admin
-4. **Style with Tailwind v4** - Use design tokens from `theme.css`
+4. **Style with Tailwind v4** - Use design tokens from `spacing.css`, `colors.css`, and `typography.css`
 5. **Add animations** - GSAP for professional polish
 
 ### Common Tasks
@@ -1568,3 +1633,54 @@ This is an internal tool for rapid website development. For questions or improve
 ## 📄 License
 
 MIT License - See LICENSE file for details.
+
+
+## Search Experience
+
+### Feature Overview
+
+- **Payload Search Plugin**: The starter wires `@payloadcms/plugin-search` through `src/admin/payload/plugins/index.ts`. It syncs every front-end collection and maintains a dedicated `search` collection that the frontend queries.
+- **Config-driven toggle**: Enable or disable search (and choose modal/page/hybrid modes) from `src/smartsite.config.ts`. The feature integrates with the navigation components, the `/search` results page, and the command palette.
+- **Realtime command palette**: A client-side modal (⌘/Ctrl + K) fetches results from `/api/search?q=…` and runs lightweight fuzzy scoring before grouping by collection label.
+- **Server-rendered results page**: `/search` swaps between an SEO-friendly results screen or redirects to the command palette depending on the configured mode.
+
+### Data Flow
+
+1. **Index population**  
+   - When a document is created or updated in a front-end collection, the search plugin’s `beforeSyncWithSearch` hook flattens key metadata (slug, URI, meta fields, categories) and populates the search record.  
+   - `searchText` accumulates all relevant terms so the frontend can perform case-insensitive `contains` queries without a heavy database index.
+
+2. **Fetching results**  
+   - Server requests use `getSearchResults` (`src/admin/data/search.ts`), which calls the universal cache helper (`cache.getCollectionWithPagination`) to query the `search` collection with `contains` filters.  
+   - The API route (`src/app/(frontend)/api/search/route.ts`) returns JSON for the command palette, and the `/search/page.tsx` renders the same data on the server.
+
+3. **Frontend rendering**  
+   - The command palette (`src/components/search/search-dialog.tsx`) manages modal state, debounces input, fetches JSON, and groups results by collection label.  
+   - The classic results page uses the same helper but renders cards with pagination and search form controls.
+
+### Configuration
+
+```ts
+// src/smartsite.config.ts
+features: {
+  search: {
+    enabled: true,
+    mode: "hybrid", // "page" | "modal" | "hybrid"
+  },
+}
+```
+
+- `enabled`: toggles the entire search stack. When `false`, the plugin isn’t registered, navigation hides search affordances, and the `/search` route returns 404.
+- `mode`:  
+  - `page` – only the server-rendered results page is available.  
+  - `modal` – only the command palette is exposed.  
+  - `hybrid` – both are available; the palette offers a “View all results” action.
+
+### Maintenance & Troubleshooting
+
+- **Reindexing**: The plugin exposes `/api/search/reindex` (requires admin auth) and a UI action inside the Payload admin. Running it rebuilds every search document using the current schema and hook logic.
+- **Extending search fields**: Add fields to `searchFields` (`src/admin/payload/search/fieldOverrides.ts`) and enrich `searchText` in `beforeSyncWithSearch`.
+- **Custom front-end collections**: Any collection marked `frontend: true` in the config is automatically indexed and exposed to search. Use `frontendOptions` to adjust defaults without touching the plugin.
+- **Debugging**: The API route logs request parameters and response counts via `[search-api]` messages. Inspect the `search` collection directly in Payload admin to verify stored records.
+
+By relying on the underlying search collection instead of scanning live content, the system delivers consistent performance, keeps the modal snappy, and ensures that both the command palette and server-rendered pages stay in sync with published content.

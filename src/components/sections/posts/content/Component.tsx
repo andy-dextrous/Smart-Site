@@ -11,15 +11,7 @@ import {
   type TableOfContentsItem,
 } from "@/components/posts/table-of-contents"
 import { DocumentBreadcrumbs } from "@/components/fields/breadcrumbs"
-import { cn } from "@/utilities/ui"
-
-type ProseSize = "md" | "lg" | "xl"
-
-const proseSizeClassMap: Record<ProseSize, string> = {
-  md: "prose prose-lg max-w-none",
-  lg: "prose prose-xl max-w-none",
-  xl: "prose prose-2xl max-w-none",
-}
+import { tv } from "tailwind-variants"
 
 function slugify(value: string, existing: Set<string>) {
   const base = value
@@ -92,14 +84,50 @@ function gatherPlainText(node: any): string {
   return text.trim()
 }
 
-export const PostsContentComponent: React.FC<PostsContentBlock & PageData> = props => {
+const postsContentVariants = tv({
+  slots: {
+    container: "flex flex-col gap-content-lg",
+    grid: "grid gap-grid-lg lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]",
+    aside: "flex flex-col gap-content lg:sticky lg:top-24 lg:self-start",
+    breadcrumbs: "text-sm",
+    richText:
+      "text-pretty text-dark-700 prose-h2:text-3xl prose-h3:text-2xl prose-h4:text-xl",
+  },
+  variants: {
+    tone: {
+      light: {
+        breadcrumbs: "text-dark-600",
+        richText: "text-dark-700",
+      },
+      neutral: {
+        breadcrumbs: "text-dark-600",
+        richText: "text-dark-700",
+      },
+      dark: {
+        breadcrumbs: "text-white/80",
+        richText: "text-white/80",
+      },
+    },
+    prose: {
+      md: "",
+      lg: "prose-xl",
+      xl: "prose-2xl",
+    },
+  },
+  defaultVariants: {
+    tone: "light",
+    prose: "lg",
+  },
+})
+
+export function PostsContentComponent(props: PostsContentBlock & PageData) {
   const {
     document,
     breadcrumbs,
-    showBreadcrumbs = true,
-    showReadingProgress = false,
-    showTableOfContents = true,
-    showAuthorCard = true,
+    showBreadcrumbs,
+    showReadingProgress,
+    showTableOfContents,
+    showAuthorCard,
     tocHeading = "On this page",
     tocMode = "auto",
     tocItems,
@@ -133,35 +161,55 @@ export const PostsContentComponent: React.FC<PostsContentBlock & PageData> = pro
     : []
 
   const articleId = "post-article-content"
-  const proseClass = proseSizeClassMap[proseSize ?? "lg"] ?? proseSizeClassMap.lg
+  const tone =
+    sectionSettings?.colorScheme === "dark"
+      ? "dark"
+      : sectionSettings?.colorScheme === "neutral"
+        ? "neutral"
+        : "light"
+
+  const {
+    container,
+    grid,
+    aside,
+    breadcrumbs: breadcrumbsSlot,
+    richText,
+  } = postsContentVariants({
+    tone,
+    prose: proseSize ?? "lg",
+  })
+
+  const containerClassName = container()
+  const gridClassName = grid()
+  const asideClassName = aside()
+  const breadcrumbsClassName = breadcrumbsSlot()
+  const richTextClassName = richText()
 
   return (
-    <Section sectionSettings={sectionSettings} containerClassName="space-y-10">
+    <Section sectionSettings={sectionSettings} containerClassName={containerClassName}>
       {showReadingProgress ? (
         <ReadingProgress targetSelector={`#${articleId}`} className="bg-neutral" />
       ) : null}
 
-      {showBreadcrumbs && breadcrumbs ? (
-        <DocumentBreadcrumbs
-          document={{ breadcrumbs }}
-          className="text-dark-600 text-sm"
-        />
+      {showBreadcrumbs !== false && breadcrumbs ? (
+        <DocumentBreadcrumbs document={{ breadcrumbs }} className={breadcrumbsClassName} />
       ) : null}
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-        <article id={articleId} className={cn(proseClass, "text-dark-700 text-pretty")}>
+      <div className={gridClassName}>
+        <article id={articleId} className="text-pretty">
           {post.content ? (
             <RichText
               data={post.content as SerializedEditorState}
               enableGutter={false}
+              variant="article"
               textColor="inherit"
-              className="prose-h2:text-3xl prose-h3:text-2xl prose-h4:text-xl"
+              className={richTextClassName}
             />
           ) : null}
         </article>
 
-        {showTableOfContents && tocList.length > 0 ? (
-          <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+        {showTableOfContents !== false && tocList.length > 0 ? (
+          <aside className={asideClassName}>
             <TableOfContents
               items={tocList}
               heading={tocHeading || undefined}
@@ -171,7 +219,7 @@ export const PostsContentComponent: React.FC<PostsContentBlock & PageData> = pro
         ) : null}
       </div>
 
-      {showAuthorCard ? <PostAuthorCard post={post} /> : null}
+      {showAuthorCard !== false ? <PostAuthorCard post={post} /> : null}
     </Section>
   )
 }

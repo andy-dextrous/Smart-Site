@@ -24,6 +24,11 @@ const CollectionConfigSchema = z.object({
   frontend: z.boolean(),
   label: z.string(),
   seo: z.boolean().optional(),
+  search: z
+    .object({
+      enabled: z.boolean(),
+    })
+    .optional(),
   frontendOptions: z
     .object({
       seoSchemaType: z
@@ -170,6 +175,16 @@ const I18nConfigSchema = z
 
 const I18nFeatureSchema = z.union([z.boolean(), I18nConfigSchema])
 
+const SearchModeSchema = z.enum(["page", "modal", "hybrid"])
+
+const SearchFeatureSchema = z.union([
+  z.boolean(),
+  z.object({
+    enabled: z.boolean(),
+    mode: SearchModeSchema.default("page"),
+  }),
+])
+
 const FeaturesConfigSchema = z.object({
   ai: z.object({
     enabled: z.boolean(),
@@ -179,7 +194,7 @@ const FeaturesConfigSchema = z.object({
   darkMode: z.boolean(),
   i18n: I18nFeatureSchema,
   analytics: z.boolean(),
-  search: z.boolean(),
+  search: SearchFeatureSchema,
   sitemaps: z.boolean(),
 })
 
@@ -218,6 +233,7 @@ export type BreadcrumbConfig = z.infer<typeof BreadcrumbConfigSchema>
 export type FeaturesConfig = z.infer<typeof FeaturesConfigSchema>
 export type I18nConfig = z.infer<typeof I18nConfigSchema>
 export type I18nFeature = z.infer<typeof I18nFeatureSchema>
+export type SearchFeature = z.infer<typeof SearchFeatureSchema>
 
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
@@ -243,6 +259,9 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
       frontend: true,
       label: "Pages",
       seo: true,
+      search: {
+        enabled: true,
+      },
       frontendOptions: {
         seoSchemaType: "WebPage",
         enablePreview: true,
@@ -262,6 +281,9 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
       frontend: true,
       label: "Posts",
       seo: true,
+      search: {
+        enabled: true,
+      },
       frontendOptions: {
         seoSchemaType: "Article",
         enablePreview: true,
@@ -286,6 +308,9 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
       frontend: true,
       label: "Team",
       seo: true,
+      search: {
+        enabled: true,
+      },
       frontendOptions: {
         seoSchemaType: "Person",
         enablePreview: true,
@@ -305,6 +330,9 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
       frontend: true,
       label: "Services",
       seo: true,
+      search: {
+        enabled: true,
+      },
       frontendOptions: {
         seoSchemaType: "Service",
         enablePreview: true,
@@ -356,7 +384,10 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     darkMode: false,
     i18n: false,
     analytics: true,
-    search: true,
+    search: {
+      enabled: true,
+      mode: "page",
+    },
     sitemaps: true,
   },
 

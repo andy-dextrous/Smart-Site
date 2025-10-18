@@ -1,5 +1,10 @@
 import type { Media, Post } from "@/admin/payload/payload-types"
 import { Media as PayloadMedia } from "@/components/fields/media"
+import {
+  formatPostPublishDate,
+  estimatePostReadingTime,
+  resolvePostCategories,
+} from "@/admin/utilities/posts"
 import { cn } from "@/utilities/ui"
 import Link from "next/link"
 
@@ -27,73 +32,6 @@ const metaTextClassMap: Record<PostCardAppearance, string> = {
   dark: "text-white/70",
 }
 
-function resolveCategories(post: Post): string[] {
-  const categories = post.categories || []
-
-  return categories
-    .map(category => {
-      if (typeof category === "object" && category !== null) {
-        return "title" in category && typeof category.title === "string"
-          ? category.title
-          : null
-      }
-
-      return null
-    })
-    .filter((title): title is string => Boolean(title))
-}
-
-function formatPublishDate(value: string | null | undefined): string | null {
-  if (!value) {
-    return null
-  }
-
-  const parsedDate = new Date(value)
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null
-  }
-
-  return parsedDate.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  })
-}
-
-function estimateReadingTime(content: Post["content"]): number | null {
-  if (!content?.root?.children) {
-    return null
-  }
-
-  let wordCount = 0
-
-  const walk = (node: any) => {
-    if (!node) return
-
-    if (typeof node === "string") {
-      wordCount += node.trim().split(/\s+/).filter(Boolean).length
-      return
-    }
-
-    if (node.text) {
-      wordCount += node.text.trim().split(/\s+/).filter(Boolean).length
-    }
-
-    if (Array.isArray(node.children)) {
-      node.children.forEach(walk)
-    }
-  }
-
-  content.root.children.forEach(walk)
-
-  if (wordCount === 0) {
-    return null
-  }
-
-  const wordsPerMinute = 200
-  return Math.max(1, Math.round(wordCount / wordsPerMinute))
-}
-
 export function PostCard(props: PostCardProps) {
   const {
     post,
@@ -105,9 +43,9 @@ export function PostCard(props: PostCardProps) {
     showReadingTime = false,
   } = props
 
-  const categories = showCategories ? resolveCategories(post) : []
-  const publishDate = showPublishedDate ? formatPublishDate(post.publishedAt) : null
-  const readingTime = showReadingTime ? estimateReadingTime(post.content) : null
+  const categories = showCategories ? resolvePostCategories(post) : []
+  const publishDate = showPublishedDate ? formatPostPublishDate(post.publishedAt) : null
+  const readingTime = showReadingTime ? estimatePostReadingTime(post.content) : null
 
   const image =
     post.featuredImage && typeof post.featuredImage === "object"
@@ -117,7 +55,13 @@ export function PostCard(props: PostCardProps) {
   const href = post.uri || (post.slug ? `/posts/${post.slug}` : undefined)
 
   return (
-    <article className={cn("flex h-full flex-col overflow-hidden rounded-2xl", appearanceClassMap[appearance], className)}>
+    <article
+      className={cn(
+        "flex h-full flex-col overflow-hidden rounded-2xl",
+        appearanceClassMap[appearance],
+        className
+      )}
+    >
       {image ? (
         <div className="relative aspect-[4/3] w-full overflow-hidden">
           <PayloadMedia
@@ -129,8 +73,8 @@ export function PostCard(props: PostCardProps) {
         </div>
       ) : null}
 
-      <div className="flex flex-1 flex-col gap-4 p-6 md:p-8">
-        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em]">
+      <div className="flex flex-1 flex-col gap-content p-content md:p-content-lg">
+        <div className="flex flex-wrap items-center gap-content-sm text-xs uppercase tracking-[0.18em]">
           {publishDate ? (
             <span className={metaTextClassMap[appearance]}>{publishDate}</span>
           ) : null}
@@ -140,12 +84,12 @@ export function PostCard(props: PostCardProps) {
         </div>
 
         {categories.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em]">
+          <div className="flex flex-wrap items-center gap-content-sm text-xs uppercase tracking-[0.18em]">
             {categories.map(category => (
               <span
                 key={category}
                 className={cn(
-                  "rounded-full border px-3 py-1",
+                  "rounded-full border px-content-sm py-content-xs",
                   appearance === "dark" ? "border-light-border/70 text-white/80" : "border-dark-border/70 text-dark-600"
                 )}
               >
@@ -155,17 +99,17 @@ export function PostCard(props: PostCardProps) {
           </div>
         ) : null}
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-content-sm">
           {href ? (
-            <Link href={href} className="text-balance text-2xl font-semibold leading-tight hover:text-primary">
+            <Link href={href} className="text-balance text-h3 hover:text-primary">
               {post.title}
             </Link>
           ) : (
-            <h3 className="text-balance text-2xl font-semibold leading-tight">{post.title}</h3>
+            <h3 className="text-balance text-h3">{post.title}</h3>
           )}
 
           {showExcerpt ? (
-            <p className={cn("text-base leading-relaxed", metaTextClassMap[appearance])}>
+            <p className={cn("text-base", metaTextClassMap[appearance])}>
               {post.seo?.meta?.description || ""}
             </p>
           ) : null}

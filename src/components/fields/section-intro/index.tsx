@@ -32,13 +32,13 @@ export const SectionIntro: React.FC<SectionIntroProps> = ({
   return (
     <div
       className={cn(
-        "container-sm gap-content-lg mb-section-x flex flex-col",
+        "container-sm mb-content-xl flex flex-col gap-content-lg",
         align === "center" ? "items-center" : "items-start",
         containerClassName
       )}
     >
       {heading && (
-        <h2 className={cn("text-balance text-3xl font-semibold leading-tight sm:text-4xl", headingClassName)}>
+        <h2 className={cn("text-balance", headingClassName)}>
           {parsedHeading}
         </h2>
       )}

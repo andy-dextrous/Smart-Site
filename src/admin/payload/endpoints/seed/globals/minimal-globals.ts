@@ -8,56 +8,135 @@ import type { Page } from "@/admin/payload/payload-types"
 
 type HeaderOptions = {
   includeInsights?: boolean
+  pages?: any[]
 }
 
 export const minimalHeaderGlobal = (options: HeaderOptions = {}): any => {
-  const items: Array<{ url: string; label: string }> = [
-    { url: "/", label: "Home" },
-    { url: "/about", label: "About" },
-  ]
+  const { includeInsights = false, pages = [] } = options
 
-  if (options.includeInsights) {
-    items.push({ url: "/insights", label: "Insights" })
-  }
+  const homePage = pages.find((p: any) => p?.slug === "home")
+  const aboutPage = pages.find((p: any) => p?.slug === "about")
+  const insightsPage = pages.find((p: any) => p?.slug === "insights")
+  const contactPage = pages.find((p: any) => p?.slug === "contact")
 
-  items.push({ url: "/contact", label: "Contact" })
+  const navItems: any[] = []
 
-  return {
-    navItems: items.map(link => ({
+  if (homePage) {
+    navItems.push({
       item: {
         link: {
-          type: "custom",
+          type: "reference",
           newTab: false,
-          url: link.url,
-          label: link.label,
+          reference: {
+            relationTo: "pages",
+            value: homePage.id,
+          },
+          label: "Home",
         },
         subItems: [],
       },
-    })),
+    })
+  }
+
+  if (aboutPage) {
+    navItems.push({
+      item: {
+        link: {
+          type: "reference",
+          newTab: false,
+          reference: {
+            relationTo: "pages",
+            value: aboutPage.id,
+          },
+          label: "About",
+        },
+        subItems: [],
+      },
+    })
+  }
+
+  if (includeInsights && insightsPage) {
+    navItems.push({
+      item: {
+        link: {
+          type: "reference",
+          newTab: false,
+          reference: {
+            relationTo: "pages",
+            value: insightsPage.id,
+          },
+          label: "Insights",
+        },
+        subItems: [],
+      },
+    })
+  }
+
+  if (contactPage) {
+    navItems.push({
+      item: {
+        link: {
+          type: "reference",
+          newTab: false,
+          reference: {
+            relationTo: "pages",
+            value: contactPage.id,
+          },
+          label: "Contact",
+        },
+        subItems: [],
+      },
+    })
+  }
+
+  return {
+    navItems,
   }
 }
 
-export const minimalFooterGlobal = (): any => {
+type FooterOptions = {
+  pages?: any[]
+}
+
+export const minimalFooterGlobal = (options: FooterOptions = {}): any => {
+  const { pages = [] } = options
+
+  const privacyPage = pages.find((p: any) => p?.slug === "privacy-policy")
+  const termsPage = pages.find((p: any) => p?.slug === "terms")
+
+  const legals: any[] = []
+
+  if (privacyPage) {
+    legals.push({
+      link: {
+        type: "reference",
+        newTab: false,
+        reference: {
+          relationTo: "pages",
+          value: privacyPage.id,
+        },
+        label: "Privacy Policy",
+      },
+    })
+  }
+
+  if (termsPage) {
+    legals.push({
+      link: {
+        type: "reference",
+        newTab: false,
+        reference: {
+          relationTo: "pages",
+          value: termsPage.id,
+        },
+        label: "Terms",
+      },
+    })
+  }
+
   return {
     menus: [],
-    legals: [
-      {
-        link: {
-          type: "custom",
-          newTab: false,
-          url: "/privacy-policy",
-          label: "Privacy Policy",
-        },
-      },
-      {
-        link: {
-          type: "custom",
-          newTab: false,
-          url: "/terms",
-          label: "Terms",
-        },
-      },
-    ],
+    legals,
   }
 }
 

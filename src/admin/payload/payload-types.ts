@@ -643,6 +643,7 @@ export interface Page {
    */
   uri?: string | null;
   slugLock?: boolean | null;
+  createAutomaticRedirect?: boolean | null;
   parent?: (string | null) | Page;
   breadcrumbs?:
     | {
@@ -683,36 +684,22 @@ export interface Category {
  * via the `definition` "HeroBlock".
  */
 export interface HeroBlock {
-  eyebrow?: string | null;
+  preheading?: string | null;
   heading: string;
   /**
-   * Use this for a short paragraph beneath the heading.
+   * Optional supporting copy displayed beneath the heading.
    */
-  supportingText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Optional highlight or USP line displayed below the main copy.
-   */
-  highlight?: string | null;
+  supportingText?: string | null;
   /**
    * Optional background image that fills the hero.
    */
   backgroundImage?: (string | null) | Media;
   size?: ('full' | 'large' | 'medium' | 'small') | null;
   alignment?: ('left' | 'center') | null;
+  /**
+   * Choose how the hero renders its background. Image overlay applies gradient treatments and switches copy to light mode automatically.
+   */
+  visualStyle?: ('classic' | 'image-overlay' | 'gradient') | null;
   /**
    * Optional call-to-action buttons displayed beneath the hero copy.
    */
@@ -750,7 +737,6 @@ export interface HeroBlock {
                 | 'outline'
                 | 'outlineDark'
                 | 'outlineGradient'
-                | 'phoneSelect'
                 | 'secondary'
                 | 'white'
                 | 'dark'
@@ -761,20 +747,20 @@ export interface HeroBlock {
           /**
            * Select the button size
            */
-          size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+          size?: ('sm' | 'md' | 'lg' | 'xl') | null;
           /**
            * Select the button layout
            */
           layout?: ('default' | 'centered') | null;
           /**
+           * Render the button as icon-only with optional label for screen readers.
+           */
+          iconOnly?: boolean | null;
+          /**
            * Upload an SVG icon to display within the button.
            */
           icon?: (string | null) | Media;
           iconPosition?: ('left' | 'right') | null;
-          /**
-           * Render the button as icon-only with optional label for screen readers.
-           */
-          iconOnly?: boolean | null;
         };
         id?: string | null;
       }[]
@@ -793,10 +779,12 @@ export interface HeroBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -953,6 +941,7 @@ export interface Post {
    */
   uri?: string | null;
   slugLock?: boolean | null;
+  createAutomaticRedirect?: boolean | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -1004,47 +993,35 @@ export interface Team {
   id: string;
   name: string;
   email: string;
-  content: {
-    /**
-     * The image will be used as the profile image for the team member.
-     */
-    image: string | Media;
-    role: string;
-    bio: string;
-    /**
-     * Optional profile links displayed with this team member.
-     */
-    socialLinks?:
-      | {
-          platform?:
-            | (
-                | 'twitter'
-                | 'facebook'
-                | 'instagram'
-                | 'linkedin'
-                | 'youtube'
-                | 'twitch'
-                | 'tiktok'
-                | 'github'
-                | 'website'
-              )
-            | null;
-          url?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    /**
-     * Optional qualifications and certifications for this team member.
-     */
-    education?:
-      | {
-          degree?: string | null;
-          institution?: string | null;
-          year?: number | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
+  /**
+   * The image will be used as the profile image for the team member.
+   */
+  image: string | Media;
+  role: string;
+  bio: string;
+  /**
+   * Optional profile links displayed with this team member.
+   */
+  socialLinks?:
+    | {
+        platform?:
+          | ('twitter' | 'facebook' | 'instagram' | 'linkedin' | 'youtube' | 'twitch' | 'tiktok' | 'github' | 'website')
+          | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional qualifications and certifications for this team member.
+   */
+  education?:
+    | {
+        degree?: string | null;
+        institution?: string | null;
+        year?: number | null;
+        id?: string | null;
+      }[]
+    | null;
   seo?: {
     meta?: {
       /**
@@ -1163,6 +1140,7 @@ export interface Team {
    */
   uri?: string | null;
   slugLock?: boolean | null;
+  createAutomaticRedirect?: boolean | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -1314,6 +1292,7 @@ export interface Service {
    */
   uri?: string | null;
   slugLock?: boolean | null;
+  createAutomaticRedirect?: boolean | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -1372,36 +1351,25 @@ export interface ContentBlock {
      * Select the button variant
      */
     variant?:
-      | (
-          | 'default'
-          | 'outline'
-          | 'outlineDark'
-          | 'outlineGradient'
-          | 'phoneSelect'
-          | 'secondary'
-          | 'white'
-          | 'dark'
-          | 'ghost'
-          | 'link'
-        )
+      | ('default' | 'outline' | 'outlineDark' | 'outlineGradient' | 'secondary' | 'white' | 'dark' | 'ghost' | 'link')
       | null;
     /**
      * Select the button size
      */
-    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+    size?: ('sm' | 'md' | 'lg' | 'xl') | null;
     /**
      * Select the button layout
      */
     layout?: ('default' | 'centered') | null;
     /**
+     * Render the button as icon-only with optional label for screen readers.
+     */
+    iconOnly?: boolean | null;
+    /**
      * Upload an SVG icon to display within the button.
      */
     icon?: (string | null) | Media;
     iconPosition?: ('left' | 'right') | null;
-    /**
-     * Render the button as icon-only with optional label for screen readers.
-     */
-    iconOnly?: boolean | null;
   };
   /**
    * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
@@ -1417,10 +1385,12 @@ export interface ContentBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1455,10 +1425,6 @@ export interface ContactFormBlock {
    */
   form: string | Form;
   /**
-   * Visual style based on background
-   */
-  variant?: ('white' | 'dark' | 'neutral' | 'transparent') | null;
-  /**
    * Control how this section renders on the frontend—attributes, layout width, colours, and padding.
    */
   sectionSettings?: {
@@ -1472,10 +1438,12 @@ export interface ContactFormBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1515,10 +1483,12 @@ export interface PostsArchiveBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1548,10 +1518,12 @@ export interface PostsHeroBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1593,10 +1565,12 @@ export interface PostsContentBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1622,10 +1596,12 @@ export interface PostsRelatedBlock {
           id?: string | null;
         }[]
       | null;
-    containerWidth?: ('sm' | 'md' | 'lg' | 'full') | null;
-    colorScheme?: ('light' | 'neutral' | 'dark' | 'surface' | 'transparent') | null;
-    paddingX?: ('default' | 'none' | 'xs' | 'sm' | 'lg' | 'xl') | null;
-    paddingY?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    containerWidth?: ('lg' | 'md' | 'sm' | 'full') | null;
+    colorScheme?: ('light' | 'neutral' | 'dark') | null;
+    paddingTop?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingRight?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingBottom?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
+    paddingLeft?: ('default' | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1848,13 +1824,23 @@ export interface Search {
     | {
         relationTo: 'posts';
         value: string | Post;
+      }
+    | {
+        relationTo: 'services';
+        value: string | Service;
+      }
+    | {
+        relationTo: 'team';
+        value: string | Team;
       };
   slug?: string | null;
+  uri?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
     image?: (string | null) | Media;
   };
+  searchText?: string | null;
   categories?:
     | {
         relationTo?: string | null;
@@ -2183,6 +2169,7 @@ export interface PagesSelect<T extends boolean = true> {
   slug?: T;
   uri?: T;
   slugLock?: T;
+  createAutomaticRedirect?: T;
   parent?: T;
   breadcrumbs?:
     | T
@@ -2202,13 +2189,13 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "HeroBlock_select".
  */
 export interface HeroBlockSelect<T extends boolean = true> {
-  eyebrow?: T;
+  preheading?: T;
   heading?: T;
   supportingText?: T;
-  highlight?: T;
   backgroundImage?: T;
   size?: T;
   alignment?: T;
+  visualStyle?: T;
   buttons?:
     | T
     | {
@@ -2224,9 +2211,9 @@ export interface HeroBlockSelect<T extends boolean = true> {
               variant?: T;
               size?: T;
               layout?: T;
+              iconOnly?: T;
               icon?: T;
               iconPosition?: T;
-              iconOnly?: T;
             };
         id?: T;
       };
@@ -2242,8 +2229,10 @@ export interface HeroBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2272,9 +2261,9 @@ export interface ContentBlockSelect<T extends boolean = true> {
         variant?: T;
         size?: T;
         layout?: T;
+        iconOnly?: T;
         icon?: T;
         iconPosition?: T;
-        iconOnly?: T;
       };
   sectionSettings?:
     | T
@@ -2288,8 +2277,10 @@ export interface ContentBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2302,7 +2293,6 @@ export interface ContactFormBlockSelect<T extends boolean = true> {
   supportingContent?: T;
   layout?: T;
   form?: T;
-  variant?: T;
   sectionSettings?:
     | T
     | {
@@ -2315,8 +2305,10 @@ export interface ContactFormBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2350,8 +2342,10 @@ export interface PostsArchiveBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2378,8 +2372,10 @@ export interface PostsHeroBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2415,8 +2411,10 @@ export interface PostsContentBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2439,8 +2437,10 @@ export interface PostsRelatedBlockSelect<T extends boolean = true> {
             };
         containerWidth?: T;
         colorScheme?: T;
-        paddingX?: T;
-        paddingY?: T;
+        paddingTop?: T;
+        paddingRight?: T;
+        paddingBottom?: T;
+        paddingLeft?: T;
       };
   id?: T;
   blockName?: T;
@@ -2508,6 +2508,7 @@ export interface PostsSelect<T extends boolean = true> {
   slug?: T;
   uri?: T;
   slugLock?: T;
+  createAutomaticRedirect?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -2665,27 +2666,23 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface TeamSelect<T extends boolean = true> {
   name?: T;
   email?: T;
-  content?:
+  image?: T;
+  role?: T;
+  bio?: T;
+  socialLinks?:
     | T
     | {
-        image?: T;
-        role?: T;
-        bio?: T;
-        socialLinks?:
-          | T
-          | {
-              platform?: T;
-              url?: T;
-              id?: T;
-            };
-        education?:
-          | T
-          | {
-              degree?: T;
-              institution?: T;
-              year?: T;
-              id?: T;
-            };
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  education?:
+    | T
+    | {
+        degree?: T;
+        institution?: T;
+        year?: T;
+        id?: T;
       };
   seo?:
     | T
@@ -2732,6 +2729,7 @@ export interface TeamSelect<T extends boolean = true> {
   slug?: T;
   uri?: T;
   slugLock?: T;
+  createAutomaticRedirect?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -2803,6 +2801,7 @@ export interface ServicesSelect<T extends boolean = true> {
   slug?: T;
   uri?: T;
   slugLock?: T;
+  createAutomaticRedirect?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -3061,6 +3060,7 @@ export interface SearchSelect<T extends boolean = true> {
   priority?: T;
   doc?: T;
   slug?: T;
+  uri?: T;
   meta?:
     | T
     | {
@@ -3068,6 +3068,7 @@ export interface SearchSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  searchText?: T;
   categories?:
     | T
     | {
@@ -3230,7 +3231,6 @@ export interface Header {
                   | 'outline'
                   | 'outlineDark'
                   | 'outlineGradient'
-                  | 'phoneSelect'
                   | 'secondary'
                   | 'white'
                   | 'dark'
@@ -3241,20 +3241,20 @@ export interface Header {
             /**
              * Select the button size
              */
-            size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+            size?: ('sm' | 'md' | 'lg' | 'xl') | null;
             /**
              * Select the button layout
              */
             layout?: ('default' | 'centered') | null;
             /**
+             * Render the button as icon-only with optional label for screen readers.
+             */
+            iconOnly?: boolean | null;
+            /**
              * Upload an SVG icon to display within the button.
              */
             icon?: (string | null) | Media;
             iconPosition?: ('left' | 'right') | null;
-            /**
-             * Render the button as icon-only with optional label for screen readers.
-             */
-            iconOnly?: boolean | null;
           };
           hasDropdown?: boolean | null;
           subItems?:
@@ -3292,7 +3292,6 @@ export interface Header {
                           | 'outline'
                           | 'outlineDark'
                           | 'outlineGradient'
-                          | 'phoneSelect'
                           | 'secondary'
                           | 'white'
                           | 'dark'
@@ -3303,20 +3302,20 @@ export interface Header {
                     /**
                      * Select the button size
                      */
-                    size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+                    size?: ('sm' | 'md' | 'lg' | 'xl') | null;
                     /**
                      * Select the button layout
                      */
                     layout?: ('default' | 'centered') | null;
                     /**
+                     * Render the button as icon-only with optional label for screen readers.
+                     */
+                    iconOnly?: boolean | null;
+                    /**
                      * Upload an SVG icon to display within the button.
                      */
                     icon?: (string | null) | Media;
                     iconPosition?: ('left' | 'right') | null;
-                    /**
-                     * Render the button as icon-only with optional label for screen readers.
-                     */
-                    iconOnly?: boolean | null;
                   };
                   hasChildren?: boolean | null;
                   subItems?:
@@ -3353,7 +3352,6 @@ export interface Header {
                                 | 'outline'
                                 | 'outlineDark'
                                 | 'outlineGradient'
-                                | 'phoneSelect'
                                 | 'secondary'
                                 | 'white'
                                 | 'dark'
@@ -3364,20 +3362,20 @@ export interface Header {
                           /**
                            * Select the button size
                            */
-                          size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+                          size?: ('sm' | 'md' | 'lg' | 'xl') | null;
                           /**
                            * Select the button layout
                            */
                           layout?: ('default' | 'centered') | null;
                           /**
+                           * Render the button as icon-only with optional label for screen readers.
+                           */
+                          iconOnly?: boolean | null;
+                          /**
                            * Upload an SVG icon to display within the button.
                            */
                           icon?: (string | null) | Media;
                           iconPosition?: ('left' | 'right') | null;
-                          /**
-                           * Render the button as icon-only with optional label for screen readers.
-                           */
-                          iconOnly?: boolean | null;
                         };
                         id?: string | null;
                       }[]
@@ -3436,7 +3434,6 @@ export interface Footer {
                       | 'outline'
                       | 'outlineDark'
                       | 'outlineGradient'
-                      | 'phoneSelect'
                       | 'secondary'
                       | 'white'
                       | 'dark'
@@ -3447,20 +3444,20 @@ export interface Footer {
                 /**
                  * Select the button size
                  */
-                size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+                size?: ('sm' | 'md' | 'lg' | 'xl') | null;
                 /**
                  * Select the button layout
                  */
                 layout?: ('default' | 'centered') | null;
                 /**
+                 * Render the button as icon-only with optional label for screen readers.
+                 */
+                iconOnly?: boolean | null;
+                /**
                  * Upload an SVG icon to display within the button.
                  */
                 icon?: (string | null) | Media;
                 iconPosition?: ('left' | 'right') | null;
-                /**
-                 * Render the button as icon-only with optional label for screen readers.
-                 */
-                iconOnly?: boolean | null;
               };
               id?: string | null;
             }[]
@@ -3502,7 +3499,6 @@ export interface Footer {
                 | 'outline'
                 | 'outlineDark'
                 | 'outlineGradient'
-                | 'phoneSelect'
                 | 'secondary'
                 | 'white'
                 | 'dark'
@@ -3513,20 +3509,20 @@ export interface Footer {
           /**
            * Select the button size
            */
-          size?: ('default' | 'sm' | 'md' | 'lg' | 'phoneSelect') | null;
+          size?: ('sm' | 'md' | 'lg' | 'xl') | null;
           /**
            * Select the button layout
            */
           layout?: ('default' | 'centered') | null;
           /**
+           * Render the button as icon-only with optional label for screen readers.
+           */
+          iconOnly?: boolean | null;
+          /**
            * Upload an SVG icon to display within the button.
            */
           icon?: (string | null) | Media;
           iconPosition?: ('left' | 'right') | null;
-          /**
-           * Render the button as icon-only with optional label for screen readers.
-           */
-          iconOnly?: boolean | null;
         };
         id?: string | null;
       }[]
@@ -4264,9 +4260,9 @@ export interface HeaderSelect<T extends boolean = true> {
                     variant?: T;
                     size?: T;
                     layout?: T;
+                    iconOnly?: T;
                     icon?: T;
                     iconPosition?: T;
-                    iconOnly?: T;
                   };
               hasDropdown?: T;
               subItems?:
@@ -4287,9 +4283,9 @@ export interface HeaderSelect<T extends boolean = true> {
                                 variant?: T;
                                 size?: T;
                                 layout?: T;
+                                iconOnly?: T;
                                 icon?: T;
                                 iconPosition?: T;
-                                iconOnly?: T;
                               };
                           hasChildren?: T;
                           subItems?:
@@ -4307,9 +4303,9 @@ export interface HeaderSelect<T extends boolean = true> {
                                       variant?: T;
                                       size?: T;
                                       layout?: T;
+                                      iconOnly?: T;
                                       icon?: T;
                                       iconPosition?: T;
-                                      iconOnly?: T;
                                     };
                                 id?: T;
                               };
@@ -4347,9 +4343,9 @@ export interface FooterSelect<T extends boolean = true> {
                     variant?: T;
                     size?: T;
                     layout?: T;
+                    iconOnly?: T;
                     icon?: T;
                     iconPosition?: T;
-                    iconOnly?: T;
                   };
               id?: T;
             };
@@ -4370,9 +4366,9 @@ export interface FooterSelect<T extends boolean = true> {
               variant?: T;
               size?: T;
               layout?: T;
+              iconOnly?: T;
               icon?: T;
               iconPosition?: T;
-              iconOnly?: T;
             };
         id?: T;
       };

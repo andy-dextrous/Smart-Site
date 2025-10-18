@@ -1,3 +1,11 @@
+- Design system: Realigned shared UI primitives, navigation, sections, and seeded surfaces to use the `spacing.css`/`colors.css` tokens for consistent starter styling.
+  - `src/components/ui/*`
+  - `src/components/header/**/*`
+  - `src/components/footer/index.tsx`
+  - `src/components/sections/**/*`
+  - `src/components/posts/**/*`
+  - `src/components/fields/{breadcrumbs,form,link,pagination,rich-text,section-cta,social-links}/**/*`
+
 - Routing: Homepage reassignment now regenerates canonical URIs, skips stray redirects, and cleans up automatic redirect chains when the homepage changes or is removed
   - `src/admin/payload/jobs/dependency-updates/handler.ts`
   - `src/admin/payload/jobs/dependency-updates/update-functions.ts`

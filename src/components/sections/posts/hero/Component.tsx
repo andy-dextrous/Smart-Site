@@ -1,136 +1,226 @@
-import type { Media as MediaType, Post, PostsHeroBlock } from "@/admin/payload/payload-types"
+import type { Post, PostsHeroBlock } from "@/admin/payload/payload-types"
 import type { PageData } from "@/admin/components/render-sections"
+import { parseHeadingGradient } from "@/components/heading-gradient"
 import { Section } from "@/components/fields/section"
 import { Media } from "@/components/fields/media"
+import {
+  formatPostPublishDate,
+  estimatePostReadingTime,
+  resolvePostCategories,
+} from "@/admin/utilities/posts"
+import { tv } from "tailwind-variants"
 
-function resolveCategories(post: Post) {
-  const categories = post.categories || []
+const postsHeroVariants = tv({
+  slots: {
+    section: "relative isolate overflow-hidden",
+    content: "relative z-10 w-full",
+    wrapper: "gap-content flex flex-col",
+    copy: "gap-content-sm flex flex-col text-pretty",
+    badges:
+      "flex flex-wrap items-center gap-content-sm text-xs uppercase tracking-widest",
+    badge: "rounded-full border px-content-sm py-content-xs",
+    heading: "text-balance",
+    meta: "flex flex-wrap items-center gap-content text-sm",
+    excerpt: "max-w-3xl text-lg",
+    media:
+      "relative aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl border border-dark-border bg-neutral",
+  },
+  variants: {
+    size: {
+      full: {
+        wrapper: "min-h-[100dvh] justify-center",
+      },
+      large: {
+        wrapper: "min-h-[70dvh] justify-center",
+      },
+      medium: {
+        wrapper: "min-h-[60dvh] justify-center",
+      },
+      small: {
+        wrapper: "gap-content py-section-md justify-center",
+      },
+    },
+    alignment: {
+      left: {},
+      center: {
+        wrapper: "items-center text-center",
+        copy: "items-center text-center",
+        badges: "justify-center",
+        meta: "justify-center",
+        excerpt: "mx-auto text-center",
+      },
+    },
+    tone: {
+      light: {
+        badges: "text-dark-600",
+        badge: "border-dark-border text-dark-600",
+        meta: "text-dark-600",
+        excerpt: "text-dark-600",
+      },
+      neutral: {
+        badges: "text-dark-600",
+        badge: "border-dark-border text-dark-600",
+        meta: "text-dark-600",
+        excerpt: "text-dark-600",
+      },
+      dark: {
+        section: "text-white",
+        badges: "text-white/80",
+        badge: "border-white/30 text-white",
+        meta: "text-white/80",
+        excerpt: "text-white/70",
+      },
+    },
+    mediaPresence: {
+      with: {},
+      without: {
+        wrapper: "lg:max-w-4xl",
+        copy: "lg:max-w-4xl",
+      },
+    },
+  },
+  compoundVariants: [
+    {
+      mediaPresence: "with",
+      class: {
+        wrapper: "lg:flex-row lg:items-center lg:gap-grid",
+        copy: "lg:flex-1",
+        media: "lg:flex-1",
+      },
+    },
+  ],
+  defaultVariants: {
+    size: "large",
+    alignment: "left",
+    tone: "light",
+    mediaPresence: "with",
+  },
+})
 
-  return categories
-    .map(category => {
-      if (typeof category === "object" && category !== null) {
-        return "title" in category ? category.title : null
-      }
-      return null
-    })
-    .filter((value): value is string => Boolean(value))
-}
-
-function formatPublishDate(value: string | null | undefined) {
-  if (!value) return null
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return null
-  return parsed.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
-function estimateReadingTime(content: Post["content"]) {
-  if (!content?.root?.children) return null
-
-  let words = 0
-  const walk = (node: any) => {
-    if (!node) return
-    if (typeof node === "string") {
-      words += node.trim().split(/\s+/).filter(Boolean).length
-    } else {
-      if (node.text) {
-        words += node.text.trim().split(/\s+/).filter(Boolean).length
-      }
-      if (Array.isArray(node.children)) node.children.forEach(walk)
-    }
-  }
-
-  content.root.children.forEach(walk)
-
-  if (words === 0) return null
-
-  return Math.max(1, Math.round(words / 200))
-}
-
-interface ExtendedPostsHeroBlock extends PostsHeroBlock {
-  showCategories?: boolean | null
-  showAuthor?: boolean | null
-  showPublishDate?: boolean | null
-  showReadingTime?: boolean | null
-  showFeaturedImage?: boolean | null
-}
-
-export const PostsHeroComponent: React.FC<PostsHeroBlock & PageData> = props => {
+export function PostsHeroComponent(props: PostsHeroBlock & PageData) {
   const {
     document,
-    showCategories = true,
-    showAuthor = true,
-    showPublishDate = true,
-    showReadingTime = true,
-    showFeaturedImage = true,
     sectionSettings,
-  } = props as ExtendedPostsHeroBlock & PageData
+    showCategories,
+    showAuthor,
+    showPublishDate,
+    showReadingTime,
+    showFeaturedImage,
+  } = props
 
   const post = document as Post | undefined
   if (!post) {
     return null
   }
 
-  const categories = resolveCategories(post)
-  const publishDate = showPublishDate ? formatPublishDate(post.publishedAt) : null
-  const readingTime = showReadingTime ? estimateReadingTime(post.content) : null
+  const parsedTitle = parseHeadingGradient(post.title) ?? post.title
+
+  const showCategoryBadges = showCategories !== false
+  const showAuthorName = showAuthor !== false
+  const showDate = showPublishDate !== false
+  const showReadTime = showReadingTime !== false
+  const showImage = showFeaturedImage !== false
+
+  const categories = showCategoryBadges ? resolvePostCategories(post) : []
+  const publishDate = showDate ? formatPostPublishDate(post.publishedAt) : null
+  const readingTime = showReadTime ? estimatePostReadingTime(post.content) : null
   const authors = post.populatedAuthors || []
   const primaryAuthor =
-    authors.length > 0 && typeof authors[0] === "object" ? authors[0] : null
-
-  const featuredImage =
-    showFeaturedImage && post.featuredImage && typeof post.featuredImage === "object"
-      ? (post.featuredImage as MediaType)
+    showAuthorName && authors.length > 0 && typeof authors[0] === "object"
+      ? authors[0]
       : null
 
+  const rawFeaturedImage = showImage ? post.featuredImage : null
+  const hasFeaturedImage = Boolean(rawFeaturedImage && typeof rawFeaturedImage === "object")
+
+  const tone =
+    sectionSettings?.colorScheme === "dark"
+      ? "dark"
+      : sectionSettings?.colorScheme === "neutral"
+        ? "neutral"
+        : "light"
+
+  const {
+    section,
+    content,
+    wrapper,
+    copy,
+    badges,
+    badge,
+    heading,
+    meta,
+    excerpt,
+    media: mediaSlot,
+  } = postsHeroVariants({
+    size: "large",
+    alignment: "left",
+    tone,
+    mediaPresence: hasFeaturedImage ? "with" : "without",
+  })
+
+  const sectionClassName = section()
+  const contentClassName = content()
+  const wrapperClassName = wrapper()
+  const copyClassName = copy()
+  const badgesClassName = badges()
+  const badgeClassName = badge()
+  const headingClassName = heading()
+  const metaClassName = meta()
+  const excerptClassName = excerpt()
+  const mediaClassName = mediaSlot()
+
   return (
-    <Section
-      sectionSettings={sectionSettings}
-      containerClassName="flex flex-col gap-12 lg:flex-row lg:items-center"
-    >
-      <div className="flex-1 space-y-6">
-        {categories.length > 0 && showCategories ? (
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-dark-600">
-            {categories.map(category => (
-              <span key={category} className="rounded-full border border-dark-border px-3 py-1">
-                {category}
-              </span>
-            ))}
+    <Section sectionSettings={sectionSettings} className={sectionClassName}>
+      <div className={contentClassName}>
+        <div
+          className={wrapperClassName}
+          data-animate="fade-up"
+          data-animate-distance="24"
+          data-animate-stagger="0.1"
+          data-animate-target="[data-animate-child]"
+        >
+          <div className={copyClassName}>
+            {categories.length > 0 ? (
+              <div className={badgesClassName} data-animate-child>
+                {categories.map(category => (
+                  <span key={category} className={badgeClassName}>
+                    {category}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            <h1 className={headingClassName} data-animate-child>
+              {parsedTitle}
+            </h1>
+
+            <div className={metaClassName} data-animate-child>
+              {publishDate ? <span>Published {publishDate}</span> : null}
+              {primaryAuthor ? (
+                <span>
+                  By{" "}
+                  {"name" in primaryAuthor && primaryAuthor?.name
+                    ? primaryAuthor.name
+                    : "Unknown author"}
+                </span>
+              ) : null}
+              {readingTime ? <span>{readingTime} min read</span> : null}
+            </div>
+
+            {post.seo?.meta?.description ? (
+              <p className={excerptClassName} data-animate-child>
+                {post.seo?.meta?.description}
+              </p>
+            ) : null}
           </div>
-        ) : null}
 
-        <h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-          {post.title}
-        </h1>
-
-        <div className="flex flex-wrap items-center gap-6 text-sm text-dark-600">
-          {publishDate ? <span>Published {publishDate}</span> : null}
-          {showAuthor && primaryAuthor ? (
-            <span>
-              By{" "}
-              {"name" in primaryAuthor && primaryAuthor?.name
-                ? primaryAuthor.name
-                : "Unknown author"}
-            </span>
+          {hasFeaturedImage ? (
+            <div className={mediaClassName} data-animate-child>
+              <Media resource={rawFeaturedImage} fill imgClassName="object-cover" />
+            </div>
           ) : null}
-          {readingTime ? <span>{readingTime} min read</span> : null}
         </div>
-
-        {post.seo?.meta?.description ? (
-          <p className="max-w-3xl text-lg leading-relaxed text-dark-600">
-            {post.seo?.meta?.description}
-          </p>
-        ) : null}
       </div>
-
-      {featuredImage ? (
-        <div className="relative aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl border border-dark-border bg-neutral">
-          <Media resource={featuredImage} fill imgClassName="object-cover" />
-        </div>
-      ) : null}
     </Section>
   )
 }

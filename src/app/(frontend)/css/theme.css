@@ -1,109 +1,46 @@
 @layer frontend-theme {
-  /* Spacing - applies to padding, margin, width & height */
+  /*
+  /*  THEME PRIMITIVES: RADII, SHADOWS, MOTION
+  /*
+  /*
+    This file holds cross-system primitives that aren’t tied to a single ladder.
+    - Radii keep corners consistent across cards, inputs, and surfaces.
+    - Shadows define elevation steps. Base them on brand colours so they adapt
+      with palette changes.
+    - Motion variables centralise durations/easing for predictable interaction.
+
+    Treat these as inputs—tune them here rather than sprinkling raw values
+    through components.
+  */
 
   @theme {
-    --spacing-section-x: clamp(1rem, -0.3907rem + 6.9536vw, 6.25rem);
-    --spacing-section-y: clamp(3rem, 2.1391rem + 4.3046vw, 6.25rem);
-    --spacing-section-xs: clamp(1.6875rem, 1.243vw + 1.439rem, 2.5rem);
-    --spacing-section-sm: clamp(2.25rem, 2.294vw + 1.791rem, 3.75rem);
-    --spacing-section-md: clamp(3rem, 4.015vw + 2.197rem, 5.625rem);
-    --spacing-section-lg: clamp(4rem, 6.788vw + 2.642rem, 8.4375rem);
-    --spacing-section-xl: clamp(5.5rem, 9.272vw + 3.646rem, 12.5rem); /* 200px */
-    --spacing-section-xxl: clamp(7.0625rem, 18.164vw + 3.43rem, 18.9375rem);
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1.25rem;
+    --radius-xl: 2rem;
 
-    --spacing-logo: clamp(45px, 10vw, 60px);
-    --spacing-nav: clamp(50px, 10vh, 80px);
+    --shadow-sm: 0 1px 2px 0 color-mix(in oklab, var(--color-dark) 12%, transparent);
+    --shadow-md:
+      0 10px 30px -15px color-mix(in oklab, var(--color-dark) 25%, transparent),
+      0 4px 12px -6px color-mix(in oklab, var(--color-dark) 18%, transparent);
+    --shadow-lg:
+      0 25px 60px -30px color-mix(in oklab, var(--color-dark) 45%, transparent),
+      0 12px 25px -10px color-mix(in oklab, var(--color-dark) 30%, transparent);
 
-    --spacing-content: clamp(0.9375rem, 0.7719rem + 0.8278vw, 1.5625rem);
-    --spacing-content-sm: clamp(0.625rem, 0.4594rem + 0.8278vw, 1.25rem);
-    --spacing-content-lg: clamp(1.875rem, 1.5439rem + 1.6556vw, 3.125rem);
+    --motion-duration-snappy: 120ms;
+    --motion-duration-standard: 220ms;
+    --motion-duration-gentle: 320ms;
+    --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --motion-ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-    --spacing-container: clamp(19.375rem, -0.7906rem + 100.8278vw, 95.5rem);
-    --spacing-container-md: clamp(17.5rem, 0.1821rem + 86.5894vw, 82.875rem);
-    --spacing-container-sm: clamp(17.5rem, 5.447rem + 60.2649vw, 63rem);
-  }
-
-  /* Custom Calcs */
-
-  /* This is the the offset padding to use to get a fullwidth element to
-  imitate where the edges of the containers would be. */
-
-  @theme {
-    --spacing-container-md-offset: calc(
-      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container)) / 2
-    );
-
-    --spacing-container-md-offset: calc(
-      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-md)) / 2
-    );
-
-    --spacing-container-sm-offset: calc(
-      (100vw - (var(--spacing-section-x) * 2) - var(--spacing-container-sm)) / 2
-    );
-
-    --spacing-first-section-nav-offset: calc(
-      var(--spacing-section-y) + var(--spacing-nav)
-    );
-  }
-
-
-  /* Brand Colors - neutralized via Tailwind palette variables */
-
-  @theme {
-    /* Primary (Tailwind Indigo) */
-    --color-primary: var(--color-indigo-600);
-    --color-primary-50: var(--color-indigo-50);
-    --color-primary-100: var(--color-indigo-100);
-    --color-primary-200: var(--color-indigo-200);
-    --color-primary-300: var(--color-indigo-300);
-    --color-primary-400: var(--color-indigo-400);
-    --color-primary-500: var(--color-indigo-500);
-    --color-primary-600: var(--color-indigo-600);
-
-    /* Secondary (Tailwind Sky) */
-    --color-secondary: var(--color-sky-500);
-    --color-secondary-50: var(--color-sky-50);
-    --color-secondary-100: var(--color-sky-100);
-    --color-secondary-200: var(--color-sky-200);
-    --color-secondary-300: var(--color-sky-300);
-    --color-secondary-400: var(--color-sky-400);
-    --color-secondary-500: var(--color-sky-500);
-    --color-secondary-600: var(--color-sky-600);
-    --color-secondary-700: var(--color-sky-700);
-
-    /* Neutral */
-    --color-neutral: var(--color-zinc-50);
-
-    /* Dark (Tailwind Zinc) */
-    --color-dark: var(--color-zinc-950);
-    --color-dark-50: var(--color-zinc-50);
-    --color-dark-100: var(--color-zinc-100);
-    --color-dark-600: var(--color-zinc-600);
-    --color-dark-700: var(--color-zinc-700);
-    --color-dark-800: var(--color-zinc-800);
-    --color-dark-900: var(--color-zinc-900);
-    --color-dark-950: var(--color-zinc-950);
-
-    /* White */
-    --color-white: oklch(100% 0 0);
-  }
-
-  /* Role-based Colors */
-
-  @theme {
-    --color-dark-border: color-mix(in oklab, var(--color-dark) 7%, transparent);
-    --color-light-border: color-mix(in oklab, var(--color-white) 7%, transparent);
-    --color-form-light-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
-    --color-form-dark-border: color-mix(in oklab, var(--color-dark) 10%, transparent);
-    --color-form-neutral-border: color-mix(
-      in oklab,
-      var(--color-neutral) 10%,
-      transparent
-    );
-    --color-form-transparent-border: color-mix(
-      in oklab,
-      var(--color-transparent) 7%,
-      transparent
-    );
+    --layer-negative: -1;
+    --layer-base: 0;
+    --layer-sticky: 100;
+    --layer-dropdown: 400;
+    --layer-overlay: 600;
+    --layer-toast: 700;
+    --layer-tooltip: 800;
+    --layer-max: 1000;
   }
 }

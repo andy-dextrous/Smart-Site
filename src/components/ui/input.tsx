@@ -1,67 +1,35 @@
 import * as React from "react"
-import { tv, type VariantProps } from "tailwind-variants"
+import { tv } from "tailwind-variants"
 import { cn } from "@/utilities/ui"
 
-const inputVariants = tv({
+const inputStyles = tv({
   base: [
-    "file:text-dark placeholder:text-dark-100 selection:bg-primary selection:text-white",
-    "flex h-9 w-full min-w-0 border bg-transparent px-3 py-1 text-base transition-[color,box-shadow] outline-none",
-    "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
-    "placeholder:text-sm disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-    "focus-visible:ring-[2px]",
+    "flex w-full min-w-0 rounded-md border px-control-lg py-control-md text-sm transition-[color,box-shadow]",
+    "bg-white text-dark placeholder:text-dark-600/70 selection:bg-primary selection:text-white",
+    "border-dark-border focus-visible:border-primary focus-visible:ring-primary/50 focus-visible:ring-[2px]",
+    "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:text-dark",
+    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60",
+    "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
   ],
-  variants: {
-    variant: {
-      default: [
-        "border-form-light-border",
-        "focus-visible:border-primary focus-visible:ring-primary/50",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-      ],
-      "form-white": [
-        "border-form-light-border text-dark bg-white",
-        "placeholder:text-dark-200",
-        "focus-visible:border-primary focus-visible:ring-primary/50",
-        "aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
-      ],
-      "form-dark": [
-        "border-form-dark-border bg-dark text-white",
-        "placeholder:text-dark-200",
-        "focus-visible:border-primary focus-visible:ring-primary/50",
-        "aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
-      ],
-      "form-neutral": [
-        "border-form-neutral-border bg-neutral text-dark",
-        "placeholder:text-dark-200",
-        "focus-visible:border-primary focus-visible:ring-primary/50",
-        "aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
-      ],
-      "form-transparent": [
-        "border-form-transparent-border bg-transparent text-white",
-        "placeholder:text-dark-200",
-        "focus-visible:border-primary focus-visible:ring-primary/50",
-        "aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-      ],
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
 })
 
 function Input({
   className,
   type,
-  variant,
   ...props
-}: React.ComponentProps<"input"> & VariantProps<typeof inputVariants>) {
+}: React.ComponentProps<"input">) {
   return (
     <input
       type={type}
       data-slot="input"
-      className={cn(inputVariants({ variant }), className)}
+      className={cn(inputStyles(), className)}
       {...props}
     />
   )
 }
 
-export { Input, inputVariants }
+export { Input, inputStyles }
+
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  ref?: React.Ref<HTMLInputElement>
+}

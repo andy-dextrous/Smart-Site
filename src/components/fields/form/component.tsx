@@ -14,34 +14,12 @@ import { cn } from "@/utilities/ui"
 
 import { fields } from "./fields"
 
-export type FormVariant = "white" | "dark" | "neutral" | "transparent"
-
 export type FormBlockProps = {
   blockName?: string
   blockType?: "formBlock"
   enableIntro: boolean
   form: PayloadForm
   introContent?: SerializedEditorState
-  variant?: FormVariant
-}
-
-/*************************************************************************/
-/*  FORM BUTTON COMPONENT
-/*************************************************************************/
-
-type FormButtonProps = React.ComponentProps<typeof Button> & {
-  formVariant: FormVariant
-}
-
-const FormButton: React.FC<FormButtonProps> = ({ formVariant, ...buttonProps }) => {
-  const variantMapping = {
-    white: "default" as const,
-    dark: "white" as const,
-    neutral: "default" as const,
-    transparent: "outline" as const,
-  }
-
-  return <Button variant={variantMapping[formVariant]} {...buttonProps} />
 }
 
 /*************************************************************************/
@@ -64,7 +42,6 @@ export const FormBlock: React.FC<
       submitButtonLabel,
     } = {},
     introContent,
-    variant = "white",
   } = props
 
   const formMethods = useForm<any>({
@@ -146,20 +123,17 @@ export const FormBlock: React.FC<
     [router, formID, redirect, confirmationType]
   )
 
-  const containerClasses = {
-    white: "border-form-light-border bg-white",
-    dark: "border-form-dark-border bg-dark",
-    neutral: "border-form-neutral-border bg-neutral",
-    transparent: "border-form-transparent-border bg-transparent",
-  }
-
   return (
     <div>
       {enableIntro && introContent && !hasSubmitted && (
-        <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
+        <RichText
+          className="mb-content-lg lg:mb-section-sm"
+          data={introContent}
+          enableGutter={false}
+        />
       )}
 
-      <div className={cn("border p-4 lg:p-6", containerClasses[variant])}>
+      <div className={cn("rounded-2xl border border-dark-border bg-white p-content md:p-content-lg")}>
         <FormProvider {...formMethods}>
           {!isLoading && hasSubmitted && confirmationType === "message" && (
             <RichText data={confirmationMessage} />
@@ -171,7 +145,7 @@ export const FormBlock: React.FC<
 
           {!hasSubmitted && (
             <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 last:mb-0">
+              <div className="flex flex-col gap-content">
                 {formFromProps?.fields?.map((field, index) => {
                   const FieldComponent = fields[field.blockType as keyof typeof fields] as
                     | React.FC<any>
@@ -183,29 +157,26 @@ export const FormBlock: React.FC<
                   }
 
                   return (
-                    <div className="mb-6 last:mb-0" key={index}>
-                      <FieldComponent
-                        control={control}
-                        errors={errors}
-                        form={formFromProps}
-                        register={register}
-                        variant={`form-${variant}`}
-                        {...field}
-                      />
-                    </div>
+                    <FieldComponent
+                      key={index}
+                      control={control}
+                      errors={errors}
+                      form={formFromProps}
+                      register={register}
+                      {...field}
+                    />
                   )
                 })}
               </div>
 
-              <FormButton
-                className="flex w-full items-center justify-center hover:cursor-pointer"
+              <Button
+                className="mt-content flex w-full items-center justify-center"
                 form={formID}
-                formVariant={variant}
                 size="md"
                 type="submit"
               >
-                {submitButtonLabel}
-              </FormButton>
+                {submitButtonLabel || "Submit"}
+              </Button>
             </form>
           )}
         </FormProvider>

@@ -71,7 +71,6 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
 
       // Fallback: Basic slug construction (documents without URI field)
       if (doc.slug && typeof doc.slug === "string") {
-        console.log("fallback doc.slug", doc.slug)
         return `/${doc.slug}`
       }
     }
@@ -152,10 +151,10 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
     (linkProps["aria-label"] as string | undefined) || (iconOnly ? label ?? undefined : undefined)
 
   if (isButtonAppearance) {
-    const buttonClassName = cn("inline-flex items-center gap-2", className)
+    const buttonClassName = cn("inline-flex items-center gap-content-sm", className)
     const innerLinkClassName = cn(
       "inline-flex items-center",
-      iconOnly ? "justify-center gap-0" : "gap-2"
+      iconOnly ? "justify-center gap-0" : "gap-content-sm"
     )
 
     return (

@@ -176,9 +176,16 @@ export async function updateURI({
       }
 
       if (redirectSource && redirectSource !== uri) {
-        const redirectResult = await createAutomaticRedirect(redirectSource, uri)
+        const redirectResult = await createAutomaticRedirect(
+          redirectSource,
+          collection,
+          documentId,
+          uri
+        )
         if (redirectResult.success) {
-          payload.logger.info(`✅ Automatic redirect created: ${redirectSource} → ${uri}`)
+          payload.logger.info(
+            `✅ Automatic redirect created: ${redirectSource} → ${collection}/${documentId}`
+          )
         } else {
           payload.logger.warn(`⚠️ Automatic redirect skipped: ${redirectResult.message}`)
         }
