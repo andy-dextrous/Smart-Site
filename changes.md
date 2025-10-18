@@ -1,3 +1,5 @@
+## 2.2.0 — 2025-10-18
+
 - Design system: Realigned shared UI primitives, navigation, sections, and seeded surfaces to use the `spacing.css`/`colors.css` tokens for consistent starter styling.
   - `src/components/ui/*`
   - `src/components/header/**/*`
@@ -166,3 +168,41 @@
   - `src/components/blocks/*`
 - Breadcrumbs: Consolidated header navigation primitives into a single shared component at the root so sections and posts reuse one implementation
   - `src/components/breadcrumbs.tsx`
+- Design System Preview: Split human-controlled theme tokens from computed layers, introduced `colors.css`/`spacing.css`/`theme.css` orchestration, refreshed typography ramps, and added a `/design-system-preview` route that renders every token and component variant for reference.
+  - `src/app/(frontend)/(dev)/design-system-preview/page.tsx`
+  - `src/app/(frontend)/css/{base,colors,components,globals,spacing,theme,typography,utilities}.css`
+  - `{DESIGN-SYSTEM.md,AGENTS.md,CLAUDE.md,README.md}`
+- Sections & Variants: Documented layout rules, centralised section padding controls, and refactored contact, content, and posts sections to lean on the new Tailwind variants and shared utilities.
+  - `SMARTSITE-SECTION-DESIGN.md`
+  - `src/components/fields/section/{component.tsx,section-settings.ts,types.ts}`
+  - `src/components/sections/contact-form/*`
+  - `src/components/sections/content/*`
+  - `src/components/sections/hero/*`
+  - `src/components/sections/posts/**/*`
+  - `src/components/posts/post-card.tsx`
+  - `src/admin/utilities/posts.ts`
+- Seeds & Globals: Expanded the minimal seed experience with richer copy, refreshed post templates, and generated header/footer navigation directly from the current page set so seeded projects start with working menus.
+  - `src/admin/payload/endpoints/seed/{globals/minimal-globals.ts,index.ts,pages/insights-minimal.ts,pages/minimal-pages.ts,posts/minimal-posts.ts,templates/post-minimal.ts}`
+- Search Experience: Wired a configurable search stack (API endpoint, command palette, dedicated `/search` page), surfaced collection-level toggles in `smartsite.config.ts`, and ensured documents sync with enriched metadata and category chips.
+  - `src/admin/{config/defaults.ts,config/features.ts,data/search.ts}`
+  - `src/admin/payload/plugins/index.ts`
+  - `src/admin/payload/search/{beforeSync.ts,fieldOverrides.ts}`
+  - `src/app/(frontend)/api/search/route.ts`
+  - `src/app/(frontend)/search/page.tsx`
+  - `src/components/{header/**/*,search/search-dialog.tsx,ui/command.tsx}`
+  - `src/smartsite.config.ts`
+- Search Hardening: Disabled the UI when no frontend collections expose search, normalised category lookups (even during seed runs), and fixed command-palette state so clearing input or closing with Escape never throws.
+  - `src/admin/config/features.ts`
+  - `src/admin/payload/search/beforeSync.ts`
+  - `src/components/search/search-dialog.tsx`
+  - `src/components/ui/command.tsx`
+- Redirect Automation: Added a create-redirect checkbox to the slug field, captured the previous published URI, and generate reference-based redirects whenever slugs change.
+  - `src/admin/payload/fields/slug/{index.scss,index.ts,slug-component.tsx}`
+  - `src/admin/payload/hooks/collections/universal/after-change.ts`
+  - `src/admin/redirects/auto-redirects.ts`
+  - `src/admin/routing/index-manager.ts`
+- SEO & Content Flattening: Moved SEO helpers into the config layer, added a migration to collapse the legacy `content` group, and expanded structured-data generation (author cards, search page, scoring utility) for better index hygiene.
+  - `scripts/migrations/flatten-content-group.ts`
+  - `src/admin/config/{defaults.ts,frontend.ts}`
+  - `src/admin/utilities/{seo-scoring.ts,structured-data.ts}`
+  - `src/components/posts/post-author-card.tsx`
