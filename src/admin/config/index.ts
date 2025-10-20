@@ -7,10 +7,16 @@ import { deepMerge, deepFreeze } from "./deep-merge"
 import userConfig from "@/smartsite.config"
 import { emitValidationWarnings, validateMergedConfig, validateUserConfig } from "./validator"
 import * as extensions from "@/extensions"
+import { getTestingUserConfigOverride } from "./testing"
 
 let cachedConfig: SmartSiteConfig | null = null
 let validatedUserConfig: UserConfig | null = null
 const warnedFrontendDisabled = new Set<string>()
+
+function clearConfigCache(): void {
+  cachedConfig = null
+  validatedUserConfig = null
+}
 
 /**
  * Get the merged SmartSite configuration
@@ -19,12 +25,13 @@ const warnedFrontendDisabled = new Set<string>()
  */
 export function getSmartSiteConfig(): SmartSiteConfig {
   if (process.env.NODE_ENV !== "production") {
-    cachedConfig = null
-    validatedUserConfig = null
+    clearConfigCache()
   }
 
   if (!cachedConfig) {
-    const overrides = validatedUserConfig ?? validateUserConfig(userConfig)
+    const testingOverride = getTestingUserConfigOverride()
+    const activeUserConfig = testingOverride ?? userConfig
+    const overrides = validatedUserConfig ?? validateUserConfig(activeUserConfig)
     validatedUserConfig = overrides
 
     // Deep merge user config with defaults
@@ -38,6 +45,10 @@ export function getSmartSiteConfig(): SmartSiteConfig {
   }
   
   return cachedConfig
+}
+
+export function resetSmartSiteConfigCache(): void {
+  clearConfigCache()
 }
 
 /*************************************************************************/

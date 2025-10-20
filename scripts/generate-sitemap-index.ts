@@ -2,6 +2,7 @@
 
 import fs from "fs"
 import path from "path"
+import { pathToFileURL } from "url"
 import dotenv from "dotenv"
 
 dotenv.config()
@@ -10,10 +11,20 @@ dotenv.config()
 /*  SITEMAP INDEX GENERATOR - POST BUILD SCRIPT
 /*************************************************************************/
 
-function generateSitemapIndex(
+export type SitemapCollectionEntry = {
+  slug: string
+  label: string
+}
+
+export type SitemapIndexOptions = {
+  cwd?: string
+  siteUrl?: string
+}
+
+export function buildSitemapIndexXml(
   siteUrl: string,
-  collections: Array<{ slug: string; label: string }>
-) {
+  collections: SitemapCollectionEntry[]
+): string {
   const sitemapEntries = collections
     .map(
       collection => `  <sitemap>
@@ -29,7 +40,7 @@ ${sitemapEntries}
 </sitemapindex>`
 }
 
-async function loadFrontendCollections() {
+async function loadFrontendCollections(): Promise<Record<string, { label: string }>> {
   const configModule = (await import("../src/admin/config/index")) as {
     getFrontendCollections?: () => Record<string, { label: string }>
     default?: { getFrontendCollections?: () => Record<string, { label: string }> }
@@ -44,24 +55,38 @@ async function loadFrontendCollections() {
   return getter()
 }
 
+export async function generateSitemapIndexFile(
+  options: SitemapIndexOptions = {}
+): Promise<{
+  outputPath: string
+  xml: string
+  collections: SitemapCollectionEntry[]
+  siteUrl: string
+}> {
+  const workingDir = options.cwd ?? process.cwd()
+  const siteUrl = options.siteUrl || process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
+  const collectionsObject = await loadFrontendCollections()
+  const collections = Object.entries(collectionsObject).map(([slug, collection]) => ({
+    slug,
+    label: collection.label,
+  }))
+
+  const sitemapIndexXML = buildSitemapIndexXml(siteUrl, collections)
+  const outputPath = path.join(workingDir, "public", "sitemap.xml")
+  fs.writeFileSync(outputPath, sitemapIndexXML, "utf8")
+
+  return {
+    outputPath,
+    xml: sitemapIndexXML,
+    collections,
+    siteUrl,
+  }
+}
+
 async function main() {
   try {
-    // Determine site URL with Vercel auto-detection
-    const siteUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
+    const { outputPath, collections, siteUrl } = await generateSitemapIndexFile()
     console.log(`🔧 Generating sitemap index for: ${siteUrl}`)
-
-    // Get frontend collections from config and transform to array format
-    const collectionsObject = await loadFrontendCollections()
-    const collections = Object.entries(collectionsObject).map(([slug, collection]) => ({
-      slug,
-      label: collection.label,
-    }))
-
-    const sitemapIndexXML = generateSitemapIndex(siteUrl, collections)
-
-    const outputPath = path.join(process.cwd(), "public", "sitemap.xml")
-    fs.writeFileSync(outputPath, sitemapIndexXML, "utf8")
-
     console.log(`✅ Sitemap index generated successfully at: ${outputPath}`)
     console.log(`📊 Contains ${collections.length} collection sitemaps`)
   } catch (error) {
@@ -70,4 +95,8 @@ async function main() {
   }
 }
 
-main()
+const executedScript = process.argv[1] ? pathToFileURL(process.argv[1]).href : undefined
+
+if (import.meta.url === executedScript) {
+  main()
+}

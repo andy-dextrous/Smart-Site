@@ -9,6 +9,7 @@ import React from "react"
 import { AIProvider } from "@/admin/payload/components/providers/ai-provider"
 import { getSmartSiteConfig } from "@/admin/config"
 import { getI18nConfig } from "@/admin/config/features"
+import { generateRootLayoutMetadata } from "./layout-metadata"
 
 import "./css/globals.css"
 
@@ -72,10 +73,5 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 }
 
 export async function generateMetadata() {
-  const settings = await getSettings()
-
-  return {
-    description: settings.general?.siteDescription || "Smart Site",
-    title: settings.general?.siteName || "Smart Site",
-  }
+  return await generateRootLayoutMetadata()
 }

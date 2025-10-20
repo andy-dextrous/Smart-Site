@@ -5,8 +5,6 @@ import { LivePreviewListener } from "@/admin/payload/components/frontend/live-pr
 import { routingEngine } from "@/admin/routing"
 import { handleURIRedirect } from "@/admin/redirects"
 import { notFound } from "next/navigation"
-import type { Metadata } from "next"
-import { generateMeta } from "@/admin/utilities/generate-meta"
 import { generateStructuredData } from "@/admin/utilities/structured-data"
 import { getSettings } from "@/admin/data/globals"
 
@@ -95,28 +93,7 @@ export async function SmartSiteURIRenderer({
 /*  METADATA GENERATION
 /*************************************************************************/
 
-export async function generateMetadata({
-  params: paramsPromise,
-}: {
-  params: Promise<{ uri?: string[] }>
-}): Promise<Metadata> {
-  const { uri = [] } = await paramsPromise
-  const URI = routingEngine.slugToURI(uri)
-
-  const routeResponse = await cache.getByURI(URI)
-
-  if (!routeResponse?.document) {
-    return {}
-  }
-
-  const { document, uriIndex } = routeResponse
-  const collection = uriIndex.sourceCollection
-
-  return generateMeta({
-    doc: document,
-    collection,
-  })
-}
+export { generateMetadata } from "./uri-renderer/metadata"
 
 /*************************************************************************/
 /*  STATIC PARAMS GENERATION
