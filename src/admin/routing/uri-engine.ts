@@ -1,6 +1,12 @@
 import { checkURIConflict } from "@/admin/routing/index-manager"
 import configPromise from "@payload-config"
-import { getPayload } from "payload"
+import { getPayload as loadPayload } from "payload"
+
+let currentGetPayload = loadPayload
+
+export function setRoutingPayloadAccessor(getter?: typeof loadPayload): void {
+  currentGetPayload = getter ?? loadPayload
+}
 
 /*************************************************************************/
 /*  URI ENGINE
@@ -538,7 +544,7 @@ export const routingEngine = {
     originalDoc?: any
     settings?: any
   }): Promise<string> => {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     let routingSettings
     if (settings) {
@@ -595,7 +601,7 @@ export const routingEngine = {
     data?: any
     originalDoc?: any
   }): Promise<BreadcrumbItem[]> => {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     const settings = await payload.findGlobal({
       slug: "settings",
@@ -632,7 +638,7 @@ export const routingEngine = {
     data?: any
     originalDoc?: any
   }): Promise<{ uri: string; breadcrumbs: BreadcrumbItem[] }> => {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     const settings = await payload.findGlobal({
       slug: "settings",
@@ -680,7 +686,7 @@ export const routingEngine = {
     uri: string,
     excludeDocId?: string
   ): Promise<URIConflictResult | null> => {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     return await checkConflict({
       uri,

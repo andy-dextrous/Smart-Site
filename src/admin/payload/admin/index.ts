@@ -17,92 +17,114 @@ import type {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const config = getSmartSiteConfig()
-const frontendCollections = getFrontendCollections()
+const disableAdmin = process.env.SMARTSITE_DISABLE_ADMIN === "1"
 
-const admin = {
-  user: Users.slug,
-  suppressHydrationWarning: true,
-  importMap: {
-    baseDir: path.resolve(dirname),
-  },
-  autoLogin: (() => {
-    if (
-      process.env.NODE_ENV === "development" &&
-      process.env.PAYLOAD_ADMIN_EMAIL &&
-      process.env.PAYLOAD_ADMIN_PASSWORD
-    ) {
-      return {
-        email: process.env.PAYLOAD_ADMIN_EMAIL,
-        password: process.env.PAYLOAD_ADMIN_PASSWORD,
-      }
+const config = disableAdmin ? null : getSmartSiteConfig()
+const frontendCollections = disableAdmin ? [] : getFrontendCollections()
+
+const admin = disableAdmin
+  ? {
+      user: Users.slug,
+      suppressHydrationWarning: true,
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      autoLogin: false as const,
+      components: {},
+      meta: {
+        title: "SmartSite Admin",
+        description: "",
+        icons: [],
+      },
+      livePreview: {
+        collections: [],
+        globals: [],
+        url: () => process.env.NEXT_PUBLIC_URL || "http://localhost:3000",
+        breakpoints: [],
+      },
     }
-    return false as const
-  })(),
-  components,
-  meta: {
-    title: config.admin.meta.title,
-    description: config.admin.meta.description,
-    icons: config.admin.meta.favicon
-      ? [
+  : {
+      user: Users.slug,
+      suppressHydrationWarning: true,
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      autoLogin: (() => {
+        if (
+          process.env.NODE_ENV === "development" &&
+          process.env.PAYLOAD_ADMIN_EMAIL &&
+          process.env.PAYLOAD_ADMIN_PASSWORD
+        ) {
+          return {
+            email: process.env.PAYLOAD_ADMIN_EMAIL,
+            password: process.env.PAYLOAD_ADMIN_PASSWORD,
+          }
+        }
+        return false as const
+      })(),
+      components,
+      meta: {
+        title: config?.admin.meta.title || "SmartSite Admin",
+        description: config?.admin.meta.description || "",
+        icons: config?.admin.meta.favicon
+          ? [
+              {
+                rel: "icon",
+                type: "image/png",
+                url: config.admin.meta.favicon,
+              },
+            ]
+          : [],
+      },
+      livePreview: {
+        collections: frontendCollections.map(collection => collection.slug),
+        globals: ["header", "footer"],
+        url: (args: {
+          collectionConfig?: SanitizedCollectionConfig
+          data: Record<string, any>
+          globalConfig?: SanitizedGlobalConfig
+          locale: Locale
+          payload: BasePayload
+          req: PayloadRequest
+        }) => {
+          const { data, collectionConfig, req } = args
+          const collection = collectionConfig?.slug as CollectionSlug
+          const slug = typeof data?.slug === "string" ? data.slug : ""
+
+          if (!collection || !slug) {
+            return process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
+          }
+
+          const previewPath = generatePreviewPath({
+            slug,
+            collection,
+            req,
+            data,
+          })
+
+          return previewPath + "&livePreview=true"
+        },
+        breakpoints: [
           {
-            rel: "icon",
-            type: "image/png",
-            url: config.admin.meta.favicon,
+            label: "Mobile",
+            name: "mobile",
+            width: 375,
+            height: 667,
           },
-        ]
-      : [],
-  },
-  livePreview: {
-    collections: frontendCollections.map(collection => collection.slug),
-    globals: ["header", "footer"],
-    url: (args: {
-      collectionConfig?: SanitizedCollectionConfig
-      data: Record<string, any>
-      globalConfig?: SanitizedGlobalConfig
-      locale: Locale
-      payload: BasePayload
-      req: PayloadRequest
-    }) => {
-      const { data, collectionConfig, req } = args
-      const collection = collectionConfig?.slug as CollectionSlug
-      const slug = typeof data?.slug === "string" ? data.slug : ""
-
-      if (!collection || !slug) {
-        return process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
-      }
-
-      const previewPath = generatePreviewPath({
-        slug,
-        collection,
-        req,
-        data,
-      })
-
-      // Add livePreview parameter for admin bar hiding
-      return previewPath + "&livePreview=true"
-    },
-    breakpoints: [
-      {
-        label: "Mobile",
-        name: "mobile",
-        width: 375,
-        height: 667,
+          {
+            label: "Tablet",
+            name: "tablet",
+            width: 768,
+            height: 1024,
+          },
+          {
+            label: "Desktop",
+            name: "desktop",
+            width: 1440,
+            height: 900,
+          },
+        ],
       },
-      {
-        label: "Tablet",
-        name: "tablet",
-        width: 768,
-        height: 1024,
-      },
-      {
-        label: "Desktop",
-        name: "desktop",
-        width: 1440,
-        height: 900,
-      },
-    ],
-  },
-}
+    }
 
 export default admin

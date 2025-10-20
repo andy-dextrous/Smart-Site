@@ -3,7 +3,12 @@
 /*************************************************************************/
 
 // URI Engine - Core routing functionality
-export { routingEngine, validateURI, type URIConflictResult } from "./uri-engine"
+export {
+  routingEngine,
+  validateURI,
+  type URIConflictResult,
+  setRoutingPayloadAccessor,
+} from "./uri-engine"
 
 // URI Index Manager - Index maintenance and population
 export {
@@ -11,6 +16,7 @@ export {
   deleteURI,
   checkURIConflict,
   regenerateURIs,
+  setRoutingIndexPayloadAccessor,
   type URIIndexUpdate,
   type PopulationStats,
 } from "./index-manager"

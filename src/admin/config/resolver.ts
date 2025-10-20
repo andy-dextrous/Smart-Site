@@ -53,6 +53,40 @@ const defaultBlockMap: Record<string, Block> = {
   media: MediaBlock
 }
 
+function cloneCollectionConfig(collection: CollectionConfig): CollectionConfig {
+  const clonedHooks = collection.hooks
+    ? (Object.fromEntries(
+        Object.entries(collection.hooks).map(([key, value]) => {
+          if (Array.isArray(value)) {
+            return [key, [...value]]
+          }
+          return [key, value]
+        })
+      ) as typeof collection.hooks)
+    : undefined
+
+  const adminHiddenFields = (collection.admin as Partial<{ hiddenFields?: string[] }>)?.hiddenFields
+
+  const clonedAdmin = collection.admin
+    ? {
+        ...collection.admin,
+        defaultColumns: collection.admin.defaultColumns
+          ? [...collection.admin.defaultColumns]
+          : undefined,
+        hiddenFields: adminHiddenFields ? [...adminHiddenFields] : undefined,
+        components: collection.admin.components ? { ...collection.admin.components } : undefined,
+      }
+    : undefined
+
+  return {
+    ...collection,
+    fields: Array.isArray(collection.fields) ? [...collection.fields] : collection.fields,
+    labels: collection.labels ? { ...collection.labels } : collection.labels,
+    admin: clonedAdmin,
+    hooks: clonedHooks,
+  }
+}
+
 /*************************************************************************/
 /*  CONFIGURATION RESOLVER
 /*************************************************************************/
@@ -102,9 +136,9 @@ function resolveCollections(
       // Check if there's an override in the registry
       const extensionOverride = extensions.collections[slug]
       if (extensionOverride) {
-        resolved.push(extensionOverride)
+        resolved.push(cloneCollectionConfig(extensionOverride))
       } else {
-        resolved.push(defaultCollectionMap[slug])
+        resolved.push(cloneCollectionConfig(defaultCollectionMap[slug]))
       }
       continue
     }
@@ -114,15 +148,16 @@ function resolveCollections(
     if (!collectionConfig || !collectionConfig.enabled) {
       const warning = COLLECTION_DEPENDENCY_WARNINGS[slug]
       if (warning) {
-        console.warn(`⚠️  smartsite.config.ts: ${warning}`)
+    console.warn(`⚠️  smartsite.config.ts: ${warning}`)
       }
       continue
     }
     slugs.add(slug)
-    
+
     // Check if there's an override in the registry
     const extensionOverride = extensions.collections[slug]
-    const baseCollection = extensionOverride || defaultCollectionMap[slug]
+    const sourceCollection = extensionOverride || defaultCollectionMap[slug]
+    const baseCollection = cloneCollectionConfig(sourceCollection)
     
     const finalCollection = applyFrontendWrapper(baseCollection, slug, config)
     resolved.push(finalCollection)
@@ -144,8 +179,8 @@ function resolveCollections(
     }
     
     slugs.add(slug)
-    
-    const finalCollection = applyFrontendWrapper(extension, slug, config)
+    const baseCollection = cloneCollectionConfig(extension)
+    const finalCollection = applyFrontendWrapper(baseCollection, slug, config)
     resolved.push(finalCollection)
   }
   

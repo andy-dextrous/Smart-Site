@@ -1,3 +1,186 @@
+- Storage: Added Cloudinary adapter to the media resolver, exposing it through `smartsite.config.ts` with credential fallbacks, custom folder support, and Playwright coverage for registration and warnings
+  - `src/admin/config/defaults.ts`
+  - `src/admin/config/storage-resolver.ts`
+  - `package.json`
+  - `src/admin/package.json`
+  - `../../packages/testing/tests/smart-site-starter/config/storage-providers.spec.ts`
+
+- Storage: Adopted official Payload adapters for S3 and UploadThing, expanded config schema, and added resolver coverage that asserts credential warnings vs plugin registration
+  - `src/admin/config/storage-resolver.ts`
+  - `src/admin/config/defaults.ts`
+  - `package.json`
+  - `../../packages/testing/tests/smart-site-starter/config/storage-providers.spec.ts`
+  - `../../packages/testing/tests/smart-site-starter/_shared/run-storage-resolver.ts`
+  - `../../packages/testing/tests/smart-site-starter/_shared/storage-resolver-runner.ts`
+
+- Routing: Draft autosaves and explicit draft saves now exit the universal after-change hook early, so URI updates, cache revalidation, and related logs only run on publish/unpublish events
+  - `src/admin/payload/hooks/collections/universal/after-change.ts`
+
+- Admin: Removed the auto-generated `payload-query-presets` collection from the sidebar omit list so presets stay hidden in navigation
+  - `src/admin/payload/components/providers/layout-provider/app-sidebar.tsx`
+
+- Database: Updated staging sync defaults to target the live Atlas database (`test`) so `pnpm staging:pull` copies production into staging reliably
+  - `staging-sync.config.json`
+
+- Routing: Automatic redirect creation now only runs when the slug actually changes, preventing historic redirect churn on routine updates
+  - `src/admin/routing/index-manager.ts`
+
+- Testing: Routing and redirect modules now expose optional accessor setters so external test harnesses can inject mock Payload instances without touching runtime behaviour
+  - `src/admin/routing/uri-engine.ts`
+  - `src/admin/routing/index-manager.ts`
+  - `src/admin/routing/index.ts`
+  - `src/admin/redirects/auto-redirects.ts`
+  - `src/admin/redirects/uri-redirect.ts`
+  - `src/admin/cache/revalidation.ts`
+
+- Admin Bar: Exit preview now navigates through `/api/exit-preview`, clearing preview cookies on the server before redirecting back to the canonical page
+  - `src/app/(frontend)/api/exit-preview/route.ts`
+  - `src/admin/payload/components/backend/admin-bar/exit-preview.tsx`
+
+- Redirects: Manual edits now revalidate `collection:redirects` plus both old and new `redirect:<slug>` tags, keeping cached lookups in sync
+  - `src/admin/payload/plugins/index.ts`
+
+- Redirects: Deleting a document purges automatic redirects where the deleted URI was either the source or the target, and revalidates the affected cache tags
+  - `src/admin/redirects/auto-redirects.ts`
+
+- Routing: Slug locking now engages on the first publish (create and update) and the hidden lock field re-locks automatically whenever `_status` is `published`
+  - `src/admin/payload/hooks/utilities/lock-slug.ts`
+  - `src/admin/payload/fields/slug/index.ts`
+
+- Routing: Frontend wrapper now seeds slug fields from `admin.useAsTitle` (or the first `title`/`name` field) so collections without a `title` still auto-generate slugs on first publish
+  - `src/admin/config/frontend.ts`
+
+- Rendering: Added `sanitizePayloadData` helper and now sanitize section props before handing them to client components, preventing ObjectId serialization errors
+  - `src/utilities/sanitize-payload-data.ts`
+  - `src/admin/components/render-sections.tsx`
+
+- Dependencies: Added undici@6.20.0 patch to fix "Illegal constructor" error preventing Payload type generation
+  - `patches/undici@6.20.0.patch`
+  - `package.json` (pnpm.patchedDependencies)
+
+- Dependencies: Added `.npmrc` with `legacy-peer-deps=true` to resolve peer dependency conflicts
+  - `.npmrc`
+
+- GSAP: Added ScrambleTextPlugin support to configuration schema and provider
+  - `src/admin/config/defaults.ts` (added `scrambleText: z.boolean()` to GSAPConfigSchema and `scrambleText: false` to defaults)
+  - `src/providers/gsap/index.tsx` (added import, conditional registration, and export)
+
+- Extensions: Changed plugins export type from `Plugin` to `any` to allow flexible plugin implementations
+  - `src/extensions/index.ts`
+
+- Seed API: Falls back to `SMARTSITE_SITE_NAME` from .env when `siteName` not provided in request body
+  - `src/app/(frontend)/api/seed/route.ts`
+
+- GSAP: Fixed ScrollSmoother `_context is not a function` error by registering ScrollTrigger synchronously before ScrollSmoother
+  - `src/providers/gsap/index.tsx`
+
+- AI Bridge: Removed verbose `[ai-bridge] Revalidated ai-registry` log messages
+  - `src/admin/payload/plugins/ai-bridge.ts`
+
+- URI Index: Only updates on explicit publish/unpublish events (not draft autosaves), prevents duplicate entry errors, log spam, and unnecessary cache revalidation
+  - `src/admin/payload/hooks/collections/universal/after-change.ts`
+  - `src/admin/routing/index-manager.ts`
+
+- URI Index: Fixed draft versioning - uri-index always points to published version, only uses draft status for unpublished pages
+  - `src/admin/routing/index-manager.ts`
+
+- Admin Bar: Removed `/preview` path from edit link, now goes directly to edit page
+  - `src/admin/payload/components/backend/admin-bar/edit-current-page.tsx`
+
+- Admin: User dropdown logout now routes through the official `/admin/logout` endpoint so Payload handles the redirect back to `/admin/login`
+  - `src/admin/payload/components/providers/layout-provider/user-dropdown.tsx`
+
+- Posts: Removed legacy `post-hero` component to avoid confusion with section-based hero implementations
+  - `src/components/posts/post-hero.tsx`
+
+- Fields: CMS link labels now auto-populate immediately after selecting an internal document for the link reference
+  - `src/components/fields/link/link.ts`
+  - `src/components/fields/link/link-label-field.tsx`
+
+- Database: Added `databaseInfo` export with target/provider/url metadata for logging and debugging
+  - `src/admin/payload/db/config.ts`
+
+- Media: Added `mediaInfo` export with provider/directory metadata for logging and debugging
+  - `src/admin/payload/collections/media.ts`
+
+- Payload Config: Added `onInit` logging that displays database target, provider, URL (masked), and media storage configuration on startup
+  - `src/admin/payload/payload.config.ts`
+
+- Cache: Revalidation now only runs on publish/unpublish events, draft edits no longer trigger cache invalidation
+  - `src/admin/payload/hooks/collections/universal/after-change.ts`
+
+- Media: Provider resolution now respects `smartsite.config.ts` as source of truth, defaults to "local", logs error if vercel-blob selected without env tokens
+  - `src/admin/payload/collections/media.ts`
+  - `src/admin/config/storage-resolver.ts`
+
+- Config: Updated Smart Site config schema so media overrides keep provider-specific settings (vercel-blob, etc.)
+  - `src/admin/config/defaults.ts`
+
+- Sidebar: Clicking on a group icon when sidebar is collapsed now expands the sidebar automatically
+  - `src/admin/payload/components/providers/layout-provider/app-sidebar.tsx`
+
+- Git: Added `tsconfig.tsbuildinfo` to .gitignore to exclude TypeScript build info from version control
+  - `.gitignore`
+
+- Services Extension: Fixed TypeScript error by adding explicit types to condition function parameters
+  - `src/extensions/collections/services.ts`
+
+- GSAP: Added DrawSVGPlugin support - imported, registered conditionally based on config, and exported for component use
+  - `src/providers/gsap/index.tsx`
+
+- Templates: Template content edits now invalidate every page bound to that layout via the dependent updates job, ensuring cached pages refresh after changes
+  - `src/admin/payload/jobs/dependency-updates/handler.ts`
+
+- Dependencies: Upgraded Payload core and first-party plugins to v3.58.0 to pick up the latest admin, plugin, and API improvements
+  - `package.json`
+  - `pnpm-lock.yaml`
+
+- Admin: Added query preset table cells to the generated import map after enabling collection presets
+  - `src/app/(payload)/admin/importMap.js`
+
+- Collections: Enabled Payload trash (soft delete) for pages, posts, services, team, testimonials, categories, and workshops so deletes funnel into Trash for recovery
+  - `src/admin/payload/collections/pages.ts`
+  - `src/admin/payload/collections/posts.ts`
+  - `src/admin/payload/collections/services.ts`
+  - `src/admin/payload/collections/team.ts`
+  - `src/admin/payload/collections/testimonials.ts`
+  - `src/admin/payload/collections/categories.ts`
+  - `src/extensions/collections/workshops.ts`
+
+- Users: Added a `teamMember` relationship field so each CMS user can link to their public-facing team profile
+  - `src/admin/payload/collections/users.ts`
+
+- Posts: Author population now hydrates linked team member data for each author, feeding richer info into `populatedAuthors`
+  - `src/admin/payload/hooks/collections/posts/populate-authors.ts`
+
+- Frontend: Post hero and shared author formatter now prefer linked team member names (with user fallbacks) for display
+  - `src/components/sections/post-hero/Component.tsx`
+  - `src/admin/utilities/format-authors.ts`
+
+- SEO: Article structured data now prioritises team member attributes (name, role, bio, image) when available, falling back to user details
+  - `src/admin/utilities/structured-data.ts`
+
+- Users: Removed unused education and social links arrays to keep the account schema focused on author metadata
+  - `src/admin/payload/collections/users.ts`
+
+- Team: Added optional social profile and education arrays so public bios hold richer credentials without cluttering user accounts
+  - `src/admin/payload/collections/team.ts`
+
+- Authors: Implemented unified author identity flow—users can link to team members, posts hydrate the relationship for frontend + SEO, and teams now hold optional social/education metadata while user accounts stay lean
+  - `src/admin/payload/collections/users.ts`
+  - `src/admin/payload/hooks/collections/posts/populate-authors.ts`
+  - `src/components/sections/post-hero/Component.tsx`
+  - `src/components/posts/post-author-info.tsx`
+    - Aurora-style author card with live social links and education highlights
+  - `src/admin/utilities/format-authors.ts`
+  - `src/admin/utilities/structured-data.ts`
+  - `src/admin/payload/collections/team.ts`
+
+- Sections: Normalized SectionIntro padding on mobile so headings line up with the standard gutter on side-image list and centered card grid
+  - `src/components/sections/side-image-list/Component.tsx`
+  - `src/components/sections/centered-card-grid/Component.tsx`
+    - Also ensured the CTA copy respects the dark color scheme so footer text remains legible
+
 ## 2.2.0 — 2025-10-18
 
 - Design system: Realigned shared UI primitives, navigation, sections, and seeded surfaces to use the `spacing.css`/`colors.css` tokens for consistent starter styling.

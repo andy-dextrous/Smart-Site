@@ -1,12 +1,23 @@
-import { redirect } from "next/navigation"
+import { redirect as navigate } from "next/navigation"
 import { cache } from "@/admin/cache"
-import { getPayload } from "payload"
+import { getPayload as loadPayload } from "payload"
 import configPromise from "@payload-config"
 import type { CollectionSlug } from "payload"
 
 /*************************************************************************/
 /*  URI REDIRECT HANDLER
 /*************************************************************************/
+
+let currentRedirect = navigate
+let currentGetPayload = loadPayload
+
+export function setUriRedirectNavigator(handler?: typeof navigate): void {
+  currentRedirect = handler ?? navigate
+}
+
+export function setUriRedirectPayloadAccessor(getter?: typeof loadPayload): void {
+  currentGetPayload = getter ?? loadPayload
+}
 
 /**
  * Checks for redirects and executes them if found
@@ -29,7 +40,7 @@ export async function handleURIRedirect(uri: string): Promise<boolean> {
 
   // Handle external URL redirect
   if (redirectItem.to?.url) {
-    redirect(redirectItem.to.url)
+    currentRedirect(redirectItem.to.url)
   }
 
   // Handle internal document reference redirect
@@ -43,7 +54,7 @@ export async function handleURIRedirect(uri: string): Promise<boolean> {
   }
 
   if (redirectUrl) {
-    redirect(redirectUrl)
+    currentRedirect(redirectUrl)
   }
 
   // If we get here, redirect was found but couldn't be resolved
@@ -99,7 +110,7 @@ async function fetchDocumentById(collection: CollectionSlug, id: string) {
   }
 
   try {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
     const document = await payload.findByID({
       collection,
       id,

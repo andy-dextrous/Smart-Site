@@ -11,4 +11,5 @@ export {
   type InvalidationResult,
   type BatchInvalidationSummary,
   type BatchRevalidateOptions,
+  setRevalidationHandlers,
 } from "./revalidation"

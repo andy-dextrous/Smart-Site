@@ -1,9 +1,15 @@
 import configPromise from "@payload-config"
-import { getPayload } from "payload"
+import { getPayload as loadPayload } from "payload"
 import { getFrontendCollections } from "@/admin/config/frontend"
 import { routingEngine, BreadcrumbItem } from "./uri-engine"
 import { createAutomaticRedirect } from "@/admin/redirects/auto-redirects"
 import { formatIdForText, formatIdForRelationship } from "@/admin/payload/db/id-utils"
+
+let currentGetPayload = loadPayload
+
+export function setRoutingIndexPayloadAccessor(getter?: typeof loadPayload): void {
+  currentGetPayload = getter ?? loadPayload
+}
 
 /*************************************************************************/
 /*
@@ -51,7 +57,7 @@ export async function updateURI({
   skipRedirect,
 }: URIIndexUpdate): Promise<void> {
   try {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     const formattedDocumentId = formatIdForText(documentId)
 
@@ -192,7 +198,7 @@ export async function updateURI({
       }
     }
   } catch (error) {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
     payload.logger.error("Failed to update URI index:", error)
   }
 }
@@ -203,7 +209,7 @@ export async function updateURI({
 
 export async function deleteURI(collection: string, documentId: string): Promise<void> {
   try {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     const formattedDocumentId = formatIdForText(documentId)
 
@@ -229,7 +235,7 @@ export async function deleteURI(collection: string, documentId: string): Promise
       )
     }
   } catch (error) {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
     payload.logger.error("Failed to delete from URI index:", error)
   }
 }
@@ -247,7 +253,7 @@ export async function checkURIConflict(
   excludeDocumentId?: string
 ): Promise<{ hasConflict: boolean; conflictingCollection?: string } | null> {
   try {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
     const normalizedURI = routingEngine.normalizeURI(uri)
     const normalizedExcludeId =
       typeof excludeDocumentId !== "undefined"
@@ -296,7 +302,7 @@ export async function checkURIConflict(
       conflictingCollection: highestPriorityConflict.sourceCollection,
     }
   } catch (error) {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
     payload.logger.error("Failed to check URI conflict:", error)
     return null
   }
@@ -312,7 +318,7 @@ export async function getTemplateIdForCollection(
 ): Promise<string | null> {
   try {
     // Use payload parameter if provided, otherwise get fresh instance
-    const payloadInstance = payload || (await getPayload({ config: configPromise }))
+    const payloadInstance = payload || (await currentGetPayload({ config: configPromise }))
 
     const settings = await payloadInstance.findGlobal({
       slug: "settings",
@@ -373,7 +379,7 @@ export async function regenerateURIs(context?: any): Promise<PopulationStats> {
   const frontendCollections = getFrontendCollections()
 
   try {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
 
     const collectionResults = await Promise.allSettled(
       frontendCollections.map(collection =>
@@ -405,7 +411,7 @@ export async function regenerateURIs(context?: any): Promise<PopulationStats> {
     )
     return stats
   } catch (error) {
-    const payload = await getPayload({ config: configPromise })
+    const payload = await currentGetPayload({ config: configPromise })
     payload.logger.error("URI regeneration failed with critical error:", error)
     throw error
   }
