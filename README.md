@@ -691,335 +691,586 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 <a id="design-system"></a>
 ## 🎨 Design System
 
-Smart Site ships a CSS‑first, tokenized design system under `src/app/(frontend)/css`. Tailwind v4 generates utilities directly from our `@theme` tokens, so you use simple classes instead of hand‑wiring `var(...)` in JSX. Change inputs, not outputs.
+Smart Site ships a CSS-first, tokenized design system under `src/app/(frontend)/css`. Tailwind v4 generates utilities directly from the `@theme` tokens, so you use simple classes instead of hand-wiring `var(...)` in JSX. The guidance below folds in the canonical rules that previously lived in `DESIGN-SYSTEM.md`; treat this section as the source of truth when styling sections or components.
 
-### Sources
+### CSS Sources
 - `theme.css` – radii, shadow elevations, motion timings/easings.
 - `spacing.css` – spacing scale, section/content/grid tokens, containers, nav/logo heights, control ratios, offsets.
 - `typography.css` – fluid type base/min/max, ratio, semantic steps (`--text-*`, `--text-h*`), body/heading roles.
 - `colors.css` – brand palette (`--color-*`) and role tokens (borders, surfaces).
-- `base.css` – global background/text colours, section paddings.
-- `utilities.css` – container helpers and small cross‑component utilities.
+- `base.css` – global background/text colours and section paddings.
+- `utilities.css` – container helpers and small cross-component utilities.
 
-### Tailwind v4: Automatic Classes from Tokens
-- Every `@theme` token becomes a utility. Examples:
-  - `--spacing-section-x` → `px-section-x`, `--spacing-section-y` → `py-section-y`
-  - `--spacing-content`, `--spacing-content-sm/lg/xl` → `gap-content`, `p-content`, etc.
-  - `--spacing-grid`, `--spacing-grid-lg` → `gap-grid`, `gap-grid-lg`
-  - `--text-sm`, `--text-lg`, `--text-h2` → `text-sm`, `text-lg`, `text-h2`
-- Do not write `px-[var(--spacing-content)]` or `text-[var(--text-h2)]`. Use the generated utilities.
+### Token Architecture
 
-### Token Inventory (What You Can Control)
-- Typography (in `typography.css` @theme):
-  - `--fluid-text-base-min`, `--fluid-text-base-max`
-  - `--fluid-text-viewport-min`, `--fluid-text-viewport-max`
-  - `--fluid-text-scale-min`, `--fluid-text-scale-max`
-  - `--font-fallback-sans`, `--font-sans`, `--font-body`, `--font-heading`
-  - `--font-body-weight`, `--font-heading-weight`
-  - `--line-height-body`, `--line-height-h1..h6`
-  - `--letter-spacing-body`, `--letter-spacing-heading`
-  - `--color-body`, `--color-link`, `--color-heading`
-- Spacing (in `spacing.css` @theme):
-  - `--fluid-space-base-min`, `--fluid-space-base-max`
-  - `--fluid-space-viewport-min`, `--fluid-space-viewport-max`
-  - `--fluid-space-ratio-min`, `--fluid-space-ratio-max`
-  - Containers: `--container-width-*`, `--container-md-width-*`, `--container-sm-width-*`
-  - Chrome: `--spacing-logo-min/max`, `--spacing-nav-min/max`
-- Control ratios: `--control-scale-sm/md/lg/xl`
-- Theme primitives (in `theme.css` @theme):
-  - Radii: `--radius-xs` → `--radius-xl`
-  - Shadows: `--shadow-sm/md/lg`
-  - Motion: `--motion-duration-*`, `--motion-ease-*`
-  - Layering: `--layer-negative`, `--layer-base`, `--layer-sticky`, `--layer-dropdown`, `--layer-overlay`, `--layer-toast`, `--layer-tooltip`, `--layer-max`
-- Colors (in `colors.css` @theme):
-  - Brand: `--color-primary(-50..-600)`, `--color-secondary(-50..-700)`
-  - Neutral/dark: `--color-neutral`, `--color-dark(-50..-950)`, `--color-white`
+- **Human-controlled tokens** live in the configurable `@theme` blocks at the top of `spacing.css`, `typography.css`, `colors.css`, and `theme.css`. These are the only values designers and implementers should override:
+  - Typography: `--font-*`, `--line-height-*`, `--fluid-text-base-min`, `--fluid-text-base-max`, `--fluid-text-viewport-min`, `--fluid-text-viewport-max`, `--fluid-text-scale-min`, `--fluid-text-scale-max`, `--color-body`, `--color-heading`.
+  - Spacing: `--fluid-space-base-min`, `--fluid-space-base-max`, `--fluid-space-viewport-min`, `--fluid-space-viewport-max`, `--fluid-space-ratio-min`, `--fluid-space-ratio-max`.
+  - Containers: `--container-width-*`, `--container-md-width-*`, `--container-sm-width-*`.
+  - Utilities: `--spacing-logo`, `--spacing-nav`, control scales (`--control-scale-*`), colour palettes (`--color-*`).
+- **Derived tokens** in the second `@theme` block are computed from the knobs above. Never edit or override them directly:
+  - Typography steps (`--fluid-text-step-*`, `--text-*`, `--text-h*`).
+  - Spacing scale (`--fluid-space-*`, `--spacing-section-*`, `--spacing-content-*`, `--spacing-content-xss`, `--spacing-grid-*`, `--spacing-control-*`).
+  - Container clamps (`--spacing-container*`), offsets, and helpers such as `--spacing-container-gap`.
+  - Progress helpers (`--fluid-text-progress`, `--fluid-space-progress`).
 
-Note: The derived tokens (all the computed `--text-*`, `--spacing-*`, container offsets, progress helpers) are read‑only. Modify inputs only.
+Adjust the inputs, let the pre-computed outputs follow. Tailwind 4 automatically emits utilities for every token (`--spacing-content` → `gap-content`, `--spacing-grid` → `gap-grid`, `--text-h2` → `text-h2`, `--text-sm` → `text-sm`), so use the generated classes instead of re-declaring values.
 
-### Typography Rules
-- Use the generated type utilities: `text-h1..h6`, `text-xs/sm/base/lg/xl/2xl/…`.
-- Do not hard‑code font sizes/weights/line‑heights in components. Avoid `font-*` and `leading-*` unless explicitly designing an effect.
-- Body text, headings, and links inherit from `typography.css`. If you need a special case (e.g., metric pre-heading), use utilities like `uppercase`/tracking with the existing size tokens.
-- Rich text: use the shared `RichText` wrapper (prose defaults are removed by design). Avoid adding `.prose` to non‑article sections.
+### Tailwind 4 Theme Integration
 
-### Spacing Rules
-- Sections: always use `px-section-x` and `py-section-y` (or the `<Section>` wrapper). These map to `--spacing-section-x/y`.
-- Interior spacing: prefer the content scale – `gap-content(-xs|sm|lg|xl|xxl)`, `p-content(-xs|sm|lg|xl|xxl)`.
-- Controls (buttons/inputs): use the control scale – `px-control-*`, `py-control-*`, `gap-control-*`. Tune the underlying ratios in `spacing.css`.
-- Layers: pick a named z-index utility (`z-layer-dropdown`, `z-layer-overlay`, etc.) instead of hard-coding numbers.
-- Grids: only use the grid scale inside CSS grid layouts – `gap-grid(-sm|lg|xl|xxl)`.
-- Containers: use `container`, `container-md`, `container-sm`. For full‑bleed elements that align to the container, use the offset tokens (`--spacing-container-offset`) via provided helpers.
-- First section offset above a fixed header: rely on `--spacing-first-section-nav-offset`.
+- Tailwind builds utilities from `@theme` declarations at compile time. To apply a token, use the matching utility (`py-section-y`, `gap-content`, `gap-grid`, `text-h3`, `text-sm`, etc.). Do not create custom classes like `gap-[var(--spacing-content)]`.
+- Prefer layout primitives (`flex`, `grid`) with gap utilities. Avoid stacking `mt-*`/`mb-*` on siblings—spacing should be controlled by a parent container.
+- Resolve class names with `tailwind-variants` (or constants) and pass the resulting strings into JSX. Avoid calling slot helpers inline—compute them once above the return as illustrated in the section rules.
+- When you must write CSS, import from `@/app/(frontend)/css/spacing.css`, `colors.css`, or `typography.css` and consume the variables directly. Do not define duplicate hard-coded values in component styles.
 
-### Color Palette
-- Use role tokens for backgrounds, text, and borders: `bg-white`, `bg-neutral`, `text-dark`, `text-dark-600`, `border-dark-border`, `border-light-border`.
-- Brand accents: `text-primary-500/600`, `bg-secondary-600`, gradients via existing helpers.
+### Typography System
 
-### Quick Examples
-- Good: `section className="px-section-x py-section-lg"` (uses tokens)
-- Good: `div className="container gap-content-lg"`
-- Good: `h2 className="text-h2"`
-- Avoid: `p className="text-[15px] leading-[1.6]"`
-- Avoid: `div className="gap-[var(--spacing-content)]"`
+The fluid type scale is powered by a single modular ratio with configurable bounds.
 
-### AI Agents: Must‑Follow Rules
-- Use token utilities, not raw values. Never inject `var(--*)` into class names; Tailwind v4 already generates utilities.
-- Typography must inherit the system. Do not add `font-*` or `leading-*` to UI components unless a design requirement demands it and it’s documented.
-- Spacing comes from one of four ladders: section, content, grid, control. Pick the correct ladder; do not mix arbitrary `mt-*` and `mb-*` for rhythm.
-- Containers are mandatory for layout width. Do not hard‑code `max-w-*` values that duplicate container tokens.
-- Rich text lives in the `RichText` component. Do not reintroduce `.prose` in general sections.
-- If a size you need is missing, add a control input token and extend the derived block—do not hard‑code exceptions in components.
-- Before building, scan `spacing.css`, `typography.css`, `colors.css` to learn the available tokens; implement with utilities; validate with the design‑system preview route `(dev)/design-system-preview`.
+- **Control tokens**
+  - Base size: `--fluid-text-base-min` (mobile) and `--fluid-text-base-max` (desktop).
+  - Viewport ramp: `--fluid-text-viewport-min`, `--fluid-text-viewport-max`. The interpolation runs from min → max; outside the range it clamps.
+  - Scale range: `--fluid-text-scale-min`, `--fluid-text-scale-max` (default 1.2 → 1.25). Lower values compress the hierarchy; higher values stretch headings.
+  - Families and roles: `--font-body`, `--font-heading`, `--font-fallback-sans`, plus the per-role line-height and letter-spacing tokens.
+- **Derived tokens**
+  - Steps: `--fluid-text-step--2` through `--fluid-text-step-6`.
+  - Semantic aliases: `--text-xs` → `--text-5xl`, `--text-h6` → `--text-h1`.
+- **Usage rules**
+  - Components should use the generated utilities (`text-h2`, `text-sm`, `text-base`, `text-lg`, `text-xs`, etc.) or inherit from semantic tags. Never hard-code pixel sizes in JSX or component CSS.
+  - Body copy, lists, and blockquotes rely on global rules in `typography.css`. Leave them untouched unless the component demands a distinct style (e.g. a metric counter).
+  - Rich text from Payload should live inside the shared `RichText` component. It inherits the global tokens, so no `.prose` overrides or body IDs are required. Use the `not-prose` helpers when you need to inject bespoke layouts inside the document flow.
+  - Lean on the body-scale utilities (`text-xs`, `text-sm`, `text-base`, `text-lg`) for navigation, metadata, and legal copy. Pair them with tracking/weight utilities as needed (e.g. uppercase + custom letter spacing for pre-headings).
+  - To adjust typography for a client build, override the control tokens in that app’s own theme sheet. Do not copy `typography.css`—only change the inputs.
 
-For deeper background and all token definitions, see `apps/smart-site-starter/DESIGN-SYSTEM.md`.
+### Spacing System
 
-<a id="settings"></a>
-## 🛠 Settings
+Spacing uses a mirrored modular scale that also interpolates between min and max breakpoints.
 
-Smart Site exposes multiple globals to keep site-wide controls inside the admin:
+- **Control tokens**
+  - Base padding: `--fluid-space-base-min` (mobile), `--fluid-space-base-max` (desktop).
+  - Ramp: `--fluid-space-viewport-min`, `--fluid-space-viewport-max`.
+  - Ratio range: `--fluid-space-ratio-min`, `--fluid-space-ratio-max` (default 1.28 → 1.36) for progressive loosening across viewports.
+  - Container widths: `--container-width-*`, `--container-md-width-*`, `--container-sm-width-*`. These follow the same progress curve as space.
+  - Utility anchors: `--spacing-logo`, `--spacing-nav` for chrome sizing.
+  - Control scales: `--control-scale-*` feed button/input padding without diverging from the core rhythm.
+- **Derived tokens**
+  - Steps: `--fluid-space-0` → `--fluid-space-7`.
+  - Section spacing: `--spacing-section-*`, `--spacing-section-x`, `--spacing-section-y`.
+  - Content spacing: `--spacing-content-xss`, `--spacing-content-*`, `--spacing-grid-*`.
+  - Control spacing: `--spacing-control-*` for form controls and compact chrome.
+  - Containers: `--spacing-container`, `--spacing-container-md`, `--spacing-container-sm`, `--spacing-container-gap`, plus offset helpers.
+- **Usage rules**
+  - Sections must render through the shared `<Section>` wrapper so vertical rhythm, padding, and colour schemes stay consistent. Avoid layering additional `py-section-*` utilities inside the component.
+  - Interior layouts should rely on `gap-content-*`, `px-content`, etc. Keep the same semantic tokens for padding, gap, and margin to avoid breaking the scale.
+  - Cards, feature blocks, and CTA wrappers should pull padding and gaps from the content scale (`p-content`, `gap-content-*`). Use the control scale (`px-[--spacing-control-*]`) for dense UI chrome like buttons or inputs.
+  - Grid layouts should combine `grid-cols-*` with `gap-grid`, `gap-grid-lg`, etc. Use the `gap-grid` scale only inside CSS grid containers; flexbox layouts should stay on the content scale.
+  - Default section gutters map to `--spacing-section-md` horizontally and `--spacing-section-lg` vertically. Override the semantic tokens, not the raw fluid steps, when you need different defaults.
+  - Container utilities (`container`, `container-md`, `container-sm`) map to the computed widths. Use the offset tokens (`spacing-container-offset`) for full-bleed elements that need to align with container edges.
 
-- **Header** (`src/admin/payload/globals/header/config.ts`): Manage navigation structure, dropdowns, and nested submenus. Update this when menus change—do not hard-code links in layout components.
-- **Footer** (`src/admin/payload/globals/footer/config.ts`): Configure footer menus and legal links. This is the canonical source for footer navigation, so editors can reorder or rename links without code deployments.
-- **Settings** (`src/admin/payload/globals/settings/index.ts`): Owns brand text, location data, routing defaults, SEO fallbacks, and integrations. Because this document is fetched on every request, treat it as the definitive place to toggle site-wide behaviour.
-- **AI Settings** (`src/admin/payload/globals/ai-settings/index.ts`): Stores AI feature switches and credentials when the Mastra backend is active.
+### Colour Tokens
 
-### When to use Settings vs. other configuration
+- Primary and secondary palettes follow Tailwind’s Indigo and Sky scales; use `text-primary-500`, `bg-secondary-600`, etc. for brand accents.
+- `--color-dark-*` drives typography, borders, and dark surfaces. `--color-neutral` and `--color-white` handle light surfaces.
+- Border tokens (`--color-dark-border`, `--color-light-border`) standardise separators. Reach for `border-dark-border` / `border-light-border` instead of arbitrary opacity adjustments.
 
-- Use **Settings** for anything editorial teams must control live—branding text, social links, analytics IDs, archive/template relationships, search-engine verification, robots toggles, or the first-section nav offset logic driven by routing.
-- Use **Header**/**Footer** for navigation updates. They feed directly into frontend components and trigger cache revalidation through their `afterChange` hooks.
-- Use `src/smartsite.config.ts` for developer-level feature flags (enabling collections, turning on GSAP modules, selecting storage providers). These values require a redeploy and are not meant for editors.
-- Create purpose-built globals/collections when a client needs custom data structures (e.g., testimonials, pricing matrices). Keep Settings focused on foundational behaviour.
+### Rich Text and Prose
 
-### Settings tabs at a glance
-- **General**: `siteName` and `siteDescription` power branding text and default metadata. Adjust when the company name or positioning changes.
-- **Social Media**: Manage outbound profile URLs in one place. Header/footer components consume this array directly.
-- **Locations**: Maintain office/contact entries with coordinates. Map-based sections and structured data use this list, so prefer updating here instead of editing components.
-- **Routing**: Assign the homepage, default page template, collection archive pages, and per-collection single templates. Changing these triggers revalidation and updates the auto-apply template logic.
-- **SEO**: Set default meta imagery, favicons, organisation schema, and verification codes. Use the robots controls to block staging instances from crawlers.
-- **Social Defaults**: Provide fallback Open Graph/Twitter assets and handles when individual entries lack overrides.
-- **Integrations**: Paste analytics IDs or trusted embeds into `<head>`/`<body>` slots without touching code.
+- The `RichText` component already strips Tailwind Prose defaults and relies on our tokens. Do not reintroduce `.prose` or bespoke selectors around Payload content.
+- Use `data-rich-text` or component-level class hooks only when you need contextual colour themes (e.g. inverted sections). Modify colour tokens (`--color-body`, `--color-heading`) on the parent rather than overriding every element.
+- For articles that must use traditional long-form spacing, apply a specific variant class that toggles the section/content spacing tokens; never hand-write margins on individual headings or paragraphs.
 
-All of these updates should go through the admin. The `afterSettingsChange`, `afterHeaderChange`, and `afterFooterChange` hooks handle cache invalidation, template dependency jobs, and navigation refreshes; bypassing the UI skips those guarantees.
+### Implementation Checklist
 
-<a id="templates"></a>
-## 🧩 Templates
+- [ ] Wrap every top-level section with the shared `<Section>` component so vertical rhythm, colour schemes, and padding come from Section Settings.
+- [ ] Apply container utilities instead of width clamps in JSX or CSS.
+- [ ] Pick typography utilities (`text-h*`, `text-xs/sm/base/lg`, `leading-*`) rather than raw pixel values.
+- [ ] Use gap and padding tokens for component spacing. If you need a custom size, add it as a new control token rather than hard-coding.
+- [ ] When adding new theme inputs, document them here and keep the derived calculations together so Tailwind continues to generate utilities.
+- [ ] Never edit the computed token block. Change the inputs, test the cascade, and ensure Tailwind picks up the new classes.
 
-Templates are editorial building blocks that capture reusable section stacks. The philosophy is: **codify layout intent once, let editors apply it repeatedly without duplicating effort.**
+### Client and Demo Overrides
 
-- **Where they live**: `src/admin/payload/collections/templates.ts` defines the collection. Each template includes a name, an optional description (help text for editors), and a required list of section blocks.
-- **How they are used**:
-  - **Automatic**: In Settings → Routing, set `Default Page Template` or a collection-specific `Single Template`. When an editor creates a new entry for those collections and leaves sections empty, the `applyDefaultTemplate` hook clones that template into the document.
-  - **Manual**: Section-based collections expose an **Apply Template** field in the sidebar (rendered by `assign-template`). Selecting a template replaces the current section list, keeping block order and default props intact.
-- **When to create a template**: Any time a layout repeats across entries—service details, product landers, sub-brand homepages, campaign microsites. One-off hero compositions or experimental pages can remain freeform sections instead.
-- **Maintenance**: Editing a template does not overwrite customised pages. After changing a template, ask editors to reapply it where necessary; the dependency job invalidates caches so previews stay fresh but respects per-page tweaks.
+- Client apps (`apps/clients/*`) should only override human-controlled tokens in their local `spacing.css`, `colors.css`, or `typography.css`. Avoid copying computed tokens—share the same calculations to guarantee consistency.
+- The showcase demo (`apps/smart-site/`) may experiment with different ratios or container widths, but changes that should ship to clients must land in this starter first.
+- When shipping a customised client palette, keep the same token names (`--color-primary-*`). The CLI depends on those names to wire components at generate time.
 
-Keep templates lean—avoid hard-coded copy, and use placeholder text that nudges editors toward the intended structure. This keeps them flexible while still enforcing layout standards.
-
+Adhering to these rules keeps every Smart Site instance portable, predictable, and easy to tune. If a new pattern requires additional tokens, add them alongside the existing inputs and extend this section so downstream implementers understand how to use them.
 <a id="building-sections"></a>
 ## 📦 Building Sections
 
-Sections are the **core building blocks** of Smart Site. Start with a blank canvas, install audited patterns from the Smart Site Sections Library, or craft bespoke sections in this directory. Each section is a self-contained unit with its own fields and component.
-
-> 📘 **Before writing or reviewing a section**, read the canonical playbooks:
-> - [`SMARTSITE-SECTION-DESIGN.md`](./SMARTSITE-SECTION-DESIGN.md) — non-negotiable rules, examples, and implementation patterns.
-> - [`DESIGN-SYSTEM.md`](./DESIGN-SYSTEM.md) — the full token catalogue and typography/spacing guidance every section must use.
+Sections are the core building blocks of Smart Site. The guidance below merges the full `SMARTSITE-SECTION-DESIGN.md` playbook into this README; follow it whenever you plan, implement, or review a section.
 
 ### Section Architecture
 
-Every section consists of two required files:
-
-| File            | Purpose                   | Location                        |
+| File | Purpose | Location |
 | --------------- | ------------------------- | ------------------------------- |
-| `config.ts`     | Payload fields definition | `sections/[name]/config.ts`     |
-| `Component.tsx` | React component           | `sections/[name]/Component.tsx` |
+| `config.ts` | Payload fields definition | `sections/[name]/config.ts` |
+| `Component.tsx` | React component | `sections/[name]/Component.tsx` |
 
 ### Quick Start
 
-```bash
-# 1. Create section folder (kebab-case)
-mkdir src/components/sections/hero-banner
+1. Create the section folder (kebab-case).
 
-# 2. Create config.ts and Component.tsx
-touch src/components/sections/hero-banner/{config.ts,Component.tsx}
-```
+   ```bash
+   mkdir src/components/sections/hero-banner
+   ```
 
-### Step 1: Define Fields (config.ts)
+2. Scaffold the required files.
 
-```typescript
+   ```bash
+   touch src/components/sections/hero-banner/{config.ts,Component.tsx}
+   ```
+
+3. Register the section immediately in both registries.
+
+   ```typescript
+   // src/components/sections/config.ts
+   export { HeroBanner } from "./hero-banner/config"
+
+   // src/components/sections/sections-map.tsx
+   import { HeroBannerComponent } from "./hero-banner/Component"
+
+   export const sectionsMap = {
+     "hero-banner": HeroBannerComponent,
+   }
+   ```
+
+4. Populate `config.ts` / `Component.tsx` using the rules that follow.
+
+### Reusable Field Patterns
+
+Smart Site provides pre-built field groups so schemas stay consistent. Import only the helpers a section truly needs.
+
+| Field Group | Purpose | Includes |
+| -------------------- | ------------------ | ------------------------------- |
+| `link()` | Smart linking | Internal/external/anchor |
+| `buttonsGroup()` | Button clusters | Array of buttons |
+| `button()` | Single action | Label, URL, variant |
+| `sectionCta()` | Call-to-action bar | Button text, link, style |
+| `sectionIntro()` | Optional heading | Heading, description, alignment |
+| `image()` | Media upload | Image-only upload field |
+
+### Section Best Practices
+
+✅ **Do** keep folders in kebab-case (`hero-banner`), re-use field patterns, keep sections generic, and reach for architectural names (`card-grid`, `text-image`).
+
+❌ **Don’t** create page-specific sections (`about-hero`), hardcode content inside components, mix admin and frontend imports, or skip generated types.
+
+### 1. Section Folder Contract
+
+- Locate sections in `src/components/sections/<section-name>/`.
+- Use kebab-case for directory and file names (`feature-grid`, `stats-overview`).
+- Each section always exports a server-safe entry point and may optionally attach client helpers:
+  - `config.ts` — Payload `Block` definition (no client-only code).
+  - `Component.tsx` — React implementation. Default to a server component, but it can be client-side if the entire section needs interactivity (animations, form state, etc.).
+  - Optional `client.tsx` (or `component-client.tsx`) for interactive behaviour when you want to keep the main component on the server. Import it lazily from `Component.tsx` and keep it colocated.
+- Register the section immediately:
+  - Add the `Block` to `src/components/sections/config.ts` under `sections.sectionBlocks`.
+  - Map the slug to the component in `src/components/sections/sections-map.tsx`.
+- All sections receive shared page context props when rendered:
+  - `document` – the current Payload document (Page/Post/etc.).
+  - `collection` – the collection slug of that document.
+  - `breadcrumbs` – array used for navigational trails.
+  - `searchParams` – parsed query string.
+  - `params` – dynamic route params (e.g. `uri` segments). Treat these as optional; guard their usage inside the component.
+- Keep individual folders self-contained. Shared helpers belong in `src/components/fields` or `src/components/ui` so the CLI can install sections without chasing deep relative imports.
+
+### 2. Payload Config Rules (`config.ts`)
+
+Follow the patterns in this section.
+
+- Start with the brief. Model only the fields the section actually needs to satisfy the client or design intent; resist adding optional knobs "just in case." When the request is unclear, pause and ask for clarification before inflating the schema.
+- Always use the shared field factories for core primitives:
+  - Links route through the `link()`/`CMSLink` field set so internal/external references stay normalized.
+  - Media (images, video) uses the `media` field + `<Media>` component to respect responsive sizing and metadata.
+- Rich text content should rely on the shared `richText()` field + `<RichText>` renderer. Keep the default variant so it inherits typography tokens; only opt into the `prose`/article variant for long-form content such as blog posts.
+- Import field presets from `@/components/fields/*` whenever they exist (link, media, section-cta, content, etc.). Never duplicate schemas inline.
+- Wrap logical groups in `collapsible` blocks. Default to open for primary content, closed for supporting controls.
+- Provide `label`, `admin.description`, and `admin.placeholder` strings to explain author intent.
+- Set `slug` equal to the folder name; set `interfaceName` so TypeScript components receive strong types (`HeroBlock`, `FeatureGridBlock`).
+- Run `sectionSettings()` as the final field to expose shared colour/container/padding controls.
+- Avoid bespoke collections unless absolutely required. When you need additional relationships, prefer existing global collections or propose extensions in ADRs before adding new ones.
+- Keep defaults sensible: choose the most common layout or toggle as `defaultValue`, especially for stylistic selectors (alignment, size, colour scheme, layout variants). Components should be able to rely on these defaults without re-normalising values.
+- When you have multiple small, related settings (e.g. paired toggles, select boxes, numeric inputs), wrap them in a `type: "row"` so editors see them inline.
+
+```ts
 import type { Block } from "payload"
-import { link } from "@/components/fields/link/link"
-import { sectionCta } from "@/components/fields/section-cta/section-cta"
 
-export const HeroBanner: Block = {
-  slug: "hero-banner",
-  interfaceName: "HeroBannerBlock",
+import { link } from "@/components/fields/link/link"
+import { sectionSettings } from "@/components/fields/section"
+
+export const Hero: Block = {
+  slug: "hero",
+  interfaceName: "HeroBlock",
   fields: [
-    link(), // Smart link selector
-    sectionCta(), // Call-to-action fields
     {
-      name: "backgroundImage",
-      type: "upload",
-      relationTo: "media",
+      type: "collapsible",
+      label: "Content",
+      fields: [
+        { name: "preheading", type: "text", admin: { placeholder: "Optional label" } },
+        { name: "heading", type: "text", required: true },
+        { name: "supportingText", type: "textarea", admin: { rows: 4 } },
+      ],
     },
+    {
+      type: "collapsible",
+      label: "Media",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "backgroundImage",
+          type: "upload",
+          relationTo: "media",
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Layout",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "size",
+              type: "select",
+              defaultValue: "large",
+              options: [
+                { label: "Full viewport", value: "full" },
+                { label: "Large", value: "large" },
+                { label: "Medium", value: "medium" },
+                { label: "Compact", value: "small" },
+              ],
+            },
+            {
+              name: "alignment",
+              type: "select",
+              defaultValue: "left",
+              options: [
+                { label: "Left aligned", value: "left" },
+                { label: "Centre aligned", value: "center" },
+              ],
+            },
+            {
+              name: "visualStyle",
+              type: "select",
+              defaultValue: "classic",
+              options: [
+                { label: "Classic", value: "classic" },
+                { label: "Image overlay", value: "image-overlay" },
+                { label: "Gradient panel", value: "gradient" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Buttons",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "buttons",
+          type: "array",
+          defaultValue: [],
+          fields: [
+            link({
+              optional: true,
+              defaultAppearance: "button",
+              overrides: { name: "button" },
+            }),
+          ],
+        },
+      ],
+    },
+    sectionSettings(),
   ],
 }
 ```
 
-### Step 2: Build Component (Component.tsx)
+### 3. Component Rules (`Component.tsx`)
 
-```typescript
-import { CMSLink } from "@/components/fields/link"
-import { SectionCta } from "@/components/fields/section-cta"
-import { Media } from "@/components/fields/media"
-import type { HeroBannerBlock } from "@/admin/payload/payload-types"
+- Import generated types from `@/admin/payload/payload-types` and annotate the function signature (e.g. `export function HeroComponent(props: HeroBlock)`).
+- Wrap every section in the shared `<Section>` component. Only set `disableContainer` when the design truly needs full-bleed content.
+- Reach for design-system utilities instead of custom values. Cross-reference the design system rules; never hard-code pixel sizes or bespoke Tailwind classes that duplicate the shared tokens.
+- Re-use shared field components (`CMSLink`, `RichText`, `Media`, `ButtonsGroup`, etc.) so data normalization stays consistent. When a field returns an array, map through a normalized helper before rendering.
+- Let Payload defaults do the heavy lifting. Avoid re-normalizing enum values inside the component—read the generated types, trust `defaultValue`, and handle `null` cases only when the schema marks a field as optional.
+- Drive layout and tone through `tailwind-variants` (or an equivalent class map) and resolve all slot classes up front:
+  - Declare slots for every region (`section`, `content`, `wrapper`, `copy`, `supporting`, `buttonItem`, etc.).
+  - Assign the resolved strings to constants (e.g. `const wrapperClassName = wrapper()`) and pass them to JSX. Do not call the slot helpers inline.
+  - If you see `className={slot()}` in JSX, move that call to a constant above the return.
+  - Use variants to switch tone (`light` vs `dark`), alignment, container flush states, and per-element spacing rather than injecting conditional `cn()` calls in the markup.
+- When rendering media, pass the raw field value directly to `<Media>`. The component ignores non-object inputs; no local `typeof === "object"` guards are needed.
+- Keep markup lean. Avoid redundant wrappers, stray `div`s, or re-exported fragments—structure should match the visual intent exactly.
+- Always import the generated Payload types; never recreate interfaces or enums locally.
+- Guard optional content (`if (!heading) return null` or inline ternaries). Never render empty wrappers.
+- Keep logic declarative. Derive class names with maps keyed by enumerations, not by if/else blocks scattered throughout the JSX.
+- Use Tailwind utilities first. When you need bespoke styling, extend the shared CSS layers (`spacing.css`, `typography.css`, `colors.css`, `utilities.css`) instead of creating local modules, and source every value from the design tokens.
+- Do not mutate props. Derive new objects or arrays locally.
+- Mark `Component.tsx` with `"use client"` when the whole section needs interactive behaviour. Otherwise, keep it server-side and split interactivity into an optional `client.tsx` that you lazy-load and pass only the required props.
 
-export function HeroBannerComponent({
-  link,
-  sectionCta,
-  backgroundImage
-}: HeroBannerBlock) {
+```tsx
+/*************************************************************************/
+/*  HERO VARIANTS                                                        */
+/*************************************************************************/
+const heroVariants = tv({
+  slots: {
+    section: "relative isolate overflow-hidden",
+    content: "relative z-10 w-full",
+    wrapper: "gap-content flex flex-col",
+    copy: "gap-content-sm flex flex-col",
+    buttons: "gap-content-sm flex flex-wrap items-center",
+    preheading: "text-xs uppercase tracking-widest",
+    heading: "",
+    supporting: "max-w-2xl text-pretty",
+    buttonItem: "gap-content-xs inline-flex items-center",
+  },
+  variants: {
+    alignment: {
+      left: { wrapper: "items-start text-left" },
+      center: {
+        wrapper: "items-center text-center",
+        copy: "items-center text-center",
+        buttons: "justify-center",
+        preheading: "mx-auto",
+        supporting: "mx-auto text-center",
+      },
+    },
+    tone: {
+      light: {
+        preheading: "text-dark-500",
+        supporting: "text-dark-600",
+      },
+      dark: {
+        section: "text-white",
+        preheading: "text-white/80",
+        heading: "text-white",
+        supporting: "text-white/80",
+      },
+    },
+  },
+  defaultVariants: {
+    alignment: "left",
+    tone: "light",
+  },
+})
+
+export function HeroComponent(props: HeroBlock) {
+  const {
+    heading,
+    preheading,
+    supportingText,
+    buttons = [],
+    alignment = "left",
+    visualStyle = "classic",
+    sectionSettings,
+  } = props
+
+  /**
+   * Payload Fields
+   */
+  const heroButtons = buttons.filter(buttonItem => Boolean(buttonItem?.button))
+  const hasButtons = heroButtons.length > 0
+  const tone = visualStyle === "image-overlay" ? "dark" : "light"
+
+  /**
+   * Tailwind Variants
+   */
+  const {
+    section,
+    content,
+    wrapper,
+    copy,
+    buttons: buttonsSlot,
+    preheading: preheadingSlot,
+    heading: headingSlot,
+    supporting: supportingSlot,
+    buttonItem,
+  } = heroVariants({
+    alignment,
+    tone,
+  })
+
+  /**
+   * Class Names
+   */
+  const sectionClassName = section()
+  const contentClassName = content()
+  const wrapperClassName = wrapper()
+  const copyClassName = copy()
+  const buttonsClassName = buttonsSlot()
+  const preheadingClassName = preheadingSlot()
+  const headingClassName = headingSlot()
+  const supportingClassName = supportingSlot()
+  const buttonItemClassName = buttonItem()
+
+  /**
+   * Render
+   */
   return (
-    <section className="relative min-h-screen">
-      {backgroundImage && <Media resource={backgroundImage} />}
-      {link?.label && (
-        <CMSLink
-          newTab={link.newTab ?? undefined}
-          reference={link.reference ?? undefined}
-          type={link.type ?? undefined}
-          url={link.url ?? undefined}
-        >
-          {link.label}
-        </CMSLink>
-      )}
-      <SectionCta {...sectionCta} />
-    </section>
+    <Section sectionSettings={sectionSettings} className={sectionClassName}>
+      <div className={contentClassName}>
+        <div className={wrapperClassName}>
+          <div className={copyClassName}>
+            {preheading ? <p className={preheadingClassName}>{preheading}</p> : null}
+            <h1 className={headingClassName}>{heading}</h1>
+            {supportingText ? (
+              <p className={supportingClassName}>{supportingText}</p>
+            ) : null}
+          </div>
+
+          {hasButtons ? (
+            <div className={buttonsClassName}>
+              {heroButtons.map((buttonItem, index) => (
+                <CMSLink
+                  key={`hero-button-${index}`}
+                  {...buttonItem.button!}
+                  className={buttonItemClassName}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </Section>
   )
 }
 ```
 
-### Step 3: Register Section
+- Block comment headers (e.g. `/*************************************************************************/`) belong at the very top of a file. Inside components, favour the inline JSDoc-style separators (`/** … */`) shown in the example to mark major logic groups.
 
-```typescript
-// src/components/sections/config.ts
-export { HeroBanner } from "./hero-banner/config"
+### 4. Data Access & Caching
 
-// src/components/sections/sections-map.tsx
-import { HeroBannerComponent } from "./hero-banner/Component"
-export const sectionsMap = {
-  "hero-banner": HeroBannerComponent,
-}
-```
+- Rely on the injected page context first. Every section receives `document`, `collection`, `breadcrumbs`, `searchParams`, and `params`; prefer these props before issuing new queries.
+- When additional data is required, import `cache` from `@/admin/cache` and call the shared helpers server-side. Core methods: `getByURI`, `getBySlug`, `getByID`, `getCollection`, `getGlobal`, `getAllURIs`.
+- Avoid calling `getPayload()` or direct fetches inside sections. Wrap cache calls in domain helpers under `src/lib/<domain>/…` (or the client’s `src/lib`) so the logic stays reusable and inherits smart revalidation.
+- Match the cache API’s `QueryOptions` shape (`limit`, `sort`, `where`, `depth`, `overrideAccess`, `draft`) when composing queries. This keeps invalidation tags accurate.
+- Only expose section-level toggles for draft or alternate datasets when a user story demands it. Otherwise, let the defaults (published content, depth 5) flow from the cache helpers.
 
-### Design Tokens & Styling
+#### Pagination patterns
 
-- **Spacing** (`spacing.css`): use classes like `px-section-x`, `py-section-y`, `gap-content`, `gap-content-sm/lg`, and the container utilities (`container`, `container-md`, `container-sm`) to align with the layout grid.
-- **Color tokens**: prefer palette utilities such as `bg-primary-500`, `text-secondary-600`, `text-dark-700`, `border-light-border`. Gradient helpers (e.g., `.gradient-border`) live in `components.css`.
-- **Utilities** (`utilities.css`): helpers like `stop-scroll`, `scrollbar-hidden`, `center`, `fill-abs`, and `title-hidden` handle cross-component behaviors.
-- **Animations**: mark animated components with `"use client"`, import `useGSAP`/`gsap` from `@/providers/gsap`, scope the animation with a ref, animate transforms/opacity, add `will-change` classes when animating, and toggle `gsap.globalAnimations` when you prefer drop-in data-attribute reveals.
-- **Typography & padding**: lean on the design system for spacing (`px-section-x`, `py-section-y`, `gap-content`) and type instead of adding ad-hoc `p-*`, `text-*`, or `leading-*` utilities inside components.
-- **Styling workflow**: check `components.css` for reusable patterns before layering custom Tailwind values; only add new classes there when the pattern will be reused.
+- Reuse the shared pagination tooling instead of rolling custom “next/previous” controls. The canonical implementation lives alongside the posts archive:
+  - Fetch paginated data through a helper that returns `docs`, `page`, `totalPages`, and `totalDocs` (e.g. `getPostsWithPagination`).
+  - Drive the page index from `searchParams.page` and always coerce it to a positive integer.
+  - Pass the resulting metadata straight into `<Pagination>` (for the button group) and `<PageRange>` (for the “Showing x–y of z” copy). Both components live in `@/components/fields/pagination` and accept tone-aware props.
+  - Build the destination URL once via an `archiveUri` (usually the current document breadcrumb). The component handles appending `?page=`—do not concatenate page numbers manually.
+- Config schema: expose toggles such as “Show pagination” or “Show page range” plus basic settings (page size, sort order). Avoid re-declaring link arrays or explicit page labels; the pagination field set owns that UI.
+- When another section needs pagination, mirror the `PostsArchiveComponent` structure: fetch, derive the archive URI, render your collection grid/list, then hand the metadata to the shared pagination components.
 
-### Adding Animations
+### 5. Layout, Spacing, and Containers
 
-High-contrast motion is part of the Smart Site DNA. Pick the right layer for the job so pages stay maintainable and performant.
+- Vertical rhythm is handled by the `<Section>` wrapper. Do not add `py-section-*` utilities directly inside a section component—the wrapper already applies the default rhythm and Section Settings adjust it when required.
+- Containers:
+  - Default to `container`. This default is enforced via `sectionSettings` (`defaultValue: "lg"`). Do not set container utilities manually inside the component.
+  - When a narrower presentation is required, rely on Section Settings to switch to `container-md` or `container-sm`.
+  - For true full-bleed content (media strips, banners), use `disableContainer` and manage padding with section settings.
+- Interior spacing pulls from two coordinated scales:
+  - **Content scale** (`gap-content-xss`, `gap-content-xs`, `gap-content-sm`, `gap-content`, `gap-content-lg`, `gap-content-xl`, `gap-content-xxl`, with matching padding utilities `p-content-*`). Use these for flex layouts, stacks, cards, and component padding.
+  - **Grid scale** (`gap-grid-xs`, `gap-grid-sm`, `gap-grid`, `gap-grid-lg`, `gap-grid-xl`, `gap-grid-xxl`). Use these only inside CSS grids; they track the same progression but stage larger leaps for multi-column layouts.
+- Control spacing for UI elements (buttons, inputs) comes from the control scale (`px-control-sm`/`py-control-*`). Reach for these when adjusting individual form controls or icon buttons.
+- Section Settings exposes independent padding controls for top, right, bottom, and left (presented inline at 25% width each). Keep `px-section-x` and `py-section-y` as the baseline, then override individual sides with the generated utilities (`pt-section-sm`, `pb-section-none`, `pl-section-xs`, `pr-section-lg`). Avoid ad hoc `mt-*`/`mb-*` spacing on children.
+- Section padding also has a full scale (`px-section-none`, `px-section-xs`, `px-section-sm`, `px-section-lg`, `px-section-xl`, plus matching `py-section-*` variants). Only toggle these via Section Settings so the vertical rhythm remains consistent across the site.
+- Use the container offset helpers (`pl-container-offset`, `pr-container-offset`, and their `-md`/`-sm` variants) when you need full-bleed elements to align with the container gutters.
+- Treat Section Settings as client/editor overrides. When building a section, assume the defaults (standard container, light scheme, baseline padding) unless a user story explicitly requires exposing additional toggles or changing the defaults via schema.
+- When mixing grids and flex layouts, align gap tokens with the underlying display type (grid → `gap-grid`, flex → `gap-content`).
+- Avoid manual margins between siblings. Let the parent flex/grid gap control spacing.
 
-#### 1. Quick presets (config-driven)
+### 6. Typography and Rich Text
 
-- Toggle `gsap.globalAnimations` in `smartsite.config.ts` when editors just need tasteful reveals.
-- Add data attributes directly to markup – no custom hooks required:
+- Use semantic tags (`h1`–`h6`, `p`, `ul`) and allow the global typography sheet to style them.
+- Default to the design-system tokens; the most common overrides you will apply are size (`text-sm`, `text-lg`, `leading-relaxed`) and colour (`text-body`, `text-muted`). If a stakeholder explicitly requests something extra—such as bumping weight to `font-semibold`—honour the brief with the nearest token and avoid adding unsolicited embellishments.
+- Utility overrides must come from the generated scale (`text-sm`, `leading-snug`, `font-semibold`), never custom pixel values.
+- Rich text payloads must render through the shared `<RichText>` component with `enableGutter` and `className` overrides instead of ad hoc `dangerouslySetInnerHTML`.
+- Pre-headings, legal copy, captions, and metadata use the body scale tokens and simple utilities (uppercase, tracking). Avoid one-off custom classes like bespoke `.text-preheading`.
+
+### 7. Colour, Themes, and Inversion
+
+- Colour changes come from Section Settings (light, neutral, dark) or parent-level CSS variables. Only apply manual colour utilities for edge cases (e.g. CTA button variants).
+- To invert tone (e.g. light-on-dark), toggle Section Settings → colour scheme rather than sprinkling `text-white`/`bg-dark` in component markup.
+- When a section needs accent colours beyond the neutral palette, use theme tokens (`text-primary-500`, `bg-secondary-100`). Introduce new tokens in `colors.css` before using raw hex values.
+- Ensure every nested element—typography, buttons, badges, cards—derives its colours from the current scheme. Use semantic classes (`text-body`, `text-heading`, button variants tied to the palette) instead of hard-coded values so light/neutral/dark variants stay in sync.
+- Some sections may only ever ship with a single colour treatment; in those cases you can keep one scheme and omit additional variants. Default to the shared schemes unless the design brief explicitly says a section is single-theme only.
+
+### 8. Interactivity and Animations
+
+- Confirm the desired motion strategy up front. Ask the requester (or inspect adjacent sections) to determine whether the project relies on global data attributes, bespoke GSAP timelines, or shared effects—then follow the same pattern unless you are explicitly asked to change it.
+- **Global data attributes**: when Smart Site config enables global animations, add hooks once at the parent instead of scattering per-child delays.
+  - Use `data-animate="fade-up"` + `data-animate-stagger`, and point `data-animate-target` (or `[data-animate-item]`) at the descendants you want to tween together.
+  - Avoid assigning individual `data-animate-delay` values when a single stagger will do; it keeps the ScrollTrigger footprint lean and the markup clearer.
+  - Other helpers (`data-parallax`, `data-rotate`, `data-typewriter`, `data-pulse`, `data-split`) follow the same pattern—apply to the element that conceptually owns the effect.
+- Available global hooks (see `src/providers/gsap/global-animations.tsx` for options and defaults):
+
+  | Hook | Purpose | Common attributes |
+  | --- | --- | --- |
+  | `data-animate` | Fade/slide on scroll | `data-animate-distance`, `data-animate-duration`, `data-animate-stagger`, `data-animate-target`, `data-animate-offset`, `data-animate-repeat` |
+  | `data-parallax` | Scroll-tied parallax | `data-parallax-speed`, `data-parallax-start`, `data-parallax-end`, `data-parallax-scrub` |
+  | `data-rotate` | Scroll-driven rotations | `data-rotate-turns`, `data-rotate-start`, `data-rotate-end`, `data-rotate-scrub` |
+  | `data-typewriter` | Typewriter effect | `data-typewriter-speed`, `data-typewriter-delay`, `data-typewriter-ease`, `data-typewriter-start`, `data-typewriter-repeat` |
+  | `data-pulse` | Looping pulse | `data-pulse-scale`, `data-pulse-duration` |
+  | `data-split` | SplitText animations | `data-split` (`lines`/`words`/`chars`), `data-split-stagger`, `data-split-duration`, `data-split-ease`, `data-split-offset` |
+
+- **Example – parent/child fade/stagger**
 
   ```tsx
-  <div data-animate="fade-up" data-animate-delay="0.2">
-    <h2 className="font-display text-balance">Heading that glides in</h2>
+  <div
+    data-animate="fade-up"
+    data-animate-distance="24"
+    data-animate-stagger="0.1"
+    data-animate-target="[data-animate-child]"
+  >
+    <h2 data-animate-child>Heading</h2>
+    <p data-animate-child>Supporting copy</p>
+    <div data-animate-child>Buttons…</div>
   </div>
   ```
 
-| Effect        | Attribute(s)                                                                                                      | Notes |
-| ------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
-| Fade + offset | `data-animate="fade-up\|fade-down\|fade-left\|fade-right\|fade-in"`, `data-animate-duration`, `data-animate-delay`, `data-animate-distance`, `data-animate-offset`, `data-animate-stagger`, `data-animate-target`, `data-animate-repeat` | Uses `ScrollTrigger`. Repeats when `data-animate-repeat="true"`.
-| Parallax      | `data-parallax`, `data-parallax-speed`, `data-parallax-start`, `data-parallax-end`, `data-parallax-scrub`          | Vertical translate tied to scroll. |
-| Rotate        | `data-rotate`, `data-rotate-turns`, `data-rotate-start`, `data-rotate-end`, `data-rotate-scrub`                    | Continuous scroll-based rotations. |
-| Typewriter    | `data-typewriter`, `data-typewriter-speed`, `data-typewriter-delay`, `data-typewriter-ease`, `data-typewriter-start`, `data-typewriter-repeat` | TextPlugin loads automatically when needed. |
-| Pulse         | `data-pulse`, `data-pulse-scale`, `data-pulse-duration`                                                            | Idle breathing animation (no ScrollTrigger required). |
-| Split text    | `data-split="lines\|words\|chars"`, `data-split-stagger`, `data-split-duration`, `data-split-offset`, `data-split-ease` | SplitText loads on demand and runs once per page load. |
+- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and follow the patterns in `apps/clients/elvora/src/components/sections/*` for reference.
+- **Reusable GSAP effects**: place shared animations in `src/providers/gsap/effects.ts` (using `gsap.registerEffect`) so sections can call `gsap.effects.myEffect(targets, config)` without duplicating timelines. This keeps motion consistent across the catalogue.
+- Keep third-party animation libraries out of sections. If you discover a missing helper, register it centrally in the GSAP provider rather than inlining it per section.
 
-#### 2. Section-level timelines
+### 9. Accessibility and Semantics
 
-- Reach for bespoke timelines when motion depends on component state or complex sequencing.
-- Import from the provider so GSAP plugins respect config toggles:
+- Maintain heading order relative to the page (no skipping levels). The hero typically renders the `h1`; subsequent sections should start at `h2`.
+- Provide alt text through Media fields or computed fallbacks. Never leave background images without context if they convey information.
+- Buttons/links from Payload should expose `aria-label` and `rel` attributes via the shared `CMSLink` component. Do not wrap block-level elements inside links unless the HTML specification allows it.
+- Ensure interactive elements are keyboard reachable and visually focusable.
 
-  ```tsx
-  "use client"
+### 10. Data Safety and Performance
 
-  import { useRef } from "react"
-  import { gsap, useGSAP } from "@/providers/gsap"
+- Avoid heavy computations inside render. Pre-compute derived data at the top of the component.
+- Lazy-load expensive subcomponents with `next/dynamic` if they introduce large bundles (e.g. charts, maps). Document the decision in the section README if you do.
+- Do not fetch data directly within a section component. All data must come from the section props or shared loaders.
 
-  export function FeatureRow() {
-    const scope = useRef<HTMLDivElement>(null)
+### 11. Review Checklist Before Shipping
 
-    useGSAP(() => {
-      const items = gsap.utils.toArray<HTMLElement>('[data-feature]', scope.current)
-      gsap.from(items, {
-        opacity: 0,
-        y: 24,
-        stagger: 0.12,
-        duration: 0.6,
-        ease: "power2.out",
-      })
-    }, { scope })
+- [ ] Folder and files follow naming contract (`kebab-case`, `config.ts`, `Component.tsx`).
+- [ ] `config.ts` imports shared field presets and ends with `sectionSettings()`.
+- [ ] Component wraps content with `<Section>` and uses container/gap/typography tokens only.
+- [ ] Optional data guarded; no empty wrappers rendered when fields are blank.
+- [ ] Animations use shared provider or declarative attributes; `"use client"` only when required.
+- [ ] Accessibility reviewed (heading levels, alt text, focus states).
+- [ ] Section registered in both `sections/config.ts` and `sections-map.tsx`.
+- [ ] Storybook or catalogue preview (blocks library) updated if the section is installable.
+- [ ] Manual QA on default, min, and max viewport widths to confirm fluid type/spacing behaves.
 
-    return (
-      <div ref={scope}>
-        {/* ... */}
-      </div>
-    )
-  }
-  ```
+### 12. Coordination with the Blocks Library
 
-#### 3. Custom GSAP effects
+- When promoting a section to the public catalogue, mirror the Smart Site folder into `apps/blocks-library/src/registry/sections/<name>/` without diverging token usage.
+- Provide preview fixtures that use the same field schema so the catalogue renders accurately.
+- Keep dependency metadata up-to-date (`packages/cli/src/registry/sections.ts`) so the CLI installs required fields, animations, and utilities.
 
-- Register reusable effects in `src/providers/gsap/effects.ts`.
-- Keep project-specific effects in `src/providers/gsap/effects.ts` so teams can add branded motion without conflicts.
+### 13. Evolving the Guidelines
 
-#### 4. Performance checklist
+- ESLint enforces the key violations automatically. When the linter flags classes such as `bg-white`, `text-dark-500`, `tracking-[...]`, or the presence of a top-level `"use client"` directive, refactor the section to rely on the shared tokens or split the interactive code into `client.tsx`. Use `// smartsite-allow-client` in the rare cases where a section must remain entirely client-side.
+- Any proposal to deviate from these rules must include:
+  - A documented rationale (link to ADR or GitHub issue).
+  - Updates to this guideline and the design system rules.
+  - Communication to the team before merging.
+- Treat this section as the source of truth. If you discover a helpful pattern while building sections, codify it here before rolling it out.
 
-- Prefer transforms and opacity; avoid animating layout properties.
-- Disable `gsap.globalAnimations` when a project only uses bespoke motion.
-- Kill any manually created `ScrollTrigger` or timelines inside cleanup callbacks.
-- Keep timelines scoped (`useGSAP` + refs) to prevent cross-page leaks.
-
-### Reusable Field Patterns
-
-Smart Site provides **pre-built field groups** that ensure consistency:
-
-| Field Group          | Purpose            | Includes                        |
-| -------------------- | ------------------ | ------------------------------- |
-| `link()`             | Smart linking      | Internal/external/anchor        |
-| `buttonsGroup()`     | Button clusters    | Array of buttons                |
-| `button()`           | Single action      | Label, URL, variant             |
-| `sectionCta()`       | Call-to-action bar | Button text, link, style        |
-| `sectionIntro()`     | Optional heading   | Heading, description, alignment |
-| `image()`            | Media upload       | Image-only upload field         |
-
-Use only the helpers that fit a section’s content footprint—`sectionIntro()` is handy when you need a heading/pre-heading pair, but many sections can skip it entirely in favour of richer link or content fields.
-
-### Section Best Practices
-
-✅ **DO:**
-
-- Use kebab-case folder names (`hero-banner`)
-- Leverage reusable field patterns
-- Keep sections generic and reusable
-- Use architectural names (`card-grid`, `text-image`)
-
-❌ **DON'T:**
-
-- Create page-specific sections (`about-hero`)
-- Hardcode content in components
-- Mix admin and frontend imports
-- Skip type safety
-
+Adhering to this checklist guarantees that every Smart Site section is portable, composable, and ready for automation via the CLI. Break the rules only with explicit approval and documented trade-offs.
 <a id="routing--caching"></a>
 ## ⚡ Routing & Caching
 

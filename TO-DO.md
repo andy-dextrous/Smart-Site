@@ -26,12 +26,10 @@
 ## Starter
 
 - auto screenshots of sections
-- chat widget should only show if truly connected
+- chat widget should only show if truly connected. Possibly design it like https://fellou.ai/
 - Consider making beginner starter collections part of a Brochure Website starter theme, clean out backend and move all to CLI.
 - Make header and footer globals slot-ready for any type of footer or header.
-- Packaged testing library
 - move seeding, setup, updates, AI registration/setup to CLI
-- Cloudinary support
 
 ## Blocks Library
 
