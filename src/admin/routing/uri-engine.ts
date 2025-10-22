@@ -8,6 +8,37 @@ export function setRoutingPayloadAccessor(getter?: typeof loadPayload): void {
   currentGetPayload = getter ?? loadPayload
 }
 
+const RESERVED_URI_PREFIXES = ["/admin", "/api"]
+
+function normalizeReservedURI(uri: string): string {
+  if (!uri || uri === "/") {
+    return uri || "/"
+  }
+  return uri.replace(/\/+$/, "")
+}
+
+export function isReservedURI(uri: string): boolean {
+  const normalized = normalizeReservedURI(uri)
+  const candidates = new Set<string>([normalized])
+
+  const withoutLocale = normalized.replace(/^\/[^/]+/, "")
+  if (withoutLocale.startsWith("/")) {
+    candidates.add(withoutLocale)
+  }
+
+  for (const candidate of candidates) {
+    if (
+      RESERVED_URI_PREFIXES.some(
+        prefix => candidate === prefix || candidate.startsWith(`${prefix}/`)
+      )
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
+
 /*************************************************************************/
 /*  URI ENGINE
 
@@ -517,6 +548,12 @@ export function validateURI(uri: string): { isValid: boolean; errors: string[] }
     errors.push("URI can only contain letters, numbers, hyphens, and forward slashes")
   }
 
+  if (isReservedURI(uri)) {
+    errors.push(
+      `URI cannot start with reserved prefix (${RESERVED_URI_PREFIXES.join(", ")})`
+    )
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -731,5 +768,8 @@ export const routingEngine = {
 
     // Remove trailing slashes from other paths
     return uri.replace(/\/+$/, "")
+  },
+  isReservedURI: (uri: string): boolean => {
+    return isReservedURI(uri)
   },
 }

@@ -513,6 +513,14 @@ export function getFrontendCollection(slug: string): FrontendCollection | undefi
   return undefined
 }
 
+export function __getRegisteredCollectionsForTesting(): FrontendCollection[] {
+  return Array.from(registeredCollections.values())
+}
+
+export function __clearRegisteredCollectionsForTesting(): void {
+  registeredCollections.clear()
+}
+
 /*************************************************************************/
 /*  UTILITY FUNCTIONS
 /*************************************************************************/

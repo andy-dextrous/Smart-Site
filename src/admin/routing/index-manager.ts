@@ -1,7 +1,7 @@
 import configPromise from "@payload-config"
 import { getPayload as loadPayload } from "payload"
 import { getFrontendCollections } from "@/admin/config/frontend"
-import { routingEngine, BreadcrumbItem } from "./uri-engine"
+import { routingEngine, BreadcrumbItem, isReservedURI } from "./uri-engine"
 import { createAutomaticRedirect } from "@/admin/redirects/auto-redirects"
 import { formatIdForText, formatIdForRelationship } from "@/admin/payload/db/id-utils"
 
@@ -259,6 +259,10 @@ export async function checkURIConflict(
       typeof excludeDocumentId !== "undefined"
         ? formatIdForText(excludeDocumentId)
         : undefined
+
+    if (isReservedURI(normalizedURI)) {
+      return { hasConflict: true, conflictingCollection: "reserved" }
+    }
 
     const conflicts = await payload.find({
       collection: "uri-index",

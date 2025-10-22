@@ -362,7 +362,8 @@ export async function getCollectionItemsForArchive(
 export async function shouldTriggerArchiveDependentUpdates(
   collection: string,
   doc: any,
-  previousDoc: any
+  previousDoc: any,
+  payload?: any
 ): Promise<boolean> {
   // Only pages can trigger archive dependent updates
   if (collection !== "pages") return false
@@ -371,7 +372,7 @@ export async function shouldTriggerArchiveDependentUpdates(
   if (doc._status !== "published") return false
 
   // Check if this page is used as an archive page
-  const collections = await getArchiveChildCollections(doc.id)
+  const collections = await getArchiveChildCollections(doc.id, payload)
   if (collections.length === 0) return false
 
   // Check for slug changes
