@@ -20,6 +20,9 @@
     - Heading line heights sit here so designers can adjust rhythm in one place.
     - Viewport bounds inherit from spacing tokens so type and spacing share the same
       responsive curve—override `--fluid-space-viewport-*` if you need different targets.
+    - Optional display scale example: set `--fluid-heading-base-min/max` to 20px/40px and
+      `--fluid-heading-scale-min/max` to 1.28/1.36 so headings climb faster than body copy
+      while body text keeps the tighter defaults.
 
     Keep these inputs declarative; avoid referencing other custom properties so the
     math block below stays predictable.
@@ -55,6 +58,11 @@
     --fluid-text-viewport-max: var(--fluid-space-viewport-max, 90rem);
     --fluid-text-scale-min: 1.2;
     --fluid-text-scale-max: 1.25;
+
+    --fluid-heading-base-min: var(--fluid-text-base-min);
+    --fluid-heading-base-max: var(--fluid-text-base-max);
+    --fluid-heading-scale-min: var(--fluid-text-scale-min);
+    --fluid-heading-scale-max: var(--fluid-text-scale-max);
   }
 
   @theme {
@@ -132,12 +140,44 @@
     --text-4xl: var(--fluid-text-step-5);
     --text-5xl: var(--fluid-text-step-6);
 
-    --text-h6: var(--fluid-text-step-0);
-    --text-h5: var(--fluid-text-step-1);
-    --text-h4: var(--fluid-text-step-2);
-    --text-h3: var(--fluid-text-step-3);
-    --text-h2: var(--fluid-text-step-4);
-    --text-h1: var(--fluid-text-step-6);
+    /* Fluid Heading Base (optional display scale) */
+    --fluid-heading-base-fluid: calc(
+      var(--fluid-heading-base-min) +
+        (var(--fluid-heading-base-max) - var(--fluid-heading-base-min)) *
+        var(--fluid-text-progress)
+    );
+    --fluid-heading-base: clamp(
+      var(--fluid-heading-base-min),
+      var(--fluid-heading-base-fluid),
+      var(--fluid-heading-base-max)
+    );
+
+    /* Fluid Heading Steps (fallback to body when scales match) */
+    --fluid-heading-scale-fluid: calc(
+      var(--fluid-heading-scale-min) +
+        (var(--fluid-heading-scale-max) - var(--fluid-heading-scale-min)) *
+        var(--fluid-text-progress)
+    );
+    --fluid-heading-scale: clamp(
+      var(--fluid-heading-scale-min),
+      var(--fluid-heading-scale-fluid),
+      var(--fluid-heading-scale-max)
+    );
+
+    --fluid-heading-step-0: var(--fluid-heading-base);
+    --fluid-heading-step-1: calc(var(--fluid-heading-step-0) * var(--fluid-heading-scale));
+    --fluid-heading-step-2: calc(var(--fluid-heading-step-1) * var(--fluid-heading-scale));
+    --fluid-heading-step-3: calc(var(--fluid-heading-step-2) * var(--fluid-heading-scale));
+    --fluid-heading-step-4: calc(var(--fluid-heading-step-3) * var(--fluid-heading-scale));
+    --fluid-heading-step-5: calc(var(--fluid-heading-step-4) * var(--fluid-heading-scale));
+    --fluid-heading-step-6: calc(var(--fluid-heading-step-5) * var(--fluid-heading-scale));
+
+    --text-h6: var(--fluid-heading-step-0, var(--fluid-text-step-0));
+    --text-h5: var(--fluid-heading-step-1, var(--fluid-text-step-1));
+    --text-h4: var(--fluid-heading-step-2, var(--fluid-text-step-2));
+    --text-h3: var(--fluid-heading-step-3, var(--fluid-text-step-3));
+    --text-h2: var(--fluid-heading-step-4, var(--fluid-text-step-4));
+    --text-h1: var(--fluid-heading-step-6, var(--fluid-text-step-6));
   }
 }
 
@@ -309,5 +349,4 @@
       }
     }
   }
-
 }

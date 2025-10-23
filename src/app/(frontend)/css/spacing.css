@@ -129,8 +129,8 @@
     --spacing-container-gap: var(--spacing-content-xl);
 
     --spacing-logo-fluid: calc(
-      var(--spacing-logo-min) +
-        (var(--spacing-logo-max) - var(--spacing-logo-min)) * var(--fluid-space-progress)
+      var(--spacing-logo-min) + (var(--spacing-logo-max) - var(--spacing-logo-min)) *
+        var(--fluid-space-progress)
     );
     --spacing-logo: clamp(
       var(--spacing-logo-min),
@@ -139,8 +139,8 @@
     );
 
     --spacing-nav-fluid: calc(
-      var(--spacing-nav-min) +
-        (var(--spacing-nav-max) - var(--spacing-nav-min)) * var(--fluid-space-progress)
+      var(--spacing-nav-min) + (var(--spacing-nav-max) - var(--spacing-nav-min)) *
+        var(--fluid-space-progress)
     );
     --spacing-nav: clamp(
       var(--spacing-nav-min),
