@@ -106,6 +106,8 @@ If information is missing, insert a “Clarify” step before planning. If the t
 
 Reference `README.md` → **Installation & Getting Started** when covering:
 
+- **Recommended deployment path**: MongoDB Atlas + Vercel hosting with Vercel Blob. Provision Atlas, set `DATABASE_URL` to the SRV URI, enable Blob and add `BLOB_READ_WRITE_TOKEN`, then mirror those secrets in Vercel.
+
 - **Prerequisites:** Node 20+, `pnpm@9.14.4`, MongoDB (local or Atlas), optional Vercel Blob & Resend.
 - **First-time setup:** `pnpm install` then `pnpm run setup`. Explain wizard outputs (`.env`, secrets, seeding) and ports (3000).
 - **Environment variables:** describe the keys the wizard writes (database, storage, AI). Emphasize `SMARTSITE_AI_REGISTRATION_SECRET`, `AI_AGENT_API_KEY`, `AI_AGENT_USER_ID`.
@@ -149,7 +151,7 @@ Use this as a quick map for where changes belong. Never modify the admin layer.
 - `src/components/` — frontend building blocks.
   - `sections/` — installable/custom sections; each folder has `config.ts` + `Component.tsx`; register in `config.ts` and `sections-map.tsx`.
   - `fields/` — shared field presets and UI components (links, media, rich text, pagination, section wrapper, etc.).
-  - `header/`, `footer/`, `ui/`, `posts/`, `icons/`, `logos/` — site chrome and shared UI pieces.
+  - `header/`, `footer/`, `ui/`, `posts/`, `icons/`, `logos/` — site chrome and shared UI pieces. Header/footer components wire into the corresponding Payload globals; do not rebuild them as sections.
 - `src/extensions/` — user-defined Payload configs (collections/globals/blocks/plugins). Enable via `smartsite.config.ts → extensions`.
 - `src/providers/` — GSAP provider, effects, global animation hooks, utilities for motion.
 - `src/hooks/` — shared React hooks (client/server where appropriate).
@@ -164,6 +166,7 @@ Rules of thumb
 - Sections live under `src/components/sections/<kebab-name>/` with schema + component colocated.
 - Put new shared UI patterns under `components/ui` or `components/fields` so they can be reused.
 - Add new Payload entities through `src/extensions` and register slugs in `smartsite.config.ts`.
+- Header/footer are managed by dedicated components (`src/components/header`, `src/components/footer`) backed by Payload globals (`globals/header`, `globals/footer`). Never build them as sections; edit the globals in admin or via `smartsite.config.ts`/extensions.
 
 ---
 
@@ -311,7 +314,7 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
   - If editors need a default layout → set Default Page Template in Settings → Routing.
   - If they want to apply a layout to an existing page → use the sidebar “Apply Template” control.
   - If editing a template doesn’t update pages → remind that templates aren’t retroactive; reapply intentionally.
-  - If navigation changes are requested → update Header/Footer globals; never hard-code links in components.
+- If navigation changes are requested → update Header/Footer globals; never hard-code links in components.
 
 - Forms & Email
   - If form emails fail → verify `RESEND_API_KEY` and sender domain; submissions still store in collections.

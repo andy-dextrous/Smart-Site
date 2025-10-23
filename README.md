@@ -102,7 +102,7 @@ pnpm install
 >
 > ⚠️ Use only the `SMARTSITE_AI_REGISTRATION_SECRET` issued by Wild Creative. Without an issued secret the wizard skips AI registration and the site operates without AI features.
 
-The setup script writes these values into `.env`; use this reference when updating keys manually or configuring CI pipelines:
+The setup script writes these values into `.env`; use this reference when updating keys manually or configuring CI pipelines. For production and most proofs-of-concept we recommend pointing `DATABASE_URL` at MongoDB Atlas and using Vercel Blob for storage. Local values remain available for offline development.
 
 ```bash
 # Core Configuration
@@ -110,9 +110,10 @@ NODE_ENV=development
 NEXT_PUBLIC_URL=http://localhost:3000
 PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts
 
-# Database
+# Database (swap to Atlas URI for production)
 DATABASE_PROVIDER=mongoose
-DATABASE_URL=mongodb://127.0.0.1:27017/smart-site-dev
+DATABASE_URL="mongodb+srv://<username>:<password>@<cluster-url>/smart-site?retryWrites=true&w=majority"
+# DATABASE_URL=mongodb://127.0.0.1:27017/smart-site-dev  # Optional local override
 
 # Security
 PAYLOAD_SECRET=<generate-random-32-char-string>    # openssl rand -hex 32
@@ -151,6 +152,35 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 ### 3. Database Setup
 
 Smart Site runs on MongoDB in every environment. PostgreSQL drivers remain in the repository for compatibility with legacy tooling, but the canonical configuration sets `DATABASE_PROVIDER=mongoose` and points `DATABASE_URL` at a MongoDB deployment.
+
+#### Quick Start (Recommended): MongoDB Atlas + Vercel
+
+1. **Provision MongoDB Atlas**
+   - Create a Serverless or Dedicated cluster in the same region as your Vercel project.
+   - Add a database user with read/write access and restrict IP access to Vercel (`0.0.0.0/0` initially, then tighten with the Vercel egress IPs).
+   - Copy the SRV connection string and update `.env`:
+
+     ```bash
+     DATABASE_PROVIDER=mongoose
+     DATABASE_URL="mongodb+srv://<username>:<password>@<cluster-url>/smart-site?retryWrites=true&w=majority"
+     ```
+
+2. **Set up Vercel project & Blob storage**
+   - Create a new Vercel project and link it to your Smart Site repo.
+   - Enable [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) and generate a **Read/Write token**. Add it to `.env`:
+
+     ```bash
+     BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+     ```
+
+   - Optional: configure Resend (`RESEND_API_KEY`) or other email providers in Vercel secrets.
+
+3. **Deploy & validate**
+   - Push your repo and let Vercel build automatically.
+   - In Vercel → Settings → Environment Variables, mirror the values from local development.
+   - Trigger `pnpm seed` locally (with Atlas connection) or run the `/api/seed` route in production to populate data.
+
+> Atlas + Vercel Blob is the default deployment path. Use the local instructions below only when you explicitly need an offline environment.
 
 #### Local development (macOS and Linux)
 
@@ -306,6 +336,7 @@ The minimal profile is intentionally lean, giving editors the essentials without
 - **Navigation**:
   - Header links for Home and Contact.
   - Footer legal links for Privacy Policy and Terms.
+  - *Remember*: headers and footers are managed via Payload globals (`globals/header`, `globals/footer`). Never implement them as sections; update the globals in admin or via `smartsite.config.ts` overrides.
 - **Global settings** preconfigured with site name/description, SEO defaults (including robots.txt), and routing that points the homepage field at the seeded Home page. Social links, locations, analytics IDs, and templates are intentionally left blank for you to fill in.
 
 Run the **demo** profile when you want a fully populated showcase—posts, services, testimonials, media, templates, and expanded navigation are all included in that variant.
@@ -1805,9 +1836,10 @@ mongo --eval "db.adminCommand('listDatabases')"
    - Set `VERCEL_PROJECT_PRODUCTION_URL`
 
 3. **Database & Storage**
-   - Configure Vercel Postgres in dashboard
-   - Set up Vercel Blob for file storage
-   - Copy connection strings to environment variables
+   - Provision a MongoDB Atlas cluster (Serverless or Dedicated) and create a database user.
+   - Whitelist Vercel IPs or use the Atlas “Allow access from anywhere” option during setup.
+   - Enable Vercel Blob and generate a Read/Write token.
+   - Copy the Atlas SRV URI (`DATABASE_URL`) and Blob token (`BLOB_READ_WRITE_TOKEN`) into your Vercel environment variables.
 
 4. **Advanced Settings**
    - Enable **Function Regions** (Sydney for AU/NZ projects)
@@ -1856,6 +1888,7 @@ Smart Site can deploy to any Node.js hosting platform:
 <a id="staging-environments"></a>
 ## 🧪 Staging Environments
 
+- **Optional (advanced teams only)**: enable staging when you need a dedicated Atlas cluster for QA. Skip this section unless you have a formal promote workflow.
 - **Purpose**: Maintain a clean separation between production (`DATABASE_URL`) and any staging cluster referenced via `STAGING_DATABASE_URL` while you harden new features.
 - **Automatic selection**: Whenever `STAGING_DATABASE_URL` is defined, development servers and preview deploys fall back to staging automatically. Override the behaviour explicitly with `SMARTSITE_DATABASE_TARGET=staging` or `SMARTSITE_DATABASE_TARGET=prod`.
 - **Sync commands**: `pnpm staging:pull` copies production content into staging; `pnpm staging:push` promotes staging back to production. Both commands require the MongoDB Database Tools (`mongodump`, `mongorestore`) to be installed locally.
