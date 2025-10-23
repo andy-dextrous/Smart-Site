@@ -73,6 +73,23 @@ If information is missing, insert a “Clarify” step before planning. If the t
 
 ---
 
+### Example Flow
+
+**User request:** “Make the homepage feel more spaced out and add a dark hero with a CTA.”
+
+1. Normalize intent: bump spacing tokens; create hero section with dark scheme + buttons.
+2. Check prerequisites: repo installed, dev server running, `.env` seeded.
+3. Reference `README.md` → Design System (spacing ladder) & Building Sections (workflow).
+4. Plan:
+   - Adjust `spacing.css` control tokens slightly.
+   - Scaffold `hero-dark-cta` section (`config.ts` + `Component.tsx`), reuse shared presets, register.
+   - Apply `<Section>` with tone variant, ensure CTA buttons use `CMSLink`.
+5. Instructions: show token edits, section files, registry updates.
+6. Validation: run `pnpm lint`, `pnpm type-check`, review `/` to confirm spacing + hero layout.
+7. Risks: remind to capture before/after spacing and confirm dark Section Settings for accessibility.
+
+---
+
 ## 5. Source of Truth
 
 - `README.md` is the bible. When a user asks anything, check its TOC and quote the relevant anchor:
@@ -203,6 +220,20 @@ Never edit `src/admin/` directly in client projects.
 
 ---
 
+### Where to Put Things
+
+| Task / Asset                            | Put it here                                                    | Notes                                                 |
+| --------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
+| New section (schema + component)        | `src/components/sections/<kebab-name>/`                        | Register in `sections/config.ts` + `sections-map.tsx` |
+| Shared UI pattern / building block      | `src/components/ui/` (or `fields/` if tied to CMS fields)      | Keep token utilities and responsive behaviour         |
+| Domain loader or complex cache query    | `src/lib/`                                                     | Use `@/admin/cache`; return normalized shapes         |
+| New Payload collection/global/block     | `src/extensions/<type>/<slug>.ts` + `src/extensions/index.ts`  | Enable via `smartsite.config.ts → extensions`         |
+| Configuration overrides / feature flags | `src/smartsite.config.ts`                                      | Adjust features, GSAP flags, extensions               |
+| Design tokens / theme tuning            | `src/app/(frontend)/css/{spacing,typography,colors,theme}.css` | Modify only human-controlled tokens                   |
+| Animation utilities / shared effects    | `src/providers/gsap/`                                          | Register global attributes or effects                 |
+
+---
+
 ## 8. Section Development Workflow
 
 Ground everything in `README.md` → **Building Sections** and the integrated playbook.
@@ -265,10 +296,10 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
   - If no existing field fits the brief → add minimal new fields to the section schema rather than bending an unrelated preset; promote to a shared factory only if the pattern repeats across sections/projects.
 
 - Animations
-  - If global reveals are enabled → prefer `data-animate` attributes with `data-animate-target` and a single stagger.
+  - If global reveals are enabled → prefer `data-animate` attributes with `data-animate-target` and a single stagger IF the animation requirement is simple.
   - If bespoke timelines are needed → add `"use client"` locally and use `@/providers/gsap` (`useGSAP`, scoped refs, cleanup).
   - If the whole section’s layout/behaviour depends on hooks or coordinated timelines → mark the entire section `"use client"` (acceptable); keep the surface lean and scoped.
-  - If SplitText effects are requested → enable via config, register once in the GSAP provider.
+  - If any GSAP effects/plugins are requested → enable via config, register once in the GSAP provider. You have the full suite of plugins available via config.
   - If performance suffers → disable global animations or reduce distances/durations; prefer transforms and opacity.
 
 - Routing & Caching
@@ -303,6 +334,20 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
   - If lint fails → fix reported files; do not disable rules.
   - If type-check fails → import generated Payload types; avoid manual type invention.
   - If styling is inconsistent → replace ad hoc utilities with token utilities; verify against design system.
+
+---
+
+### Common Errors & Fixes
+
+| Symptom / Message                                          | Likely Cause                                                 | Fix                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `pnpm: command not found` or Node < 20                     | Environment mismatch                                         | Install pnpm 9.14.4, Node 20; reopen shell                                                                 |
+| `MongoServerError: authentication failed`                  | MongoDB not running or wrong URI                             | Start service (`brew services start mongodb-community@8.0` / `net start MongoDB`) or update `DATABASE_URL` |
+| Requests 404 after slug change                             | URI index pending                                            | Wait for routing job, ensure cache revalidation; run `pnpm regenerate-uris` only for recovery              |
+| AI chat disabled / `ai-agent` missing                      | Missing `SMARTSITE_AI_REGISTRATION_SECRET` or seed not rerun | Add secret, run `pnpm ai:register` (or seed) and restart                                                   |
+| Tailwind class `bg-[var(--…)]` flagged                     | Incorrect Tailwind v4 usage                                  | Replace with generated utility (`bg-dark`, `px-section-x`, etc.)                                           |
+| Type error: payload types missing                          | Not importing generated types                                | Import from `@/admin/payload/payload-types`; rerun `pnpm lint`/`pnpm type-check`                           |
+| `Cannot read properties of undefined (sections)` in render | Section not registered                                       | Export block in `sections/config.ts` and component in `sections-map.tsx`                                   |
 
 ---
 

@@ -382,7 +382,6 @@ Smart Site follows a **field-driven, section-first architecture** where:
 │   │   ├── sections/                     # 📦 Sections you install or create (starter ships empty)
 │   │   │   ├── config.ts                 # Section registry
 │   │   │   ├── sections-map.tsx          # Component mapping
-│   │   │   ├── CLAUDE.md                 # Section dev guide
 │   │   │   └── [section-name]/           # Individual sections
 │   │   │       ├── config.ts             # Payload fields
 │   │   │       └── Component.tsx         # React component
