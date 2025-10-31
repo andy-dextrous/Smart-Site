@@ -31,6 +31,9 @@ function resolveMonorepoRoot(startDir: string): string {
 const monorepoRoot = resolveMonorepoRoot(configDirname)
 
 const nextConfig = {
+  experimental: {
+    turbopackFileSystemCacheForDev: true,
+  },
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_URL].map(item => {
@@ -59,7 +62,9 @@ const nextConfig = {
   reactStrictMode: true,
   redirects,
   sassOptions: {
-    silenceDeprecations: ["global-builtin"],
+    implementation: "sass-embedded",
+    quietDeps: true,
+    silenceDeprecations: ["import", "global-builtin", "legacy-js-api"],
   },
   outputFileTracingRoot: monorepoRoot,
   turbopack: {

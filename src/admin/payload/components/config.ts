@@ -4,6 +4,8 @@ const components = {
   views: {
     dashboard: {
       Component: "@/admin/payload/components/backend/dashboard#Dashboard",
+      path: "/",
+      exact: true,
     },
   },
   beforeLogin: ["@/admin/payload/components/backend/before-login#BeforeLogin"],
