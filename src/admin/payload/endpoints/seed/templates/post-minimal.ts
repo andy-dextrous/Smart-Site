@@ -47,7 +47,7 @@ export async function postMinimalTemplate(payload: Payload, context?: any): Prom
     })
     return template.id as string
   } catch (e) {
-    payload.logger.warn("Failed to create minimal post template:", e)
+    payload.logger.warn({ error: e }, "Failed to create minimal post template")
     return null
   }
 }

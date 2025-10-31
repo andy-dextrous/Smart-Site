@@ -162,7 +162,7 @@ async function main() {
 		console.log("")
 		console.log(
 			chalk.gray(
-				"Run `pnpm --filter @product-studio/smart-site-starter tsx scripts/migrations/flatten-content-group.ts` after pulling these changes."
+				"Run `pnpm --filter @product-studio/smart-site tsx scripts/migrations/flatten-content-group.ts` after pulling these changes."
 			)
 		)
 		process.exit(0)

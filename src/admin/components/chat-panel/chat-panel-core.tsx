@@ -1,6 +1,6 @@
 "use client"
 
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import {
@@ -115,6 +115,15 @@ export const chatPanelShellStyles = /* css */ `
   display: flex;
   flex-direction: column;
 }
+
+.chat-panel--workspace {
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  opacity: 1;
+  transform: none;
+}
 `
 
 export function ChatPanelCore({
@@ -123,6 +132,11 @@ export function ChatPanelCore({
   scope,
   renderContent = true,
 }: ChatPanelCoreProps) {
+  const [focusSignal, setFocusSignal] = useState(1)
+  const handleFocusTick = useCallback(() => {
+    setFocusSignal(previous => previous + 1)
+  }, [])
+
   return (
     <ChatThreadsProvider isOpen={isOpen} scope={scope}>
       <ActiveChatRuntime />
@@ -130,16 +144,37 @@ export function ChatPanelCore({
         <DialogPrimitive.Root
           modal
           open={isOpen}
-          onOpenChange={open => !open && onClose()}
+          onOpenChange={open => {
+            if (!open) {
+              onClose()
+              return
+            }
+            handleFocusTick()
+          }}
         >
-          <ChatPanelInner isOpen={isOpen} onClose={onClose} />
+          <ChatPanelInner
+            isOpen={isOpen}
+            onClose={onClose}
+            focusSignal={focusSignal}
+            onFocusTick={handleFocusTick}
+          />
         </DialogPrimitive.Root>
       ) : null}
     </ChatThreadsProvider>
   )
 }
 
-function ChatPanelInner({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function ChatPanelInner({
+  isOpen,
+  onClose,
+  focusSignal,
+  onFocusTick,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  focusSignal: number
+  onFocusTick: () => void
+}) {
   const {
     threads,
     openTabs,
@@ -158,7 +193,6 @@ function ChatPanelInner({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const currentValue = activeThreadId || openTabs[0]
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null)
-  const [focusSignal, setFocusSignal] = useState(0)
   const lastFocusedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -194,14 +228,7 @@ function ChatPanelInner({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     }
   }, [portalContainer])
 
-  const tabsValue = useMemo(() => currentValue, [currentValue])
-
-  useEffect(() => {
-    if (!isOpen) {
-      return
-    }
-    setFocusSignal(previous => previous + 1)
-  }, [isOpen, tabsValue])
+  const tabsValue = currentValue
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -232,21 +259,25 @@ function ChatPanelInner({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 onValueChange={value => {
                   if (value) {
                     switchThread(value)
+                    onFocusTick()
                   }
                 }}
               >
-                <ChatHeaderTabs
-                  threads={threads}
-                  openTabs={openTabs}
-                  activeThreadId={activeThreadId}
-                  onSelect={switchThread}
-                  onCloseTab={closeTab}
-                  onDeleteThread={deleteThread}
-                  hasMessages={(id: string) => (getThreadMessages(id) || []).length > 0}
-                  onNewThread={onNewThread}
-                  getDisplayTitle={getDisplayTitle}
-                  onClosePanel={onClose}
-                />
+          <ChatHeaderTabs
+            threads={threads}
+            openTabs={openTabs}
+            activeThreadId={activeThreadId}
+            onSelect={switchThread}
+            onCloseTab={closeTab}
+            onDeleteThread={deleteThread}
+            hasMessages={(id: string) => (getThreadMessages(id) || []).length > 0}
+            onNewThread={async () => {
+              await onNewThread()
+              onFocusTick()
+            }}
+            getDisplayTitle={getDisplayTitle}
+            onClosePanel={onClose}
+          />
                 <div className="chat-panel__body">
                   {openTabs.map(threadId => {
                     const messages = getThreadMessages(threadId)

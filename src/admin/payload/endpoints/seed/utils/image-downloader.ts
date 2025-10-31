@@ -156,7 +156,10 @@ export async function downloadImages(
         mediaItems[key] = fallbackItem
         payload.logger.info(`Created media item using local fallback for: ${key}`)
       } catch (fallbackError) {
-        payload.logger.error(`Failed to create fallback for ${key}:`, fallbackError)
+        payload.logger.error(
+          { error: fallbackError, key },
+          `Failed to create fallback for ${key}`
+        )
         // Create a minimal object to prevent undefined errors
         mediaItems[key] = {
           id: null,

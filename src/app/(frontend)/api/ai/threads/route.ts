@@ -1,5 +1,6 @@
 import { getSmartSiteConfig } from "@/admin/config"
 import { getAIBackendStatus } from "@/admin/lib/ai/status"
+import { resolveAIRequestCredentials } from "@/admin/lib/ai/identity"
 import { NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -16,9 +17,9 @@ export async function GET(req: NextRequest) {
     const config = getSmartSiteConfig()
     const aiConfig = config.features.ai
 
-    const apiKey = process.env.AI_AGENT_API_KEY
-    const siteId = process.env.AI_AGENT_USER_ID
-    if (!apiKey || !siteId) throw new Error("Missing AI credentials")
+    const credentials = await resolveAIRequestCredentials()
+    if (!credentials) throw new Error("Missing AI credentials")
+    const { apiKey, siteId } = credentials
 
     const url = new URL(req.url)
     const page = url.searchParams.get("page") || "0"
@@ -54,9 +55,9 @@ export async function POST(req: NextRequest) {
     const aiConfig = config.features.ai
     if (!aiConfig.enabled) return new Response("AI disabled", { status: 503 })
 
-    const apiKey = process.env.AI_AGENT_API_KEY
-    const siteId = process.env.AI_AGENT_USER_ID
-    if (!apiKey || !siteId) throw new Error("Missing AI credentials")
+    const credentials = await resolveAIRequestCredentials()
+    if (!credentials) throw new Error("Missing AI credentials")
+    const { apiKey, siteId } = credentials
 
     const body = await req.text()
 

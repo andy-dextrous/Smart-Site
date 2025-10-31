@@ -79,8 +79,12 @@ export const afterUniversalDelete: CollectionAfterDeleteHook = async ({
       }
     } catch (error) {
       payload.logger.error(
-        `URI index cleanup failed for ${collection.slug}/${doc.id}:`,
-        error
+        {
+          error,
+          collection: collection.slug,
+          documentId: doc.id,
+        },
+        `URI index cleanup failed for ${collection.slug}/${doc.id}`
       )
     }
   }
@@ -97,8 +101,8 @@ export const afterUniversalDelete: CollectionAfterDeleteHook = async ({
     })
   } catch (error) {
     payload.logger.debug(
-      `Smart revalidation failed for ${collection.slug} delete:`,
-      error
+      { error, collection: collection.slug },
+      `Smart revalidation failed for ${collection.slug} delete`
     )
   }
 

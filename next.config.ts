@@ -8,8 +8,8 @@ import { NextConfig } from "next"
 const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
 
 // Get monorepo root dynamically
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const configFilename = fileURLToPath(import.meta.url)
+const configDirname = path.dirname(configFilename)
 
 function resolveMonorepoRoot(startDir: string): string {
   let currentDir = startDir
@@ -28,7 +28,7 @@ function resolveMonorepoRoot(startDir: string): string {
   return startDir
 }
 
-const monorepoRoot = resolveMonorepoRoot(__dirname)
+const monorepoRoot = resolveMonorepoRoot(configDirname)
 
 const nextConfig = {
   images: {
@@ -59,7 +59,7 @@ const nextConfig = {
   reactStrictMode: true,
   redirects,
   sassOptions: {
-    silenceDeprecations: ["import", "global-builtin", "legacy-js-api"],
+    silenceDeprecations: ["global-builtin"],
   },
   outputFileTracingRoot: monorepoRoot,
   turbopack: {
@@ -81,7 +81,17 @@ const nextConfig = {
 
     return config
   },
-  serverExternalPackages: ["@mastra/*", "sharp", "jsdom"],
+  serverExternalPackages: [
+    "@mastra/*",
+    "@payloadcms/db-postgres",
+    "@payloadcms/db-vercel-postgres",
+    "@payloadcms/drizzle",
+    "@esbuild/*",
+    "drizzle-kit",
+    "esbuild",
+    "jsdom",
+    "sharp",
+  ],
 } as NextConfig
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

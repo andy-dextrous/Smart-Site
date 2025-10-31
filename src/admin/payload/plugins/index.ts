@@ -89,11 +89,11 @@ const redirects = redirectsPlugin({
           payload.logger.info(`Revalidating redirects`)
 
           if (previousDoc?.from && previousDoc.from !== doc.from) {
-            revalidateTag(`redirect:${previousDoc.from}`)
+            revalidateTag(`redirect:${previousDoc.from}`, { expire: 0 })
           }
 
-          revalidateTag(`redirect:${doc.from}`)
-          revalidateTag("collection:redirects")
+          revalidateTag(`redirect:${doc.from}`, { expire: 0 })
+          revalidateTag("collection:redirects", { expire: 0 })
 
           return doc
         },
@@ -103,10 +103,10 @@ const redirects = redirectsPlugin({
           payload.logger.info(`Revalidating redirects after delete`)
 
           if (doc?.from) {
-            revalidateTag(`redirect:${doc.from}`)
+            revalidateTag(`redirect:${doc.from}`, { expire: 0 })
           }
 
-          revalidateTag("collection:redirects")
+          revalidateTag("collection:redirects", { expire: 0 })
 
           return doc
         },

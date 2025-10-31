@@ -1,4 +1,4 @@
-# Smart Site Starter — Agent Operating Guide
+# Smart Site — Agent Operating Guide
 
 This document is the **system prompt** for any agent that supports developers inside the standalone Smart Site repository. Assume the user only has this app and that **`README.md` is the canonical source of truth**. Quote the README (with section anchors) whenever you instruct or explain. Do not contradict it.
 
@@ -109,8 +109,9 @@ Reference `README.md` → **Installation & Getting Started** when covering:
 - **Recommended deployment path**: MongoDB Atlas + Vercel hosting with Vercel Blob. Provision Atlas, set `DATABASE_URL` to the SRV URI, enable Blob and add `BLOB_READ_WRITE_TOKEN`, then mirror those secrets in Vercel.
 
 - **Prerequisites:** Node 20+, `pnpm@9.14.4`, MongoDB (local or Atlas), optional Vercel Blob & Resend.
-- **First-time setup:** `pnpm install` then `pnpm run setup`. Explain wizard outputs (`.env`, secrets, seeding) and ports (3000).
-- **Environment variables:** describe the keys the wizard writes (database, storage, AI). Emphasize `SMARTSITE_AI_REGISTRATION_SECRET`, `AI_AGENT_API_KEY`, `AI_AGENT_USER_ID`.
+- **First-time setup:** `pnpm install` then run `pnpm smartsite init` from the monorepo root. Explain wizard outputs (`.env`, secrets, seeding) and ports (3000).
+- **Identity config:** keep `identity.siteName` in `src/smartsite.config.ts` aligned with the client brand; the CLI uses it for AI registration and seeding labels.
+- **Environment variables:** describe the keys the wizard writes (database, storage, AI). Emphasize `AI_AGENT_API_KEY` as the single AI secret.
 - **QA commands:** `pnpm lint`, `pnpm type-check` before sign-off. No manual formatters.
 - **Dev server etiquette:** remind users the wizard can leave `pnpm dev` running; only restart if needed.
 - **Reseeding:** with server running, `pnpm seed` (minimal) or `pnpm seed:demo`. Summarize dataset contents.
@@ -158,7 +159,7 @@ Use this as a quick map for where changes belong. Never modify the admin layer.
 - `src/lib/` — domain loaders and helpers that wrap cache access; prefer here over direct payload calls.
 - `src/utilities/`, `src/types/` — misc utilities, shared types.
 - `src/smartsite.config.ts` — developer configuration surface (features, gsap, extensions, admin meta).
-- `src/middleware.ts` — Next.js middleware.
+- `src/proxy.ts` — Next.js proxy handler.
 
 Rules of thumb
 
@@ -205,7 +206,7 @@ src/
 ├── lib/                                 # Domain loaders wrapping cache
 ├── utilities/, types/
 ├── smartsite.config.ts                  # Developer configuration surface
-└── middleware.ts
+└── proxy.ts
 ```
 
 ### Most-Edited Files (Quick Links)
@@ -277,7 +278,8 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
 
 - Setup & Environment
   - If Node < 20 or pnpm missing → install per README → rerun `pnpm install`.
-  - If `.env` is missing → run `pnpm run setup` and copy secrets; do not hand-edit derived keys.
+  - If `.env` is missing → run `pnpm smartsite init` and copy secrets; do not hand-edit derived keys.
+  - If AI keys are missing/outdated → run `pnpm smartsite ai rotate`.
   - If port 3000 is busy → stop the other process or run `pnpm kill`, then start dev.
   - If Mongo connection fails → check service status (Homebrew/Chocolatey) or Atlas IP allowlist → verify `DATABASE_URL`.
   - If seeding stalls → ensure `pnpm dev` is running → retry `pnpm seed` or `pnpm seed:demo`.
@@ -326,8 +328,8 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
 
 - AI Integration
   - If AI features are requested without a subscription → set `features.ai.enabled = false` and proceed without AI.
-  - If registration fails → confirm `SMARTSITE_AI_REGISTRATION_SECRET` → rerun seed or `pnpm ai:register`.
-  - If keys are lost → coordinate rotation then `pnpm ai:register --force`.
+  - If the workspace is still disabled → confirm the AI agent exists (`pnpm smartsite ai rotate`) and that Wild Creative has approved the site.
+  - If keys are lost → coordinate rotation then `pnpm smartsite ai rotate --force`.
 
 - Deployment
   - If building for production → run `pnpm build`; ensure environment variables mirror staging; connect Mongo Atlas.
@@ -347,7 +349,7 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
 | `pnpm: command not found` or Node < 20                     | Environment mismatch                                         | Install pnpm 9.14.4, Node 20; reopen shell                                                                 |
 | `MongoServerError: authentication failed`                  | MongoDB not running or wrong URI                             | Start service (`brew services start mongodb-community@8.0` / `net start MongoDB`) or update `DATABASE_URL` |
 | Requests 404 after slug change                             | URI index pending                                            | Wait for routing job, ensure cache revalidation; run `pnpm regenerate-uris` only for recovery              |
-| AI chat disabled / `ai-agent` missing                      | Missing `SMARTSITE_AI_REGISTRATION_SECRET` or seed not rerun | Add secret, run `pnpm ai:register` (or seed) and restart                                                   |
+| AI chat disabled / `ai-agent` missing                      | AI agent not provisioned or site not yet approved            | Run `pnpm smartsite ai rotate` (or seed) and confirm activation with Wild Creative                                |
 | Tailwind class `bg-[var(--…)]` flagged                     | Incorrect Tailwind v4 usage                                  | Replace with generated utility (`bg-dark`, `px-section-x`, etc.)                                           |
 | Type error: payload types missing                          | Not importing generated types                                | Import from `@/admin/payload/payload-types`; rerun `pnpm lint`/`pnpm type-check`                           |
 | `Cannot read properties of undefined (sections)` in render | Section not registered                                       | Export block in `sections/config.ts` and component in `sections-map.tsx`                                   |
@@ -378,10 +380,11 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
 
 Reference `README.md` → **AI Integration**.
 
-- Preconditions: `features.ai.enabled = true` in `smartsite.config.ts`, valid `SMARTSITE_AI_REGISTRATION_SECRET`.
-- Seeding or `pnpm ai:register` ensures the hidden `ai-agent` user and writes credentials; store recovery tokens securely.
+- Preconditions: `features.ai.enabled = true` in `smartsite.config.ts`, site approved by Wild Creative.
+- Seeding or `pnpm smartsite ai rotate` ensures the hidden `ai-agent` user and writes credentials; store recovery tokens securely.
+- From the Payload dashboard, open **AI Settings** and press **Apply for AI Access** to send the approval request. While pending, the workspace sidebar remains disabled.
 - Troubleshoot with `/api/ai/health` and check `.env` values; direct escalations to Wild Creative when backend issues arise.
-- Warn against creating multiple agent users or sharing API keys. Use `pnpm ai:register --force` only when coordinating rotations.
+- Warn against creating multiple agent users or sharing API keys. Use `pnpm smartsite ai rotate --force` only when coordinating rotations.
 
 ---
 
@@ -398,7 +401,7 @@ For each scenario, provide explicit steps and link back to the README anchors.
 7. **Connect Resend for forms:** add `RESEND_API_KEY` and default sender → configure form submission (README → Settings).
 8. **Promote to production:** summarize environment variable requirements, deployment build (`pnpm build`), and database connection steps.
 9. **Restore from backup:** run `mongorestore` with target URI → verify via Payload admin.
-10. **Troubleshoot AI registration:** confirm env keys, rerun `pnpm ai:register`, inspect logs, escalate if backend unreachable.
+10. **Troubleshoot AI registration:** confirm env keys, rerun `pnpm smartsite ai rotate`, inspect logs, escalate if backend unreachable.
 
 Encourage users to document custom decisions for future developers.
 
@@ -425,12 +428,12 @@ Encourage users to document custom decisions for future developers.
 
 ## 16. Quick Reference Commands
 
-- Setup: `pnpm install`, `pnpm run setup`
+- Setup: `pnpm install`, `pnpm smartsite init`
 - Dev scripts: `pnpm dev`, `pnpm kill`
 - Seeding: `pnpm seed`, `pnpm seed:demo`
 - QA: `pnpm lint`, `pnpm type-check`
 - Routing recovery: `pnpm regenerate-uris`
-- AI registration: `pnpm ai:register [--force]`
+- AI registration: `pnpm smartsite ai rotate [--force]`
 
 Always finish by pointing back to `README.md` for exhaustive details and reminding the user of the next verification step.
 

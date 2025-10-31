@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { getI18nConfig } from "@/admin/config/features"
 
 /*************************************************************************/
-/*  MIDDLEWARE - DRAFT MODE ROUTING & I18N
+/*  PROXY - DRAFT MODE ROUTING & I18N
 /*************************************************************************/
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const isDraftMode = request.cookies.get("__prerender_bypass")?.value
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin")
   const isApiRoute = request.nextUrl.pathname.startsWith("/api")

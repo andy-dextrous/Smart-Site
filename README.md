@@ -1,6 +1,6 @@
 # Smart Site - Enterprise Website Builder
 
-A **field-driven, section-first website builder** powered by **Next.js 15**, **Payload CMS 3**, **Tailwind CSS v4**, **GSAP**, and **AI integration via Mastra**, designed for rapid development of dynamic websites with enterprise-grade features.
+A **field-driven, section-first website builder** powered by **Next.js 16**, **Payload CMS 3**, **Tailwind CSS v4**, **GSAP**, and **AI integration via Mastra**, designed for rapid development of dynamic websites with enterprise-grade features.
 
 ## 📋 Table of Contents
 
@@ -87,20 +87,23 @@ cd <your-site-folder>
 pnpm install
 ```
 
-1. Open `.env.example` and, if your team has an active Smart Site AI subscription, request the `SMARTSITE_AI_REGISTRATION_SECRET` from Wild Creative (andrew@wildcreative.com.au) and paste it in. Leave the field blank if you are not connecting to the managed AI service. Every other key will be filled in by the setup script.
-2. Run the interactive bootstrap:
+1. Run the interactive bootstrap. Inside the monorepo you can use the Smart Site CLI (recommended), while standalone exports can keep using the local script:
 
    ```bash
-   pnpm run setup
+   # Monorepo: run from repo root so the CLI can locate apps/smart-site
+   pnpm smartsite init
+
+   # Standalone clone fallback
+   pnpm smartsite init
    ```
 
-   The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, seeds demo data, and can leave `pnpm dev` running when it finishes.
+   The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, seeds baseline data, and (when seeding is enabled) keeps `next dev` running so you land on a ready-to-edit site.
 
 ### 2. Environment Configuration
 
-> 💡 **Quick start**: Once the registration secret is set, `pnpm run setup` handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes.
+> 💡 **Quick start**: `pnpm smartsite init` handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes. AI access is requested later from the Smart Site admin once your project is ready.
 >
-> ⚠️ Use only the `SMARTSITE_AI_REGISTRATION_SECRET` issued by Wild Creative. Without an issued secret the wizard skips AI registration and the site operates without AI features.
+> Need to re-run the baseline data later? Use `pnpm smartsite seed starter --start-dev` to boot a local dev server, call `/api/seed`, and keep the site running— or point at any URL with `--url https://staging.yoursite.com`.
 
 The setup script writes these values into `.env`; use this reference when updating keys manually or configuring CI pipelines. For production and most proofs-of-concept we recommend pointing `DATABASE_URL` at MongoDB Atlas and using Vercel Blob for storage. Local values remain available for offline development.
 
@@ -128,13 +131,9 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...          # Vercel Blob storage
 RESEND_API_KEY=re_...                             # Resend.com API key
 RESEND_DEFAULT_FROM=noreply@example.com
 
-# AI Backend (Optional)
-# OPENAI_API_KEY=sk-...                           # If using AI features
-SMARTSITE_AI_REGISTRATION_SECRET=<registration-token>
 
-# AI Agent (auto-generated after seeding)
+# AI Agent (auto-generated after setup)
 AI_AGENT_API_KEY=
-AI_AGENT_USER_ID=
 
 # Admin Seeding (Development)
 PAYLOAD_ADMIN_EMAIL=admin@example.com
@@ -143,11 +142,27 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 
 #### AI Environment Variables
 
-- `SMARTSITE_AI_REGISTRATION_SECRET` — subscription credential issued directly by Wild Creative. Contact andrew@wildcreative.com.au to obtain or rotate the value. Without this key the site remains disconnected from the managed AI platform.
-- `AI_AGENT_API_KEY` — generated automatically during seeding once the registration secret is present. This key identifies your site to the managed backend; store it securely and never share it outside your organization.
-- `AI_AGENT_USER_ID` — auto-generated identifier paired with the API key. It scopes every AI request to your tenant on the managed service.
+- `AI_AGENT_API_KEY` — generated automatically during setup/seed. This is the only AI secret that ships in `.env.example`; the wizard writes the actual value after it provisions the hidden agent.
 
-> Rerun the seed if `.env` ever loses the agent credentials. The script reconciles the database user and restores the values without regenerating keys unless a rotation flow is requested.
+> Legacy placeholders (`SMARTSITE_AI_REGISTRATION_SECRET`, `SMARTSITE_SITE_NAME`) were removed. All onboarding now flows through the admin “Apply for AI Access” action described below, which keeps the local environment lean.
+
+> Rerun the seed (or `pnpm smartsite ai rotate`) if `.env` ever loses the agent credentials. The command reconciles the database user and restores the values without regenerating keys unless a rotation flow is requested.
+
+### Identity Configuration
+
+Set the canonical site name in `src/smartsite.config.ts`:
+
+```ts
+// src/smartsite.config.ts
+const config: UserConfig = {
+  identity: {
+    siteName: "Smart Site",
+  },
+  // ...
+}
+```
+
+This value is used when seeding content, registering the AI agent, and rendering admin chrome. The CLI reads it automatically, so you no longer need `SMARTSITE_SITE_NAME` in `.env`.
 
 ### 3. Database Setup
 
@@ -266,7 +281,7 @@ mongorestore --uri "$MONGODB_URI" "$BACKUP_PATH"
 #### GUI tooling
 
 - [MongoDB Compass](https://www.mongodb.com/products/compass) is the recommended GUI. Connect with `mongodb://127.0.0.1:27017` in development and paste Atlas connection strings for staging or production.
-- The seed scripts create collections automatically; Compass will list them after the first request to `/api/seed` or after running `pnpm seed:minimal`.
+- The seed scripts create collections automatically; Compass will list them after the first request to `/api/seed` or after running `pnpm seed`.
 
 #### Production and staging (MongoDB Atlas)
 
@@ -293,11 +308,13 @@ mongodump --uri "mongodb://127.0.0.1:27017/smart-site-dev" --out ./backups/dev-$
 mongorestore --uri "mongodb+srv://<username>:<password>@<cluster-url>/smart-site-prod" ./backups/dev-YYYYMMDD-HHMMSS
 ```
 
-Run seeding (`pnpm seed:minimal` or `pnpm seed:demo`) only against development databases. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
+> Prefer the CLI? Run `pnpm smartsite staging pull` or `pnpm smartsite staging push` to wrap the same workflow (backups, protected collections, and environment overrides) without remembering the raw `mongodump` commands.
+
+Run seeding (`pnpm smartsite seed starter` or `pnpm seed`) only against development databases. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
 
 ### 4. AI Backend Setup
 
-Smart Site runs standalone out of the box. To enable AI features you connect to the managed Smart Site AI platform operated by Wild Creative. There is no customer-managed installation step—simply request access via andrew@wildcreative.com.au and add the supplied registration secret to your `.env` file before seeding.
+Smart Site runs standalone out of the box. To enable AI features you connect to the managed Smart Site AI platform operated by Wild Creative. There is no customer-managed installation step—after seeding, contact andrew@wildcreative.com.au (or use the upcoming admin “Apply for AI Access” action) and they will activate your workspace. Until approval the AI sidebar remains disabled, but your local agent credentials are ready.
 
 ### 5. Development Server
 
@@ -308,20 +325,20 @@ pnpm dev
 
 ### 6. Database Seeding & Initial Setup
 
-> **🗃️ Important:** The setup wizard seeds the minimal profile for you. Use the commands below only when you need to reseed or switch profiles.
+> **🗃️ Important:** The setup wizard (`pnpm smartsite init`) seeds the minimal profile for you. Use the commands below only when you need to reseed or switch profiles.
 
-`pnpm run setup` already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the database.
+The wizard already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the database.
 
 #### Reseeding from the command line
 
 1. Ensure the dev server is running (`pnpm dev`).
-2. Run the seeding script (defaults to the minimal profile):
+2. Run the seeding script (minimal profile only):
 
    ```bash
    pnpm seed
    ```
 
-   Use `pnpm seed:demo` when you intentionally need the rich demo dataset. The script reads `SMARTSITE_SITE_NAME` so update `.env` before seeding if you want different registration metadata.
+   The wizard prompts for a site name during setup; rerun `pnpm smartsite init` or call the seed endpoint with a custom `siteName` to change the label.
 
 #### Minimal seed contents
 
@@ -339,7 +356,7 @@ The minimal profile is intentionally lean, giving editors the essentials without
   - *Remember*: headers and footers are managed via Payload globals (`globals/header`, `globals/footer`). Never implement them as sections; update the globals in admin or via `smartsite.config.ts` overrides.
 - **Global settings** preconfigured with site name/description, SEO defaults (including robots.txt), and routing that points the homepage field at the seeded Home page. Social links, locations, analytics IDs, and templates are intentionally left blank for you to fill in.
 
-Run the **demo** profile when you want a fully populated showcase—posts, services, testimonials, media, templates, and expanded navigation are all included in that variant.
+The starter ships only the minimal profile. Explore `apps/smart-site/` for the richer demo experience if you need sample marketing content.
 
 ### 7. Available Scripts
 
@@ -378,7 +395,7 @@ Smart Site follows a **field-driven, section-first architecture** where:
 
 | Layer         | Technology            | Purpose                                |
 | ------------- | --------------------- | -------------------------------------- |
-| **Framework** | Next.js 15 App Router | React framework with server components |
+| **Framework** | Next.js 16 App Router | React framework with server components |
 | **CMS**       | Payload CMS 3         | Headless CMS with visual editor        |
 | **Styling**   | Tailwind CSS v4       | Utility-first CSS with design tokens   |
 | **Animation** | GSAP + ScrollTrigger  | Professional animations                |
@@ -586,7 +603,7 @@ Example:
 1. **Development** - New features built in this master environment
 2. **Version bump** - Update version in `src/admin/package.json`
 3. **Test** - Features tested with demo data
-4. **Sync** - Admin folder synced to smart-site-starter: `pnpm sync:to-starter`
+4. **Sync** - Admin folder synced to smart-site: `pnpm sync:to-starter`
 5. **Release** - Tagged release created with version from admin package.json
 6. **Update** - Client sites pull updates via SmartSite CLI
 7. **Dependencies** - CLI auto-syncs required packages from manifest
@@ -595,26 +612,35 @@ Example:
 <a id="ai-integration"></a>
 ## 🤖 AI Integration
 
-Smart Site includes powerful AI features via the **Mastra framework**, with processing handled by a remote backend for security and scalability.
+Smart Site includes powerful AI features via the **Mastra framework**, with processing handled by a remote backend for security and scalability. The starter prepares an AI agent identity during seeding, but the workspace only activates after Wild Creative approves the site.
 
-### Initial Registration Flow
+### Initial Connection Flow
 
-1. Confirm `features.ai.enabled` is set to `true` in `src/smartsite.config.ts` and that the `SMARTSITE_AI_REGISTRATION_SECRET` in `.env` matches the subscription credential provided by Wild Creative. Do not modify the default endpoint unless the Wild Creative team supplies an alternative.
-2. Run the standard seed flow (`pnpm seed`, the `/api/seed` endpoint, or the interactive setup script). During seeding the hidden `ai-agent` user is ensured, the site is registered with Smart Site AI, and `AI_AGENT_API_KEY` / `AI_AGENT_USER_ID` are written to `.env`.
-3. Restart Smart Site so the updated environment variables are loaded.
+1. Confirm `identity.siteName` and `features.ai.enabled` are set in `src/smartsite.config.ts`.
+2. Run the standard seed flow (`pnpm seed`, the `/api/seed` endpoint, or the interactive setup script). The hidden `ai-agent` user is ensured and the generated `AI_AGENT_API_KEY` value is written to `.env`.
+3. From the Payload admin, open **AI Settings** and click **Apply for AI Access**. This sends the workspace metadata to Wild Creative (andrew@wildcreative.com.au). While your site is pending, the workspace sidebar stays disabled but you can continue configuring context fields.
 
-After this handshake the admin chat assistant and other AI features can reach the managed backend immediately. If anything fails during registration, email andrew@wildcreative.com.au for support—there is no customer-side troubleshooting beyond verifying the secret and rerunning the seed.
+### AI Workspace Approval Flow
+
+- The starter now proxies two control-plane endpoints: `GET /api/ai/status` and `POST /api/ai/apply`. They forward the stored API key + site ID to the Smart Site AI backend so admins never paste secrets into browsers.
+- **Status states** returned by the control plane are normalized to `inactive`, `pending`, `active`, `suspended`, `unauthorized`, or `error`. Only the `active` state renders the workspace shell, chat sidebar, and admin toggle; every other state hides them completely to avoid confusing non-approved users.
+- **Apply for AI Access** only appears when the status is `inactive` or `pending`. Submitting the form records your site metadata and the requesting admin, then notifies Wild Creative for manual approval. The gate re-polls status every 15 seconds so the UI flips to “Active” moments after approval without needing a reload.
+- Once approved, the status endpoint returns `active`, the workspace shell hydrates on every page, and the Cmd + L hotkey/admin toggle become available again. If the backend revokes access later (e.g., `suspended`), the same status check instantly hides the sidebar across the whole site.
 
 ### Regenerating Credentials Later
 
-If a key is lost—or you want to rotate it without touching content—contact Wild Creative first, then run:
+Run the helper any time you need to reconcile the AI agent credentials with your `.env` file:
 
 ```bash
-pnpm ai:register         # Sync existing credentials with the managed service
-pnpm ai:register --force # Issue a brand-new API key (coordinate with Wild Creative before executing)
+pnpm smartsite ai rotate         # Ensure the ai-agent user exists and sync the current API key into .env
+pnpm smartsite ai rotate --force # Issue a brand-new API key (coordinate with Wild Creative before executing)
+
+# Legacy fallback when the CLI is unavailable
+pnpm smartsite ai rotate
+pnpm smartsite ai rotate --force
 ```
 
-The command reuses the existing AI agent, updates Smart Site AI, and rewrites the `.env` entries in-place.
+The command never deletes content—it simply regenerates the API key when requested and persists the updated values.
 
 ### Architecture
 
@@ -650,20 +676,24 @@ No backend deployment is required on the client side. The Smart Site AI platform
 
 Smart Site authenticates with the AI backend using a special "AI Agent" user pattern:
 
+#### CLI Shortcuts
+
+- `pnpm smartsite ai status` — print the current workspace enablement state.
+- `pnpm smartsite ai apply` — submit or retry the approval request without opening Payload.
+- `pnpm smartsite ai rotate` — reconcile/rotate the API key when credentials are missing or compromised.
+
 #### How Authentication Works
 
 1. **AI Agent User**: Each Smart Site instance has a hidden user with role `ai-agent`
 2. **API Key Generation**: This user has an API key (64-character hex string) for authentication
 3. **Auto-Creation**: The AI agent is automatically created during database seeding
-4. **Environment Storage**: Credentials are saved to `.env` (rerunnable with `pnpm ai:register`):
+4. **Environment Storage**: Credentials are saved to `.env` (rerunnable with `pnpm smartsite ai rotate`):
 
 ```bash
-# AI Agent Configuration (Auto-generated example)
+# AI Agent Configuration (auto-generated example)
 AI_AGENT_API_KEY=80fda7460be5a83e4dc8256392bba4baacdd48777fd5eb1bdd13a1c1b9a25375
-AI_AGENT_USER_ID=68c0ba9971ba48af9e63f160
+# AI agent identifiers are managed automatically in the database
 ```
-
-> When the Wild Creative-issued `SMARTSITE_AI_REGISTRATION_SECRET` is present, the seeding step registers your site with the managed Smart Site AI platform, prints an audit fingerprint, and returns a single-use recovery token. Store that token securely—the platform cannot reissue it without manual intervention from Wild Creative.
 
 #### Setting Up AI Authentication
 
@@ -695,7 +725,7 @@ User ID: [user-id]
 const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
   headers: {
     Authorization: `Bearer ${AI_AGENT_API_KEY}`,
-    "X-Site-ID": AI_AGENT_USER_ID,
+    "X-Site-ID": "<resolved ai-agent user id>",
     "X-Site-URL": NEXT_PUBLIC_URL,
   },
 })
@@ -706,7 +736,7 @@ const response = await fetch(`${AI_BACKEND_URL}/api/operations`, {
 1. Frontend API routes under `app/(frontend)/api/ai/*` validate the shared secret, add the `X-Site-ID` header, and proxy requests to the Mastra backend.
 2. The managed Smart Site AI backend operated by Wild Creative verifies the site ID/API key pair, loads the correct workspace, and runs the requested chat/thread/schema operation.
 3. Responses stream back through the proxy so the admin chat panel and public endpoints never expose Mastra credentials directly.
-4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity; you can rerun this logic later via `pnpm ai:register` (add `--force` to rotate the key).
+4. `ensureAIAgentWithAPIKey` keeps the Payload AI agent user and `.env` credentials synchronized during seeding, preserving a single Smart Site identity; you can rerun this logic later via `pnpm smartsite ai rotate` (add `--force` to rotate the key).
 
 > Backend provisioning is handled entirely by Wild Creative. If you need to confirm connectivity or request changes, email andrew@wildcreative.com.au rather than attempting to deploy your own instance.
 
@@ -1802,7 +1832,7 @@ Tell your AI assistant to use specific rules:
 | **MongoDB connection fails** | Ensure the MongoDB service is running (brew services list / net start MongoDB) |
 | **Build fails**              | Run `pnpm type-check` and fix errors           |
 | **AI chat not working**      | Email andrew@wildcreative.com.au—backend uptime is managed by Wild Creative |
-| **Lost AI credentials**      | Coordinate with Wild Creative, then run `pnpm ai:register --force` and restart |
+| **Lost AI credentials**      | Coordinate with Wild Creative, then run `pnpm smartsite ai rotate --force` and restart |
 
 ### Debug Commands
 
@@ -1848,7 +1878,7 @@ mongo --eval "db.adminCommand('listDatabases')"
 
 ### AI Backend Deployment
 
-The Smart Site AI backend is operated entirely by Wild Creative. There are no deployment steps for clients—Wild Creative provisions, maintains, and secures the AI platform. To enable AI for your Smart Site instance, ensure your subscription is active and confirm the connection by seeding with the provided registration secret. For upgrades, regional routing, or incident support, email andrew@wildcreative.com.au.
+The Smart Site AI backend is operated entirely by Wild Creative. There are no deployment steps for clients—Wild Creative provisions, maintains, and secures the AI platform. Once your seed completes, contact andrew@wildcreative.com.au to have your workspace activated (a self-serve approval flow is being rolled out). For upgrades, regional routing, or incident support, email the same address.
 
 ### Other Platforms
 
@@ -1876,8 +1906,8 @@ Smart Site can deploy to any Node.js hosting platform:
 #### AI Backend (Managed by Wild Creative)
 
 - [ ] Subscription confirmed with Wild Creative
-- [ ] `SMARTSITE_AI_REGISTRATION_SECRET` provided by Wild Creative and stored in `.env`
-- [ ] `AI_AGENT_API_KEY` / `AI_AGENT_USER_ID` generated after seeding
+- [ ] AI workspace approved by Wild Creative (contact andrew@wildcreative.com.au)
+- [ ] `AI_AGENT_API_KEY` generated after seeding
 - [ ] Connection test completed (admin chat assistant responding)
 - [ ] Support contact: andrew@wildcreative.com.au documented for the team
 
@@ -1891,7 +1921,7 @@ Smart Site can deploy to any Node.js hosting platform:
 - **Optional (advanced teams only)**: enable staging when you need a dedicated Atlas cluster for QA. Skip this section unless you have a formal promote workflow.
 - **Purpose**: Maintain a clean separation between production (`DATABASE_URL`) and any staging cluster referenced via `STAGING_DATABASE_URL` while you harden new features.
 - **Automatic selection**: Whenever `STAGING_DATABASE_URL` is defined, development servers and preview deploys fall back to staging automatically. Override the behaviour explicitly with `SMARTSITE_DATABASE_TARGET=staging` or `SMARTSITE_DATABASE_TARGET=prod`.
-- **Sync commands**: `pnpm staging:pull` copies production content into staging; `pnpm staging:push` promotes staging back to production. Both commands require the MongoDB Database Tools (`mongodump`, `mongorestore`) to be installed locally.
+- **Sync commands**: `pnpm smartsite staging pull` copies production content into staging; `pnpm smartsite staging push` promotes staging back to production. Both commands require the MongoDB Database Tools (`mongodump`, `mongorestore`) to be installed locally.
 - **Protection rules**: Default exclusions (users, submissions, `payload-*` collections) live in `staging-sync.config.json`. Extend that file per client to prevent accidental overwrites of operational data.
 - **Portable workflow**: The helper script (`scripts/db/staging-sync.mjs`) ships with Smart Site and is copied to the Starter and client repos during sync, ensuring every exported site keeps the same commands.
 
@@ -1901,7 +1931,7 @@ Smart Site can deploy to any Node.js hosting platform:
 ## 📖 Additional Resources
 
 - **[Payload CMS Documentation](https://payloadcms.com/docs)**
-- **[Next.js 15 Documentation](https://nextjs.org/docs)**
+- **[Next.js 16 Documentation](https://nextjs.org/docs)**
 - **[Tailwind CSS v4 Documentation](https://tailwindcss.com/docs)**
 - **[GSAP Documentation](https://greensock.com/docs/)**
 - **[Mastra AI Documentation](https://mastra.ai/docs)**

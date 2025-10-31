@@ -38,7 +38,7 @@ export async function GET(): Promise<Response> {
       }
     )
   } catch (error) {
-    payload.logger.error("Failed to run global revalidation:", error)
+    payload.logger.error({ error }, "Failed to run global revalidation")
 
     return Response.json(
       {

@@ -5,7 +5,6 @@ import {
   ensureAIAgentIdentity,
   generateSecureAPIKey,
 } from "@/admin/payload/seed-shared/identity"
-import { registerIdentityWithSmartSiteAI } from "@/admin/payload/seed-shared/registration"
 
 /*************************************************************************/
 /*  AI AGENT USER SEEDING (SMART SITE STARTER)
@@ -45,14 +44,6 @@ export async function ensureAIAgentWithAPIKey(
       "AI agent API key is not available after identity provisioning. Check seeding logs and environment configuration."
     )
   }
-
-  await registerIdentityWithSmartSiteAI({
-    payload,
-    user: result.user as User,
-    apiKey: effectiveApiKey,
-    siteName,
-    env,
-  })
 
   return { user: result.user, apiKey: result.apiKey }
 }

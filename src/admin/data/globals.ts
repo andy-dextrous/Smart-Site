@@ -1,3 +1,5 @@
+"use server"
+
 import { cache } from "@/admin/cache"
 import type { Config } from "@/admin/payload/payload-types"
 
@@ -6,17 +8,21 @@ type Global = keyof Config["globals"]
 /**
  * Get Individual Global
  */
-export const getGlobal = (slug: Global, depth = 0) => cache.getGlobal(slug, depth)
+export async function getGlobal(slug: Global, depth = 0) {
+  return await cache.getGlobal(slug, depth)
+}
 
 /**
  * Get Settings
  */
-export const getSettings = () => cache.getGlobal("settings", 4)
+export async function getSettings() {
+  return await cache.getGlobal("settings", 4)
+}
 
 /**
  * Get Homepage
  */
-export const getHomepage = async () => {
+export async function getHomepage() {
   try {
     const settings = await cache.getGlobal("settings", 5)
     const homepage = settings.routing?.homepage

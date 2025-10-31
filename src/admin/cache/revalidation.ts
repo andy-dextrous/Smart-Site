@@ -44,6 +44,10 @@ let currentRevalidateTag = nextRevalidateTag
 let currentRevalidatePath = nextRevalidatePath
 let currentGetPayload = loadPayload
 
+function triggerRevalidateTag(tag: string): void {
+  currentRevalidateTag(tag, { expire: 0 })
+}
+
 export function setRevalidationHandlers(options?: {
   revalidateTag?: typeof nextRevalidateTag | null
   revalidatePath?: typeof nextRevalidatePath | null
@@ -185,12 +189,15 @@ export async function revalidateAll(): Promise<{
     const payload = await currentGetPayload({ config: configPromise })
     const result = await revalidateAllInternal("manual-clear-all")
 
-    payload.logger.info(`🧹 Cache cleared successfully`, {
-      tagsInvalidated: result.tagsInvalidated.length,
-      pathsInvalidated: result.pathsInvalidated.length,
-      duration: result.duration,
-      reason: result.reason,
-    })
+    payload.logger.info(
+      {
+        tagsInvalidated: result.tagsInvalidated.length,
+        pathsInvalidated: result.pathsInvalidated.length,
+        duration: result.duration,
+        reason: result.reason,
+      },
+      "🧹 Cache cleared successfully"
+    )
 
     return {
       success: true,
@@ -199,7 +206,7 @@ export async function revalidateAll(): Promise<{
     }
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error("Failed to clear all cache:", error)
+    payload.logger.error({ error }, "Failed to clear all cache")
     return {
       success: false,
       message: error instanceof Error ? error.message : "Unknown error occurred",
@@ -230,14 +237,14 @@ export async function revalidateCollection(
 
   // Collection-wide invalidation
   const collectionTag = `collection:${collection}`
-  currentRevalidateTag(collectionTag)
+  triggerRevalidateTag(collectionTag)
   result.tagsInvalidated.push(collectionTag)
 
   // URI index invalidation for frontend collections
   const { isFrontendCollection } = await import("@/admin/config/frontend")
   if (isFrontendCollection(collection)) {
     const uriIndexTag = `uri-index:${collection}`
-    currentRevalidateTag(uriIndexTag)
+    triggerRevalidateTag(uriIndexTag)
     result.tagsInvalidated.push(uriIndexTag)
   }
 
@@ -279,7 +286,7 @@ async function revalidateForDocumentChange(
   }
 
   itemTags.forEach(tag => {
-    currentRevalidateTag(tag)
+    triggerRevalidateTag(tag)
     result.tagsInvalidated.push(tag)
   })
 
@@ -289,7 +296,7 @@ async function revalidateForDocumentChange(
   if (doc.uri) {
     const normalizedUri = routingEngine.normalizeURI(doc.uri)
     const uriTag = `uri:${normalizedUri}`
-    currentRevalidateTag(uriTag)
+    triggerRevalidateTag(uriTag)
     result.tagsInvalidated.push(uriTag)
 
     /**
@@ -304,14 +311,14 @@ async function revalidateForDocumentChange(
    */
   const collectionTag = `collection:${collection}`
   if (!result.tagsInvalidated.includes(collectionTag)) {
-    currentRevalidateTag(collectionTag)
+    triggerRevalidateTag(collectionTag)
     result.tagsInvalidated.push(collectionTag)
   }
 
   if (isFrontendCollection(collection)) {
     const uriIndexCollectionTag = `uri-index:${collection}`
     if (!result.tagsInvalidated.includes(uriIndexCollectionTag)) {
-      currentRevalidateTag(uriIndexCollectionTag)
+      triggerRevalidateTag(uriIndexCollectionTag)
       result.tagsInvalidated.push(uriIndexCollectionTag)
     }
   }
@@ -322,7 +329,7 @@ async function revalidateForDocumentChange(
   if (changes.uriChanged && changes.oldUri) {
     const oldNormalizedUri = routingEngine.normalizeURI(changes.oldUri)
     const oldUriTag = `uri:${oldNormalizedUri}`
-    currentRevalidateTag(oldUriTag)
+    triggerRevalidateTag(oldUriTag)
     result.tagsInvalidated.push(oldUriTag)
 
     /**
@@ -337,7 +344,7 @@ async function revalidateForDocumentChange(
    */
   if (changes.slugChanged && changes.oldSlug) {
     const oldSlugTag = `item:${collection}:${changes.oldSlug}`
-    currentRevalidateTag(oldSlugTag)
+    triggerRevalidateTag(oldSlugTag)
     result.tagsInvalidated.push(oldSlugTag)
   }
 
@@ -347,12 +354,12 @@ async function revalidateForDocumentChange(
   const navImpact = await getNavigationImpact(collection, doc, changes)
 
   if (navImpact.affectsHeader) {
-    currentRevalidateTag("global:header")
+    triggerRevalidateTag("global:header")
     result.tagsInvalidated.push("global:header")
   }
 
   if (navImpact.affectsFooter) {
-    currentRevalidateTag("global:footer")
+    triggerRevalidateTag("global:footer")
     result.tagsInvalidated.push("global:footer")
   }
 
@@ -364,14 +371,14 @@ async function revalidateForDocumentChange(
     const dependentCollections = await getCollectionsUsingArchive(doc.id)
     for (const dep of dependentCollections) {
       const collectionTag = `collection:${dep.collection}`
-      currentRevalidateTag(collectionTag)
+      triggerRevalidateTag(collectionTag)
       result.tagsInvalidated.push(collectionTag)
 
       /**
        * Also invalidate URI index for affected collections
        */
       const uriIndexTag = `uri-index:${dep.collection}`
-      currentRevalidateTag(uriIndexTag)
+      triggerRevalidateTag(uriIndexTag)
       result.tagsInvalidated.push(uriIndexTag)
     }
   }
@@ -386,13 +393,13 @@ async function revalidateForDocumentChange(
      */
     if (changes.newParent) {
       const parentTag = `item:pages:${changes.newParent}`
-      currentRevalidateTag(parentTag)
+      triggerRevalidateTag(parentTag)
       result.tagsInvalidated.push(parentTag)
     }
 
     if (changes.oldParent) {
       const oldParentTag = `item:pages:${changes.oldParent}`
-      currentRevalidateTag(oldParentTag)
+      triggerRevalidateTag(oldParentTag)
       result.tagsInvalidated.push(oldParentTag)
     }
   }
@@ -539,7 +546,7 @@ async function revalidateForGlobalChange(
    * 1. Always invalidate the specific global
    */
   const globalTag = `global:${globalSlug}`
-  currentRevalidateTag(globalTag)
+  triggerRevalidateTag(globalTag)
   result.tagsInvalidated.push(globalTag)
 
   /**
@@ -559,7 +566,7 @@ async function revalidateForGlobalChange(
       result.pathsInvalidated.push("/")
 
       const rootUriTag = `uri:${routingEngine.normalizeURI("/")}`
-      currentRevalidateTag(rootUriTag)
+      triggerRevalidateTag(rootUriTag)
       result.tagsInvalidated.push(rootUriTag)
     }
 
@@ -568,11 +575,11 @@ async function revalidateForGlobalChange(
      */
     for (const archiveChange of settingsChanges.archiveChanges) {
       const collectionTag = `collection:${archiveChange.collection}`
-      currentRevalidateTag(collectionTag)
+      triggerRevalidateTag(collectionTag)
       result.tagsInvalidated.push(collectionTag)
 
       const uriIndexTag = `uri-index:${archiveChange.collection}`
-      currentRevalidateTag(uriIndexTag)
+      triggerRevalidateTag(uriIndexTag)
       result.tagsInvalidated.push(uriIndexTag)
     }
 
@@ -581,7 +588,7 @@ async function revalidateForGlobalChange(
      */
     if (settingsChanges.integrationChanges) {
       // Integration code affects every page, so revalidate everything
-      currentRevalidateTag("all")
+      triggerRevalidateTag("all")
       result.tagsInvalidated.push("all")
 
       // Also revalidate key paths
@@ -598,11 +605,11 @@ async function revalidateForGlobalChange(
      */
     for (const templateChange of settingsChanges.templateChanges) {
       const collectionTag = `collection:${templateChange.collection}`
-      currentRevalidateTag(collectionTag)
+      triggerRevalidateTag(collectionTag)
       result.tagsInvalidated.push(collectionTag)
 
       const uriIndexTag = `uri-index:${templateChange.collection}`
-      currentRevalidateTag(uriIndexTag)
+      triggerRevalidateTag(uriIndexTag)
       result.tagsInvalidated.push(uriIndexTag)
     }
   }
@@ -612,7 +619,7 @@ async function revalidateForGlobalChange(
    */
   if (globalSlug === "header" || globalSlug === "footer") {
     const layoutTag = `layout:${globalSlug}`
-    currentRevalidateTag(layoutTag)
+    triggerRevalidateTag(layoutTag)
     result.tagsInvalidated.push(layoutTag)
   }
 
@@ -654,7 +661,7 @@ async function revalidateAllInternal(
   /**
    * 1. Nuclear option - invalidate everything
    */
-  currentRevalidateTag("all")
+  triggerRevalidateTag("all")
   result.tagsInvalidated.push("all")
   payload.logger.info(`   ✓ Invalidated tag: all`)
 

@@ -2,7 +2,6 @@
 
 import {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -201,31 +200,29 @@ interface ChatResizeProps {
 }
 
 export function ChatResize({ children, className, panelRef }: ChatResizeProps) {
-  const [width, setWidth] = useState(DEFAULT_WIDTH)
-  const [height, setHeight] = useState(DEFAULT_HEIGHT)
-  const [isResizing, setIsResizing] = useState(false)
-  const resizeOriginRef = useRef({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
-
-  useEffect(() => {
+  const [width, setWidth] = useState(() => {
     if (typeof window === "undefined") {
-      return
+      return DEFAULT_WIDTH
     }
-
     const savedWidth = readNumberFromStorage(STORAGE_KEY)
     if (typeof savedWidth === "number") {
-      setWidth(clamp(savedWidth, MIN_WIDTH, MAX_WIDTH))
+      return clamp(savedWidth, MIN_WIDTH, MAX_WIDTH)
     }
-
+    return DEFAULT_WIDTH
+  })
+  const [height, setHeight] = useState(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_HEIGHT
+    }
     const savedHeight = readNumberFromStorage(HEIGHT_STORAGE_KEY)
     if (typeof savedHeight === "number") {
-      setHeight(clamp(savedHeight, MIN_HEIGHT, getMaxHeight()))
-      return
+      return clamp(savedHeight, MIN_HEIGHT, getMaxHeight())
     }
-
     const viewportHeight = window.innerHeight || DEFAULT_HEIGHT
-    const fallbackHeight = clamp(viewportHeight - 64, MIN_HEIGHT, getMaxHeight())
-    setHeight(fallbackHeight)
-  }, [])
+    return clamp(viewportHeight - 64, MIN_HEIGHT, getMaxHeight())
+  })
+  const [isResizing, setIsResizing] = useState(false)
+  const resizeOriginRef = useRef({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
 
   const updateSize = useCallback((deltaWidth: number, deltaHeight: number) => {
     const origin = resizeOriginRef.current

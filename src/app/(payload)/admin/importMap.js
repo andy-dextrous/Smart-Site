@@ -39,6 +39,7 @@ import { RowLabel as RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6 } from '@/admin/p
 import { RowLabel as RowLabel_6d6b76e060b56c87a47bd22280eeb127 } from '@/admin/payload/globals/footer/RowLabel'
 import { SocialLinksRowLabel as SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7 } from '@/admin/payload/fields/social-links-row-label'
 import { default as default_e5d96bbf460917257cf7b4a80fa7fc85 } from '@/admin/payload/components/backend/row-grid'
+import { AISettingsAccessGate as AISettingsAccessGate_9b2ba51a571b59e9042ad067fb16d728 } from '@/admin/payload/components/backend/ai-settings/access-gate'
 import { default as default_f2ccf5b28ea897a84aa17ece60da1642 } from '@/admin/payload/components/backend/nav'
 import { Icon as Icon_81e8042dbd61adf4500fa58396806cc9 } from '@/admin/payload/components/backend/logo'
 import { Logo as Logo_81e8042dbd61adf4500fa58396806cc9 } from '@/admin/payload/components/backend/logo'
@@ -90,6 +91,7 @@ export const importMap = {
   "@/admin/payload/globals/footer/RowLabel#RowLabel": RowLabel_6d6b76e060b56c87a47bd22280eeb127,
   "@/admin/payload/fields/social-links-row-label#SocialLinksRowLabel": SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7,
   "@/admin/payload/components/backend/row-grid#default": default_e5d96bbf460917257cf7b4a80fa7fc85,
+  "@/admin/payload/components/backend/ai-settings/access-gate#AISettingsAccessGate": AISettingsAccessGate_9b2ba51a571b59e9042ad067fb16d728,
   "@/admin/payload/components/backend/nav#default": default_f2ccf5b28ea897a84aa17ece60da1642,
   "@/admin/payload/components/backend/logo#Icon": Icon_81e8042dbd61adf4500fa58396806cc9,
   "@/admin/payload/components/backend/logo#Logo": Logo_81e8042dbd61adf4500fa58396806cc9,

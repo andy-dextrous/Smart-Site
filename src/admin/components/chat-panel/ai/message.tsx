@@ -50,8 +50,8 @@ export const messageStyles = /* css */ `
 }
 
 .chat-message__assistant-icon {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(79, 55, 251, 0.2), rgba(79, 55, 251, 0.05));
   border: 1px solid rgba(79, 55, 251, 0.12);
@@ -68,8 +68,8 @@ export const messageStyles = /* css */ `
 }
 
 .chat-message__assistant-icon-mark {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   color: var(--chat-color-accent);
 }
 
@@ -96,8 +96,8 @@ export const messageStyles = /* css */ `
 }
 
 .chat-message__avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   overflow: hidden;
   background: linear-gradient(135deg, rgba(67, 67, 73, 0.12), rgba(67, 67, 73, 0.04));
@@ -118,8 +118,8 @@ export const messageStyles = /* css */ `
 }
 
 .chat-message__avatar-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 `
 

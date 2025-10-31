@@ -7,7 +7,9 @@ import {
   Fragment,
   type ChangeEventHandler,
   type ComponentProps,
+  type ComponentType,
   createContext,
+  createElement,
   forwardRef,
   type FormEvent,
   type FormEventHandler,
@@ -72,20 +74,19 @@ export const promptInputStyles = /* css */ `
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--chat-color-layer-1);
   border: 1px solid var(--chat-color-border);
   border-radius: 18px 18px 12px 12px;
-  box-shadow: var(--chat-shadow-sm);
-  padding: 12px 16px 16px;
-  backdrop-filter: blur(10px);
+  box-shadow: none;
+  padding: 12px 14px 14px;
   font-size: 15px;
   line-height: 1.45;
 }
 
 .chat-root[data-theme="dark"] .chat-input,
 [data-chat-panel-root][data-theme="dark"] .chat-input {
-  background: rgba(24, 24, 26, 0.9);
-  border-color: #2e2e32;
+  background: var(--chat-color-layer-1);
+  border-color: var(--chat-color-border);
   font-size: 15px;
 }
 
@@ -263,6 +264,63 @@ export const promptInputStyles = /* css */ `
 }
 `
 
+const IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg"])
+const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "webm", "avi", "mkv"])
+const AUDIO_EXTENSIONS = new Set(["mp3", "wav", "m4a", "flac", "ogg"])
+const ARCHIVE_EXTENSIONS = new Set(["zip", "rar", "7z", "gz", "tar"])
+const CODE_EXTENSIONS = new Set([
+  "js",
+  "ts",
+  "tsx",
+  "jsx",
+  "json",
+  "yml",
+  "yaml",
+  "xml",
+  "html",
+  "css",
+  "scss",
+  "md",
+  "mdx",
+  "py",
+  "rb",
+  "go",
+  "rs",
+  "java",
+  "c",
+  "cpp",
+  "sh",
+])
+const DOCUMENT_EXTENSIONS = new Set(["pdf", "txt", "rtf", "doc", "docx", "pages"])
+
+type IconComponent = ComponentType<{ className?: string }>
+
+function resolveAttachmentIcon(mediaType: string, extension: string): IconComponent {
+  const type = mediaType.toLowerCase()
+  const ext = extension.toLowerCase()
+
+  if (type.startsWith("image/") || IMAGE_EXTENSIONS.has(ext)) {
+    return FileImage
+  }
+  if (type.startsWith("video/") || VIDEO_EXTENSIONS.has(ext)) {
+    return FileVideo
+  }
+  if (type.startsWith("audio/") || AUDIO_EXTENSIONS.has(ext)) {
+    return FileAudio
+  }
+  if (ARCHIVE_EXTENSIONS.has(ext)) {
+    return FileArchive
+  }
+  if (CODE_EXTENSIONS.has(ext)) {
+    return FileCode
+  }
+  if (DOCUMENT_EXTENSIONS.has(ext)) {
+    return FileText
+  }
+
+  return FileIcon
+}
+
 export type PromptInputAttachmentProps = HTMLAttributes<HTMLDivElement> & {
 	data: AttachmentItem
   className?: string
@@ -273,54 +331,10 @@ export function PromptInputAttachment({ data, className, ...props }: PromptInput
   const filename = data.filename || "attachment"
   const type = (data.mediaType || "").toLowerCase()
   const ext = filename.split(".").pop()?.toLowerCase() || ""
-
-  const pickIcon = () => {
-    if (type.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
-      return FileImage
-    }
-    if (type.startsWith("video/") || ["mp4", "mov", "webm", "avi", "mkv"].includes(ext)) {
-      return FileVideo
-    }
-    if (type.startsWith("audio/") || ["mp3", "wav", "m4a", "flac", "ogg"].includes(ext)) {
-      return FileAudio
-    }
-    if (["zip", "rar", "7z", "gz", "tar"].includes(ext)) {
-      return FileArchive
-    }
-    if (
-      [
-        "js",
-        "ts",
-        "tsx",
-        "jsx",
-        "json",
-        "yml",
-        "yaml",
-        "xml",
-        "html",
-        "css",
-        "scss",
-        "md",
-        "mdx",
-        "py",
-        "rb",
-        "go",
-        "rs",
-        "java",
-        "c",
-        "cpp",
-        "sh",
-      ].includes(ext)
-    ) {
-      return FileCode
-    }
-    if (["pdf", "txt", "rtf", "doc", "docx", "pages"].includes(ext)) {
-      return FileText
-    }
-    return FileIcon
-  }
-
-  const TypeIcon = pickIcon()
+  const iconElement = useMemo(
+    () => createElement(resolveAttachmentIcon(type, ext), { className: "chat-attachment__icon-mark" }),
+    [type, ext]
+  )
 
   return (
     <div className={cn("chat-attachment", className)} title={filename} {...props}>
@@ -329,7 +343,7 @@ export function PromptInputAttachment({ data, className, ...props }: PromptInput
           <Image alt={filename} className="chat-attachment__image" height={40} src={data.url} width={40} />
         ) : (
           <div className="chat-attachment__icon">
-            <TypeIcon className="chat-attachment__icon-mark" />
+            {iconElement}
           </div>
         )}
         <button
@@ -419,17 +433,14 @@ export function PromptInput({
   const formRef = useRef<HTMLFormElement | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const dragCounterRef = useRef(0)
-  const [panelRoot, setPanelRoot] = useState<HTMLElement | null>(null)
+  const panelRootRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const root = anchorRef.current?.closest("form")
     if (root instanceof HTMLFormElement) {
       formRef.current = root
     }
-    const panel = anchorRef.current?.closest("[data-chat-panel-root]") as HTMLElement | null
-    if (panel) {
-      setPanelRoot(panel)
-    }
+    panelRootRef.current = anchorRef.current?.closest("[data-chat-panel-root]") as HTMLElement | null
   }, [])
 
   const openFileDialog = useCallback(() => {
@@ -507,38 +518,30 @@ export function PromptInput({
     })
   }, [])
 
-  useEffect(() => {
-    if (items.length === 0 && inputRef.current) {
-      inputRef.current.value = ""
+  const handleDragOver = useCallback((event: DragEvent) => {
+    if (event.dataTransfer?.types?.includes("Files")) {
+      event.preventDefault()
     }
-  }, [items])
+  }, [])
 
-  useEffect(() => {
-    const root = panelRoot
-    if (!root) {
-      return
+  const handleDragEnter = useCallback((event: DragEvent) => {
+    if (event.dataTransfer?.types?.includes("Files")) {
+      dragCounterRef.current += 1
+      setDragActive(true)
     }
+  }, [])
 
-    const onDragOver = (event: DragEvent) => {
-      if (event.dataTransfer?.types?.includes("Files")) {
-        event.preventDefault()
+  const handleDragLeave = useCallback((event: DragEvent) => {
+    if (event.dataTransfer?.types?.includes("Files")) {
+      dragCounterRef.current = Math.max(0, dragCounterRef.current - 1)
+      if (dragCounterRef.current === 0) {
+        setDragActive(false)
       }
     }
-    const onDragEnter = (event: DragEvent) => {
-      if (event.dataTransfer?.types?.includes("Files")) {
-        dragCounterRef.current += 1
-        setDragActive(true)
-      }
-    }
-    const onDragLeave = (event: DragEvent) => {
-      if (event.dataTransfer?.types?.includes("Files")) {
-        dragCounterRef.current = Math.max(0, dragCounterRef.current - 1)
-        if (dragCounterRef.current === 0) {
-          setDragActive(false)
-        }
-      }
-    }
-    const onDrop = (event: DragEvent) => {
+  }, [])
+
+  const handleDrop = useCallback(
+    (event: DragEvent) => {
       if (event.dataTransfer?.types?.includes("Files")) {
         event.preventDefault()
       }
@@ -547,20 +550,34 @@ export function PromptInput({
       }
       dragCounterRef.current = 0
       setDragActive(false)
+    },
+    [add]
+  )
+
+  useEffect(() => {
+    if (items.length === 0 && inputRef.current) {
+      inputRef.current.value = ""
+    }
+  }, [items])
+
+  useEffect(() => {
+    const root = panelRootRef.current
+    if (!root) {
+      return
     }
 
-    root.addEventListener("dragover", onDragOver)
-    root.addEventListener("dragenter", onDragEnter)
-    root.addEventListener("dragleave", onDragLeave)
-    root.addEventListener("drop", onDrop)
+    root.addEventListener("dragover", handleDragOver)
+    root.addEventListener("dragenter", handleDragEnter)
+    root.addEventListener("dragleave", handleDragLeave)
+    root.addEventListener("drop", handleDrop)
 
     return () => {
-      root.removeEventListener("dragover", onDragOver)
-      root.removeEventListener("dragenter", onDragEnter)
-      root.removeEventListener("dragleave", onDragLeave)
-      root.removeEventListener("drop", onDrop)
+      root.removeEventListener("dragover", handleDragOver)
+      root.removeEventListener("dragenter", handleDragEnter)
+      root.removeEventListener("dragleave", handleDragLeave)
+      root.removeEventListener("drop", handleDrop)
     }
-  }, [add, panelRoot])
+  }, [handleDragOver, handleDragEnter, handleDragLeave, handleDrop])
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = event => {
     if (event.currentTarget.files) {

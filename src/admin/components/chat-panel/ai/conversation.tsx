@@ -28,7 +28,7 @@ export const conversationStyles = /* css */ `
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px 32px 32px;
+  padding: 24px 16px 32px;
 }
 
 .chat-message-block {

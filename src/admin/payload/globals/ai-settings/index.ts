@@ -29,7 +29,19 @@ export const AISettings: GlobalConfig = {
   },
   fields: [
     {
+      type: "ui",
+      name: "aiWorkspaceGate",
+      admin: {
+        components: {
+          Field: "@/admin/payload/components/backend/ai-settings/access-gate#AISettingsAccessGate",
+        },
+      },
+    },
+    {
       type: "tabs",
+      admin: {
+        className: "ai-settings-content",
+      },
       tabs: [
         {
           name: "general",

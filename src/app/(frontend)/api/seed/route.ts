@@ -16,6 +16,8 @@ export const maxDuration = 60 // This function can run for a maximum of 60 secon
 /*  POST /api/seed                  - Seeds minimal profile
 /*************************************************************************/
 
+const DEFAULT_SITE_NAME = "Smart Site"
+
 export async function POST(request: Request): Promise<Response> {
   const payload = await getPayload({ config })
   const requestHeaders = await headers()
@@ -61,15 +63,9 @@ export async function POST(request: Request): Promise<Response> {
       if (typeof body?.siteName === "string") siteName = body.siteName.trim()
     } catch {}
 
-    if ((!siteName || siteName.length === 0) && typeof process.env.SMARTSITE_SITE_NAME === "string") {
-      const envSiteName = process.env.SMARTSITE_SITE_NAME.trim()
-      if (envSiteName.length > 0) {
-        siteName = envSiteName
-      }
-    }
-
-    if (!siteName) {
-      throw new Error("Seed request must include a siteName string")
+    if (!siteName || siteName.length === 0) {
+      siteName = DEFAULT_SITE_NAME
+      payload.logger.info(`Seed request did not include a siteName. Falling back to "${DEFAULT_SITE_NAME}".`)
     }
 
     payload.logger.info(
@@ -99,7 +95,7 @@ export async function POST(request: Request): Promise<Response> {
       duration: totalDuration,
     })
   } catch (error: any) {
-    payload.logger.error("Seed operation failed:", error)
+    payload.logger.error({ error }, "Seed operation failed")
 
     return Response.json(
       {

@@ -5,6 +5,9 @@ import type { UserConfig } from "@/admin/config/defaults"
 /*************************************************************************/
 
 const config: UserConfig = {
+  identity: {
+    siteName: "Smart Site",
+  },
   admin: {
     meta: {
       title: "Admin | Smart Site",

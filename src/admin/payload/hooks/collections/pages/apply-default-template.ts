@@ -79,8 +79,8 @@ export function createApplyDefaultTemplateHook(
         }
       } catch (error) {
         req.payload.logger.error(
-          `Error applying default template for ${collectionName}:`,
-          error
+          { error, collectionName },
+          `Error applying default template for ${collectionName}`
         )
         // Continue without template - don't block content creation
       }

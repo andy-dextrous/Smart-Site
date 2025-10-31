@@ -1,5 +1,6 @@
 import { getSmartSiteConfig } from "@/admin/config"
 import { getAIBackendStatus } from "@/admin/lib/ai/status"
+import { resolveAIRequestCredentials } from "@/admin/lib/ai/identity"
 import { NextRequest } from "next/server"
 
 /*************************************************************************/
@@ -16,9 +17,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ thre
 
     const config = getSmartSiteConfig()
     const aiConfig = config.features.ai
-    const apiKey = process.env.AI_AGENT_API_KEY
-    const siteId = process.env.AI_AGENT_USER_ID
-    if (!apiKey || !siteId) throw new Error("Missing AI credentials")
+    const credentials = await resolveAIRequestCredentials()
+    if (!credentials) throw new Error("Missing AI credentials")
+    const { apiKey, siteId } = credentials
 
     const url = new URL(req.url)
     const last = url.searchParams.get("last") || "50"

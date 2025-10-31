@@ -6,6 +6,7 @@ import {
 import { updateURI } from "@/admin/routing/index-manager"
 import { routingEngine } from "@/admin/routing/uri-engine"
 import { batchRevalidate } from "@/admin/cache"
+import { revalidateTag } from "next/cache"
 import { detectChanges } from "@/admin/cache/change-detection"
 import { cleanupAutomaticRedirect } from "@/admin/redirects/auto-redirects"
 import configPromise from "@payload-config"
@@ -313,8 +314,11 @@ export async function processHomepageChange(
           })
         } catch (error) {
           payload.logger.warn(
-            `Failed to generate canonical URI for demoted homepage ${oldHomepage.id}:`,
-            error
+            {
+              error,
+              pageId: oldHomepage.id,
+            },
+            `Failed to generate canonical URI for demoted homepage ${oldHomepage.id}`
           )
         }
 
@@ -443,8 +447,11 @@ export async function processHomepageChange(
             await cleanupAutomaticRedirect(target)
           } catch (error) {
             payload.logger.warn(
-              `Failed to cleanup automatic redirect for ${target} during homepage change:`,
-              error
+              {
+                error,
+                target,
+              },
+              `Failed to cleanup automatic redirect for ${target} during homepage change`
             )
           }
         })
@@ -667,12 +674,9 @@ export async function processTemplateChange(
     // Perform batch cache invalidation
     if (batchInvalidationOperations.length > 0) {
       try {
-        // Use direct cache tag invalidation for template changes
-        const { revalidateTag } = await import("next/cache")
-
         // Invalidate all collected cache tags
         for (const tag of cacheTagsToInvalidate) {
-          revalidateTag(tag)
+          revalidateTag(tag, { expire: 0 })
         }
 
         result.cacheEntriesCleared = cacheTagsToInvalidate.size
@@ -681,7 +685,7 @@ export async function processTemplateChange(
           `Successfully invalidated ${result.cacheEntriesCleared} cache tags`
         )
       } catch (cacheError) {
-        payload.logger.error(`Cache invalidation failed:`, cacheError)
+        payload.logger.error({ error: cacheError }, "Cache invalidation failed")
         // Fallback to batchRevalidate if direct invalidation fails
         try {
           const invalidationResult = await batchRevalidate({
@@ -695,7 +699,7 @@ export async function processTemplateChange(
             `Fallback batchRevalidate completed, cleared ${result.cacheEntriesCleared} entries`
           )
         } catch (batchError) {
-          payload.logger.error(`Fallback batchRevalidate also failed:`, batchError)
+          payload.logger.error({ error: batchError }, "Fallback batchRevalidate also failed")
         }
       }
     }
@@ -703,7 +707,7 @@ export async function processTemplateChange(
     result.success = true
   } catch (error) {
     result.errors.push(error instanceof Error ? error.message : String(error))
-    payload.logger.error(`Template change failed:`, error)
+    payload.logger.error({ error }, "Template change failed")
   }
 
   return result
@@ -789,11 +793,9 @@ export async function processTemplateContentChange(
 
     // Perform cache invalidation
     try {
-      const { revalidateTag } = await import("next/cache")
-
       // Invalidate all collected cache tags
       for (const tag of cacheTagsToInvalidate) {
-        revalidateTag(tag)
+        revalidateTag(tag, { expire: 0 })
       }
 
       result.cacheEntriesCleared = cacheTagsToInvalidate.size
@@ -803,8 +805,12 @@ export async function processTemplateContentChange(
       )
     } catch (cacheError) {
       payload.logger.error(
-        `Cache invalidation failed for template ${templateId}:`,
-        cacheError
+        {
+          error: cacheError,
+          templateId,
+          templateName: additionalData?.templateName,
+        },
+        `Cache invalidation failed for template ${templateId}`
       )
       result.errors.push(`Cache invalidation failed: ${cacheError}`)
     }
@@ -813,8 +819,8 @@ export async function processTemplateContentChange(
   } catch (error) {
     result.errors.push(error instanceof Error ? error.message : String(error))
     payload.logger.error(
-      `Template content change processing failed for template ${templateId}:`,
-      error
+      { error, templateId, templateName: additionalData?.templateName },
+      `Template content change processing failed for template ${templateId}`
     )
   }
 

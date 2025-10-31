@@ -60,42 +60,11 @@ export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Prom
   const env = options.env ?? process.env
   const logger = payload.logger
 
-  const envUserId = env.AI_AGENT_USER_ID?.trim()
   const envApiKey = env.AI_AGENT_API_KEY?.trim()
   const siteName = options.siteName.trim()
 
   if (!siteName) {
     throw new Error("Site name is required to create the AI agent identity")
-  }
-
-  if (envUserId && !forceRegenerate) {
-    try {
-      const existing = await payload.findByID({
-        collection: "users",
-        id: envUserId,
-        overrideAccess: true,
-      })
-
-      if (existing) {
-        if (!envApiKey) {
-          throw new Error(
-            "AI_AGENT_API_KEY is missing but AI_AGENT_USER_ID is set. Restore the secret or run the explicit rotation flow."
-          )
-        }
-
-        logger.info("AI agent located via environment ID; returning without modification")
-        return { user: existing as User, apiKey: null, created: false }
-      }
-
-      throw new Error(
-        "AI_AGENT_USER_ID references a user that does not exist. Restore the database record or rerun the rotation flow."
-      )
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error
-      }
-      throw new Error(String(error))
-    }
   }
 
   const existingAgent = await payload.find({
@@ -124,7 +93,6 @@ export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Prom
 
       logger.info("Regenerated AI agent API key via force option")
 
-      env.AI_AGENT_USER_ID = String(updated.id)
       env.AI_AGENT_API_KEY = apiKey
 
       if (onKeyIssued) {
@@ -144,7 +112,6 @@ export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Prom
     }
 
     logger.info("AI agent already exists; keeping existing credentials")
-    env.AI_AGENT_USER_ID = String(agent.id)
     return { user: agent, apiKey: null, created: false }
   }
 
@@ -169,7 +136,6 @@ export async function ensureAIAgentIdentity(options: EnsureAIAgentOptions): Prom
 
   logger.info(`Created AI agent with API key: ${seedData.email}`)
 
-  env.AI_AGENT_USER_ID = String(user.id)
   env.AI_AGENT_API_KEY = apiKey
 
   if (onKeyIssued) {

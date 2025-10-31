@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useRef } from "react"
+import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { TextFieldClientProps } from "payload"
 
 import {
@@ -50,7 +50,15 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
   const { id, hasPublishedDoc } = documentInfo
   const savedSlug = (documentInfo as any)?.data?.slug as string | undefined
 
-  const baselineSlugRef = useRef<string | undefined>(undefined)
+  const baselineSlug = useMemo(() => {
+    if (!hasPublishedDoc) {
+      return undefined
+    }
+    if (typeof savedSlug === "string" && savedSlug.length > 0) {
+      return savedSlug
+    }
+    return undefined
+  }, [hasPublishedDoc, savedSlug])
   const lastPromptSlugRef = useRef<string | undefined>(undefined)
   const lastTargetValue = useRef<string>("")
 
@@ -59,26 +67,12 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
     return fields[checkboxFieldPath]?.value as boolean
   })
 
-  useEffect(() => {
-    if (typeof savedSlug === "string" && savedSlug.length > 0) {
-      baselineSlugRef.current = savedSlug
-    } else if (!savedSlug) {
-      baselineSlugRef.current = undefined
-    }
-  }, [savedSlug])
-
-  useEffect(() => {
-    if (!baselineSlugRef.current && typeof value === "string" && value.length > 0) {
-      baselineSlugRef.current = value
-    }
-  }, [value])
-
   const slugChangedFromBaseline = Boolean(
     hasPublishedDoc &&
-      baselineSlugRef.current &&
+      baselineSlug &&
       typeof value === "string" &&
       value.length > 0 &&
-      value !== baselineSlugRef.current
+      value !== baselineSlug
   )
 
   useEffect(() => {

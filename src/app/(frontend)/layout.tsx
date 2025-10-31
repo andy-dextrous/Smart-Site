@@ -9,6 +9,7 @@ import React from "react"
 import { AIProvider } from "@/admin/payload/components/providers/ai-provider"
 import { getSmartSiteConfig } from "@/admin/config"
 import { getI18nConfig } from "@/admin/config/features"
+import { WorkspaceGate } from "@/admin/components/workspace/workspace-gate"
 import { generateRootLayoutMetadata } from "./layout-metadata"
 
 import "./css/globals.css"
@@ -48,24 +49,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {gaId && <GoogleAnalytics gaId={gaId} />}
 
         <AIProvider withContainer={false}>
-          <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
-            <SmartSiteAdminBar settings={settings} />
-            <Header />
-            {smoothScrollEnabled ? (
-              <div id="smooth-wrapper">
-                <div id="smooth-content">
+          <WorkspaceGate>
+            <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
+              <SmartSiteAdminBar settings={settings} />
+              <Header />
+              {smoothScrollEnabled ? (
+                <div id="smooth-wrapper">
+                  <div id="smooth-content">
+                    {children}
+                    <Footer />
+                  </div>
+                </div>
+              ) : (
+                <>
                   {children}
                   <Footer />
-                </div>
-              </div>
-            ) : (
-              <>
-                {children}
-                <Footer />
-              </>
-            )}
-            {bodyEnd && parse(bodyEnd)}
-          </Providers>
+                </>
+              )}
+              {bodyEnd && parse(bodyEnd)}
+            </Providers>
+          </WorkspaceGate>
         </AIProvider>
       </body>
     </html>

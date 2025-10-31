@@ -11,12 +11,13 @@ import {
   toggleChatOpen,
   useChatStore,
 } from "@/admin/components/chat-panel/chat-store"
-import { ChatExperienceMount } from "@/admin/components/chat-panel/chat-experience-mount"
 import { isAuthBootstrapRoute } from "@/admin/payload/components/providers/provider-routes"
+import type { AIWorkspaceState } from "@/admin/lib/ai/status"
 
 interface AIContextType {
   isEnabled: boolean
   statusReason: string | null
+  status: AIWorkspaceState | null
   isChatOpen: boolean
   toggleChat: () => void
   closeChat: () => void
@@ -29,10 +30,11 @@ interface AIProviderClientProps {
   children: React.ReactNode
   enabled: boolean
   reason: string | null
+  status: AIWorkspaceState
   withContainer?: boolean
 }
 
-export function AIProviderClient({ children, enabled, reason, withContainer = true }: AIProviderClientProps) {
+export function AIProviderClient({ children, enabled, reason, status: workspaceStatus, withContainer = true }: AIProviderClientProps) {
   const pathname = usePathname()
   const bypassProviders = isAuthBootstrapRoute(pathname)
 
@@ -40,17 +42,39 @@ export function AIProviderClient({ children, enabled, reason, withContainer = tr
     return <>{children}</>
   }
 
+  return (
+    <AIProviderRuntime
+      enabled={enabled}
+      reason={reason}
+      status={workspaceStatus}
+      withContainer={withContainer}
+    >
+      {children}
+    </AIProviderRuntime>
+  )
+}
+
+interface AIProviderRuntimeProps {
+  children: React.ReactNode
+  enabled: boolean
+  reason: string | null
+  status: AIWorkspaceState
+  withContainer: boolean
+}
+
+function AIProviderRuntime({ children, enabled, reason, status: workspaceStatus, withContainer }: AIProviderRuntimeProps) {
   useEffect(() => {
     initializeChatStore()
   }, [])
 
   useEffect(() => {
-    setChatAvailability(enabled, reason)
-  }, [enabled, reason])
+    setChatAvailability(enabled, reason, workspaceStatus)
+  }, [enabled, reason, workspaceStatus])
 
   const isChatOpen = useChatStore(state => state.isOpen)
   const isEnabled = useChatStore(state => state.isEnabled)
   const statusReason = useChatStore(state => state.statusReason)
+  const status = useChatStore(state => state.status)
 
   const toggleChat = useCallback(() => {
     if (!isEnabled) return
@@ -71,6 +95,18 @@ export function AIProviderClient({ children, enabled, reason, withContainer = tr
     event => {
       event.preventDefault()
       if (!isEnabled) return
+      if (typeof window !== "undefined") {
+        const global = window as typeof window & {
+          __smartSiteWorkspaceToggle?: () => void
+        }
+        if (global.__smartSiteWorkspaceToggle) {
+          global.__smartSiteWorkspaceToggle()
+          return
+        }
+      }
+      if (typeof document !== "undefined" && document.documentElement.dataset.workspaceShell === "active") {
+        return
+      }
       toggleChatOpen()
     },
     {
@@ -85,11 +121,12 @@ export function AIProviderClient({ children, enabled, reason, withContainer = tr
   const contextValue = useMemo<AIContextType>(() => ({
     isEnabled,
     statusReason,
+    status,
     isChatOpen,
     toggleChat,
     closeChat,
     openChat,
-  }), [isEnabled, statusReason, isChatOpen, toggleChat, closeChat, openChat])
+  }), [isEnabled, statusReason, status, isChatOpen, toggleChat, closeChat, openChat])
 
   return (
     <AIContext.Provider value={contextValue}>
@@ -100,7 +137,6 @@ export function AIProviderClient({ children, enabled, reason, withContainer = tr
       ) : (
         children
       )}
-      <ChatExperienceMount scope={withContainer ? "admin" : "frontend"} />
     </AIContext.Provider>
   )
 }

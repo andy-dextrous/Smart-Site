@@ -244,6 +244,33 @@ const utilities = `
   box-shadow: 0 0 0 2px rgba(131, 115, 252, 0.45);
 }
 
+.workspace-chat-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--chat-color-layer-0);
+}
+
+.workspace-chat-surface {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.workspace-chat-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--chat-color-text-secondary);
+}
+
 .chat-sr-only {
   position: absolute;
   width: 1px;

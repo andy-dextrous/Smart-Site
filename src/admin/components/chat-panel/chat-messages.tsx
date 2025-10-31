@@ -95,6 +95,28 @@ export function ChatMessages({ messages, status, regenerate, onQuickSend, focusS
                     }
                     case "reasoning":
                       return null
+                    case "tool-invocation": {
+                      const invocation = (part as { toolInvocation?: ToolUIPart }).toolInvocation
+                      if (!invocation) return null
+                      const normalizedState =
+                        toolInvocationStateMap[String((invocation as any).state)] ?? "output-available"
+                      const invocationName = (invocation as any)?.toolName ?? "invocation"
+                      return (
+                        <Tool key={`${message.id}-${index}`} defaultOpen={false}>
+                          <ToolHeader
+                            toolType={`tool-${invocationName}` as ToolUIPart["type"]}
+                            state={normalizedState}
+                          />
+                          <ToolContent>
+                            <ToolInput input={(invocation as any)?.args ?? {}} />
+                            <ToolOutput
+                              output={(invocation as any)?.result ?? null}
+                              errorText={(invocation as any)?.errorText ?? (invocation as any)?.error}
+                            />
+                          </ToolContent>
+                        </Tool>
+                      )
+                    }
                     default:
                       if (part.type?.startsWith("tool-")) {
                         const toolPart = part as ToolUIPart
@@ -204,3 +226,9 @@ function ConversationAutoStick({ focusSignal, isActive, status, messages }: Conv
 
   return null
 }
+  const toolInvocationStateMap: Record<string, ToolUIPart["state"]> = {
+    result: "output-available",
+    running: "input-available",
+    error: "output-error",
+    input: "input-available",
+  }

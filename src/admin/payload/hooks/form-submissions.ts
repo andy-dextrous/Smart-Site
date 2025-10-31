@@ -20,8 +20,8 @@ export const markAsReadAfterRead: CollectionAfterReadHook = async ({
       })
     } catch (error) {
       payload.logger.warn(
-        `Could not mark form submission ${doc.id} as read:`,
-        error instanceof Error ? error.message : String(error)
+        { error, submissionId: doc.id },
+        `Could not mark form submission ${doc.id} as read`
       )
     }
   }

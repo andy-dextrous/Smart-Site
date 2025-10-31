@@ -6,6 +6,8 @@
 @import "tailwindcss/preflight.css" layer(frontend-base);
 @import "tailwindcss/utilities.css" layer(frontend-utilities);
 
+@source not "../../../../*.md";
+
 /* External Plugins */
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";

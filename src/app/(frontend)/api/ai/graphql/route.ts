@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache"
 import crypto from "crypto"
+import { getAIAgentUserId } from "@/admin/lib/ai/identity"
 
 export async function POST(request: Request) {
   /**
@@ -47,7 +48,10 @@ export async function POST(request: Request) {
     .digest("hex")
     .substring(0, 16)
 
-  const siteId = process.env.AI_AGENT_USER_ID!
+  const siteId = await getAIAgentUserId()
+  if (!siteId) {
+    return Response.json({ error: "AI agent identity missing" }, { status: 500 })
+  }
   const cacheKey = [siteId, queryHash]
   const tags = [`site:${siteId}`, `query:${queryHash}`]
 

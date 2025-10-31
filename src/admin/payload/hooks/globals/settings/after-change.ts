@@ -99,15 +99,21 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({
               }
             } catch (error) {
               payload.logger.error(
-                `Failed to revalidate archive page ${change.newArchive}:`,
-                error
+                {
+                  error,
+                  archivePage: change.newArchive,
+                },
+                `Failed to revalidate archive page ${change.newArchive}`
               )
             }
           }
         } catch (error) {
           payload.logger.error(
-            `Failed to process archive change for collection ${change.collection}:`,
-            error
+            {
+              error,
+              collection: change.collection,
+            },
+            `Failed to process archive change for collection ${change.collection}`
           )
         }
       })
@@ -138,8 +144,11 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({
           await revalidateCollection(change.collection, "template-change")
         } catch (error) {
           payload.logger.error(
-            `Failed to revalidate collection ${change.collection} for template change:`,
-            error
+            {
+              error,
+              collection: change.collection,
+            },
+            `Failed to revalidate collection ${change.collection} for template change`
           )
         }
       })
@@ -173,7 +182,7 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({
           "📋 Non-routing settings changed - full cache refresh triggered"
         )
       } catch (error) {
-        payload.logger.error("Failed to revalidate after settings change:", error)
+        payload.logger.error({ error }, "Failed to revalidate after settings change")
       }
     }
 
@@ -189,10 +198,10 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({
   }
 
   try {
-    revalidateTag(`global:${global.slug}`)
+    revalidateTag(`global:${global.slug}`, { expire: 0 })
     payload.logger.info(`Revalidated global:${global.slug}`)
   } catch (error) {
-    payload.logger.error(`Revalidation failed for global ${global.slug}:`, error)
+    payload.logger.error({ error, slug: global.slug }, `Revalidation failed for global ${global.slug}`)
   }
 
   return doc

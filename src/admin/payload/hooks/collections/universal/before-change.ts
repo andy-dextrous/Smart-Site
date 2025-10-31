@@ -46,8 +46,8 @@ export const beforeUniversalChange: CollectionBeforeChangeHook = async ({
     data._uriGenerated = true
   } catch (error) {
     payload.logger.error(
-      `URI generation failed for ${collection.slug}/${data.slug}:`,
-      error
+      { error, collection: collection.slug, slug: data.slug },
+      `URI generation failed for ${collection.slug}/${data.slug}`
     )
     data._uriGenerationFailed = true
   }

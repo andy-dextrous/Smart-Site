@@ -92,8 +92,12 @@ export async function updateURI({
         })
       } catch (error) {
         payload.logger.warn(
-          `Failed to generate breadcrumbs for ${collection}/${documentId}:`,
-          error
+          {
+            error,
+            collection,
+            documentId,
+          },
+          `Failed to generate breadcrumbs for ${collection}/${documentId}`
         )
         resolvedBreadcrumbs = []
       }
@@ -153,8 +157,12 @@ export async function updateURI({
         await payload.delete({ collection: "uri-index", id: draftEntry.id })
       } catch (error) {
         payload.logger.warn(
-          `Failed to clean up draft URI index entry for ${collection}/${documentId}:`,
-          error
+          {
+            error,
+            collection,
+            documentId,
+          },
+          `Failed to clean up draft URI index entry for ${collection}/${documentId}`
         )
       }
     }
@@ -190,6 +198,11 @@ export async function updateURI({
         )
         if (redirectResult.success) {
           payload.logger.info(
+            {
+              redirectSource,
+              collection,
+              documentId,
+            },
             `✅ Automatic redirect created: ${redirectSource} → ${collection}/${documentId}`
           )
         } else {
@@ -199,7 +212,7 @@ export async function updateURI({
     }
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error("Failed to update URI index:", error)
+    payload.logger.error({ error }, "Failed to update URI index")
   }
 }
 
@@ -236,7 +249,7 @@ export async function deleteURI(collection: string, documentId: string): Promise
     }
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error("Failed to delete from URI index:", error)
+    payload.logger.error({ error }, "Failed to delete from URI index")
   }
 }
 
@@ -307,7 +320,7 @@ export async function checkURIConflict(
     }
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error("Failed to check URI conflict:", error)
+    payload.logger.error({ error }, "Failed to check URI conflict")
     return null
   }
 }
@@ -402,8 +415,11 @@ export async function regenerateURIs(context?: any): Promise<PopulationStats> {
         stats.errors += collectionStats.errors
       } else {
         payload.logger.error(
-          `Failed to process collection ${collection.slug}:`,
-          result.reason
+          {
+            error: result.reason,
+            collection: collection.slug,
+          },
+          `Failed to process collection ${collection.slug}`
         )
         stats.collections[collection.slug] = { found: 0, populated: 0, errors: 1 }
         stats.errors++
@@ -416,7 +432,7 @@ export async function regenerateURIs(context?: any): Promise<PopulationStats> {
     return stats
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error("URI regeneration failed with critical error:", error)
+    payload.logger.error({ error }, "URI regeneration failed with critical error")
     throw error
   }
 }

@@ -199,7 +199,7 @@ export default function DesignSystemPreviewPage(): any {
           <div className="flex items-center gap-content">
             <SparklesIcon className="size-6 text-primary" />
             <span className="text-sm uppercase tracking-[0.2em]">
-              Smart Site Starter
+              Smart Site
             </span>
           </div>
           <div className="flex flex-col gap-content-sm">
@@ -684,7 +684,7 @@ function OverlayGallery(): any {
               </SheetHeader>
               <div className="flex flex-col gap-content-sm px-control-lg">
                 <Label htmlFor="sheet-heading">Heading</Label>
-                <Input id="sheet-heading" defaultValue="Build with Smart Site Starter" />
+                <Input id="sheet-heading" defaultValue="Build with Smart Site" />
                 <Label htmlFor="sheet-preheading">Pre-heading</Label>
                 <Textarea
                   id="sheet-preheading"
@@ -842,7 +842,7 @@ function ContentGallery(): any {
             </p>
             <h3>Scaling acquisition with modular landing pages</h3>
             <p className="text-dark-600">
-              Smart Site Starter condenses brand foundations into configurable tokens,
+              Smart Site condenses brand foundations into configurable tokens,
               unlocking rapid iteration across campaigns. This preview route ensures
               designers and engineers stay aligned on the canonical implementation before
               promoting updates to client instances.

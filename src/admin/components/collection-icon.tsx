@@ -1,6 +1,6 @@
 "use client"
 
-import { ComponentType, Suspense } from "react"
+import { ComponentType, Suspense, createElement, useMemo } from "react"
 import { IoIosDocument } from "react-icons/io"
 import dynamic from "next/dynamic"
 import { navIconMap } from "@/admin/payload/components/backend/nav/navIconMap"
@@ -57,12 +57,18 @@ const iconLoaders: Record<string, () => Promise<any>> = {
 // Cache for loaded components
 const componentCache = new Map<string, ComponentType<{ className?: string }>>()
 
+function getIconCacheKey(config: IconConfig) {
+  if (config.type === "lucide") {
+    return `lucide:${config.name}`
+  }
+  if (config.type === "react-icons") {
+    return `ri:${config.name}`
+  }
+  return `custom:${config.mediaId ?? config.url ?? "unknown"}`
+}
+
 function createDynamicIcon(config: IconConfig): ComponentType<{ className?: string }> {
-  const cacheKey = config.type === "lucide"
-    ? `lucide:${config.name}`
-    : config.type === "react-icons"
-    ? `ri:${config.name}`
-    : `custom:${config.mediaId ?? config.url ?? "unknown"}`
+  const cacheKey = getIconCacheKey(config)
   
   // Check cache first
   if (componentCache.has(cacheKey)) {
@@ -129,30 +135,35 @@ interface CollectionIconProps {
 }
 
 export function CollectionIcon({ slug, iconConfig, item, className }: CollectionIconProps) {
-  // Priority 1: Use provided iconConfig
-  if (iconConfig) {
-    const DynamicIcon = createDynamicIcon(iconConfig)
+  const resolvedConfig = useMemo<IconConfig | null>(() => {
+    if (iconConfig) {
+      return iconConfig
+    }
+    if (item) {
+      const customMetadata = (item.admin?.custom || item.custom) as CollectionCustomMetadata | undefined
+      if (customMetadata?.icon) {
+        return customMetadata.icon
+      }
+    }
+    return null
+  }, [iconConfig, item])
+
+  const dynamicIconElement = useMemo(() => {
+    if (!resolvedConfig) {
+      return null
+    }
+    const Component = createDynamicIcon(resolvedConfig)
+    return createElement(Component, { className })
+  }, [resolvedConfig, className])
+
+  if (dynamicIconElement) {
     return (
       <Suspense fallback={<IoIosDocument className={`${className} animate-pulse`} />}>
-        <DynamicIcon className={className} />
+        {dynamicIconElement}
       </Suspense>
     )
   }
-  
-  // Priority 2: Extract from item if provided
-  if (item) {
-    const customMetadata = (item.admin?.custom || item.custom) as CollectionCustomMetadata | undefined
-    if (customMetadata?.icon) {
-      const DynamicIcon = createDynamicIcon(customMetadata.icon)
-      return (
-        <Suspense fallback={<IoIosDocument className={`${className} animate-pulse`} />}>
-          <DynamicIcon className={className} />
-        </Suspense>
-      )
-    }
-  }
-  
-  // Priority 3: Fall back to navIconMap
+
   const FallbackIcon = navIconMap[slug] || navIconMap.default || IoIosDocument
   return <FallbackIcon className={className} />
 }

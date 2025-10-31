@@ -314,152 +314,6 @@ export function ChatThreadsProvider({ children, isOpen, scope }: ChatThreadsProv
     setThreads(list)
   }, [])
 
-  /**
-   * Fetch: messages with TTL + fingerprint guard
-   */
-function normalizeStoredMessage(message: UIMessage): UIMessage {
-  const cloned = { ...message }
-  if (Array.isArray(cloned.parts)) {
-    cloned.parts = cloned.parts
-      .map(part => {
-        if (!part || typeof (part as any).type !== "string") {
-          return part as UIMessage["parts"][number]
-        }
-        return restorePartFromData(part as UIMessage["parts"][number])
-      })
-      .filter(part => {
-        const type = typeof (part as any)?.type === "string" ? ((part as any).type as string) : ""
-        return type !== "tool-invocation"
-      })
-  }
-  const withInvocations = cloned as UIMessage & {
-    toolInvocations?: Array<Record<string, unknown>>
-  }
-  if ("toolInvocations" in withInvocations) {
-    delete withInvocations.toolInvocations
-  }
-  if (Array.isArray(withInvocations.toolInvocations)) {
-    withInvocations.toolInvocations = withInvocations.toolInvocations.map(invocation => {
-      const updated = { ...invocation }
-      if (typeof updated.state === "string" && updated.state === "streaming") {
-        delete updated.state
-      }
-      return updated
-    })
-  }
-  return withInvocations
-}
-
-function restorePartFromData(part: UIMessage["parts"][number]): UIMessage["parts"][number] {
-  const record = part as Record<string, unknown>
-  const typeValue = typeof record.type === "string" ? (record.type as string) : ""
-  if (!typeValue.startsWith("data-")) {
-    return part
-  }
-
-  const fallbackType = typeValue.replace(/^data-/, "")
-  const payload = (record as { data?: unknown }).data
-
-  if (payload && typeof payload === "object") {
-    const restored = { ...(payload as Record<string, unknown>) }
-    const originalType = typeof restored.originalType === "string" ? (restored.originalType as string) : fallbackType
-    delete restored.originalType
-    if (!("type" in restored)) {
-      (restored as any).type = originalType
-    }
-    const idValue = typeof (record as any).id === "string" ? ((record as any).id as string) : undefined
-    if (idValue && !("id" in restored)) {
-      restored.id = idValue
-    }
-    return restored as UIMessage["parts"][number]
-  }
-
-  const fallback = { ...record }
-  ;(fallback as any).type = fallbackType
-  delete (fallback as any).data
-  return fallback as UIMessage["parts"][number]
-}
-
-interface ToolInvocationSnapshot {
-  result?: unknown
-  args?: unknown
-  toolName?: unknown
-  toolCallId?: unknown
-}
-
-function buildToolInvocationSnapshot(messages: UIMessage[] | undefined) {
-  const map = new Map<string, ToolInvocationSnapshot>()
-  if (!Array.isArray(messages)) return map
-  for (const message of messages) {
-    if (Array.isArray(message.parts)) {
-      for (const part of message.parts) {
-        const callId = (part as any)?.toolInvocation?.toolCallId
-        if (typeof callId === "string") {
-          map.set(callId, {
-            result: (part as any)?.toolInvocation?.result,
-            args: (part as any)?.toolInvocation?.args,
-            toolName: (part as any)?.toolInvocation?.toolName,
-            toolCallId: callId,
-          })
-        }
-      }
-    }
-    const invocations = (message as any)?.toolInvocations as Array<Record<string, unknown>> | undefined
-    if (Array.isArray(invocations)) {
-      for (const invocation of invocations) {
-        const callId = typeof invocation.toolCallId === "string" ? invocation.toolCallId : undefined
-        if (callId && !map.has(callId)) {
-          map.set(callId, {
-            result: invocation.result,
-            args: invocation.args,
-            toolName: invocation.toolName,
-            toolCallId: callId,
-          })
-        }
-      }
-    }
-  }
-  return map
-}
-
-function enrichMessageWithSnapshots(message: UIMessage, snapshot: Map<string, ToolInvocationSnapshot>): UIMessage {
-  const enriched: UIMessage & {
-    toolInvocations?: Array<Record<string, unknown>>
-  } = { ...message }
-
-  if (Array.isArray(enriched.parts)) {
-    enriched.parts = enriched.parts.map(part => {
-      const callId = (part as any)?.toolInvocation?.toolCallId
-      if (typeof callId === "string" && snapshot.has(callId)) {
-        const snap = snapshot.get(callId)!
-        const mergedInvocation = {
-          ...(part as any).toolInvocation,
-          ...snap,
-        }
-        return {
-          ...(part as any),
-          toolInvocation: mergedInvocation,
-        } as UIMessage["parts"][number]
-      }
-      return part
-    })
-  }
-
-  const invocations = (enriched.toolInvocations ?? []) as Array<Record<string, unknown>>
-  if (Array.isArray(invocations) && invocations.length) {
-    enriched.toolInvocations = invocations.map(invocation => {
-      const callId = typeof invocation.toolCallId === "string" ? invocation.toolCallId : undefined
-      if (callId && snapshot.has(callId)) {
-        const snap = snapshot.get(callId)!
-        return { ...invocation, ...snap }
-      }
-      return invocation
-    })
-  }
-
-  return enriched
-}
-
   const refreshMessages = useCallback(
     async (threadId: string, opts: { force?: boolean } = {}) => {
       const token = (loadTokensRef.current[threadId] || 0) + 1
@@ -807,7 +661,7 @@ function enrichMessageWithSnapshots(message: UIMessage, snapshot: Map<string, To
       }
       initializedRef.current = true
     })()
-  }, [isOpen])
+  }, [isOpen, persistActive, refreshMessages, refreshThreads])
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -932,4 +786,151 @@ export function useThreadMessagesBridge(threadId?: string) {
     if (!threadId) return
     refreshMessages(threadId).catch(() => {})
   }, [threadId, refreshMessages])
+}
+
+/*************************************************************************/
+/*  CHAT THREAD HELPERS
+/*************************************************************************/
+
+interface ToolInvocationSnapshot {
+  result?: unknown
+  args?: unknown
+  toolName?: unknown
+  toolCallId?: unknown
+}
+
+function normalizeStoredMessage(message: UIMessage): UIMessage {
+  const cloned = { ...message }
+  if (Array.isArray(cloned.parts)) {
+    cloned.parts = cloned.parts
+      .map(part => {
+        if (!part || typeof (part as any).type !== "string") {
+          return part as UIMessage["parts"][number]
+        }
+        return restorePartFromData(part as UIMessage["parts"][number])
+      })
+      .filter(part => {
+        const type = typeof (part as any)?.type === "string" ? ((part as any).type as string) : ""
+        return type !== "tool-invocation"
+      })
+  }
+  const withInvocations = cloned as UIMessage & {
+    toolInvocations?: Array<Record<string, unknown>>
+  }
+  if ("toolInvocations" in withInvocations) {
+    delete withInvocations.toolInvocations
+  }
+  if (Array.isArray(withInvocations.toolInvocations)) {
+    withInvocations.toolInvocations = withInvocations.toolInvocations.map(invocation => {
+      const updated = { ...invocation }
+      if (typeof updated.state === "string" && updated.state === "streaming") {
+        delete updated.state
+      }
+      return updated
+    })
+  }
+  return withInvocations
+}
+
+function restorePartFromData(part: UIMessage["parts"][number]): UIMessage["parts"][number] {
+  const record = part as Record<string, unknown>
+  const typeValue = typeof record.type === "string" ? (record.type as string) : ""
+  if (!typeValue.startsWith("data-")) {
+    return part
+  }
+
+  const fallbackType = typeValue.replace(/^data-/, "")
+  const payload = (record as { data?: unknown }).data
+
+  if (payload && typeof payload === "object") {
+    const restored = { ...(payload as Record<string, unknown>) }
+    const originalType = typeof restored.originalType === "string" ? (restored.originalType as string) : fallbackType
+    delete restored.originalType
+    if (!("type" in restored)) {
+      (restored as any).type = originalType
+    }
+    const idValue = typeof (record as any).id === "string" ? ((record as any).id as string) : undefined
+    if (idValue && !("id" in restored)) {
+      restored.id = idValue
+    }
+    return restored as UIMessage["parts"][number]
+  }
+
+  const fallback = { ...record }
+  ;(fallback as any).type = fallbackType
+  delete (fallback as any).data
+  return fallback as UIMessage["parts"][number]
+}
+
+function buildToolInvocationSnapshot(messages: UIMessage[] | undefined) {
+  const map = new Map<string, ToolInvocationSnapshot>()
+  if (!Array.isArray(messages)) return map
+  for (const message of messages) {
+    if (Array.isArray(message.parts)) {
+      for (const part of message.parts) {
+        const callId = (part as any)?.toolInvocation?.toolCallId
+        if (typeof callId === "string") {
+          map.set(callId, {
+            result: (part as any)?.toolInvocation?.result,
+            args: (part as any)?.toolInvocation?.args,
+            toolName: (part as any)?.toolInvocation?.toolName,
+            toolCallId: callId,
+          })
+        }
+      }
+    }
+    const invocations = (message as any)?.toolInvocations as Array<Record<string, unknown>> | undefined
+    if (Array.isArray(invocations)) {
+      for (const invocation of invocations) {
+        const callId = typeof invocation.toolCallId === "string" ? invocation.toolCallId : undefined
+        if (callId && !map.has(callId)) {
+          map.set(callId, {
+            result: invocation.result,
+            args: invocation.args,
+            toolName: invocation.toolName,
+            toolCallId: callId,
+          })
+        }
+      }
+    }
+  }
+  return map
+}
+
+function enrichMessageWithSnapshots(message: UIMessage, snapshot: Map<string, ToolInvocationSnapshot>): UIMessage {
+  const enriched: UIMessage & {
+    toolInvocations?: Array<Record<string, unknown>>
+  } = { ...message }
+
+  if (Array.isArray(enriched.parts)) {
+    enriched.parts = enriched.parts.map(part => {
+      const callId = (part as any)?.toolInvocation?.toolCallId
+      if (typeof callId === "string" && snapshot.has(callId)) {
+        const snap = snapshot.get(callId)!
+        const mergedInvocation = {
+          ...(part as any).toolInvocation,
+          ...snap,
+        }
+        return {
+          ...(part as any),
+          toolInvocation: mergedInvocation,
+        } as UIMessage["parts"][number]
+      }
+      return part
+    })
+  }
+
+  const invocations = (enriched.toolInvocations ?? []) as Array<Record<string, unknown>>
+  if (Array.isArray(invocations) && invocations.length) {
+    enriched.toolInvocations = invocations.map(invocation => {
+      const callId = typeof invocation.toolCallId === "string" ? invocation.toolCallId : undefined
+      if (callId && snapshot.has(callId)) {
+        const snap = snapshot.get(callId)!
+        return { ...invocation, ...snap }
+      }
+      return invocation
+    })
+  }
+
+  return enriched
 }

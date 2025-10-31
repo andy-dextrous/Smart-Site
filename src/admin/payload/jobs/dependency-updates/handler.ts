@@ -235,7 +235,7 @@ export async function uriDependentUpdatesHandler({
         allBatchUpdates.push(...operationResult.batchUpdates)
         result.operationsProcessed.push(`${operation.operation}:${operation.entityId}`)
       } catch (error) {
-        logger.error(`Failed to process operation ${operation.operation}:`, error)
+        logger.error({ error, operation: operation.operation }, `Failed to process operation ${operation.operation}`)
         result.errors.push(
           `${operation.operation}: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -251,8 +251,8 @@ export async function uriDependentUpdatesHandler({
         result.documentsUpdated++
       } catch (error) {
         logger.error(
-          `Failed to update document ${update.collection}:${update.documentId}:`,
-          error
+          { error, collection: update.collection, documentId: update.documentId },
+          `Failed to update document ${update.collection}:${update.documentId}`
         )
         result.errors.push(
           `Document update failed: ${update.collection}:${update.documentId} - ${error instanceof Error ? error.message : String(error)}`
@@ -277,7 +277,7 @@ export async function uriDependentUpdatesHandler({
           0
         )
       } catch (error) {
-        logger.error("Failed to process batch cache invalidation:", error)
+        logger.error({ error }, "Failed to process batch cache invalidation")
         result.errors.push(
           `Cache invalidation failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -290,7 +290,7 @@ export async function uriDependentUpdatesHandler({
       `Completed batched dependent updates: ${result.documentsUpdated} documents updated, ${result.cacheEntriesCleared} cache entries cleared, ${result.errors.length} errors`
     )
   } catch (error) {
-    logger.error(`Batched dependent updates job failed:`, error)
+    logger.error({ error }, "Batched dependent updates job failed")
     result.errors.push(error instanceof Error ? error.message : String(error))
   }
 

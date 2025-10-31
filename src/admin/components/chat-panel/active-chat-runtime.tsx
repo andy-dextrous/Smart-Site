@@ -114,7 +114,7 @@ export function ActiveChatRuntime() {
     if (!Array.isArray(chatMessages) || chatMessages.length === 0) return
     const mapped = mapStatus(status)
     setThreadMessages({ threadId: activeThreadId, items: chatMessages, status: mapped, mode: "replace" })
-  }, [chatMessages, status, activeThreadId])
+  }, [chatMessages, status, activeThreadId, setThreadMessages])
 
   useEffect(() => {
     if (status === "streaming") hadStreamingRef.current = true

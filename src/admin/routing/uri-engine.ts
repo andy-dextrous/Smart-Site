@@ -120,7 +120,7 @@ async function resolveHomepageSlug(payload: any, routingSettings: any): Promise<
 
     return homepage?.slug || null
   } catch (error) {
-    payload.logger.warn("Failed to resolve homepage slug during URI generation:", error)
+    payload.logger.warn({ error }, "Failed to resolve homepage slug during URI generation")
     return null
   }
 }
@@ -289,7 +289,7 @@ async function generatePageIndexData({
       breadcrumbs: mode === "uri" ? undefined : currentBreadcrumbs,
     }
   } catch (error) {
-    payload.logger.warn("Failed to generate hierarchical page data:", error)
+    payload.logger.warn({ error }, "Failed to generate hierarchical page data")
 
     _visited.delete(currentDocId) // Cleanup
     return createFallbackPageResult(slug, title)
@@ -418,7 +418,7 @@ async function generateCollectionIndexData({
         }
       }
     } catch (error) {
-      payload.logger.warn(`Failed to fetch archive page for ${collection}:`, error)
+      payload.logger.warn({ error, collection }, `Failed to fetch archive page for ${collection}`)
     }
   }
 
@@ -506,7 +506,7 @@ async function checkConflict({
         }
       }
     } catch (error) {
-      payload.logger.error(`Failed to get conflict document details:`, error)
+      payload.logger.error({ error }, "Failed to get conflict document details")
     }
   }
 

@@ -21,10 +21,10 @@ export const afterAISettingsChange: GlobalAfterChangeHook = async ({
 	}
 
 	try {
-		revalidateTag(`global:${global.slug}`)
+		revalidateTag(`global:${global.slug}`, { expire: 0 })
 		payload.logger.info(`Revalidated global:${global.slug}`)
 	} catch (error) {
-		payload.logger.error(`Revalidation failed for global ${global.slug}:`, error)
+		payload.logger.error({ error, slug: global.slug }, `Revalidation failed for global ${global.slug}`)
 	}
 
 	return doc

@@ -68,7 +68,7 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
         logger: payload.logger,
       })
     } catch (error) {
-      payload.logger.debug(`Smart revalidation failed for ${collection.slug}:`, error)
+      payload.logger.debug({ error, collection: collection.slug }, `Smart revalidation failed for ${collection.slug}`)
     }
   }
 

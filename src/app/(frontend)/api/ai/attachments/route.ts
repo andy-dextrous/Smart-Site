@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 
 import { getSmartSiteConfig } from "@/admin/config"
 import { getAIBackendStatus } from "@/admin/lib/ai/status"
+import { resolveAIRequestCredentials } from "@/admin/lib/ai/identity"
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,12 +14,11 @@ export async function POST(req: NextRequest) {
     const config = getSmartSiteConfig()
     const aiConfig = config.features.ai
 
-    const apiKey = process.env.AI_AGENT_API_KEY
-    const siteId = process.env.AI_AGENT_USER_ID
-
-    if (!apiKey || !siteId) {
-      throw new Error("Missing AI credentials in environment variables")
+    const credentials = await resolveAIRequestCredentials()
+    if (!credentials) {
+      throw new Error("Missing AI credentials")
     }
+    const { apiKey, siteId } = credentials
 
     const headers: Record<string, string> = {
       Authorization: `Bearer ${apiKey}`,

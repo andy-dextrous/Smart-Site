@@ -249,6 +249,37 @@
   &__toaster-error-icon {
     color: #dc2626;
   }
+
+  &__workspace-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    border-radius: 0.125rem;
+    padding: 0 0.5rem;
+    height: 1.25rem;
+    background: rgba(79, 55, 251, 0.22);
+    color: #f8f8f9;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background 0.18s ease, color 0.18s ease;
+
+    &:hover {
+      background: rgba(79, 55, 251, 0.38);
+      color: #ffffff;
+    }
+
+    &--active {
+      background: rgba(248, 248, 249, 0.18);
+      color: #ffffff;
+    }
+  }
+
+  &__workspace-button-icon {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .admin-bar-toaster {

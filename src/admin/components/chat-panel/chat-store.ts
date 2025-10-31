@@ -1,6 +1,7 @@
 "use client"
 
 import { useSyncExternalStore } from "react"
+import type { AIWorkspaceState } from "@/admin/lib/ai/status"
 
 /*************************************************************************/
 /*  CHAT STORE - SHARED ACROSS FRONTEND + ADMIN ROOTS
@@ -9,6 +10,7 @@ import { useSyncExternalStore } from "react"
 type ChatStoreState = {
   isEnabled: boolean
   statusReason: string | null
+  status: AIWorkspaceState | null
   isOpen: boolean
 }
 
@@ -16,7 +18,12 @@ type ChatStoreListener = () => void
 
 type ChatStoreEvent =
   | { type: "open"; isOpen: boolean }
-  | { type: "availability"; isEnabled: boolean; statusReason: string | null }
+  | {
+      type: "availability"
+      isEnabled: boolean
+      statusReason: string | null
+      status: AIWorkspaceState | null
+    }
 
 type ChatStoreSelector<T> = (state: ChatStoreState) => T
 
@@ -28,6 +35,7 @@ const CHANNEL_NAME = "smart-site-chat"
 let state: ChatStoreState = {
   isEnabled: false,
   statusReason: null,
+  status: null,
   isOpen: false,
 }
 
@@ -99,6 +107,7 @@ function handleBroadcast(event: MessageEvent<ChatStoreEvent>) {
         ...state,
         isEnabled: data.isEnabled,
         statusReason: data.statusReason,
+        status: data.status,
       }
       emit()
       break
@@ -156,14 +165,19 @@ export function getChatSnapshot(): ChatStoreSnapshot {
   return state
 }
 
-export function setChatAvailability(isEnabled: boolean, statusReason: string | null) {
+export function setChatAvailability(
+  isEnabled: boolean,
+  statusReason: string | null,
+  status: AIWorkspaceState | null = null
+) {
   const next = {
     ...state,
     isEnabled,
     statusReason,
+    status,
   }
   state = next
-  emit({ type: "availability", isEnabled, statusReason })
+  emit({ type: "availability", isEnabled, statusReason, status })
 }
 
 export function setChatOpen(isOpen: boolean) {
@@ -188,6 +202,7 @@ export function resetChatStore() {
   state = {
     isEnabled: false,
     statusReason: null,
+    status: null,
     isOpen: false,
   }
   emit()

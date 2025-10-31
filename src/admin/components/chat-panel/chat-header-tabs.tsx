@@ -10,7 +10,7 @@ export const chatHeaderStyles = /* css */ `
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--chat-color-border);
   background: var(--chat-color-layer-1);
 }
@@ -69,6 +69,7 @@ export const chatHeaderStyles = /* css */ `
   border-radius: 50%;
   border: none;
   color: var(--chat-color-text-muted);
+  background: rgba(0, 0, 0, 0.02);
   transition: background 0.2s ease, color 0.2s ease;
   position: absolute;
   top: 50%;
@@ -84,6 +85,7 @@ export const chatHeaderStyles = /* css */ `
 .chat-root[data-theme="dark"] .chat-tabs__tab-close,
 [data-chat-panel-root][data-theme="dark"] .chat-tabs__tab-close {
   color: var(--chat-color-text-secondary);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .chat-root[data-theme="dark"] .chat-tabs__tab-close:hover,

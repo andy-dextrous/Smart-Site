@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>http://localhost:3000/sitemap/pages.xml</loc>
+    <lastmod>2025-10-30T21:25:19.135Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>http://localhost:3000/sitemap/posts.xml</loc>
+    <lastmod>2025-10-30T21:25:19.136Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>http://localhost:3000/sitemap/team.xml</loc>
+    <lastmod>2025-10-30T21:25:19.136Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>http://localhost:3000/sitemap/services.xml</loc>
+    <lastmod>2025-10-30T21:25:19.136Z</lastmod>
+  </sitemap>
+</sitemapindex>

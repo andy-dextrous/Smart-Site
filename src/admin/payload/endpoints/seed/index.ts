@@ -26,6 +26,7 @@ import { seedAIAgent, ensureAIAgentWithAPIKey } from "./users/ai-agent"
 import { postMinimalTemplate } from "./templates/post-minimal"
 import { insightsMinimalPage } from "./pages/insights-minimal"
 import { sampleMinimalPosts } from "./posts/minimal-posts"
+import { revalidateTag } from "next/cache"
 
 // Types
 type SeedResult = {
@@ -179,11 +180,10 @@ class DynamicSeedManager {
        * This ensures getTemplateIdForCollection() reads the newly created settings
        */
       try {
-        const { revalidateTag } = await import("next/cache")
-        revalidateTag("global:settings")
+        revalidateTag("global:settings", { expire: 0 })
         this.payload.logger.info("Invalidated settings cache for URI regeneration")
       } catch (error) {
-        this.payload.logger.error("Failed to invalidate settings cache:", error)
+        this.payload.logger.error({ error }, "Failed to invalidate settings cache")
       }
 
       /**
@@ -201,15 +201,17 @@ class DynamicSeedManager {
        */
       if (this.blogEnabled) {
         try {
-          const { revalidateTag } = await import("next/cache")
           // Invalidate collection and URI index cache tags for posts
-          revalidateTag("collection:posts")
-          revalidateTag("uri-index:posts")
+          revalidateTag("collection:posts", { expire: 0 })
+          revalidateTag("uri-index:posts", { expire: 0 })
           // Also revalidate the Insights archive page URI
-          revalidateTag("uri:/insights")
+          revalidateTag("uri:/insights", { expire: 0 })
           this.payload.logger.info("Revalidated posts collection and insights URI cache tags")
         } catch (error) {
-          this.payload.logger.error("Failed to revalidate posts/insights cache tags:", error)
+          this.payload.logger.error(
+            { error },
+            "Failed to revalidate posts/insights cache tags"
+          )
         }
       }
 
@@ -246,10 +248,11 @@ class DynamicSeedManager {
           this.payload.logger.info(`Email: ${aiAgent.email}`)
           this.payload.logger.info(`User ID: ${aiAgent.id}`)
           this.payload.logger.info("═══════════════════════════════════════════════════════════════")
+          this.payload.logger.info("AI workspace is pending connection. Visit the admin AI settings to request Smart Site AI access when you're ready.")
           
           // Optionally save to .env file for development
           if (process.env.NODE_ENV === "development") {
-            await this.saveAPIKeyToEnv(apiKey, aiAgent.id)
+            await this.saveAPIKeyToEnv(apiKey)
           }
         } else {
           this.payload.logger.info(`AI agent already has API key configured (not shown for security)`)
@@ -280,7 +283,6 @@ class DynamicSeedManager {
           normalized.includes("already exists") ||
           normalized.includes("already provisioned") ||
           normalized.includes("api key is not available") ||
-          normalized.includes("registration secret missing") ||
           normalized.includes("endpoint is not configured") ||
           normalized.includes("not found") ||
           normalized.includes("404")
@@ -290,7 +292,7 @@ class DynamicSeedManager {
             `AI agent already provisioned; skipping new credentials (${message || "no details"})`
           )
         } else {
-          this.payload.logger.error("Failed to create AI agent user:", error)
+          this.payload.logger.error({ error }, "Failed to create AI agent user")
           stats.errors.push(`AI agent creation failed: ${message || error}`)
         }
         // Don't fail the entire seeding if AI agent creation fails
@@ -320,7 +322,7 @@ class DynamicSeedManager {
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
       stats.errors.push(errorMessage)
 
-      this.payload.logger.error("Database seeding failed:", error)
+      this.payload.logger.error({ error }, "Database seeding failed")
 
       /**
        * Always re-enable hooks in case of error
@@ -329,8 +331,8 @@ class DynamicSeedManager {
         enableSyncHooks(this.payload, this.context)
       } catch (disableError) {
         this.payload.logger.error(
-          "Failed to re-enable hooks after seeding error:",
-          disableError
+          { error: disableError },
+          "Failed to re-enable hooks after seeding error"
         )
       }
 
@@ -359,7 +361,7 @@ class DynamicSeedManager {
         this.payload.logger.warn("Cache clear after seeding reported failure state")
       }
     } catch (error) {
-      this.payload.logger.error("Failed to clear cache after seeding:", error)
+      this.payload.logger.error({ error }, "Failed to clear cache after seeding")
     }
   }
 
@@ -367,7 +369,7 @@ class DynamicSeedManager {
   /*  SAVE API KEY TO ENV FILE (DEVELOPMENT ONLY)
   /*************************************************************************/
   
-  private async saveAPIKeyToEnv(apiKey: string, userId: string): Promise<void> {
+  private async saveAPIKeyToEnv(apiKey: string): Promise<void> {
     try {
       const envPath = path.join(process.cwd(), ".env")
       
@@ -376,7 +378,7 @@ class DynamicSeedManager {
       try {
         envContent = await fs.readFile(envPath, "utf-8")
       } catch (error) {
-        this.payload.logger.error("Could not read .env file:", error)
+        this.payload.logger.error({ error }, "Could not read .env file")
         return
       }
       
@@ -384,7 +386,6 @@ class DynamicSeedManager {
       const lines = envContent.split("\n")
       const updatedLines = []
       let foundApiKey = false
-      let foundUserId = false
       let lastNonEmptyIndex = -1
       
       for (let i = 0; i < lines.length; i++) {
@@ -394,11 +395,6 @@ class DynamicSeedManager {
         if (line.startsWith("AI_AGENT_API_KEY=")) {
           updatedLines.push(`AI_AGENT_API_KEY=${apiKey}`)
           foundApiKey = true
-        }
-        // Update existing AI_AGENT_USER_ID
-        else if (line.startsWith("AI_AGENT_USER_ID=")) {
-          updatedLines.push(`AI_AGENT_USER_ID=${userId}`)
-          foundUserId = true
         }
         // Keep all other lines
         else {
@@ -412,7 +408,7 @@ class DynamicSeedManager {
       }
       
       // If we didn't find the variables, add them
-      if (!foundApiKey || !foundUserId) {
+      if (!foundApiKey) {
         // Find where to insert (before a section or at the end)
         let insertIndex = lastNonEmptyIndex + 1
         
@@ -444,13 +440,7 @@ class DynamicSeedManager {
         }
         
         // Add the missing variables
-        if (!foundApiKey) {
-          updatedLines.splice(insertIndex, 0, `AI_AGENT_API_KEY=${apiKey}`)
-          insertIndex++
-        }
-        if (!foundUserId) {
-          updatedLines.splice(insertIndex, 0, `AI_AGENT_USER_ID=${userId}`)
-        }
+        updatedLines.splice(insertIndex, 0, `AI_AGENT_API_KEY=${apiKey}`)
       }
       
       // Write back to file
@@ -458,7 +448,7 @@ class DynamicSeedManager {
       
       this.payload.logger.info("API key saved to .env for development use")
     } catch (error) {
-      this.payload.logger.warn("Could not save API key to .env:", error)
+      this.payload.logger.warn({ error }, "Could not save API key to .env")
     }
   }
 
@@ -502,7 +492,7 @@ class DynamicSeedManager {
       const page = await this.payload.create({ collection: "pages", data: pageData as any, context: this.context })
       pages.push(page)
     } catch (error) {
-      this.payload.logger.error("Error creating insights page:", error)
+      this.payload.logger.error({ error }, "Error creating insights page")
     }
     return pages
   }
@@ -521,7 +511,7 @@ class DynamicSeedManager {
         const post = await this.payload.create({ collection: "posts", data: p as any, context: this.context })
         posts.push(post)
       } catch (error) {
-        this.payload.logger.error("Error creating post:", error)
+        this.payload.logger.error({ error }, "Error creating post")
       }
     }
     return posts
@@ -574,7 +564,7 @@ class DynamicSeedManager {
         })
         pages.push(page)
       } catch (error) {
-        this.payload.logger.error("Error creating minimal page:", error)
+        this.payload.logger.error({ error }, "Error creating minimal page")
       }
     }
     
@@ -606,7 +596,7 @@ class DynamicSeedManager {
         })
         contactPage = contactLookup.docs?.[0]
       } catch (error) {
-        this.payload.logger.error("Failed to locate contact page for hero button injection:", error)
+        this.payload.logger.error({ error }, "Failed to locate contact page for hero button injection")
         return
       }
     }
@@ -663,8 +653,11 @@ class DynamicSeedManager {
         pages[index] = updatedPage
       } catch (error) {
         this.payload.logger.error(
-          `Failed to attach contact button to page "${page?.slug ?? page?.id}":`,
-          error
+          {
+            error,
+            pageSlug: page?.slug ?? page?.id,
+          },
+          `Failed to attach contact button to page "${page?.slug ?? page?.id}"`
         )
       }
     }
@@ -690,15 +683,14 @@ class DynamicSeedManager {
       })
       // Explicitly revalidate header cache tag since hooks may be disabled during seed
       try {
-        const { revalidateTag } = await import("next/cache")
-        revalidateTag("global:header")
+        revalidateTag("global:header", { expire: 0 })
         this.payload.logger.info("Revalidated global:header after seed")
       } catch (error) {
-        this.payload.logger.error("Failed to revalidate global:header:", error)
+        this.payload.logger.error({ error }, "Failed to revalidate global:header")
       }
       globals.push(header)
     } catch (error) {
-      this.payload.logger.error("Error creating header:", error)
+      this.payload.logger.error({ error }, "Error creating header")
     }
 
     try {
@@ -776,15 +768,14 @@ class DynamicSeedManager {
       })
       // Explicitly revalidate footer cache tag since hooks may be disabled during seed
       try {
-        const { revalidateTag } = await import("next/cache")
-        revalidateTag("global:footer")
+        revalidateTag("global:footer", { expire: 0 })
         this.payload.logger.info("Revalidated global:footer after seed")
       } catch (error) {
-        this.payload.logger.error("Failed to revalidate global:footer:", error)
+        this.payload.logger.error({ error }, "Failed to revalidate global:footer")
       }
       globals.push(footer)
     } catch (error) {
-      this.payload.logger.error("Error creating footer:", error)
+      this.payload.logger.error({ error }, "Error creating footer")
     }
 
     return globals
@@ -815,7 +806,7 @@ class DynamicSeedManager {
       
       this.payload.logger.info("Settings global created with routing configuration")
     } catch (error) {
-      this.payload.logger.error("Error creating settings global:", error)
+      this.payload.logger.error({ error }, "Error creating settings global")
     }
   }
 
@@ -895,10 +886,8 @@ class DynamicSeedManager {
               try {
                 if (
                   collection === "users" &&
-                  (
-                    (typeof process.env.AI_AGENT_USER_ID === "string" && String(item.id) === process.env.AI_AGENT_USER_ID) ||
-                    (typeof (item as any).role === "string" && (item as any).role === "ai-agent")
-                  )
+                  typeof (item as any).role === "string" &&
+                  (item as any).role === "ai-agent"
                 ) {
                   continue
                 }
@@ -910,8 +899,12 @@ class DynamicSeedManager {
                 totalDeleted++
               } catch (deleteError) {
                 this.payload.logger.error(
-                  `Failed to delete ${collection} item ${item.id}:`,
-                  deleteError
+                  {
+                    error: deleteError,
+                    collection,
+                    itemId: item.id,
+                  },
+                  `Failed to delete ${collection} item ${item.id}`
                 )
               }
             }
@@ -926,6 +919,10 @@ class DynamicSeedManager {
           stats.created[collection] = totalDeleted
         } catch (error) {
           this.payload.logger.info(
+            {
+              error,
+              collection,
+            },
             `Collection ${collection} doesn't exist or couldn't be accessed, skipping`
           )
         }
@@ -953,7 +950,7 @@ class DynamicSeedManager {
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
       stats.errors.push(errorMessage)
 
-      this.payload.logger.error("Data deletion failed:", error)
+      this.payload.logger.error({ error }, "Data deletion failed")
 
       /**
        * Always re-enable hooks in case of error
@@ -964,8 +961,8 @@ class DynamicSeedManager {
         }
       } catch (disableError) {
         this.payload.logger.error(
-          "Failed to re-enable hooks after deletion error:",
-          disableError
+          { error: disableError },
+          "Failed to re-enable hooks after deletion error"
         )
       }
 
@@ -1031,7 +1028,7 @@ class DynamicSeedManager {
             this.payload.logger.debug(`Deleted local media directory: ${file}`)
           }
         } catch (error) {
-          this.payload.logger.error(`Failed to delete local media file ${file}:`, error)
+          this.payload.logger.error({ error, file }, `Failed to delete local media file ${file}`)
           errors++
         }
       }
@@ -1040,7 +1037,7 @@ class DynamicSeedManager {
         `Local media cleanup completed: ${deletedFiles} files/directories deleted, ${errors} errors`
       )
     } catch (error) {
-      this.payload.logger.error("Error during local media file cleanup:", error)
+      this.payload.logger.error({ error }, "Error during local media file cleanup")
       // Don't throw the error as this is cleanup - continue with seeding
     }
   }
@@ -1067,7 +1064,7 @@ class DynamicSeedManager {
       // Remove the empty directory
       await fs.rmdir(dirPath)
     } catch (error) {
-      this.payload.logger.error(`Failed to cleanup directory ${dirPath}:`, error)
+      this.payload.logger.error({ error, directory: dirPath }, `Failed to cleanup directory ${dirPath}`)
     }
   }
 
@@ -1113,8 +1110,12 @@ class DynamicSeedManager {
             totalDeleted++
           } catch (error) {
             this.payload.logger.error(
-              `Failed to delete media item ${mediaItem.id} (${mediaItem.filename}):`,
-              error instanceof Error ? error.message : String(error)
+              {
+                error,
+                mediaId: mediaItem.id,
+                filename: mediaItem.filename,
+              },
+              `Failed to delete media item ${mediaItem.id} (${mediaItem.filename})`
             )
 
             totalErrors++
@@ -1133,7 +1134,7 @@ class DynamicSeedManager {
         `Media deletion completed: ${totalDeleted} deleted, ${totalErrors} errors`
       )
     } catch (error) {
-      this.payload.logger.error("Error during media file deletion:", error)
+      this.payload.logger.error({ error }, "Error during media file deletion")
       throw error
     }
   }
@@ -1196,15 +1197,18 @@ class DynamicSeedManager {
           }
         } catch (error) {
           this.payload.logger.debug(
-            `System collection ${collection} cleanup skipped:`,
-            error
+            {
+              error,
+              collection,
+            },
+            `System collection ${collection} cleanup skipped`
           )
         }
       }
 
       this.payload.logger.info("System collections cleanup completed")
     } catch (error) {
-      this.payload.logger.warn("System collections cleanup encountered issues:", error)
+      this.payload.logger.warn({ error }, "System collections cleanup encountered issues")
     }
   }
 }

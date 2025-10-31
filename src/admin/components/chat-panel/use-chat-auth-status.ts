@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 export type ChatAuthStatus = "unknown" | "loading" | "authenticated" | "unauthenticated"
 
@@ -35,12 +35,23 @@ export function useChatAuthStatus(enabled: boolean) {
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    if (!enabled) {
-      setStatus("unauthenticated")
-      return
+    if (!enabled) return
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled) return
+      check().catch(() => {})
+    })
+    return () => {
+      cancelled = true
     }
-    check().catch(() => setStatus("unauthenticated"))
   }, [check, enabled])
 
-  return { status, refresh: check }
+  const derivedStatus = useMemo<ChatAuthStatus>(() => {
+    if (!enabled) {
+      return "unauthenticated"
+    }
+    return status
+  }, [enabled, status])
+
+  return { status: derivedStatus, refresh: check }
 }

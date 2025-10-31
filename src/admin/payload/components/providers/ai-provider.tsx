@@ -13,8 +13,14 @@ interface AIProviderProps {
 
 export async function AIProvider({ children, withContainer = true }: AIProviderProps) {
   const status = await getAIBackendStatus()
+  const isActive = status.status === "active"
   return (
-    <AIProviderClient enabled={status.enabled} reason={status.reason} withContainer={withContainer}>
+    <AIProviderClient
+      enabled={isActive}
+      reason={status.reason}
+      status={status.status}
+      withContainer={withContainer}
+    >
       {children}
     </AIProviderClient>
   )

@@ -61,10 +61,10 @@ export const afterTemplateChange: CollectionAfterChangeHook = async ({
   }
 
   try {
-    revalidateTag(`template:${doc.id}`)
+    revalidateTag(`template:${doc.id}`, { expire: 0 })
     payload.logger.info(`Revalidated template:${doc.id}`)
   } catch (error) {
-    payload.logger.debug(`Template revalidation failed for ${doc.id}:`, error)
+    payload.logger.debug({ error, templateId: doc.id }, `Template revalidation failed for ${doc.id}`)
   }
 
   return doc

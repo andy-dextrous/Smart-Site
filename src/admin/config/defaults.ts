@@ -115,6 +115,11 @@ const AdminMetaSchema = z.object({
   favicon: z.string().optional(),
 })
 
+const IdentityConfigSchema = z.object({
+  siteName: z.string().min(1, "siteName is required"),
+  siteUrl: z.string().url().optional(),
+})
+
 const ImageOptimizationSchema = z.object({
   quality: z.object({
     default: z.number().min(1).max(100),
@@ -189,7 +194,7 @@ const FeaturesConfigSchema = z.object({
   ai: z.object({
     enabled: z.boolean(),
     endpoint: z.string(),
-    registrationPath: z.string().default("/api/internal/identities"),
+    registrationPath: z.string().default("/api/internal/sites/apply"),
   }),
   darkMode: z.boolean(),
   i18n: I18nFeatureSchema,
@@ -208,6 +213,7 @@ const ExtensionsConfigSchema = z.object({
 export const SmartSiteConfigSchema = z.object({
   collections: z.record(z.union([MediaCollectionConfigSchema, CollectionConfigSchema])),
   features: FeaturesConfigSchema,
+  identity: IdentityConfigSchema,
   admin: z.object({
     theme: AdminThemeSchema,
     meta: AdminMetaSchema,
@@ -234,6 +240,7 @@ export type FeaturesConfig = z.infer<typeof FeaturesConfigSchema>
 export type I18nConfig = z.infer<typeof I18nConfigSchema>
 export type I18nFeature = z.infer<typeof I18nFeatureSchema>
 export type SearchFeature = z.infer<typeof SearchFeatureSchema>
+export type IdentityConfig = z.infer<typeof IdentityConfigSchema>
 
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
@@ -249,6 +256,10 @@ const DEFAULT_AI_ENDPOINT =
   process.env.SMARTSITE_AI_ENDPOINT?.trim() || "https://smart-site-ai-core.vercel.app"
 
 export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
+  identity: {
+    siteName: "Smart Site",
+    siteUrl: process.env.NEXT_PUBLIC_URL || "http://localhost:3000",
+  },
   /*************************************************************************/
   /*  COLLECTION CONFIGURATIONS
   /*************************************************************************/
@@ -379,7 +390,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
     ai: {
       enabled: true,
       endpoint: DEFAULT_AI_ENDPOINT,
-      registrationPath: "/api/internal/identities",
+      registrationPath: "/api/internal/sites/apply",
     },
     darkMode: false,
     i18n: false,

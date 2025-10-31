@@ -17,6 +17,7 @@ import { revalidateTag } from "next/cache"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
 import { AISettings } from "@/admin/payload/globals/ai-settings"
 import { sections } from "@/components/sections/config"
+import { getAIAgentUserId } from "@/admin/lib/ai/identity"
 
 const REGISTRY_TAG = "ai-registry"
 const AUTH_HEADER = "authorization"
@@ -477,7 +478,7 @@ function stripGlobal(globalConfig: unknown): GlobalManifest | null {
   return compactedGlobal ?? null
 }
 
-function buildResponseBody(req: PayloadRequest) {
+function buildResponseBody(req: PayloadRequest, siteId: string | null) {
   const payload = req.payload
   const payloadConfig = payload.config ?? {}
   const collections: CollectionManifest[] = Array.isArray(payloadConfig?.collections)
@@ -501,7 +502,7 @@ function buildResponseBody(req: PayloadRequest) {
   return {
     generatedAt: new Date().toISOString(),
     site: {
-      id: process.env.AI_AGENT_USER_ID ?? null,
+      id: siteId,
       url: process.env.NEXT_PUBLIC_URL ?? null,
     },
     payload: payloadMeta,
@@ -649,9 +650,9 @@ async function proxyToPayload(req: PayloadRequest, targetPath: string): Promise<
 
 async function revalidateRegistry(payload: PayloadRequest["payload"], contextLabel: string) {
   try {
-    revalidateTag(REGISTRY_TAG)
+    revalidateTag(REGISTRY_TAG, { expire: 0 })
   } catch (error) {
-    payload.logger.error(`[ai-bridge] Failed to revalidate ${REGISTRY_TAG} after ${contextLabel}`, error)
+    payload.logger.error({ error, registryTag: REGISTRY_TAG, contextLabel }, `[ai-bridge] Failed to revalidate ${REGISTRY_TAG} after ${contextLabel}`)
   }
 }
 
@@ -721,7 +722,8 @@ async function handleRegistry(req: PayloadRequest): Promise<Response> {
   if (!hasValidBearer(req)) {
     return unauthorized()
   }
-  const snapshot = buildResponseBody(req)
+  const siteId = await getAIAgentUserId({ payload: req.payload })
+  const snapshot = buildResponseBody(req, siteId)
   const schemaVersion = computeSchemaSignature(snapshot)
   const responseBody: Record<string, unknown> = { ...snapshot, schemaVersion }
   const raw = JSON.stringify(responseBody)
