@@ -87,21 +87,21 @@ cd <your-site-folder>
 pnpm install
 ```
 
-1. Run the interactive bootstrap. Inside the monorepo you can use the Smart Site CLI (recommended), while standalone exports can keep using the local script:
+1. Run the interactive bootstrap with the Smart Site CLI (published to npm as `smartsite`). Always execute it from the project root so it can find `package.json` and `.env.example`.
 
    ```bash
-   # Monorepo: run from repo root so the CLI can locate apps/smart-site
-   pnpm smartsite init
+   # One-off run without installing anything
+   npx smartsite init --project .
 
-   # Standalone clone fallback
-   pnpm smartsite init
+   # Prefer a pinned dependency? add the CLI locally, then:
+   pnpm smartsite init --project .
    ```
 
    The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, seeds baseline data, and (when seeding is enabled) keeps `next dev` running so you land on a ready-to-edit site.
 
 ### 2. Environment Configuration
 
-> 💡 **Quick start**: `pnpm smartsite init` handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes. AI access is requested later from the Smart Site admin once your project is ready.
+> 💡 **Quick start**: `npx smartsite init --project .` (or `pnpm smartsite init --project .` after installing the CLI) handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes. AI access is requested later from the Smart Site admin once your project is ready.
 >
 > Need to re-run the baseline data later? Use `pnpm smartsite seed starter --start-dev` to boot a local dev server, call `/api/seed`, and keep the site running— or point at any URL with `--url https://staging.yoursite.com`.
 
@@ -325,7 +325,7 @@ pnpm dev
 
 ### 6. Database Seeding & Initial Setup
 
-> **🗃️ Important:** The setup wizard (`pnpm smartsite init`) seeds the minimal profile for you. Use the commands below only when you need to reseed or switch profiles.
+> **🗃️ Important:** The setup wizard (`smartsite init --project .`) seeds the minimal profile for you. Use the commands below only when you need to reseed or switch profiles.
 
 The wizard already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the database.
 
@@ -338,7 +338,7 @@ The wizard already seeds the **minimal** profile so you can start building immed
    pnpm seed
    ```
 
-   The wizard prompts for a site name during setup; rerun `pnpm smartsite init` or call the seed endpoint with a custom `siteName` to change the label.
+   The wizard prompts for a site name during setup; rerun `smartsite init --project .` or call the seed endpoint with a custom `siteName` to change the label.
 
 #### Minimal seed contents
 
@@ -356,7 +356,7 @@ The minimal profile is intentionally lean, giving editors the essentials without
   - *Remember*: headers and footers are managed via Payload globals (`globals/header`, `globals/footer`). Never implement them as sections; update the globals in admin or via `smartsite.config.ts` overrides.
 - **Global settings** preconfigured with site name/description, SEO defaults (including robots.txt), and routing that points the homepage field at the seeded Home page. Social links, locations, analytics IDs, and templates are intentionally left blank for you to fill in.
 
-The starter ships only the minimal profile. Explore `apps/smart-site/` for the richer demo experience if you need sample marketing content.
+This starter ships only the minimal profile so you can build bespoke sites without demo noise. If you need richer marketing content for inspiration, use the separate Smart Site demo repository (it mirrors the same architecture but seeds additional pages, posts, and animations).
 
 ### 7. Available Scripts
 
@@ -850,8 +850,8 @@ Spacing uses a mirrored modular scale that also interpolates between min and max
 
 ### Client and Demo Overrides
 
-- Client apps (`apps/clients/*`) should only override human-controlled tokens in their local `spacing.css`, `colors.css`, or `typography.css`. Avoid copying computed tokens—share the same calculations to guarantee consistency.
-- The showcase demo (`apps/smart-site/`) may experiment with different ratios or container widths, but changes that should ship to clients must land in this starter first.
+- Client deployments generated from this starter should only override human-controlled tokens in their local `spacing.css`, `colors.css`, or `typography.css`. Avoid copying computed tokens—share the same calculations to guarantee consistency.
+- The public Smart Site demo may experiment with different ratios or container widths, but changes that should ship to clients must land in this starter first.
 - When shipping a customised client palette, keep the same token names (`--color-primary-*`). The CLI depends on those names to wire components at generate time.
 
 Adhering to these rules keeps every Smart Site instance portable, predictable, and easy to tune. If a new pattern requires additional tokens, add them alongside the existing inputs and extend this section so downstream implementers understand how to use them.
@@ -1286,7 +1286,7 @@ export function HeroComponent(props: HeroBlock) {
   </div>
   ```
 
-- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and follow the patterns in `apps/clients/elvora/src/components/sections/*` for reference.
+- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and reference the demo project (or your own prior implementations) for practical patterns.
 - **Reusable GSAP effects**: place shared animations in `src/providers/gsap/effects.ts` (using `gsap.registerEffect`) so sections can call `gsap.effects.myEffect(targets, config)` without duplicating timelines. This keeps motion consistent across the catalogue.
 - Keep third-party animation libraries out of sections. If you discover a missing helper, register it centrally in the GSAP provider rather than inlining it per section.
 
@@ -1317,7 +1317,7 @@ export function HeroComponent(props: HeroBlock) {
 
 ### 12. Coordination with the Blocks Library
 
-- When promoting a section to the public catalogue, mirror the Smart Site folder into `apps/blocks-library/src/registry/sections/<name>/` without diverging token usage.
+- When promoting a section to the public catalogue, mirror the Smart Site folder into the Blocks Library repository (`src/registry/sections/<name>/`) without diverging token usage.
 - Provide preview fixtures that use the same field schema so the catalogue renders accurately.
 - Keep dependency metadata up-to-date (`packages/cli/src/registry/sections.ts`) so the CLI installs required fields, animations, and utilities.
 

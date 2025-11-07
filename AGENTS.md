@@ -109,7 +109,7 @@ Reference `README.md` → **Installation & Getting Started** when covering:
 - **Recommended deployment path**: MongoDB Atlas + Vercel hosting with Vercel Blob. Provision Atlas, set `DATABASE_URL` to the SRV URI, enable Blob and add `BLOB_READ_WRITE_TOKEN`, then mirror those secrets in Vercel.
 
 - **Prerequisites:** Node 20+, `pnpm@9.14.4`, MongoDB (local or Atlas), optional Vercel Blob & Resend.
-- **First-time setup:** `pnpm install` then run `pnpm smartsite init` from the monorepo root. Explain wizard outputs (`.env`, secrets, seeding) and ports (3000).
+- **First-time setup:** `pnpm install` then run `npx smartsite init --project .` from the project root. Explain wizard outputs (`.env`, secrets, seeding) and ports (3000).
 - **Identity config:** keep `identity.siteName` in `src/smartsite.config.ts` aligned with the client brand; the CLI uses it for AI registration and seeding labels.
 - **Environment variables:** describe the keys the wizard writes (database, storage, AI). Emphasize `AI_AGENT_API_KEY` as the single AI secret.
 - **QA commands:** `pnpm lint`, `pnpm type-check` before sign-off. No manual formatters.
@@ -278,7 +278,7 @@ Use these “if this, then that” rules to route requests quickly. Always cite 
 
 - Setup & Environment
   - If Node < 20 or pnpm missing → install per README → rerun `pnpm install`.
-  - If `.env` is missing → run `pnpm smartsite init` and copy secrets; do not hand-edit derived keys.
+  - If `.env` is missing → run `smartsite init --project .` (via `npx smartsite` or a locally installed CLI) and copy secrets; do not hand-edit derived keys.
   - If AI keys are missing/outdated → run `pnpm smartsite ai rotate`.
   - If port 3000 is busy → stop the other process or run `pnpm kill`, then start dev.
   - If Mongo connection fails → check service status (Homebrew/Chocolatey) or Atlas IP allowlist → verify `DATABASE_URL`.
@@ -428,7 +428,7 @@ Encourage users to document custom decisions for future developers.
 
 ## 16. Quick Reference Commands
 
-- Setup: `pnpm install`, `pnpm smartsite init`
+- Setup: `pnpm install`, `npx smartsite init --project .`
 - Dev scripts: `pnpm dev`, `pnpm kill`
 - Seeding: `pnpm seed`, `pnpm seed:demo`
 - QA: `pnpm lint`, `pnpm type-check`
