@@ -4,7 +4,7 @@ const components = {
   views: {
     dashboard: {
       Component: "@/admin/payload/components/backend/dashboard#Dashboard",
-      path: "/",
+      path: "/" as `/${string}`,
       exact: true,
     },
   },
