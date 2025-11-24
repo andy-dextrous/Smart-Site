@@ -60,7 +60,7 @@ const config = buildConfig({
 
       const mediaLocation = mediaInfo.provider === "local" && mediaInfo.dir
         ? path.relative(process.cwd(), mediaInfo.dir)
-        : "vercel-blob"
+        : mediaInfo.provider
 
       const mediaBanner = [
         "\n=== MEDIA STORAGE ===",

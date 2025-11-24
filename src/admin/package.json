@@ -1,6 +1,6 @@
 {
   "name": "@smartsite/admin-layer",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "private": true,
   "description": "SmartSite Admin Layer - Core CMS Backend Infrastructure",
   "author": "SmartSite Team",
@@ -9,9 +9,9 @@
     "type": "git",
     "url": "https://github.com/andy-dextrous/Smart-Site.git"
   },
-  "releaseDate": "2025-11-21",
-  "gitCommit": "4d4d821b4e9b3c3e4b8f7a3b0b0e4c1e5d6f7a8b",
-  "changelog": "https://github.com/andy-dextrous/Smart-Site/releases/tag/v2.3.3",
+  "releaseDate": "2025-11-24",
+  "gitCommit": "pending",
+  "changelog": "https://github.com/andy-dextrous/Smart-Site/releases/tag/v2.3.4",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"

@@ -42,22 +42,27 @@ function buildFormatOptions(quality?: number): ImageUploadFormatOptions | undefi
   }
 }
 
-function resolveMediaProvider(): "local" | "vercel-blob" {
+function resolveMediaProvider(): "local" | "vercel-blob" | "s3" | "cloudinary" | "uploadthing" {
   const smartSiteConfig = getSmartSiteConfig()
   const mediaConfig = (smartSiteConfig.collections.media as any) || {}
   const provider = mediaConfig.provider as string | undefined
 
   // Config is the source of truth - default to "local" if not specified
-  if (provider === "vercel-blob") {
-    if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.VERCEL_BLOB_TOKEN) {
-      console.error(
-        "❌ Media provider set to 'vercel-blob' in smartsite.config.ts but BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN not found in environment"
-      )
-    }
-    return "vercel-blob"
+  switch (provider) {
+    case "vercel-blob":
+      if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.VERCEL_BLOB_TOKEN) {
+        console.error(
+          "❌ Media provider set to 'vercel-blob' in smartsite.config.ts but BLOB_READ_WRITE_TOKEN or VERCEL_BLOB_TOKEN not found in environment"
+        )
+      }
+      return "vercel-blob"
+    case "s3":
+    case "cloudinary":
+    case "uploadthing":
+      return provider
+    default:
+      return "local"
   }
-
-  return "local"
 }
 
 function resolveMediaDir(): string | undefined {
