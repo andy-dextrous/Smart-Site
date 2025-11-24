@@ -575,7 +575,8 @@ This ensures client sites always have the packages the admin layer needs without
 3. Update releaseDate
 4. Add any new packages to sharedDependencies
 5. Make your admin changes
-6. Run: pnpm sync:to-starter
+6. Commit and push your changes
+7. Create and push a git tag in this repo: vX.Y.Z (e.g., v2.3.5)
 ```
 
 Example:
@@ -600,14 +601,13 @@ Example:
 
 ### How Updates Flow to Client Sites
 
-1. **Development** - New features built in this master environment
-2. **Version bump** - Update version in `src/admin/package.json`
-3. **Test** - Features tested with demo data
-4. **Sync** - Admin folder synced to smart-site: `pnpm sync:to-starter`
-5. **Release** - Tagged release created with version from admin package.json
-6. **Update** - Client sites pull updates via SmartSite CLI
-7. **Dependencies** - CLI auto-syncs required packages from manifest
-8. **Install** - Clients run `pnpm install` to get new packages
+1. **Development** - New features built in this master environment.
+2. **Version bump** - Update `version` and `releaseDate` in `src/admin/package.json`.
+3. **Test** - Features tested with demo data.
+4. **Release** - Create and push a git tag `vX.Y.Z` on `master` in this repo; the `release-smart-site` workflow syncs the starter into `andy-dextrous/Smart-Site` and creates a GitHub release.
+5. **Update** - Client sites pull updates via SmartSite CLI.
+6. **Dependencies** - CLI auto-syncs required packages from the admin manifest.
+7. **Install** - Clients run `pnpm install` to get new packages.
 
 <a id="ai-integration"></a>
 ## 🤖 AI Integration

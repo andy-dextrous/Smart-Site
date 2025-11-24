@@ -31,9 +31,6 @@ function resolveMonorepoRoot(startDir: string): string {
 const monorepoRoot = resolveMonorepoRoot(configDirname)
 
 const nextConfig = {
-  experimental: {
-    turbopackFileSystemCacheForDev: true,
-  },
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_URL].map(item => {
