@@ -4,28 +4,38 @@
   /*
   /*
     Update this section when you want to retune the type system.
+
+    Mental model
+    - All numbers in the `--fluid-text-*` block are plain numbers interpreted as px.
+      Example: `--fluid-text-base-min: 16` and `--fluid-text-base-max: 18` mean
+      the root body size moves from 16px at a 320px viewport to 18px at 1440px.
+    - `--fluid-text-viewport-min/max` define that viewport band (here 320–1440px).
+      Changing these widens or narrows the stretch where the type scales.
+    - The system computes a slope + intercept line from these four numbers and
+      turns it into a `clamp(min px, slope * 1vw + intercept px, max px)` so every
+      browser, including Firefox, gets the same behaviour.
+
+    What to tune
     - Set font families, weights, and colours to match the brand.
-    - Control the fluid scale with `--fluid-text-base-*` and the min/max ratio tokens.
-      Example: bump `--fluid-text-base-min` to 18px and set
-      `--fluid-text-scale-min/max` to 1.2 / 1.28 for a tighter hierarchy that still
-      respects the shared viewport range.
-    - Common ratios:
+    - Retune the hierarchy with `--fluid-text-base-min/max` and
+      `--fluid-text-scale-min/max`:
+        • 16→18 with scale 1.2–1.25 – calm editorial default
+        • 18→22 with scale 1.25–1.33 – bolder, more dramatic headings
+    - Common scale ratios (for `--fluid-text-scale-*` and heading scales):
         • 1.067 – minor second (tight UI copy)
         • 1.125 – major second
         • 1.2   – minor third
         • 1.25  – major third
         • 1.333 – perfect fourth (our default)
         • 1.414 – augmented fourth
-        • 1.5   – perfect fifth (dramatic hero)
+        • 1.5   – perfect fifth (dramatic hero / displays)
     - Heading line heights sit here so designers can adjust rhythm in one place.
-    - Viewport bounds inherit from spacing tokens so type and spacing share the same
-      responsive curve—override `--fluid-space-viewport-*` if you need different targets.
-    - Optional display scale example: set `--fluid-heading-base-min/max` to 20px/40px and
-      `--fluid-heading-scale-min/max` to 1.28/1.36 so headings climb faster than body copy
-      while body text keeps the tighter defaults.
+    - To make headings climb faster than body copy, raise
+      `--fluid-heading-base-min/max` and/or `--fluid-heading-scale-*` while leaving
+      the body values tighter.
 
     Keep these inputs declarative; avoid referencing other custom properties so the
-    math block below stays predictable.
+    math block below stays predictable and easy to reason about.
   */
 
   @theme {
@@ -52,10 +62,10 @@
     --line-height-h5: 1.2;
     --line-height-h6: 1.2;
 
-    --fluid-text-base-min: 16px;
-    --fluid-text-base-max: 18px;
-    --fluid-text-viewport-min: var(--fluid-space-viewport-min, 20rem);
-    --fluid-text-viewport-max: var(--fluid-space-viewport-max, 90rem);
+    --fluid-text-base-min: 16;
+    --fluid-text-base-max: 18;
+    --fluid-text-viewport-min: 320;
+    --fluid-text-viewport-max: 1440;
     --fluid-text-scale-min: 1.2;
     --fluid-text-scale-max: 1.25;
 
@@ -77,44 +87,29 @@
       design calls for additional sizes.
     */
 
-    /* Fluid Text Progress */
-    --fluid-text-viewport-span: max(
-      1,
-      calc((var(--fluid-text-viewport-max) - var(--fluid-text-viewport-min)) / 1px)
+    /* Fluid Text Base — spec-safe slope/intercept (numbers → px) */
+    --fluid-text-viewport-span: calc(
+      var(--fluid-text-viewport-max) - var(--fluid-text-viewport-min)
     );
-    --fluid-text-progress: var(
-      --fluid-space-progress,
-      clamp(
-        0,
-        calc(
-          ((100vw - var(--fluid-text-viewport-min)) / 1px) /
-            var(--fluid-text-viewport-span)
-        ),
-        1
-      )
+    --fluid-text-base-slope: calc(
+      (var(--fluid-text-base-max) - var(--fluid-text-base-min)) /
+        (var(--fluid-text-viewport-span) / 100)
     );
-
-    /* Fluid Text Base */
-    --fluid-text-base-fluid: calc(
-      var(--fluid-text-base-min) +
-        (var(--fluid-text-base-max) - var(--fluid-text-base-min)) *
-        var(--fluid-text-progress)
+    --fluid-text-base-intercept: calc(
+      var(--fluid-text-base-min) -
+        (var(--fluid-text-base-slope) * (var(--fluid-text-viewport-min) / 100))
     );
     --fluid-text-base: clamp(
-      var(--fluid-text-base-min),
-      var(--fluid-text-base-fluid),
-      var(--fluid-text-base-max)
+      calc(var(--fluid-text-base-min) * 1px),
+      calc((var(--fluid-text-base-slope) * 1vw) + (var(--fluid-text-base-intercept) * 1px)),
+      calc(var(--fluid-text-base-max) * 1px)
     );
 
-    /* Fluid Text Steps */
-    --fluid-text-scale-fluid: calc(
-      var(--fluid-text-scale-min) +
-        (var(--fluid-text-scale-max) - var(--fluid-text-scale-min)) *
-        var(--fluid-text-progress)
-    );
+    /* Fluid Text Scale (held at mid-point to stay unit-safe across browsers) */
+    --fluid-text-scale-mid: calc((var(--fluid-text-scale-min) + var(--fluid-text-scale-max)) / 2);
     --fluid-text-scale: clamp(
       var(--fluid-text-scale-min),
-      var(--fluid-text-scale-fluid),
+      var(--fluid-text-scale-mid),
       var(--fluid-text-scale-max)
     );
 
@@ -140,27 +135,31 @@
     --text-4xl: var(--fluid-text-step-5);
     --text-5xl: var(--fluid-text-step-6);
 
-    /* Fluid Heading Base (optional display scale) */
-    --fluid-heading-base-fluid: calc(
-      var(--fluid-heading-base-min) +
-        (var(--fluid-heading-base-max) - var(--fluid-heading-base-min)) *
-        var(--fluid-text-progress)
+    /* Fluid Heading Base — shares viewport span */
+    --fluid-heading-base-slope: calc(
+      (var(--fluid-heading-base-max) - var(--fluid-heading-base-min)) /
+        (var(--fluid-text-viewport-span) / 100)
+    );
+    --fluid-heading-base-intercept: calc(
+      var(--fluid-heading-base-min) -
+        (var(--fluid-heading-base-slope) * (var(--fluid-text-viewport-min) / 100))
     );
     --fluid-heading-base: clamp(
-      var(--fluid-heading-base-min),
-      var(--fluid-heading-base-fluid),
-      var(--fluid-heading-base-max)
+      calc(var(--fluid-heading-base-min) * 1px),
+      calc(
+        (var(--fluid-heading-base-slope) * 1vw) +
+          (var(--fluid-heading-base-intercept) * 1px)
+      ),
+      calc(var(--fluid-heading-base-max) * 1px)
     );
 
-    /* Fluid Heading Steps (fallback to body when scales match) */
-    --fluid-heading-scale-fluid: calc(
-      var(--fluid-heading-scale-min) +
-        (var(--fluid-heading-scale-max) - var(--fluid-heading-scale-min)) *
-        var(--fluid-text-progress)
+    /* Heading Scale held at mid-point (unit-safe) */
+    --fluid-heading-scale-mid: calc(
+      (var(--fluid-heading-scale-min) + var(--fluid-heading-scale-max)) / 2
     );
     --fluid-heading-scale: clamp(
       var(--fluid-heading-scale-min),
-      var(--fluid-heading-scale-fluid),
+      var(--fluid-heading-scale-mid),
       var(--fluid-heading-scale-max)
     );
 
