@@ -22,7 +22,7 @@ type Props = {
 /*  Items to omit from the nav
 /*******************************************************/
 
-const omittedEntities = ["search"]
+const omittedEntities = ["search", "payload-kv", "payload-kvs"]
 
 /*******************************************************/
 /*  Nav Client Component

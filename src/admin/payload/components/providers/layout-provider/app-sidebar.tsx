@@ -228,8 +228,10 @@ export function AppSidebar() {
     "payload-migrations",
     "payload-jobs",
     "payload-locked-documents",
+    "payload-kv",
     "payload-folders",
     "payload-query-presets",
+    "payload-kvs",
   ]
 
   const visibleCollections = collections.filter(

@@ -25,16 +25,18 @@ import { HeadingFeatureClient as HeadingFeatureClient_e70f5e05f09f93e00b997edb1e
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_d1988c653dbb7de5dc8bb77db36a0ffc } from '@/admin/payload/components/backend/assign-template'
 import { SlugComponent as SlugComponent_6c420b1b8714748be3eba61478399bf0 } from '@/admin/payload/fields/slug/slug-component'
-import { FolderTableCell as FolderTableCell_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
-import { FolderField as FolderField_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
+import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
-import { FolderTypeField as FolderTypeField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
-import { QueryPresetsAccessCell as QueryPresetsAccessCell_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
-import { QueryPresetsWhereCell as QueryPresetsWhereCell_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
-import { QueryPresetsWhereField as QueryPresetsWhereField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
-import { QueryPresetsColumnsCell as QueryPresetsColumnsCell_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
-import { QueryPresetsColumnField as QueryPresetsColumnField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
+import { FolderTypeField as FolderTypeField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsAccessCell as QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsWhereCell as QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsWhereField as QueryPresetsWhereField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsColumnsCell as QueryPresetsColumnsCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsColumnField as QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
+import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { RowLabel as RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6 } from '@/admin/payload/globals/header/row-label'
 import { RowLabel as RowLabel_6d6b76e060b56c87a47bd22280eeb127 } from '@/admin/payload/globals/footer/RowLabel'
 import { SocialLinksRowLabel as SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7 } from '@/admin/payload/fields/social-links-row-label'
@@ -48,6 +50,7 @@ import { BeforeLogin as BeforeLogin_7928b506e44967428d9de145b0f5de84 } from '@/a
 import { AIProvider as AIProvider_60a9abb034156393a5335c785c8cc821 } from '@/admin/payload/components/providers/ai-provider'
 import { AILayoutProvider as AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45 } from '@/admin/payload/components/providers/layout-provider'
 import { Dashboard as Dashboard_2318927de43c97f7df38b2e062d88eaf } from '@/admin/payload/components/backend/dashboard'
+import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
   "@/admin/components/fields/link/link-label-field#LinkLabelField": LinkLabelField_fcfbfa303a249c0c5df3db459c69e782,
@@ -77,16 +80,18 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ParagraphFeatureClient": ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/admin/payload/components/backend/assign-template#default": default_d1988c653dbb7de5dc8bb77db36a0ffc,
   "@/admin/payload/fields/slug/slug-component#SlugComponent": SlugComponent_6c420b1b8714748be3eba61478399bf0,
-  "@payloadcms/ui/rsc#FolderTableCell": FolderTableCell_ab83ff7e88da8d3530831f296ec4756a,
-  "@payloadcms/ui/rsc#FolderField": FolderField_ab83ff7e88da8d3530831f296ec4756a,
+  "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
+  "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
-  "@payloadcms/ui#FolderTypeField": FolderTypeField_3817bf644402e67bfe6577f60ef982de,
-  "@payloadcms/ui#QueryPresetsAccessCell": QueryPresetsAccessCell_3817bf644402e67bfe6577f60ef982de,
-  "@payloadcms/ui#QueryPresetsWhereCell": QueryPresetsWhereCell_3817bf644402e67bfe6577f60ef982de,
-  "@payloadcms/ui#QueryPresetsWhereField": QueryPresetsWhereField_3817bf644402e67bfe6577f60ef982de,
-  "@payloadcms/ui#QueryPresetsColumnsCell": QueryPresetsColumnsCell_3817bf644402e67bfe6577f60ef982de,
-  "@payloadcms/ui#QueryPresetsColumnField": QueryPresetsColumnField_3817bf644402e67bfe6577f60ef982de,
+  "@payloadcms/next/client#FolderTypeField": FolderTypeField_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsAccessCell": QueryPresetsAccessCell_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsWhereCell": QueryPresetsWhereCell_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsWhereField": QueryPresetsWhereField_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsColumnsCell": QueryPresetsColumnsCell_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsColumnField": QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsGroupByCell": QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40,
+  "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
   "@/admin/payload/globals/header/row-label#RowLabel": RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6,
   "@/admin/payload/globals/footer/RowLabel#RowLabel": RowLabel_6d6b76e060b56c87a47bd22280eeb127,
   "@/admin/payload/fields/social-links-row-label#SocialLinksRowLabel": SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7,
@@ -99,5 +104,6 @@ export const importMap = {
   "@/admin/payload/components/backend/before-login#BeforeLogin": BeforeLogin_7928b506e44967428d9de145b0f5de84,
   "@/admin/payload/components/providers/ai-provider#AIProvider": AIProvider_60a9abb034156393a5335c785c8cc821,
   "@/admin/payload/components/providers/layout-provider#AILayoutProvider": AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45,
-  "@/admin/payload/components/backend/dashboard#Dashboard": Dashboard_2318927de43c97f7df38b2e062d88eaf
+  "@/admin/payload/components/backend/dashboard#Dashboard": Dashboard_2318927de43c97f7df38b2e062d88eaf,
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

@@ -44,7 +44,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {head && parse(head)}
       </head>
 
-      <body>
+      <body suppressHydrationWarning>
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
 

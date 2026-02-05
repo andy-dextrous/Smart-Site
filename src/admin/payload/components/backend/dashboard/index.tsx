@@ -25,6 +25,8 @@ export const Dashboard: FC<DashboardProps> = props => {
     "payload-migrations",
     "payload-jobs",
     "payload-locked-documents",
+    "payload-kv",
+    "payload-kvs",
     "search",
   ]
 
