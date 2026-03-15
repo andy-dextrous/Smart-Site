@@ -15,6 +15,6 @@ Do not scan unrelated active plans unless the current plan explicitly routes you
 
 ## Active plans
 
-There are no starter-local active ExecPlans checked into this exported harness yet.
+There are no active SmartSite-local ExecPlans checked into this docs harness yet.
 
-When SmartSite is being maintained as a standalone repo, add only starter-local plans here. Do not link this index back to monorepo-only plan files.
+Add only SmartSite-local plans here.

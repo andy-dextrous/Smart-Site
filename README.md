@@ -1,6 +1,6 @@
 # SmartSite
 
-SmartSite is a portable, field-driven, section-first website starter built with Next.js, Payload CMS, MongoDB, Tailwind CSS, and GSAP.
+SmartSite is a field-driven, section-first website builder built with Next.js, Payload CMS, MongoDB, Tailwind CSS, and GSAP.
 
 ## Start Here
 

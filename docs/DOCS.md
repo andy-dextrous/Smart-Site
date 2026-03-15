@@ -4,7 +4,7 @@ This document defines how the SmartSite docs harness works.
 
 ## Purpose
 
-SmartSite is a portable starter. Its docs need to make sense after export into a standalone repository, not only while it still lives under `apps/smart-site/` in the factory monorepo.
+SmartSite uses a docs harness so agents can retrieve the smallest correct set of instructions for the task at hand.
 
 ## Routing rule
 

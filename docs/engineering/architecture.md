@@ -85,7 +85,7 @@ Smart Site follows a **field-driven, section-first architecture** where:
 │   │       └── api/                      # CMS API endpoints
 │   │
 │   ├── components/                       # 🎨 Frontend components
-│   │   ├── sections/                     # 📦 Sections you install or create (starter ships empty)
+│   │   ├── sections/                     # 📦 Sections you install or create
 │   │   │   ├── config.ts                 # Section registry
 │   │   │   ├── sections-map.tsx          # Component mapping
 │   │   │   └── [section-name]/           # Individual sections

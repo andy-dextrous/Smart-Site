@@ -11,7 +11,7 @@ For self-hosted sites, `smartsite-deployment.json` is the source of truth and ge
 ## Recommended development process
 
 1. develop locally first
-2. seed or refresh local data intentionally
+2. seed or refresh local data intentionally and only with explicit approval for database-writing actions
 3. deploy preview only when needed
 4. promote to production
 5. back up before risky changes
@@ -56,12 +56,12 @@ Smart Site supports both hosted and self-hosted delivery, but the developer-faci
 
 For self-hosted sites, the source of truth is `smartsite-deployment.json`. Scripts generate the per-environment env files under `.smartsite-self-hosted/generated/` so developers and agents do not have to hand-maintain them.
 
-The starter should only need one checked-in env template: `.env.example`. Self-hosted runtime env files are generated artifacts and should stay hidden under `.smartsite-self-hosted/`, not live as first-class files in the app root.
+SmartSite should only need one checked-in env template: `.env.example`. Self-hosted runtime env files are generated artifacts and should stay hidden under `.smartsite-self-hosted/`, not live as first-class files in the app root.
 
 ### Recommended Development Process
 
 1. **Develop locally first** - Build sections, fields, and content model changes against local MongoDB with `pnpm dev`
-2. **Seed or refresh local data intentionally** - Use local Mongo dumps or seed flows; never improvise on production
+2. **Seed or refresh local data intentionally** - Use local Mongo dumps or seed flows only when the user explicitly wants a database-writing action. Treat seed flows as destructive bootstrap tools for local development, not routine maintenance.
 3. **Deploy preview only when needed** - Use it for sensitive live work, stakeholder review, or changes that need production-like verification
 4. **Promote to production** - Rebuild against the production URL and production Mongo data
 5. **Back up before risky changes** - Always take a fresh Mongo backup before destructive restores or content promotions
@@ -150,6 +150,12 @@ The self-hosted flow now adds guardrails around destructive or risky operations:
 - production deploy and rollback block when the current branch is behind upstream unless you pass `--force`
 - production restore takes a fresh production backup before overwrite
 - production restore refuses to apply an older archive over a newer production snapshot unless you pass `--force`
+- seed flows are local-only bootstrap actions and should never be run casually or against non-local databases
+
+Agent rule:
+
+- never run `pnpm seed`, `pnpm smartsite seed starter`, `/api/seed`, `mongorestore`, or any other database-writing command without explicit user approval for that specific action
+- always warn that the action can overwrite or replace existing data before proposing or running it
 
 Use this to inspect the current guard state explicitly:
 

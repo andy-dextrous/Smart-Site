@@ -1,6 +1,6 @@
 # SmartSite — Agent Router
 
-Start here when you are working inside the SmartSite starter.
+Start here when you are working inside SmartSite.
 
 ## First move
 
@@ -12,7 +12,6 @@ Do not open `docs/PLANS.md` for an ordinary task plan. Use it only when the task
 
 ## Important boundary
 
-- These docs are written as if SmartSite already lives in its own repository.
 - For normal SmartSite work, everything you need should be inside `docs/`.
 
 ## Source manuscript

@@ -19,7 +19,7 @@ Feature toggles belong in SmartSite config first. Do not start by editing `src/a
    - no chat panel
    - AI routes are unavailable or return disabled responses
 
-If the requirement is stronger than "disable AI" and really means "remove every AI-related surface from the starter," treat that as a separate core change. That is not a normal site-level toggle.
+If the requirement is stronger than "disable AI" and really means "remove every AI-related surface from SmartSite," treat that as a separate core change. That is not a normal site-level toggle.
 
 ### Disable search
 
@@ -49,8 +49,8 @@ Set the matching `features.*` toggle in `src/smartsite.config.ts`.
 Only leave the config path when one of these is true:
 
 - the feature has no existing config key
-- the task is to add a new reusable starter capability
-- the task is to remove starter-core code, not just disable it for one site
+- the task is to add a new reusable core capability
+- the task is to remove core SmartSite code, not just disable it for one site
 
 When that happens, read:
 

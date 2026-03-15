@@ -31,7 +31,7 @@ Anchor responses in [docs/engineering/design-system.md](design-system.md) and [d
 - **Typography:** use `text-h*`, body scale utilities, and the `RichText` component. No custom pixel values.
 - **Spacing:** use section/content/grid/control ladders, container utilities, and Section Settings overrides.
 - **Colour schemes:** rely on Section Settings and palette tokens (`text-primary-500`, `bg-neutral`, `border-dark-border`).
-- **Client overrides:** for downstream projects, override inputs in each app’s theme files, keeping token names consistent.
+- **Site overrides:** override inputs in each app’s theme files while keeping token names consistent.
 - **Validation:** suggest using design previews, checking fluid behaviour at min/max widths, and running lint/type-check after updates.
 
 If users request unsupported tokens, advise adding them as new human-controlled inputs with documentation updates.

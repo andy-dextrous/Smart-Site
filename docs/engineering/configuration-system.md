@@ -11,7 +11,7 @@ Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
 - `src/smartsite.config.ts` is the primary customization surface.
 - Use `src/extensions/` for new slugs and new first-class extensions, not for built-in SmartSite collections that already exist.
-- Keep `src/admin/` protected. Shared core changes belong in the starter itself, not as ad hoc downstream edits.
+- Keep `src/admin/` protected. Shared core changes belong in SmartSite itself, not as ad hoc site-level edits.
 - For feature toggles such as AI, search, analytics, GSAP global animations, and i18n, start with `smartsite.config.ts` before considering any deeper change.
 
 ## ⚙️ Configuration System

@@ -21,7 +21,7 @@ Run the interactive bootstrap from the project root:
 npx smartsite init --project .
 ```
 
-The wizard copies `.env.example` to `.env`, generates secrets, collects database and storage details, seeds baseline data, and can leave the dev server running.
+The wizard copies `.env.example` to `.env`, generates secrets, collects database and storage details, optionally seeds baseline data for a fresh local install, and can leave the dev server running.
 
 ## Environment configuration
 
@@ -42,7 +42,7 @@ Smart Site runs on MongoDB in every environment.
 
 ## AI backend
 
-Smart Site runs standalone out of the box. AI features connect to the managed Smart Site AI platform operated by Wild Creative after approval.
+AI features connect to the managed Smart Site AI platform operated by Wild Creative after approval.
 
 Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
@@ -77,13 +77,15 @@ pnpm install
    pnpm smartsite init --project .
    ```
 
-   The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, seeds baseline data, and (when seeding is enabled) keeps `next dev` running so you land on a ready-to-edit site.
+   The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, optionally seeds baseline data for a fresh local install, and (when seeding is enabled) keeps `next dev` running so you land on a ready-to-edit site.
 
 ### 2. Environment Configuration
 
 > 💡 **Quick start**: `npx smartsite init --project .` (or `pnpm smartsite init --project .` after installing the CLI) handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes. AI access is requested later from the Smart Site admin once your project is ready.
 >
 > Need to re-run the baseline data later? Use `pnpm smartsite seed starter --start-dev` to boot a local dev server, call `/api/seed`, and keep the site running— or point at any URL with `--url https://staging.yoursite.com`.
+>
+> **Database safety:** Seeding writes to the database and can overwrite existing content. Treat it as a one-time bootstrap step for a fresh local site unless the user explicitly asks for it again. Do not seed staging or production databases.
 
 The setup script writes these values into `.env`; use this reference when updating keys manually or configuring CI pipelines. Smart Site supports two first-class deployment shapes:
 
@@ -158,7 +160,7 @@ Smart Site runs on MongoDB in every environment. PostgreSQL drivers remain in th
 
 #### Self-hosted Mongo appliance
 
-This is the recommended profile when you want a portable client-site boilerplate you can clone, install on a VPS, back up, restore, and hand over safely.
+This is the recommended profile when you want a site you can install on a VPS, back up, restore, and hand over safely.
 
 1. **Keep local development on normal Mongo**
    - Run Smart Site locally against MongoDB Community.
@@ -238,7 +240,7 @@ This profile keeps the classic hosted approach for teams that want managed infra
 
 3. **Deploy & validate**
    - Push your repo and let the host build automatically.
-   - Trigger `pnpm seed` locally against the target database only when intentionally bootstrapping a new hosted site.
+   - Trigger `pnpm seed` locally against the target database only when intentionally bootstrapping a brand-new hosted site and only after confirming the target database is meant to be overwritten.
 
 #### Local development (macOS and Linux)
 
@@ -351,13 +353,13 @@ mongodump --uri "mongodb://127.0.0.1:27017/smart-site-dev" --out .smartsite-self
 mongorestore --uri "mongodb+srv://<username>:<password>@<cluster-url>/smart-site-prod" .smartsite-self-hosted/backups/manual/dev-YYYYMMDD-HHMMSS
 ```
 
-> Use the raw `mongodump` and `mongorestore` commands above for hosted environment promotion. SmartSite does not currently ship `pnpm smartsite staging pull` or `pnpm smartsite staging push` wrappers in the standalone starter.
+> Use the raw `mongodump` and `mongorestore` commands above for hosted environment promotion. SmartSite does not currently ship `pnpm smartsite staging pull` or `pnpm smartsite staging push` wrappers.
 
-Run seeding (`pnpm smartsite seed starter` or `pnpm seed`) only against development databases. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
+Run seeding (`pnpm smartsite seed starter` or `pnpm seed`) only against development databases and only with explicit confirmation that overwriting the target data is intended. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
 
 ### 4. AI Backend Setup
 
-Smart Site runs standalone out of the box. To enable AI features you connect to the managed Smart Site AI platform operated by Wild Creative. There is no customer-managed installation step—after seeding, contact andrew@wildcreative.com.au (or use the upcoming admin “Apply for AI Access” action) and they will activate your workspace. Until approval the AI sidebar remains disabled, but your local agent credentials are ready.
+To enable AI features you connect to the managed Smart Site AI platform operated by Wild Creative. There is no customer-managed installation step—after seeding, contact andrew@wildcreative.com.au (or use the upcoming admin “Apply for AI Access” action) and they will activate your workspace. Until approval the AI sidebar remains disabled, but your local agent credentials are ready.
 
 ### 5. Development Server
 
@@ -368,14 +370,16 @@ pnpm dev
 
 ### 6. Database Seeding & Initial Setup
 
-> **🗃️ Important:** The setup wizard (`smartsite init --project .`) seeds the minimal profile for you. Use the commands below only when you need to reseed or switch profiles.
+> **🗃️ Important:** The setup wizard (`smartsite init --project .`) can seed the minimal profile for you during first setup. Use the commands below only when you intentionally want to overwrite a local development database.
 
-The wizard already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the database.
+The wizard already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the local development database and confirming that losing existing content is acceptable.
 
 #### Reseeding from the command line
 
 1. Ensure the dev server is running (`pnpm dev`).
-2. Run the seeding script (minimal profile only):
+2. Make sure the target database is local, disposable, or already intentionally wiped.
+3. Treat this as a destructive action. Do not run it against staging, preview, or production databases.
+4. Run the seeding script (minimal profile only):
 
    ```bash
    pnpm seed
@@ -399,7 +403,7 @@ The minimal profile is intentionally lean, giving editors the essentials without
   - *Remember*: headers and footers are managed via Payload globals (`globals/header`, `globals/footer`). Never implement them as sections; update the globals in admin or via `smartsite.config.ts` overrides.
 - **Global settings** preconfigured with site name/description, SEO defaults (including robots.txt), and routing that points the homepage field at the seeded Home page. Social links, locations, analytics IDs, and templates are intentionally left blank for you to fill in.
 
-This starter ships only the minimal profile so you can build bespoke sites without demo noise. If you need richer marketing content for inspiration, use the separate Smart Site demo repository (it mirrors the same architecture but seeds additional pages, posts, and animations).
+Smart Site ships only the minimal profile so you can build bespoke sites without demo noise.
 
 ### 7. Available Scripts
 
@@ -413,7 +417,7 @@ pnpm type-check       # Run TypeScript checks
 
 # Database & Content Management
 pnpm db:schema        # Generate database schema
-pnpm seed             # Seed demo content (requires dev server at :3000)
+pnpm seed             # Seed local development content only; destructive if the DB is not disposable
 # Run the two commands above sequentially to rebuild the schema and reseed
 pnpm regenerate-uris  # Regenerate URI index for routing
 

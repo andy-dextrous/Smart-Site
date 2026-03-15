@@ -8,7 +8,7 @@ For ordinary site work, do not start by editing `src/admin`. Start with:
 - `src/extensions/`
 - frontend components under `src/components/` and `src/app/(frontend)/`
 
-Use `src/admin/` only when the task is truly starter-core work that should change SmartSite for every install, not just for one site.
+Use `src/admin/` only when the task is truly core SmartSite work that should affect the shared system, not just one site.
 
 Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
@@ -48,4 +48,4 @@ When you do make a real admin-layer change:
 - update `releaseDate`
 - add any new shared dependencies the admin layer requires
 
-That manifest is how starter releases and downstream updates track shared admin changes.
+That manifest is how shared admin changes are versioned and tracked.

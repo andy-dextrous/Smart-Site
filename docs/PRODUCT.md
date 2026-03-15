@@ -34,14 +34,13 @@ SmartSite follows a field-driven, section-first architecture where:
 SmartSite supports two first-class deployment shapes:
 
 - hosted Mongo plus managed hosting
-- self-hosted Mongo as a portable Docker appliance
+- self-hosted Mongo as a Docker appliance
 
 The exact detection and operating rules are in [docs/product-specs/hosting-modes.md](product-specs/hosting-modes.md).
 
 ## Product promise
 
 - build locally with the fastest loop possible
-- keep the starter portable
 - preserve preview, routing, caching, and Payload behavior across hosting modes
 - give agents clear, deterministic commands instead of tribal knowledge
 

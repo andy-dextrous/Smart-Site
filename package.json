@@ -1,6 +1,6 @@
 {
   "name": "smart-site",
-  "version": "2.3.9",
+  "version": "2.3.10",
   "description": "Enterprise website builder: Next.js 16 + Payload CMS 3 with Tailwind v4, GSAP animations, and Mastra-powered AI — section-first architecture with smart routing/caching.",
   "license": "MIT",
   "type": "module",

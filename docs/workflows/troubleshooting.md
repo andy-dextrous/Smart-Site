@@ -29,13 +29,16 @@ PAYLOAD_CONFIG_PATH=./src/admin/payload/payload.config.ts pnpm exec payload migr
 # Regenerate URI index
 pnpm regenerate-uris
 
-# Reset everything
+# Reset local development data
 pnpm db:schema
 pnpm seed
 
 # View MongoDB databases
 mongo --eval "db.adminCommand('listDatabases')"
 ```
+
+`pnpm seed` is destructive. Use it only for a disposable local database that you explicitly intend to rebuild.
+Never use it as a casual fix for preview or production data.
 
 <a id="deployment"></a>
 ## 🚀 Deployment

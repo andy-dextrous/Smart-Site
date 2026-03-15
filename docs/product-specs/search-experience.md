@@ -9,7 +9,7 @@ Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
 ### Feature Overview
 
-- **Payload Search Plugin**: The starter wires `@payloadcms/plugin-search` through `src/admin/payload/plugins/index.ts`. It syncs every front-end collection and maintains a dedicated `search` collection that the frontend queries.
+- **Payload Search Plugin**: SmartSite wires `@payloadcms/plugin-search` through `src/admin/payload/plugins/index.ts`. It syncs every front-end collection and maintains a dedicated `search` collection that the frontend queries.
 - **Config-driven toggle**: Enable or disable search (and choose modal/page/hybrid modes) from `src/smartsite.config.ts`. The feature integrates with the navigation components, the `/search` results page, and the command palette.
 - **Realtime command palette**: A client-side modal (⌘/Ctrl + K) fetches results from `/api/search?q=…` and runs lightweight fuzzy scoring before grouping by collection label.
 - **Server-rendered results page**: `/search` swaps between an SEO-friendly results screen or redirects to the command palette depending on the configured mode.

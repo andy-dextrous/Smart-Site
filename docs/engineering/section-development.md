@@ -34,12 +34,16 @@ Import only the helpers a section truly needs:
 - trust Payload defaults instead of re-normalizing everything in the component
 - use design-system utilities, not hard-coded pixel values
 - keep data access in shared loaders or injected context, not direct fetches inside sections
+- do not set `minRows` on array fields unless the user explicitly requires a non-removable minimum
+- collapse secondary editor controls by default, including repeatable groups where that UI is available
 
 ## Review checklist
 
 - kebab-case folder and file names
 - shared field presets reused where appropriate
 - section registered in both registries
+- array fields remain removable by default unless the brief explicitly requires otherwise
+- secondary controls and repeatable editor groups default to collapsed where Payload supports it
 - optional data guarded
 - accessibility reviewed
 - design-system utilities used consistently
@@ -136,12 +140,14 @@ Follow the patterns in this section.
 - Rich text content should rely on the shared `richText()` field + `<RichText>` renderer. Keep the default variant so it inherits typography tokens; only opt into the `prose`/article variant for long-form content such as blog posts.
 - Import field presets from `@/components/fields/*` whenever they exist (link, media, section-cta, content, etc.). Never duplicate schemas inline.
 - Wrap logical groups in `collapsible` blocks. Default to open for primary content, closed for supporting controls.
+- When using `collapsible` groups for supporting controls, set `admin.initCollapsed: true` by default.
 - Provide `label`, `admin.description`, and `admin.placeholder` strings to explain author intent.
 - Set `slug` equal to the folder name; set `interfaceName` so TypeScript components receive strong types (`HeroBlock`, `FeatureGridBlock`).
 - Run `sectionSettings()` as the final field to expose shared colour/container/padding controls.
 - Avoid bespoke collections unless absolutely required. When you need additional relationships, prefer existing global collections or propose extensions in ADRs before adding new ones.
 - Keep defaults sensible: choose the most common layout or toggle as `defaultValue`, especially for stylistic selectors (alignment, size, colour scheme, layout variants). Components should be able to rely on these defaults without re-normalising values.
 - When you have multiple small, related settings (e.g. paired toggles, select boxes, numeric inputs), wrap them in a `type: "row"` so editors see them inline.
+- For `array` fields, omit `minRows` unless the product requirement explicitly says the editor must never be able to remove the last item.
 
 ```ts
 import type { Block } from "payload"
@@ -498,6 +504,8 @@ export function HeroComponent(props: HeroBlock) {
 - [ ] Folder and files follow naming contract (`kebab-case`, `config.ts`, `Component.tsx`).
 - [ ] `config.ts` imports shared field presets and ends with `sectionSettings()`.
 - [ ] Component wraps content with `<Section>` and uses container/gap/typography tokens only.
+- [ ] Array fields stay deletable by default; `minRows` is only present when explicitly required by the brief.
+- [ ] Supporting controls are collapsed by default with `admin.initCollapsed: true` where applicable.
 - [ ] Optional data guarded; no empty wrappers rendered when fields are blank.
 - [ ] Animations use shared provider or declarative attributes; `"use client"` only when required.
 - [ ] Accessibility reviewed (heading levels, alt text, focus states).
@@ -520,5 +528,5 @@ export function HeroComponent(props: HeroBlock) {
   - Communication to the team before merging.
 - Treat this section as the source of truth. If you discover a helpful pattern while building sections, codify it here before rolling it out.
 
-Adhering to this checklist guarantees that every Smart Site section is portable, composable, and ready for automation via the CLI. Break the rules only with explicit approval and documented trade-offs.
+Adhering to this checklist keeps every Smart Site section composable and ready for automation via the CLI. Break the rules only with explicit approval and documented trade-offs.
 <a id="routing--caching"></a>

@@ -1,6 +1,6 @@
 # SmartSite Docs
 
-This is the canonical docs harness for SmartSite as a standalone starter.
+This is the canonical docs harness for SmartSite.
 
 ## Task routing
 

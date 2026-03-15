@@ -14,7 +14,7 @@ Do not read [docs/workflows/getting-started.md](getting-started.md) unless the t
 
 ### Self-hosted Mongo Deployment
 
-This is the portable client-site profile intended for cloning, restoring, and handoff.
+This profile is intended for cloning, restoring, and handoff.
 
 1. **Prepare the source env**
    - `pnpm self-hosted:run -- promote` materializes generated runtime env files from the source env path in `smartsite-deployment.json`.
@@ -37,7 +37,7 @@ This is the portable client-site profile intended for cloning, restoring, and ha
    - Enable preview only if you actually need it.
 
 5. **Copy the project to the host**
-   - Sync the Smart Site repo or the generated client-site repo to the server.
+   - Sync the project to the server.
    - Keep `smartsite-deployment.json` in the app root.
 
 6. **First boot**
@@ -114,7 +114,7 @@ For the self-hosted Mongo profile, browser setup should happen once, then host-n
    doctl auth init
    ```
 
-2. Create a starter droplet
+2. Create an initial droplet
 
    ```bash
    doctl compute droplet create smartsite-prod \
@@ -150,7 +150,7 @@ For the self-hosted Mongo profile, browser setup should happen once, then host-n
    hcloud context create smartsite
    ```
 
-2. Create a starter server
+2. Create an initial server
 
    ```bash
    hcloud server create \
@@ -194,6 +194,12 @@ Smart Site still supports classic hosted delivery when that fits the project bet
 
 4. **Deploy & validate**
    - Trigger a production build and validate admin, preview, forms, and media uploads.
+
+### Database safety
+
+- Do not use seed flows as a routine deployment step.
+- Seed only when intentionally bootstrapping a brand-new local or hosted database and only after confirming the overwrite is wanted.
+- For existing preview or production environments, move content with backups, dumps, restores, or admin exports instead of reseeding.
 
 ### AI Backend Deployment
 
@@ -258,7 +264,7 @@ Smart Site can deploy to any Node.js hosting platform:
 - [ ] Connection test completed (admin chat assistant responding)
 - [ ] Support contact: andrew@wildcreative.com.au documented for the team
 
-> **🚀 Production data:** Prefer restoring or migrating real content into preview or production. Reserve seeding for intentional bootstrap flows, not routine promote workflows.
+> **🚀 Production data:** Prefer restoring or migrating real content into preview or production. Reserve seeding for intentional bootstrap flows only, and require explicit confirmation before any database-writing action that can overwrite data.
 
 ---
 

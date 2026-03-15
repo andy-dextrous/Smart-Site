@@ -128,9 +128,8 @@ Spacing uses a mirrored modular scale that also interpolates between min and max
 
 ### Client and Demo Overrides
 
-- Client deployments generated from this starter should only override human-controlled tokens in their local `spacing.css`, `colors.css`, or `typography.css`. Avoid copying computed tokens—share the same calculations to guarantee consistency.
-- The public Smart Site demo may experiment with different ratios or container widths, but changes that should ship to clients must land in this starter first.
+- Sites should only override human-controlled tokens in their local `spacing.css`, `colors.css`, or `typography.css`. Avoid copying computed tokens—share the same calculations to guarantee consistency.
 - When shipping a customised client palette, keep the same token names (`--color-primary-*`). The CLI depends on those names to wire components at generate time.
 
-Adhering to these rules keeps every Smart Site instance portable, predictable, and easy to tune. If a new pattern requires additional tokens, add them alongside the existing inputs and extend this section so downstream implementers understand how to use them.
+Adhering to these rules keeps every Smart Site implementation predictable and easy to tune. If a new pattern requires additional tokens, add them alongside the existing inputs and extend this section so implementers understand how to use them.
 <a id="building-sections"></a>

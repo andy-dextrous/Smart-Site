@@ -12,4 +12,4 @@ This file routes Claude and other agents into the SmartSite-local docs harness.
 
 ## Assumption
 
-Treat SmartSite as a standalone starter repository. If a workflow is only true because SmartSite currently lives inside a factory monorepo, it belongs in the root docs, not here.
+Treat these docs as the complete local operating surface for SmartSite work.

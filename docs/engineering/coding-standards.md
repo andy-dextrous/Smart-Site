@@ -22,7 +22,7 @@ Anchor responses in [docs/engineering/design-system.md](design-system.md).
 - **Typography:** use `text-h*`, body scale utilities, and the `RichText` component. No custom pixel values.
 - **Spacing:** use section/content/grid/control ladders, container utilities, and Section Settings overrides.
 - **Colour schemes:** rely on Section Settings and palette tokens (`text-primary-500`, `bg-neutral`, `border-dark-border`).
-- **Client overrides:** for downstream projects, override inputs in each app’s theme files, keeping token names consistent.
+- **Site overrides:** override inputs in each site’s theme files while keeping token names consistent.
 - **Validation:** suggest using design previews, checking fluid behaviour at min/max widths, and running lint/type-check after updates.
 
 If users request unsupported tokens, advise adding them as new human-controlled inputs with documentation updates.
@@ -55,7 +55,7 @@ Use this as a quick map for where changes belong. Never modify the admin layer.
 
 Rules of thumb
 
-- Never touch `src/admin` in a downstream client project; make shared admin changes in the SmartSite starter first.
+- Never touch `src/admin` for ordinary site work; make shared admin changes only when the change truly belongs in SmartSite core.
 - Sections live under `src/components/sections/<kebab-name>/` with schema + component colocated.
 - Put new shared UI patterns under `components/ui` or `components/fields` so they can be reused.
 - Add new Payload entities through `src/extensions` and register slugs in `smartsite.config.ts`.
@@ -114,7 +114,7 @@ src/
 
 Never edit `src/admin/` directly in client projects.
 
-Use `src/extensions/` only when you are introducing a genuinely new slug or capability that does not already exist in the starter. If a built-in collection or feature already exists, configure or extend it through `smartsite.config.ts` and the documented extension points instead of duplicating it.
+Use `src/extensions/` only when you are introducing a genuinely new slug or capability that does not already exist. If a built-in collection or feature already exists, configure or extend it through `smartsite.config.ts` and the documented extension points instead of duplicating it.
 
 ---
 
@@ -192,7 +192,7 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
   - If the section repeats across multiple pages → consider a Template or a blocks-library promotion.
   - If interactivity is required (e.g., sliders) → split client logic to a colocated client module and lazy-load.
   - If payload fields duplicate existing factories → replace with shared field presets.
-  - If no existing field fits the brief → add minimal new fields to the section schema rather than bending an unrelated preset; promote to a shared factory only if the pattern repeats across sections/projects.
+  - If no existing field fits the brief → add minimal new fields to the section schema rather than bending an unrelated preset; promote to a shared pattern only if the same need repeats across sections.
 
 - Animations
   - If global reveals are enabled → prefer `data-animate` attributes with `data-animate-target` and a single stagger IF the animation requirement is simple.
