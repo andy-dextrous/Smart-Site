@@ -1,0 +1,17 @@
+node_modules
+.next
+.turbo
+.git
+.github
+.DS_Store
+coverage
+dist
+tsconfig.tsbuildinfo
+*.log
+.env
+.env.local
+.env.development
+.env.production
+.env.self-hosted
+backups
+

@@ -75,10 +75,10 @@ export function SmartSiteAdminBar({ settings }: AdminBarProps) {
     // Client-side preview mode detection
     const checkPreviewModes = () => {
       const hasPreviewCookie = document.cookie.includes("__prerender_bypass")
-      const hasPreviewParam = window.location.search.includes("preview=true")
       const hasLivePreviewParam = window.location.search.includes("livePreview=true")
+      const isPreviewPath = window.location.pathname.startsWith("/preview")
 
-      setIsPreview(hasPreviewCookie || hasPreviewParam)
+      setIsPreview(hasPreviewCookie || isPreviewPath)
       setIsLivePreview(hasLivePreviewParam)
     }
 
@@ -86,16 +86,28 @@ export function SmartSiteAdminBar({ settings }: AdminBarProps) {
     checkPreviewModes()
   }, [])
 
+  useEffect(() => {
+    const root = document.documentElement
+
+    if (!isLoading && user && !isLivePreview) {
+      root.classList.add("smartsite-has-admin-bar")
+      return () => root.classList.remove("smartsite-has-admin-bar")
+    }
+
+    root.classList.remove("smartsite-has-admin-bar")
+    return () => root.classList.remove("smartsite-has-admin-bar")
+  }, [isLoading, isLivePreview, user])
+
   /*************************************************************************/
   /*  REFRESH PREVIEW DETECTION AFTER EXIT
   /*************************************************************************/
 
   const refreshPreviewState = () => {
     const hasPreviewCookie = document.cookie.includes("__prerender_bypass")
-    const hasPreviewParam = window.location.search.includes("preview=true")
     const hasLivePreviewParam = window.location.search.includes("livePreview=true")
+    const isPreviewPath = window.location.pathname.startsWith("/preview")
 
-    setIsPreview(hasPreviewCookie || hasPreviewParam)
+    setIsPreview(hasPreviewCookie || isPreviewPath)
     setIsLivePreview(hasLivePreviewParam)
   }
 

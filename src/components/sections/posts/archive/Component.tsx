@@ -1,11 +1,18 @@
-import type { PostsArchiveBlock, Post } from "@/admin/payload/payload-types"
+import type { Media, PostsArchiveBlock, Post } from "@/admin/payload/payload-types"
 import type { PageData } from "@/admin/components/render-sections"
 import { getPostsWithPagination } from "@/admin/data/posts"
+import {
+  estimatePostReadingTime,
+  formatPostPublishDate,
+  resolvePostCategories,
+} from "@/admin/utilities/posts"
 import { Section } from "@/components/fields/section"
 import { PageRange } from "@/components/fields/pagination/page-range"
-import { PostCard } from "@/components/posts/post-card"
 import { Pagination } from "@/components/fields/pagination"
+import { PostCard } from "@/components/posts/post-card"
+import { Suspense } from "react"
 import { tv } from "tailwind-variants"
+import { PostsArchiveClient } from "./client"
 
 type ArchiveLayout = NonNullable<PostsArchiveBlock["layout"]>
 type ArchiveColumns = NonNullable<PostsArchiveBlock["columns"]>
@@ -66,6 +73,122 @@ function normalizeCategoryFilter(categoryFilter: PostsArchiveBlock["categoryFilt
     .filter((value): value is string => Boolean(value))
 }
 
+type ArchivePostItem = {
+  id: string | number
+  title: string
+  href: string | null
+  excerpt: string
+  categories: string[]
+  publishDate: string | null
+  readingTime: number | null
+  featuredImage: { url: string; alt: string | null } | null
+}
+
+function toArchivePostItem(post: Post, options: { includeCategories: boolean; includePublishedDate: boolean; includeReadingTime: boolean }): ArchivePostItem {
+  const image =
+    post.featuredImage && typeof post.featuredImage === "object"
+      ? (post.featuredImage as Media)
+      : null
+
+  const href = post.uri || (post.slug ? `/posts/${post.slug}` : null)
+
+  return {
+    id: post.id,
+    title: post.title || "",
+    href,
+    excerpt: post.seo?.meta?.description || "",
+    categories: options.includeCategories ? resolvePostCategories(post) : [],
+    publishDate: options.includePublishedDate ? formatPostPublishDate(post.publishedAt) : null,
+    readingTime: options.includeReadingTime ? estimatePostReadingTime(post.content) : null,
+    featuredImage:
+      image && typeof image.url === "string" && image.url.length > 0
+        ? { url: image.url, alt: typeof image.alt === "string" ? image.alt : null }
+        : null,
+  }
+}
+
+function PostsArchiveFallback(props: {
+  posts: Post[]
+  archiveUri: string
+  limit: number
+  page: number
+  totalPages: number
+  totalDocs: number
+  gridClassName: string
+  controlsClassName: string
+  rangeClassName: string
+  cardClassName?: string
+  tone: "light" | "neutral" | "dark"
+  appearance: "neutral" | "light" | "dark"
+  showExcerpt: boolean
+  showCategories: boolean
+  showPublishedDate: boolean
+  showReadingTime: boolean
+  showPagination: boolean
+  showPageRange: boolean
+}) {
+  const {
+    posts,
+    archiveUri,
+    limit,
+    page,
+    totalPages,
+    totalDocs,
+    gridClassName,
+    controlsClassName,
+    rangeClassName,
+    cardClassName,
+    tone,
+    appearance,
+    showExcerpt,
+    showCategories,
+    showPublishedDate,
+    showReadingTime,
+    showPagination,
+    showPageRange,
+  } = props
+
+  return (
+    <>
+      <div className={gridClassName}>
+        {posts.map(post => (
+          <PostCard
+            key={post.id}
+            post={post}
+            appearance={appearance}
+            showExcerpt={showExcerpt}
+            showCategories={showCategories}
+            showPublishedDate={showPublishedDate}
+            showReadingTime={showReadingTime}
+            className={cardClassName}
+          />
+        ))}
+      </div>
+
+      {showPagination && totalPages > 1 ? (
+        <div className={controlsClassName}>
+          {showPageRange ? (
+            <PageRange
+              collection="posts"
+              currentPage={page}
+              limit={limit}
+              totalDocs={totalDocs}
+              className={rangeClassName}
+            />
+          ) : null}
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            archiveUri={archiveUri}
+            colorVariant={tone}
+          />
+        </div>
+      ) : null}
+    </>
+  )
+}
+
 export async function PostsArchiveComponent(props: PostsArchiveBlock & PageData) {
   const {
     postsPerPage,
@@ -80,7 +203,6 @@ export async function PostsArchiveComponent(props: PostsArchiveBlock & PageData)
     categoryFilter,
     offset,
     sort,
-    searchParams,
     document,
     sectionSettings,
   } = props
@@ -103,15 +225,11 @@ export async function PostsArchiveComponent(props: PostsArchiveBlock & PageData)
   const normalizedOffset = offset ?? 0
   const normalizedSort = sort ?? "-publishedAt"
 
-  const currentPageParam = searchParams?.page
-  const currentPage =
-    typeof currentPageParam === "string" ? Math.max(parseInt(currentPageParam, 10) || 1, 1) : 1
-
   const categoryIds = normalizeCategoryFilter(categoryFilter)
 
   const posts = await getPostsWithPagination({
     limit: resolvedLimit,
-    page: currentPage,
+    page: 1,
     categoryFilter: categoryIds,
     offset: normalizedOffset,
     sort: normalizedSort,
@@ -138,43 +256,63 @@ export async function PostsArchiveComponent(props: PostsArchiveBlock & PageData)
   const rangeClassName = range()
   const cardClassName = card()
 
+  const archivePosts = posts.docs.map(post =>
+    toArchivePostItem(post as Post, {
+      includeCategories: shouldShowCategories,
+      includePublishedDate: shouldShowPublishedDate,
+      includeReadingTime: shouldShowReadingTime,
+    })
+  )
+
   return (
     <Section sectionSettings={sectionSettings} containerClassName={containerClassName}>
-      <div className={gridClassName}>
-        {posts.docs.map(post => (
-          <PostCard
-            key={(post as Post).id}
-            post={post as Post}
+      <Suspense
+        fallback={
+          <PostsArchiveFallback
+            posts={posts.docs as Post[]}
+            archiveUri={archiveUri}
+            limit={resolvedLimit}
+            page={posts.page}
+            totalPages={posts.totalPages}
+            totalDocs={posts.totalDocs}
+            gridClassName={gridClassName}
+            controlsClassName={controlsClassName}
+            rangeClassName={rangeClassName}
+            cardClassName={cardClassName || undefined}
+            tone={tone}
             appearance={appearance}
             showExcerpt={shouldShowExcerpt}
             showCategories={shouldShowCategories}
             showPublishedDate={shouldShowPublishedDate}
             showReadingTime={shouldShowReadingTime}
-            className={cardClassName || undefined}
+            showPagination={shouldShowPagination}
+            showPageRange={shouldShowPageRange}
           />
-        ))}
-      </div>
-
-      {shouldShowPagination && posts.totalPages > 1 ? (
-        <div className={controlsClassName}>
-          {shouldShowPageRange ? (
-            <PageRange
-              collection="posts"
-              currentPage={posts.page}
-              limit={resolvedLimit}
-              totalDocs={posts.totalDocs}
-              className={rangeClassName}
-            />
-          ) : null}
-
-          <Pagination
-            page={posts.page}
-            totalPages={posts.totalPages}
-            archiveUri={archiveUri}
-            colorVariant={tone}
-          />
-        </div>
-      ) : null}
+        }
+      >
+        <PostsArchiveClient
+          initialPosts={archivePosts}
+          initialPage={posts.page}
+          initialTotalDocs={posts.totalDocs}
+          initialTotalPages={posts.totalPages}
+          limit={resolvedLimit}
+          offset={normalizedOffset}
+          sort={normalizedSort}
+          categoryFilter={categoryIds}
+          includeReadingTime={shouldShowReadingTime}
+          archiveUri={archiveUri}
+          gridClassName={gridClassName}
+          controlsClassName={controlsClassName}
+          rangeClassName={rangeClassName}
+          cardClassName={cardClassName || undefined}
+          tone={tone}
+          appearance={appearance}
+          showExcerpt={shouldShowExcerpt}
+          showCategories={shouldShowCategories}
+          showPagination={shouldShowPagination}
+          showPageRange={shouldShowPageRange}
+        />
+      </Suspense>
     </Section>
   )
 }

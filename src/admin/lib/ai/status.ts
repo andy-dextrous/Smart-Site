@@ -120,7 +120,7 @@ export async function getAIBackendStatus(force = false): Promise<AIBackendStatus
         Authorization: `Bearer ${apiKey}`,
         "X-Site-ID": siteId,
       },
-      cache: "no-store",
+      next: { revalidate: 15 },
     })
 
     if (response.status === 401) {

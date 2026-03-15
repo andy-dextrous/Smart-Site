@@ -2,6 +2,8 @@ import type { CollectionSlug, PayloadRequest } from "payload"
 import { getPayload } from "payload"
 import { NextResponse, NextRequest } from "next/server"
 import configPromise from "@payload-config"
+import { draftMode } from "next/headers"
+import { createRequestUrl } from "@/admin/utilities/request-origin"
 
 /*************************************************************************/
 /*  PREVIEW API ROUTE - OPTIMIZED FOR STATIC GENERATION
@@ -15,6 +17,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const collection = searchParams.get("collection") as CollectionSlug
   const previewSecret = searchParams.get("previewSecret")
   const documentId = searchParams.get("documentId")
+  const isLivePreview = searchParams.get("livePreview") === "true"
 
   // Validate preview secret
   if (previewSecret !== process.env.PREVIEW_SECRET) {
@@ -47,9 +50,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     return new Response("You are not allowed to preview this page", { status: 403 })
   }
 
-  // CRITICAL CHANGE: Instead of enabling draftMode, redirect with preview parameter
-  // This keeps the response cacheable while enabling preview mode
-  const previewTarget = new URL(path, request.url)
+  const previewTarget = createRequestUrl(request, path)
   previewTarget.searchParams.set("preview", "true")
 
   if (collection) {
@@ -60,13 +61,13 @@ export async function GET(request: NextRequest): Promise<Response> {
     previewTarget.searchParams.set("previewDocumentId", documentId)
   }
 
+  if (isLivePreview) {
+    previewTarget.searchParams.set("livePreview", "true")
+  }
+
   const response = NextResponse.redirect(previewTarget, 307)
-  response.cookies.set("__prerender_bypass", "true", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 60 * 60 * 24, // 24 hours
-  })
+  const previewMode = await draftMode()
+  previewMode.enable()
 
   return response
 }

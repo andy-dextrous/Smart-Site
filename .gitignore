@@ -7,6 +7,9 @@ node_modules
 
 # Local env files
 .env
+.env.self-hosted
+.env.self-hosted.*
+.env.self-hosted.deploy
 .env.local
 .env.development.local
 .env.test.local
@@ -44,3 +47,7 @@ yarn-error.log*
 # SmartSite CLI
 .smartsite-backup/
 .smartsite-temp/
+.smartsite-self-hosted/
+
+# Self-hosted deploy artifacts
+backups/

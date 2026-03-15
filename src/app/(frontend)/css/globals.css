@@ -20,5 +20,5 @@
 /* Frontend Custom Layers */
 @import "./base.css" layer(frontend-base-custom);
 @import "./components.css" layer(frontend-components);
-@import "./utilities.css";
 @import "./typography.css" layer(frontend-components);
+@import "./utilities.css";

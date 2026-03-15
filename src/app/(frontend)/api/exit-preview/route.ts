@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createRequestUrl } from "@/admin/utilities/request-origin"
 
 /*************************************************************************/
 /*  EXIT PREVIEW API ROUTE
@@ -12,14 +13,14 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   try {
     if (redirectParam.startsWith("/")) {
-      const url = new URL(redirectParam, request.url)
+      const url = createRequestUrl(request, redirectParam)
       redirectPath = `${url.pathname}${url.search}`
     }
   } catch (error) {
     redirectPath = "/"
   }
 
-  const response = NextResponse.redirect(new URL(redirectPath, request.url), 307)
+  const response = NextResponse.redirect(createRequestUrl(request, redirectPath), 307)
 
   response.cookies.set({
     name: "__prerender_bypass",

@@ -1,20 +1,17 @@
+import { generateMetadata } from "@/admin/components/uri-renderer/metadata"
 import {
-  SmartSiteURIRenderer,
+  SmartSitePublishedURIRenderer,
   generateStaticParams,
-  generateMetadata,
-} from "@/admin/components/uri-renderer"
+} from "@/admin/components/published-uri-renderer"
 
 type Args = {
   params: Promise<{
     uri?: string[]
   }>
-  searchParams: Promise<{
-    [key: string]: string | string[] | undefined
-  }>
 }
 
 export default function Page(props: Args) {
-  return <SmartSiteURIRenderer {...props} />
+  return <SmartSitePublishedURIRenderer {...props} />
 }
 
 export { generateStaticParams, generateMetadata }

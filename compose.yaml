@@ -1,0 +1,84 @@
+name: ${SMARTSITE_STACK_NAME:-smartsite-self-hosted}
+
+services:
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    env_file:
+      - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
+    command:
+      - --bind_ip_all
+      - --auth
+    volumes:
+      - mongo-data:/data/db
+      - ./docker/mongo/init-app-user.js:/docker-entrypoint-initdb.d/init-app-user.js:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          echo 'db.adminCommand({ ping: 1 }).ok'
+          | mongosh "mongodb://$$MONGO_INITDB_ROOT_USERNAME:$$MONGO_INITDB_ROOT_PASSWORD@127.0.0.1:27017/admin?authSource=admin" --quiet
+          | grep 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${SMARTSITE_IMAGE_NAME:-smartsite-self-hosted-app}
+    env_file:
+      - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    command: ["/app/docker/build-app.sh"]
+    volumes:
+      - next-build:/app/.next
+
+  app:
+    image: ${SMARTSITE_IMAGE_NAME:-smartsite-self-hosted-app}
+    restart: unless-stopped
+    env_file:
+      - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    command: ["/app/docker/start-app.sh"]
+    volumes:
+      - next-build:/app/.next
+      - public-media:/app/public/media
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          node -e "fetch('http://127.0.0.1:3000/admin').then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    env_file:
+      - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
+    ports:
+      - "${HOST_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  mongo-data:
+  next-build:
+  public-media:
+  caddy-data:
+  caddy-config:

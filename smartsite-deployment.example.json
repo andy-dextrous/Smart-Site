@@ -1,0 +1,19 @@
+{
+  "profile": "self-hosted-mongo",
+  "provider": "digitalocean",
+  "sourceEnv": ".env",
+  "environments": {
+    "production": {
+      "enabled": true,
+      "url": "https://example.com",
+      "allowIndexing": true
+    },
+    "preview": {
+      "enabled": false,
+      "url": "https://preview.example.com",
+      "allowIndexing": false,
+      "hostPort": 8080,
+      "httpsPort": 8443
+    }
+  }
+}

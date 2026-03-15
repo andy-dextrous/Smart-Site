@@ -5,12 +5,20 @@ interface ExitPreviewProps {
 }
 
 export default function ExitPreview({ onExitPreview }: ExitPreviewProps) {
+  function stripPreviewPrefix(pathname: string): string {
+    if (!pathname.startsWith("/preview")) {
+      return pathname
+    }
+
+    const stripped = pathname.replace(/^\/preview(\/|$)/, "/")
+    return stripped === "" ? "/" : stripped
+  }
+
   function handleExitPreview(): void {
     const currentUrl = new URL(window.location.href)
-    currentUrl.searchParams.delete("preview")
     currentUrl.searchParams.delete("livePreview")
 
-    const redirectPath = `${currentUrl.pathname}${currentUrl.search}`
+    const redirectPath = `${stripPreviewPrefix(currentUrl.pathname)}${currentUrl.search}`
 
     onExitPreview?.()
 

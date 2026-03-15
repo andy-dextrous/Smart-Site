@@ -31,6 +31,9 @@ function resolveMonorepoRoot(startDir: string): string {
 const monorepoRoot = resolveMonorepoRoot(configDirname)
 
 const nextConfig = {
+  output: "standalone",
+  poweredByHeader: false,
+  deploymentId: process.env.NEXT_DEPLOYMENT_ID,
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_URL].map(item => {

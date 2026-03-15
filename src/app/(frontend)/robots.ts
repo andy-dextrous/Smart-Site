@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { getServerSideURL } from "@/admin/utilities/get-url"
+import { allowSearchIndexing } from "@/admin/utilities/runtime-environment"
 
 /*************************************************************************/
 /*  ROBOTS.TXT GENERATION - SIMPLIFIED FOR SITEMAP INDEX
@@ -7,10 +8,7 @@ import { getServerSideURL } from "@/admin/utilities/get-url"
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const siteUrl = getServerSideURL()
-  const isProduction = process.env.NODE_ENV === "production"
-  const isVercelProduction = process.env.VERCEL_ENV === "production"
-
-  const allowCrawling = isProduction && isVercelProduction
+  const allowCrawling = allowSearchIndexing()
 
   if (allowCrawling) {
     return {

@@ -10,11 +10,14 @@ export function proxy(request: NextRequest) {
   const isDraftMode = request.cookies.get("__prerender_bypass")?.value
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin")
   const isApiRoute = request.nextUrl.pathname.startsWith("/api")
+  const isPreviewPath = request.nextUrl.pathname.startsWith("/preview")
+  const hasPreviewParam = request.nextUrl.searchParams.get("preview") === "true"
   const isLivePreview = request.nextUrl.searchParams.get("livePreview") === "true"
 
-  if (isDraftMode && !isAdminRoute && !isApiRoute) {
+  if ((isDraftMode || hasPreviewParam) && !isAdminRoute && !isApiRoute && !isPreviewPath) {
     const previewUrl = request.nextUrl.clone()
-    previewUrl.searchParams.set("preview", "true")
+    previewUrl.pathname = `/preview${request.nextUrl.pathname === "/" ? "" : request.nextUrl.pathname}`
+    previewUrl.searchParams.delete("preview")
 
     if (isLivePreview) {
       previewUrl.searchParams.set("livePreview", "true")

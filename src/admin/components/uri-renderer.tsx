@@ -1,4 +1,3 @@
-import { cache } from "@/admin/cache"
 import { getDraftModeData } from "@/admin/data/draft"
 import { RenderSections } from "@/admin/components/render-sections"
 import { LivePreviewListener } from "@/admin/payload/components/frontend/live-preview-listener"
@@ -7,6 +6,7 @@ import { handleURIRedirect } from "@/admin/redirects"
 import { notFound } from "next/navigation"
 import { generateStructuredData } from "@/admin/utilities/structured-data"
 import { getSettings } from "@/admin/data/globals"
+import { draftMode } from "next/headers"
 
 /*************************************************************************/
 /*  TYPES
@@ -25,9 +25,14 @@ export async function SmartSiteURIRenderer({
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: SmartSiteURIRendererProps) {
+  const previewMode = await draftMode()
+
+  if (!previewMode.isEnabled) {
+    return notFound()
+  }
+
   const { uri = [] } = await paramsPromise
   const searchParams = await searchParamsPromise
-  const isPreview = searchParams?.preview === "true"
   const previewCollection =
     typeof searchParams?.previewCollection === "string"
       ? searchParams.previewCollection
@@ -41,12 +46,10 @@ export async function SmartSiteURIRenderer({
 
   await handleURIRedirect(URI)
 
-  const routeResponse = isPreview
-    ? await getDraftModeData(URI, {
-        collection: previewCollection,
-        documentId: previewDocumentId,
-      })
-    : await cache.getByURI(URI)
+  const routeResponse = await getDraftModeData(URI, {
+    collection: previewCollection,
+    documentId: previewDocumentId,
+  })
 
   if (!routeResponse?.document) {
     return notFound()
@@ -69,7 +72,7 @@ export async function SmartSiteURIRenderer({
 
   return (
     <main data-collection={collection} data-id={document.id}>
-      {isPreview && <LivePreviewListener />}
+      <LivePreviewListener />
       {structuredDataJson && (
         <script
           type="application/ld+json"
@@ -94,15 +97,3 @@ export async function SmartSiteURIRenderer({
 /*************************************************************************/
 
 export { generateMetadata } from "./uri-renderer/metadata"
-
-/*************************************************************************/
-/*  STATIC PARAMS GENERATION
-/*************************************************************************/
-
-export async function generateStaticParams(): Promise<{ uri: string[] }[]> {
-  const allURIs = await cache.getAllURIs()
-
-  return allURIs.map(uri => ({
-    uri: uri === "/" ? [] : uri.split("/").filter(Boolean),
-  }))
-}
