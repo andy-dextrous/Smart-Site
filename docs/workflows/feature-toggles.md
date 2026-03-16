@@ -10,6 +10,12 @@ Feature toggles belong in SmartSite config first. Do not start by editing `src/a
 
 ## Common toggles
 
+### Enable AI
+
+1. Run `pnpm ai:enable`.
+2. Provision AI credentials explicitly. The current supported path is `npx smartsite ai rotate --project .`.
+3. Open the AI access gate in admin and use the built-in apply action when you are ready.
+
 ### Disable AI
 
 1. Set `features.ai.enabled = false` in `src/smartsite.config.ts`.

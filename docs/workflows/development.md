@@ -19,11 +19,14 @@ For self-hosted sites, `smartsite-deployment.json` is the source of truth and ge
 ## Common commands
 
 ```bash
+pnpm bootstrap
+pnpm doctor
 pnpm dev
 pnpm seed
 pnpm generate:types
 pnpm lint
 pnpm type-check
+pnpm ai:enable
 pnpm self-hosted:init
 pnpm self-hosted:prepare
 pnpm self-hosted:run -- guard
@@ -72,6 +75,8 @@ SmartSite should only need one checked-in env template: `.env.example`. Self-hos
 | --- | --- | --- |
 | **Create section** | `src/components/sections/` | `config.ts` + `Component.tsx` |
 | **Add field pattern** | `src/components/fields/` | Reusable field groups |
+| **Bootstrap local install** | `pnpm bootstrap` | Interactive local-first setup helper for local Mongo or Atlas; can offer one-time local seed with explicit approval |
+| **Inspect site health** | `pnpm doctor` | Detects hosted vs self-hosted and prints next safe step |
 | **Customize admin** | `src/smartsite.config.ts` | Keep shared changes here when possible |
 | **Add collection** | `extensions.collections` | Register in config file |
 | **Style frontend** | `app/(frontend)/css/` | Tailwind v4 styles |
@@ -79,6 +84,7 @@ SmartSite should only need one checked-in env template: `.env.example`. Self-hos
 | **Quick animations** | Data attributes (`data-animate`, etc.) | Enable `gsap.globalAnimations` in config |
 | **Initialize self-hosted config** | `pnpm self-hosted:init` | Copies the deployment manifest template |
 | **Prepare self-hosted artifacts** | `pnpm self-hosted:prepare` | Generates hidden env files from the manifest |
+| **Enable AI** | `pnpm ai:enable` | Turns AI on in config; provisioning remains explicit |
 | **Deploy production** | `pnpm self-hosted:run -- promote` | Rotates `NEXT_DEPLOYMENT_ID`, rebuilds, and restarts production |
 | **Deploy preview** | `pnpm self-hosted:run -- preview` | Builds and starts the optional preview environment |
 | **Backup self-hosted Mongo** | `pnpm self-hosted:run -- backup` | Writes compressed Mongo archive |
@@ -104,6 +110,8 @@ SmartSite should only need one checked-in env template: `.env.example`. Self-hos
 
 ```bash
 # Local development
+pnpm bootstrap
+pnpm doctor
 pnpm dev
 
 # Local database and content bootstrap
@@ -151,11 +159,14 @@ The self-hosted flow now adds guardrails around destructive or risky operations:
 - production restore takes a fresh production backup before overwrite
 - production restore refuses to apply an older archive over a newer production snapshot unless you pass `--force`
 - seed flows are local-only bootstrap actions and should never be run casually or against non-local databases
+- local seed flows verify the running site against the current project before writing data; wiping existing data is a separate explicit choice and requires an extra destructive confirmation
+- rerunning bootstrap on an already configured project requires explicit approval
 
 Agent rule:
 
-- never run `pnpm seed`, `pnpm smartsite seed starter`, `/api/seed`, `mongorestore`, or any other database-writing command without explicit user approval for that specific action
+- never run `pnpm seed`, `npx smartsite seed starter --project .`, `/api/seed`, `mongorestore`, or any other database-writing command without explicit user approval for that specific action
 - always warn that the action can overwrite or replace existing data before proposing or running it
+- never rerun `smartsite init` or another bootstrap flow on an already configured project unless the user explicitly asks for it
 
 Use this to inspect the current guard state explicitly:
 

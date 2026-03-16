@@ -172,8 +172,10 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
 
 - Setup & Environment
   - If Node < 20 or pnpm missing → install per [docs/workflows/getting-started.md](../workflows/getting-started.md) → rerun `pnpm install`.
-  - If `.env` is missing → run `smartsite init --project .` (via `npx smartsite` or a locally installed CLI) and copy secrets; do not hand-edit derived keys.
-  - If AI keys are missing/outdated → run `pnpm smartsite ai rotate`.
+  - If `.env` is missing → run `pnpm bootstrap`, then review `.env`.
+  - If `.env` already exists and the site is configured → do not rerun bootstrap unless the user explicitly asks.
+  - If you need a fast status check → run `pnpm doctor` before guessing the next command.
+  - If AI is intentionally enabled and the credentials are missing/outdated → run `npx smartsite ai rotate --project .`.
   - If port 3000 is busy → stop the other process or run `pnpm kill`, then start dev.
   - If Mongo connection fails → check service status (Homebrew/Chocolatey) or Atlas IP allowlist → verify `DATABASE_URL`.
   - If seeding stalls → ensure `pnpm dev` is running → retry `pnpm seed` or `pnpm seed:demo`.
@@ -222,8 +224,8 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
 
 - AI Integration
   - If AI features are requested without a subscription → set `features.ai.enabled = false` and proceed without AI.
-  - If the workspace is still disabled → confirm the AI agent exists (`pnpm smartsite ai rotate`) and that Wild Creative has approved the site.
-  - If keys are lost → coordinate rotation then `pnpm smartsite ai rotate --force`.
+  - If the workspace is still disabled → confirm the AI agent exists (`npx smartsite ai rotate --project .`) and that Wild Creative has approved the site.
+  - If keys are lost → coordinate rotation then `npx smartsite ai rotate --project . --force`.
 
 - Deployment
   - If building for production → run `pnpm build`; ensure environment variables mirror staging; connect Mongo Atlas.

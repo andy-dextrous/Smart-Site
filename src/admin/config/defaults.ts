@@ -388,7 +388,7 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
 
   features: {
     ai: {
-      enabled: true,
+      enabled: false,
       endpoint: DEFAULT_AI_ENDPOINT,
       registrationPath: "/api/internal/sites/apply",
     },

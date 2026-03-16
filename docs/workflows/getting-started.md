@@ -15,13 +15,34 @@ cd <your-site-folder>
 pnpm install
 ```
 
-Run the interactive bootstrap from the project root:
+Preferred first path: configure the project manually.
 
 ```bash
-npx smartsite init --project .
+pnpm bootstrap
 ```
 
-The wizard copies `.env.example` to `.env`, generates secrets, collects database and storage details, optionally seeds baseline data for a fresh local install, and can leave the dev server running.
+Then:
+
+1. answer the bootstrap questions about local Mongo vs Atlas, local URL, and whether AI should remain off
+2. answer the site name and first admin questions
+3. choose whether to run the one-time local seed now
+4. review `.env` and adjust any remaining project-specific values
+5. start local MongoDB when you are using the local database path
+6. run `pnpm dev` if bootstrap did not already leave it running for a seed flow
+
+`pnpm bootstrap` is an interactive first-run helper. It:
+
+- creates `.env` from `.env.example` only if needed
+- asks whether local development should use local MongoDB or Atlas
+- asks for the local app URL
+- asks for the site name and first admin details
+- generates missing secrets when approved
+- offers a one-time local seed only when explicitly approved
+- leaves AI off unless it is explicitly enabled during the questionnaire
+
+If it runs without an interactive TTY, it falls back to safe local defaults.
+
+The CLI bootstrap still exists, but it is an optional helper path rather than the preferred default.
 
 ## Environment configuration
 
@@ -42,7 +63,7 @@ Smart Site runs on MongoDB in every environment.
 
 ## AI backend
 
-AI features connect to the managed Smart Site AI platform operated by Wild Creative after approval.
+AI features are optional and off by default. Leave AI disabled unless the site explicitly needs it.
 
 Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
@@ -67,25 +88,34 @@ cd <your-site-folder>
 pnpm install
 ```
 
-1. Run the interactive bootstrap with the Smart Site CLI (published to npm as `smartsite`). Always execute it from the project root so it can find `package.json` and `.env.example`.
+1. Prefer the manual setup path first.
+
+   ```bash
+   pnpm bootstrap
+   ```
+
+   The script behaves like a guided questionnaire. It copies `.env.example` only if `.env` is missing, asks whether local development should use local MongoDB or Atlas, asks for the local app URL, site name, and first admin details, generates missing secrets when approved, and only seeds when the user explicitly chooses the one-time local seed path. After that, review `.env`, start MongoDB if you chose the local path, and run `pnpm dev` unless bootstrap already left the dev server running for the seed flow.
+
+2. Use the Smart Site CLI only if you explicitly want the bootstrap helper path. Always execute it from the project root so it can find `package.json` and `.env.example`.
 
    ```bash
    # One-off run without installing anything
    npx smartsite init --project .
-
-   # Prefer a pinned dependency? add the CLI locally, then:
-   pnpm smartsite init --project .
    ```
 
    The wizard copies `.env.example` to `.env`, generates secrets, collects database/storage/admin details, optionally seeds baseline data for a fresh local install, and (when seeding is enabled) keeps `next dev` running so you land on a ready-to-edit site.
 
+> **Bootstrap guardrail:** If `.env` already exists and the site is already configured, do not rerun `smartsite init` unless the user explicitly asks for bootstrap to be repeated.
+
 ### 2. Environment Configuration
 
-> 💡 **Quick start**: `npx smartsite init --project .` (or `pnpm smartsite init --project .` after installing the CLI) handles `.env` creation, secret generation, database/storage selection, admin credentials, optional seeding, and can leave the dev server running when it finishes. AI access is requested later from the Smart Site admin once your project is ready.
+> 💡 **Preferred quick start**: run `pnpm bootstrap`, answer the local setup questions, choose whether to do the one-time local seed, review `.env`, start MongoDB if needed, and run `pnpm dev`. Use `npx smartsite init --project .` only when you explicitly want the bootstrap helper path.
 >
-> Need to re-run the baseline data later? Use `pnpm smartsite seed starter --start-dev` to boot a local dev server, call `/api/seed`, and keep the site running— or point at any URL with `--url https://staging.yoursite.com`.
+> Need to re-run the baseline data later? Use `npx smartsite seed starter --project . --start-dev` to boot a local dev server, call `/api/seed`, and keep the site running— or point at any URL with `--url https://staging.yoursite.com`.
 >
-> **Database safety:** Seeding writes to the database and can overwrite existing content. Treat it as a one-time bootstrap step for a fresh local site unless the user explicitly asks for it again. Do not seed staging or production databases.
+> **Database safety:** Seeding writes to the database. Treat it as a one-time bootstrap step for a fresh local site unless the user explicitly asks for it again. Do not seed staging or production databases.
+>
+> **Local seed safety:** `pnpm seed` and bootstrap seed flows verify that the running site matches the current project before they write data. Erasing existing data is a separate explicit choice and requires an extra destructive confirmation.
 
 The setup script writes these values into `.env`; use this reference when updating keys manually or configuring CI pipelines. Smart Site supports two first-class deployment shapes:
 
@@ -122,9 +152,6 @@ RESEND_API_KEY=re_...                             # Resend.com API key
 RESEND_DEFAULT_FROM=noreply@example.com
 
 
-# AI Agent (auto-generated after setup)
-AI_AGENT_API_KEY=
-
 # Admin Seeding (Development)
 PAYLOAD_ADMIN_EMAIL=admin@example.com
 PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
@@ -132,11 +159,11 @@ PAYLOAD_ADMIN_PASSWORD=SecurePassword123!
 
 #### AI Environment Variables
 
-- `AI_AGENT_API_KEY` — generated automatically during setup/seed. This is the only AI secret that ships in `.env.example`; the wizard writes the actual value after it provisions the hidden agent.
+- `AI_AGENT_API_KEY` — only needed when you explicitly enable AI. Provision it through the AI opt-in flow, not baseline setup.
 
 > Legacy placeholders (`SMARTSITE_AI_REGISTRATION_SECRET`, `SMARTSITE_SITE_NAME`) were removed. All onboarding now flows through the admin “Apply for AI Access” action described below, which keeps the local environment lean.
 
-> Rerun the seed (or `pnpm smartsite ai rotate`) if `.env` ever loses the agent credentials. The command reconciles the database user and restores the values without regenerating keys unless a rotation flow is requested.
+> If you explicitly enable AI later, provision credentials with `npx smartsite ai rotate --project .`.
 
 ### Identity Configuration
 
@@ -152,7 +179,15 @@ const config: UserConfig = {
 }
 ```
 
-This value is used when seeding content, registering the AI agent, and rendering admin chrome. The CLI reads it automatically, so you no longer need `SMARTSITE_SITE_NAME` in `.env`.
+This value is used when seeding content, rendering admin chrome, and identifying the site if you later opt into AI. The CLI reads it automatically, so you no longer need `SMARTSITE_SITE_NAME` in `.env`.
+
+### Health Check
+
+Use the local doctor script any time you need a quick status read on mode, env readiness, AI state, or the next safe command:
+
+```bash
+pnpm doctor
+```
 
 ### 3. Database Setup
 
@@ -355,11 +390,11 @@ mongorestore --uri "mongodb+srv://<username>:<password>@<cluster-url>/smart-site
 
 > Use the raw `mongodump` and `mongorestore` commands above for hosted environment promotion. SmartSite does not currently ship `pnpm smartsite staging pull` or `pnpm smartsite staging push` wrappers.
 
-Run seeding (`pnpm smartsite seed starter` or `pnpm seed`) only against development databases and only with explicit confirmation that overwriting the target data is intended. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
+Run seeding (`npx smartsite seed starter --project .` or `pnpm seed`) only against development databases and only with explicit confirmation that overwriting the target data is intended. Once a staging or production environment is active, use the promote flow above or Payload admin exports to transfer content.
 
 ### 4. AI Backend Setup
 
-To enable AI features you connect to the managed Smart Site AI platform operated by Wild Creative. There is no customer-managed installation step—after seeding, contact andrew@wildcreative.com.au (or use the upcoming admin “Apply for AI Access” action) and they will activate your workspace. Until approval the AI sidebar remains disabled, but your local agent credentials are ready.
+To enable AI features, run `pnpm ai:enable`, then provision credentials with `npx smartsite ai rotate --project .`, and finally use the admin “Apply for AI Access” action. AI remains off by default until you explicitly opt in.
 
 ### 5. Development Server
 
@@ -370,7 +405,7 @@ pnpm dev
 
 ### 6. Database Seeding & Initial Setup
 
-> **🗃️ Important:** The setup wizard (`smartsite init --project .`) can seed the minimal profile for you during first setup. Use the commands below only when you intentionally want to overwrite a local development database.
+> **🗃️ Important:** If you chose the CLI bootstrap helper during first setup, it can seed the minimal profile for you. Use the commands below only when you intentionally want to overwrite a local development database.
 
 The wizard already seeds the **minimal** profile so you can start building immediately. Rerun the seed only after intentionally wiping the local development database and confirming that losing existing content is acceptable.
 
@@ -385,7 +420,7 @@ The wizard already seeds the **minimal** profile so you can start building immed
    pnpm seed
    ```
 
-   The wizard prompts for a site name during setup; rerun `smartsite init --project .` or call the seed endpoint with a custom `siteName` to change the label.
+   The site label normally comes from `src/smartsite.config.ts`. Change it there instead of rerunning bootstrap on an already configured project.
 
 #### Minimal seed contents
 

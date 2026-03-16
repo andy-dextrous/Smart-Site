@@ -27,6 +27,7 @@ import { postMinimalTemplate } from "./templates/post-minimal"
 import { insightsMinimalPage } from "./pages/insights-minimal"
 import { sampleMinimalPosts } from "./posts/minimal-posts"
 import { revalidateTag } from "next/cache"
+import { getSmartSiteConfig } from "@/admin/config"
 
 // Types
 type SeedResult = {
@@ -41,6 +42,7 @@ type SeedResult = {
 
 type SeedOptions = {
   blog?: boolean
+  eraseExisting?: boolean
 }
 
 /*************************************************************************/
@@ -92,6 +94,7 @@ class DynamicSeedManager {
     // Minimal-only profile
     this.profile = minimalProfile
     this.blogEnabled = options?.blog !== false
+    const eraseExisting = options?.eraseExisting === true
     
     this.payload.logger.info(`Using seed profile: ${this.profile.name} - ${this.profile.description}`)
     const startTime = Date.now()
@@ -121,24 +124,32 @@ class DynamicSeedManager {
        */
       disableSyncHooks(this.payload, this.context)
 
-      /**
-       * Step 2: Clean existing data (including users to fix password hash issues)
-       */
-      this.payload.logger.info("Cleaning existing data (including users)...")
-      const deleteResult = await this.deleteData(false, false)
+      if (eraseExisting) {
+        /**
+         * Step 2: Clean existing data (including users to fix password hash issues)
+         */
+        this.payload.logger.info("Cleaning existing data (including users)...")
+        const deleteResult = await this.deleteData(false, false)
 
-      // Don't fail the entire seeding if deletion fails on empty database
-      if (!deleteResult.success) {
-        this.payload.logger.info(
-          "Deletion had issues (likely empty database), continuing with seeding..."
-        )
+        // Don't fail the entire seeding if deletion fails on empty database
+        if (!deleteResult.success) {
+          this.payload.logger.info(
+            "Deletion had issues (likely empty database), continuing with seeding..."
+          )
+        }
+      } else {
+        this.payload.logger.info("Skipping destructive delete step; seed will add or update baseline data only.")
       }
 
       /**
        * Step 3: Always create fresh users to ensure proper password hashing
        */
-      this.payload.logger.info("Creating fresh admin user...")
-      const seededUsers = await this.seedUsers()
+      const existingUsers = await this.payload.count({
+        collection: "users",
+        context: this.context,
+      })
+      const shouldCreateAdminUser = eraseExisting || existingUsers.totalDocs === 0
+      const seededUsers = shouldCreateAdminUser ? await this.seedUsers() : []
       const usersCreated = seededUsers.length
 
       /**
@@ -230,72 +241,78 @@ class DynamicSeedManager {
       stats.created.globals = seededGlobals.length + 1 // +1 for settings global
 
       /**
-       * Step 8: Create AI agent user at the very end (after all other seeding)
+       * Step 8: Provision AI identity only when the site explicitly opts in.
        */
-      this.payload.logger.info("Creating AI agent user with API key...")
-      try {
-        const { user: aiAgent, apiKey } = await ensureAIAgentWithAPIKey(
-          this.payload,
-          this.context,
-          this.siteName
-        )
-        
-        // Store the API key securely (only shown once during creation)
-        if (apiKey) {
-          this.payload.logger.info("═══════════════════════════════════════════════════════════════")
-          this.payload.logger.info("AI AGENT API KEY (SAVE THIS - SHOWN ONLY ONCE):")
-          this.payload.logger.info(`API Key: ${apiKey}`)
-          this.payload.logger.info(`Email: ${aiAgent.email}`)
-          this.payload.logger.info(`User ID: ${aiAgent.id}`)
-          this.payload.logger.info("═══════════════════════════════════════════════════════════════")
-          this.payload.logger.info("AI workspace is pending connection. Visit the admin AI settings to request Smart Site AI access when you're ready.")
-          
-          // Optionally save to .env file for development
-          if (process.env.NODE_ENV === "development") {
-            await this.saveAPIKeyToEnv(apiKey)
-          }
-        } else {
-          this.payload.logger.info(`AI agent already has API key configured (not shown for security)`)
-        }
-        
-        stats.created.users += 1 // Add AI agent to user count
-      } catch (error) {
-        const rawMessage =
-          error instanceof Error ? error.message : typeof error === "string" ? error : ""
-        const message = (rawMessage ?? "").trim()
-
-        const diagnosticDetails =
-          message ||
-          (error instanceof Error
-            ? error.stack || error.toString()
-            : typeof error === "object"
-            ? JSON.stringify(error)
-            : String(error))
-
-        this.payload.logger.info(
-          `[seed] AI agent provisioning diagnostic: ${diagnosticDetails}`
-        )
-
-        const normalized = message.toLowerCase()
-
-        const expectedDuplicate =
-          message.length === 0 ||
-          normalized.includes("already exists") ||
-          normalized.includes("already provisioned") ||
-          normalized.includes("api key is not available") ||
-          normalized.includes("endpoint is not configured") ||
-          normalized.includes("not found") ||
-          normalized.includes("404")
-
-        if (expectedDuplicate) {
-          this.payload.logger.info(
-            `AI agent already provisioned; skipping new credentials (${message || "no details"})`
+      const smartSiteConfig = getSmartSiteConfig()
+      if (smartSiteConfig.features.ai.enabled) {
+        this.payload.logger.info("AI is enabled; creating AI agent user with API key...")
+        try {
+          const { user: aiAgent, apiKey } = await ensureAIAgentWithAPIKey(
+            this.payload,
+            this.context,
+            this.siteName
           )
-        } else {
-          this.payload.logger.error({ error }, "Failed to create AI agent user")
-          stats.errors.push(`AI agent creation failed: ${message || error}`)
+
+          if (apiKey) {
+            this.payload.logger.info("═══════════════════════════════════════════════════════════════")
+            this.payload.logger.info("AI AGENT API KEY (SAVE THIS - SHOWN ONLY ONCE):")
+            this.payload.logger.info(`API Key: ${apiKey}`)
+            this.payload.logger.info(`Email: ${aiAgent.email}`)
+            this.payload.logger.info(`User ID: ${aiAgent.id}`)
+            this.payload.logger.info("═══════════════════════════════════════════════════════════════")
+            this.payload.logger.info(
+              "AI workspace is pending connection. Visit the admin AI settings to request Smart Site AI access when you're ready."
+            )
+
+            if (process.env.NODE_ENV === "development") {
+              await this.saveAPIKeyToEnv(apiKey)
+            }
+          } else {
+            this.payload.logger.info("AI agent already has API key configured (not shown for security)")
+          }
+
+          stats.created.users += 1
+        } catch (error) {
+          const rawMessage =
+            error instanceof Error ? error.message : typeof error === "string" ? error : ""
+          const message = (rawMessage ?? "").trim()
+
+          const diagnosticDetails =
+            message ||
+            (error instanceof Error
+              ? error.stack || error.toString()
+              : typeof error === "object"
+                ? JSON.stringify(error)
+                : String(error))
+
+          this.payload.logger.info(
+            `[seed] AI agent provisioning diagnostic: ${diagnosticDetails}`
+          )
+
+          const normalized = message.toLowerCase()
+
+          const expectedDuplicate =
+            message.length === 0 ||
+            normalized.includes("already exists") ||
+            normalized.includes("already provisioned") ||
+            normalized.includes("api key is not available") ||
+            normalized.includes("endpoint is not configured") ||
+            normalized.includes("not found") ||
+            normalized.includes("404")
+
+          if (expectedDuplicate) {
+            this.payload.logger.info(
+              `AI agent already provisioned; skipping new credentials (${message || "no details"})`
+            )
+          } else {
+            this.payload.logger.error({ error }, "Failed to create AI agent user")
+            stats.errors.push(`AI agent creation failed: ${message || error}`)
+          }
         }
-        // Don't fail the entire seeding if AI agent creation fails
+      } else {
+        this.payload.logger.info(
+          "AI is disabled in smartsite.config.ts; skipping AI agent provisioning during seed."
+        )
       }
 
       /**

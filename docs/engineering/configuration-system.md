@@ -36,7 +36,7 @@ const config: UserConfig = {
   },
   features: {
     ai: {
-      enabled: true,
+      enabled: false,
       endpoint: "https://smart-site-ai-core.vercel.app", // managed service (override only if Wild Creative provides a custom URL)
     },
     analytics: true,
@@ -115,7 +115,7 @@ Each configurable collection (any slug inside `smartsite.config.ts → collectio
 
 | Feature       | Options   | Default          | Purpose                                                                         |
 | ------------- | --------- | ---------------- | ------------------------------------------------------------------------------- |
-| `ai.enabled`  | `boolean` | `true`           | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
+| `ai.enabled`  | `boolean` | `false`          | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
 | `ai.endpoint` | `string`  | `https://smart-site-ai-core.vercel.app` | Managed AI backend URL (Wild Creative will advise if this needs to change)   |
 | `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
 | `i18n`        | `boolean` | `false`          | Internationalization                                                            |

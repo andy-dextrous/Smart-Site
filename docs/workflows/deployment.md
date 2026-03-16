@@ -203,14 +203,16 @@ Smart Site still supports classic hosted delivery when that fits the project bet
 
 ### AI Backend Deployment
 
-The Smart Site AI backend is still operated by Wild Creative, but the project now ships a live apply flow instead of a docs-only “email us” step.
+AI is optional and off by default. Only follow this section when the site has explicitly opted into AI.
 
 Current flow:
 
-1. seed or bootstrap the site normally
-2. open the AI access gate in admin
-3. use the built-in “Apply for AI Access” action
-4. wait for the backend status to move from pending to active
+1. set `features.ai.enabled = true` in `src/smartsite.config.ts`
+2. run `pnpm ai:enable`
+3. provision AI credentials explicitly with `npx smartsite ai rotate --project .`
+4. open the AI access gate in admin
+5. use the built-in “Apply for AI Access” action
+6. wait for the backend status to move from pending to active
 
 Wild Creative still owns the managed AI platform, approval backend, and support, but the request flow now exists inside the product.
 
@@ -258,9 +260,10 @@ Smart Site can deploy to any Node.js hosting platform:
 
 #### AI Backend (Managed by Wild Creative)
 
+- [ ] AI is explicitly enabled in `src/smartsite.config.ts`
 - [ ] Subscription confirmed with Wild Creative
 - [ ] AI workspace approved by Wild Creative (contact andrew@wildcreative.com.au)
-- [ ] `AI_AGENT_API_KEY` generated after seeding
+- [ ] `AI_AGENT_API_KEY` provisioned through the explicit AI opt-in flow
 - [ ] Connection test completed (admin chat assistant responding)
 - [ ] Support contact: andrew@wildcreative.com.au documented for the team
 
