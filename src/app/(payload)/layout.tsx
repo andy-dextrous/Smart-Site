@@ -7,8 +7,8 @@ import type { ServerFunctionClient } from "payload"
 import React from "react"
 import { importMap } from "@/app/(payload)/admin/importMap"
 
-import "@/admin/css/admin.scss"
-import "@/admin/css/styles.css"
+import "@/components/cms/styles/admin.scss"
+import "@/components/cms/styles/styles.css"
 
 type Args = {
   children: React.ReactNode

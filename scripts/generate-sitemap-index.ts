@@ -41,7 +41,7 @@ ${sitemapEntries}
 }
 
 async function loadFrontendCollections(): Promise<SitemapCollectionEntry[]> {
-  const { getFrontendCollections } = await import("../src/website/collections")
+  const { getFrontendCollections } = await import("../src/lib/collections")
   return (await getFrontendCollections()).filter(item => item.sitemap?.enabled !== false)
 }
 

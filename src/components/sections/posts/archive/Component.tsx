@@ -1,11 +1,11 @@
 import type { Media, PostsArchiveBlock, Post } from "@/payload-types"
-import type { PageData } from "@/website/rendering/render-sections"
-import { getPostsWithPagination } from "@/website/data/posts"
+import type { PageData } from "@/lib/rendering/render-sections"
+import { getPostsWithPagination } from "@/lib/data/posts"
 import {
   estimatePostReadingTime,
   formatPostPublishDate,
   resolvePostCategories,
-} from "@/utilities/posts"
+} from "@/lib/posts"
 import { Section } from "@/components/fields/section"
 import { PageRange } from "@/components/fields/pagination/page-range"
 import { Pagination } from "@/components/fields/pagination"

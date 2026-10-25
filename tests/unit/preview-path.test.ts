@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { publicPreviewPath } from "../../src/utilities/preview-path"
+import { publicPreviewPath } from "../../src/lib/preview-path"
 
 test("preview returns retain public path and ordinary query parameters", () => {
   assert.equal(

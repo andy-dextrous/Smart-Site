@@ -1,10 +1,10 @@
 import type { Media, Post } from "@/payload-types"
-import { getPostsWithPagination } from "@/website/data/posts"
+import { getPostsWithPagination } from "@/lib/data/posts"
 import {
   estimatePostReadingTime,
   formatPostPublishDate,
   resolvePostCategories,
-} from "@/utilities/posts"
+} from "@/lib/posts"
 import type { NextRequest } from "next/server"
 
 /*************************************************************************/

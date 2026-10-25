@@ -25,7 +25,7 @@ try {
   const manifests = {}
   for (const [folder, version] of [
     ["baseline", "3.0.1"],
-    ["target", "4.0.1"],
+    ["target", "4.0.2"],
   ]) {
     const bytes = JSON.stringify({ version })
     await writeFile(path.join(root, folder, "package.json"), bytes)
@@ -56,7 +56,7 @@ try {
     restoreEnvironmentFile,
     reportDirectory: path.join(root, "reports"),
     sourceVersion: "3.0.1",
-    targetVersion: "4.0.1",
+    targetVersion: "4.0.2",
     expectedSiteId: "fixture",
     baselineManifestSha256: manifests.baseline,
     targetManifestSha256: manifests.target,
@@ -67,7 +67,7 @@ try {
   process.argv = [...previousArgv, "--request", requestFile]
   const initial = await loadRequest()
   // The package target advances independently of the unchanged 4.0 migration epoch.
-  for (const targetVersion of ["4.0.0", "4.0.2"]) {
+  for (const targetVersion of ["4.0.0", "4.0.1", "4.0.3"]) {
     await put({ ...request, targetVersion })
     await assert.rejects(loadRequest, /Unsupported source\/target version/)
   }
@@ -87,7 +87,7 @@ try {
   await writeFile(targetManifest, staleTargetManifest)
   await put({ ...request, targetManifestSha256: digest(staleTargetManifest) })
   await assert.rejects(loadRequest, /Artifact package version mismatch/)
-  const targetBytes = JSON.stringify({ version: "4.0.1" })
+  const targetBytes = JSON.stringify({ version: "4.0.2" })
   await writeFile(targetPackage, targetBytes)
   await writeFile(
     targetManifest,
@@ -98,7 +98,7 @@ try {
   )
   await put(request)
   assert.equal((await loadRequest()).fingerprint, initial.fingerprint)
-  // Both immutable 3.x baselines remain supported; no 4.0.0-to-4.0.1 migration.
+  // Both immutable 3.x baselines remain supported; no 4.0.0-to-4.0.2 migration.
   const baselinePackage = path.join(root, "baseline/package.json")
   const baselineManifest = path.join(root, "baseline/smartsite-export.json")
   const oldBytes = JSON.stringify({ version: "3.0.0" })

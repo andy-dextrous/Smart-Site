@@ -4,8 +4,8 @@ import {
   formatPostPublishDate,
   estimatePostReadingTime,
   resolvePostCategories,
-} from "@/utilities/posts"
-import { cn } from "@/utilities/ui"
+} from "@/lib/posts"
+import { cn } from "@/lib/ui"
 import Link from "next/link"
 
 type PostCardAppearance = "light" | "dark" | "neutral"

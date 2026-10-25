@@ -464,7 +464,7 @@ export const previewEndpoint: Endpoint = {
 App-provided maintenance handler; require the existing administrative role and explicitly authorize the requested collection before starting bulk work:
 
 ```ts
-import { userHasMinimumRole } from '@/access/roles'
+import { userHasMinimumRole } from '@/payload/access/roles'
 import { APIError } from 'payload'
 
 export const reindexEndpoint = (pluginConfig) => ({
@@ -521,7 +521,7 @@ Mounted at `/api/globals/{global-slug}/{path}`.
 ```ts
 import type { GlobalConfig } from 'payload'
 import { APIError } from 'payload'
-import { userHasMinimumRole } from '@/access/roles'
+import { userHasMinimumRole } from '@/payload/access/roles'
 
 export const Settings: GlobalConfig = {
   slug: 'settings',

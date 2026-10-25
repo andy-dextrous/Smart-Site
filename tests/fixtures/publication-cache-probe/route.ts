@@ -3,8 +3,8 @@ import { exerciseUnroutedProfile } from "../../../../tests/fixtures/unrouted-pro
 import config from "@payload-config"
 import { createLocalReq, getPayload } from "payload"
 import { workAsyncStorage } from "next/dist/server/app-render/work-async-storage.external"
-import { drainPublication, publicationStatus } from "@/website/publication/runner"
-import { deliverPublicationCache } from "@/website/publication/cache-delivery"
+import { drainPublication, publicationStatus } from "@/lib/publication/runner"
+import { deliverPublicationCache } from "@/lib/publication/cache-delivery"
 
 // Independent fixture-only fault injection. Never shipped.
 export const dynamic = "force-dynamic"

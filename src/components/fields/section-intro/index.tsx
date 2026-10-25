@@ -1,7 +1,7 @@
 "use client"
 
 import RichText from "@/components/fields/rich-text"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 
 /*************************************************************************/

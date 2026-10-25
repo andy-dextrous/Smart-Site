@@ -1,5 +1,5 @@
-import { SmartSiteURIRenderer } from "@/website/rendering/uri-renderer"
-import { generateMetadata } from "@/website/rendering/uri-renderer/metadata"
+import { SmartSiteURIRenderer } from "@/lib/rendering/uri-renderer"
+import { generateMetadata } from "@/lib/rendering/uri-renderer/metadata"
 
 export const dynamic = "force-dynamic"
 

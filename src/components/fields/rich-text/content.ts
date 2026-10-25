@@ -1,7 +1,7 @@
 import { FixedToolbarFeature, InlineToolbarFeature } from "@payloadcms/richtext-lexical"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import { richTextDefault } from "@/components/fields/rich-text/defaults"
-import deepMerge from "@/utilities/deep-merge"
+import deepMerge from "@/lib/deep-merge"
 import type { Field } from "payload"
 
 export const content = (overrides: Partial<Field> = {}): Field => {

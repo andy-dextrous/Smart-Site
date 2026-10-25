@@ -83,6 +83,8 @@ The normal hosted release loop is:
 
 ## Self-hosted deployment
 
+Self-hosting is opt-in. The blank starter does not contain `.smartsite-self-hosted/` or a generated `smartsite-deployment.json`. Ordinary local startup and hosted deployment must not create them. After choosing this path, `self-hosted:init` creates the manifest and `self-hosted:prepare` creates private runtime files under `.smartsite-self-hosted/`. Agents should use these helpers instead of creating placeholder folders. Preserve an existing site’s private runtime state during upgrades.
+
 Local Docker uploads use the persistent `/app/public/media` directory. Before upgrading an existing 3.x Docker deployment, follow [the checked media relocation and rollback procedure](docker-media.md); the old standalone runtime may have stored uploads inside its build directory.
 
 Self-hosted deployment means:

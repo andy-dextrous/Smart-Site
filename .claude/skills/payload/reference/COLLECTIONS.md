@@ -6,7 +6,7 @@ Complete reference for collection configurations and patterns.
 
 ```ts
 import type { CollectionConfig } from 'payload'
-import { slugField } from '@/fields/slug'
+import { slugField } from '@/payload/fields/slug'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -79,7 +79,7 @@ This string-path form is queryable. It is different from a computed
 
 ## Auth Collection
 
-This is a generic auth model with a custom `roles` array. SmartSite already has a singular `role` field and `hasMinimumRole` / `userHasMinimumRole` in `@/access/roles`; use those rather than replacing its Users schema.
+This is a generic auth model with a custom `roles` array. SmartSite already has a singular `role` field and `hasMinimumRole` / `userHasMinimumRole` in `@/payload/access/roles`; use those rather than replacing its Users schema.
 
 ```ts
 export const Users: CollectionConfig = {

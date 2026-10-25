@@ -1,7 +1,7 @@
 "use client"
 
-import { useGSAP, gsap } from "@/providers/gsap"
-import { cn } from "@/utilities/ui"
+import { useGSAP, gsap } from "@/components/providers/gsap"
+import { cn } from "@/lib/ui"
 import { useRef } from "react"
 
 /*************************************************************************/

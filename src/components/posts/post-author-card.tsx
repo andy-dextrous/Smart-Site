@@ -1,6 +1,6 @@
 import type { Media as MediaType, Post, Team, User } from "@/payload-types"
 import { Media } from "@/components/fields/media"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 interface PostAuthorCardProps {
   post: Post

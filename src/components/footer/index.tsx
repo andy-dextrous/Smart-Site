@@ -1,5 +1,5 @@
 import LogoPrimary from "@/components/logos/logo"
-import { getGlobal, getSettings } from "@/website/data/globals"
+import { getGlobal, getSettings } from "@/lib/data/globals"
 import { CMSLink } from "@/components/fields/link"
 import { SocialLinks } from "@/components/fields/social-links"
 import type { Footer as FooterType, Setting } from "@/payload-types"

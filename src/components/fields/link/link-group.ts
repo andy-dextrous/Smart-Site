@@ -1,6 +1,6 @@
 import type { ArrayField, Field } from "payload"
 
-import deepMerge from "@/utilities/deep-merge"
+import deepMerge from "@/lib/deep-merge"
 import { link } from "@/components/fields/link/link"
 
 type LinkGroupType = (options?: { overrides?: Partial<ArrayField> }) => Field

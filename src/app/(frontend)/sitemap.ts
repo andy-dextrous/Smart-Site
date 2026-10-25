@@ -3,9 +3,9 @@ import site from "@/site.config"
 import {
   getFrontendCollectionKeys,
   shouldIncludeCollectionInSitemap,
-} from "@/website/sitemaps/config"
-import { generateSitemap } from "@/website/sitemaps/generator"
-import { getServerSideURL } from "@/utilities/get-url"
+} from "@/lib/sitemaps/config"
+import { generateSitemap } from "@/lib/sitemaps/generator"
+import { getServerSideURL } from "@/lib/get-url"
 
 /*************************************************************************/
 /*  GENERATE SITEMAPS - ONE PER FRONTEND COLLECTION

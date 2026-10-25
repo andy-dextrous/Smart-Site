@@ -142,7 +142,7 @@ Follow the patterns in this section.
 - Provide `label`, `admin.description`, and `admin.placeholder` strings to explain author intent.
 - Set `slug` equal to the folder name; set `interfaceName` so TypeScript components receive strong types (`HeroBlock`, `FeatureGridBlock`).
 - Run `sectionSettings()` as the final field to expose shared colour/container/padding controls.
-- Use an existing collection when it already represents the content. Otherwise, add an ordinary Payload collection under `src/collections` and register it in `src/payload.config.ts`; no separate extension layer or approval step is required for a requested feature. Follow [native configuration](configuration-system.md) for access, hooks, optional website routes and explicit content-tool opt-in. Preserve existing fields, records, relationships and private drafts; use the [data skill](../../.agents/skills/smartsite-data/SKILL.md) when changing stored shapes.
+- Use an existing collection when it already represents the content. Otherwise, add an ordinary Payload collection under `src/payload/collections` and register it in `src/payload.config.ts`; no separate extension layer or approval step is required for a requested feature. Follow [native configuration](configuration-system.md) for access, hooks, optional website routes and explicit content-tool opt-in. Preserve existing fields, records, relationships and private drafts; use the [data skill](../../.agents/skills/smartsite-data/SKILL.md) when changing stored shapes.
 - Keep defaults sensible: choose the most common layout or toggle as `defaultValue`, especially for stylistic selectors (alignment, size, colour scheme, layout variants). Components should be able to rely on these defaults without re-normalising values.
 - When you have multiple small, related settings (e.g. paired toggles, select boxes, numeric inputs), wrap them in a `type: "row"` so editors see them inline.
 - For `array` fields, omit `minRows` unless the product requirement explicitly says the editor must never be able to remove the last item.
@@ -398,7 +398,7 @@ export function HeroComponent(props: HeroBlock) {
 ### 4. Data Access & Caching
 
 - Rely on the injected page context first. Every section receives `document`, `collection`, `breadcrumbs`, `searchParams`, and `params`; prefer these props before issuing new queries.
-- When additional data is required, import `cache` from `@/website/cache` and call the shared helpers server-side. Core methods: `getByURI`, `getBySlug`, `getByID`, `getCollection`, `getGlobal`, `getAllURIs`.
+- When additional data is required, import `cache` from `@/lib/cache` and call the shared helpers server-side. Core methods: `getByURI`, `getBySlug`, `getByID`, `getCollection`, `getGlobal`, `getAllURIs`.
 - Avoid calling `getPayload()` or direct fetches inside sections. Wrap cache calls in domain helpers under `src/lib/<domain>/…` (or the client’s `src/lib`) so the logic stays reusable and inherits smart revalidation.
 - Match the cache API’s `QueryOptions` shape (`limit`, `sort`, `where`, `depth`, `overrideAccess`, `draft`) when composing queries. This keeps invalidation tags accurate.
 - Only expose section-level toggles for draft or alternate datasets when a user story demands it. Otherwise, let the defaults (published content, depth 5) flow from the cache helpers.
@@ -454,7 +454,7 @@ export function HeroComponent(props: HeroBlock) {
   - Use `data-animate="fade-up"` + `data-animate-stagger`, and point `data-animate-target` (or `[data-animate-item]`) at the descendants you want to tween together.
   - Avoid assigning individual `data-animate-delay` values when a single stagger will do; it keeps the ScrollTrigger footprint lean and the markup clearer.
   - Other helpers (`data-parallax`, `data-rotate`, `data-typewriter`, `data-pulse`, `data-split`) follow the same pattern—apply to the element that conceptually owns the effect.
-- Available global hooks (see `src/providers/gsap/global-animations.tsx` for options and defaults):
+- Available global hooks (see `src/components/providers/gsap/global-animations.tsx` for options and defaults):
 
   | Hook | Purpose | Common attributes |
   | --- | --- | --- |
@@ -480,8 +480,8 @@ export function HeroComponent(props: HeroBlock) {
   </div>
   ```
 
-- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and use existing sections in this repository for practical patterns.
-- **Reusable GSAP effects**: place shared animations in `src/providers/gsap/effects.ts` (using `gsap.registerEffect`) so sections can call `gsap.effects.myEffect(targets, config)` without duplicating timelines. This keeps motion consistent across the catalogue.
+- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/components/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and use existing sections in this repository for practical patterns.
+- **Reusable GSAP effects**: place shared animations in `src/components/providers/gsap/effects.ts` (using `gsap.registerEffect`) so sections can call `gsap.effects.myEffect(targets, config)` without duplicating timelines. This keeps motion consistent across the catalogue.
 - Keep third-party animation libraries out of sections. If you discover a missing helper, register it centrally in the GSAP provider rather than inlining it per section.
 
 ### 9. Accessibility and Semantics

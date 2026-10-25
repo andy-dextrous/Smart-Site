@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 import { useEffect, useState } from "react"
 
 export interface ReadingProgressProps {

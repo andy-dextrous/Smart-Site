@@ -1,24 +1,24 @@
-# SmartSite 4.0 change map
+# SmartSite 3.x → 4.0.2 change map
 
-The top-level `package.json` owns the product version. `smartsite-release.json` records supported upgrades; `smartsite-export.json` records artifact hashes. See [file-map.json](file-map.json) for exact moves. A null destination means the framework module was removed and any customization requires reconciliation.
+The top-level `package.json` owns the product version. `config/smartsite-release.json` records supported upgrades; `smartsite-export.json` records artifact hashes. See [file-map.json](file-map.json) for exact moves. A null destination means the framework module was removed and any customization requires reconciliation.
 
 | Former owner | 4.0 owner / action |
 | --- | --- |
 | `src/admin/payload/payload.config.ts` and config resolver | Explicit `src/payload.config.ts` |
 | Config defaults, validator, deep merge and freeze | Removed; native typed definitions own defaults/options |
-| `src/smartsite.config.ts` collection overrides | Edit `src/collections/<slug>.ts` directly |
+| `src/smartsite.config.ts` collection overrides | Edit `src/payload/collections/<slug>.ts` directly |
 | `src/extensions` registries | Ordinary collections/globals/blocks/plugins explicitly registered in Payload config |
-| Admin metadata/live preview | `src/admin/config.ts` and collection preview options |
-| Admin theme values | Native CSS in `src/admin/css`; no config-time CSS file writes |
+| Admin metadata/live preview | `src/payload/admin.ts` and collection preview options |
+| Admin theme values | Native CSS in `src/components/cms/styles`; no config-time CSS file writes |
 | Identity, motion, breadcrumbs, public search/locale and image-display choices | `src/site.config.ts` |
 | Collection enable/frontend/SEO/search/sitemap flags | Explicit registration, native fields/hooks and `custom.smartsite` metadata |
 | Media provider/size/quality/focal options | Native upload configuration and storage plugins; retain all provider options |
 | Database/localization/email/plugin options | Native Payload config and `src/payload` modules |
 | MCP switch and target lists | `smartsiteMcp({ enabled })` plus definition-level `custom.smartsite.mcp` |
-| `src/admin/cache`, routing, redirects and public data helpers | `src/website` domains |
-| `src/admin/mcp` | `src/mcp` |
-| Payload collections/globals/fields/hooks/access/plugins/types | Corresponding top-level `src` folders |
-| Shared frontend rendering/UI | `src/components/cms`, `src/components/cms-ui`, `src/components/content-fields`, `src/website/rendering` |
+| `src/admin/cache`, routing, redirects and public data helpers | `src/lib` domains |
+| `src/admin/mcp` | `src/payload/mcp` |
+| Payload collections/globals/fields/hooks/access/plugins/types | `src/payload` subfolders; declarations in `src/types` |
+| Shared frontend rendering/UI | `src/components/cms`, `src/components/cms/ui`, `src/components/fields`, `src/lib/rendering` |
 | `src/admin/package.json` | Removed; preserve custom dependency changes in the top-level package |
 | Old module aliases and generated files | Updated imports, `@payload-config`, `src/payload-types.ts` and regenerated admin import map |
 | Exported workflows | Standalone project commands; preserve client targets and secret references |

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { createLocalReq, type Payload } from "payload"
-import { queuePublication } from "../../src/website/publication/intent"
-import { drainPublication, publicationStatus } from "../../src/website/publication/runner"
+import { queuePublication } from "../../src/lib/publication/intent"
+import { drainPublication, publicationStatus } from "../../src/lib/publication/runner"
 
 export async function exerciseUnroutedProfile(
   payload: Payload,

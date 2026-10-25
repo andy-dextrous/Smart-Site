@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { createLocalReq, getPayload } from "payload"
 import config from "@payload-config"
-import { getDraftModeData } from "../../src/website/data/draft"
+import { getDraftModeData } from "../../src/lib/data/draft"
 const payload = await getPayload({ config })
 try {
   const child = (

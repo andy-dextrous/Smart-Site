@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload"
-import { canRunPublication } from "@/website/publication/access"
+import { canRunPublication } from "@/lib/publication/access"
 
 export const UpgradeReceipts: CollectionConfig = {
   slug: "site-upgrade-receipts",

@@ -3,9 +3,9 @@ import { writeFile } from "node:fs/promises"
 import { MongoClient } from "mongodb"
 import { createLocalReq, getPayload, type Payload } from "payload"
 import config from "../../src/payload.config"
-import { websiteCollections } from "../../src/website/collection-metadata"
-import { queuePublication } from "../../src/website/publication/intent"
-import { drainPublication } from "../../src/website/publication/runner"
+import { websiteCollections } from "../../src/lib/collection-metadata"
+import { queuePublication } from "../../src/lib/publication/intent"
+import { drainPublication } from "../../src/lib/publication/runner"
 
 // This is the publication worker's boundary, not the legacy regeneration helper's.
 // Observed real queries below must still use this limit and make the terminal read.

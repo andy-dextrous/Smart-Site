@@ -3,9 +3,9 @@ import { getPayload } from "payload"
 import { NextResponse, NextRequest } from "next/server"
 import configPromise from "@payload-config"
 import { draftMode } from "next/headers"
-import { createRequestUrl } from "@/utilities/request-origin"
-import { publicPreviewPath } from "@/utilities/preview-path"
-import { isFrontendCollection } from "@/website/collections"
+import { createRequestUrl } from "@/lib/request-origin"
+import { publicPreviewPath } from "@/lib/preview-path"
+import { isFrontendCollection } from "@/lib/collections"
 
 /*************************************************************************/
 /*  PREVIEW API ROUTE - OPTIMIZED FOR STATIC GENERATION

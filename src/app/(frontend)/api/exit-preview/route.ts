@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createRequestUrl } from "@/utilities/request-origin"
-import { publicPreviewPath } from "@/utilities/preview-path"
+import { createRequestUrl } from "@/lib/request-origin"
+import { publicPreviewPath } from "@/lib/preview-path"
 
 /*************************************************************************/
 /*  EXIT PREVIEW API ROUTE

@@ -12,6 +12,7 @@ This repository contains the complete website and its development kit. Choose th
 | Diagnose a failure | [Troubleshooting](workflows/troubleshooting.md) and `smartsite-repair` skill |
 | Launch, deploy or upgrade | [First launch](workflows/first-launch.md), [deployment](workflows/deployment.md), [upgrading](workflows/upgrading.md) and `smartsite-launch` skill |
 | Daily source work | [Development](workflows/development.md), [coding standards](engineering/coding-standards.md) |
+| Change CMS layout, sidebar, widgets or editor styling | [CMS presentation](engineering/admin-layer.md) |
 | Understand core boundaries | [Admin layer](engineering/admin-layer.md), [MCP](engineering/mcp.md), [guardrails](rules/agent-guardrails.md) |
 
 Use [PLANS.md](PLANS.md) only for substantial execution plans. A client’s plans may live in its own `docs/exec-plans/`; a fresh starter has none. The historical manuscript under `docs/references/` is provenance, not current setup guidance.

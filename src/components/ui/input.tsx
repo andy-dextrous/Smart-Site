@@ -1,6 +1,6 @@
 import * as React from "react"
 import { tv } from "tailwind-variants"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 const inputStyles = tv({
   base: [

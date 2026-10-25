@@ -1,7 +1,7 @@
 import type { Block, CollectionConfig, GlobalConfig } from "payload"
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical"
 import { link } from "@/components/fields/link/link"
-import { websitePreview } from "@/website/preview"
+import { websitePreview } from "@/lib/preview"
 
 export const NativeLinkBlock: Block = {
   slug: "native-link-probe",

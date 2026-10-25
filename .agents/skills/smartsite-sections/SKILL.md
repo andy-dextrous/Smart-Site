@@ -15,7 +15,7 @@ Generate Payload types and import map after schema changes, then type-check and 
 
 Create a representative draft through MCP, inspect the CMS controls and the actual rendered section in an external browser at desktop/mobile sizes, then verify no unrelated section changed. Never claim a section is done from source inspection alone.
 
-Example: “Add reusable testimonials” requires code, schema, both registrations and a draft rendering test. “Change Jane’s testimonial” only needs the content workflow. Edit the native project files directly: sections in `src/components/sections`, collections in `src/collections`, and registration in `src/payload.config.ts`. The `src/admin/` folder contains CMS interface code; it is not a protected framework layer.
+Example: “Add reusable testimonials” requires code, schema, both registrations and a draft rendering test. “Change Jane’s testimonial” only needs the content workflow. Edit the native project files directly: sections in `src/components/sections`, collections in `src/payload/collections`, and registration in `src/payload.config.ts`. For CMS layout or navigation work, first read `docs/engineering/admin-layer.md` to find the active sidebar and providers under `src/components/cms`. These are ordinary editable components.
 
 For Payload API details, use the bundled Payload 3.92 `payload` skill, its relevant reference file, and this repository’s installed package types.
 

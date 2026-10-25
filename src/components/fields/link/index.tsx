@@ -1,6 +1,6 @@
 import type { Media as MediaType } from "@/payload-types"
 import { Button, type ButtonProps } from "@/components/ui/button"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 import Link from "next/link"
 import React from "react"
 

@@ -2,7 +2,7 @@ import fs from "fs"
 import path from "path"
 
 const DEFAULT_TARGET = "smartsite-deployment.json"
-const DEFAULT_TEMPLATE = "smartsite-deployment.example.json"
+const DEFAULT_TEMPLATE = "docker/smartsite-deployment.example.json"
 
 /*************************************************************************/
 /*  ARGUMENTS

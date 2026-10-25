@@ -38,7 +38,7 @@ SmartSite uses a field factory, because Payload 3.92 has no native `slug` field 
 
 ```ts
 import type { CollectionConfig } from 'payload'
-import { slugField } from '@/fields/slug'
+import { slugField } from '@/payload/fields/slug'
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
@@ -610,7 +610,7 @@ const groupField: GroupField = {
 
 ## Reusable Field Factories
 
-Reuse `src/components/fields/link/link.ts` for SmartSite links and `src/fields/slug` for routed slugs instead of introducing another schema. Inspect their arguments and current collection callers before adding overrides. SmartSite's website-link plugin resolves the collection metadata used for internal links, including Lexical links.
+Reuse `src/components/fields/link/link.ts` for SmartSite links and `src/payload/fields/slug` for routed slugs instead of introducing another schema. Inspect their arguments and current collection callers before adding overrides. SmartSite's website-link plugin resolves the collection metadata used for internal links, including Lexical links.
 
 For a new field factory, return a typed `Field` or concrete field type. Preserve nested `admin`, `hooks` and `fields` deliberately: object spread only merges one level and can accidentally replace existing behavior. Avoid pretending a shallow spread is a deep merge.
 

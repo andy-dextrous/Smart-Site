@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from "react"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 import {
   Accordion,
   AccordionContent,

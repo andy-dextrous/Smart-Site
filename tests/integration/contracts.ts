@@ -3,8 +3,8 @@ import { writeFile, rm, access } from "node:fs/promises"
 import { createLocalReq, getPayload } from "payload"
 import sharp from "sharp"
 import config from "../../src/payload.config"
-import { contentRead, contentSave, uploadMedia } from "../../src/mcp/tools"
-import { withOperation, operationStatus } from "../../src/mcp/operations"
+import { contentRead, contentSave, uploadMedia } from "../../src/payload/mcp/tools"
+import { withOperation, operationStatus } from "../../src/payload/mcp/operations"
 if (process.env.SMARTSITE_ENVIRONMENT !== "local") throw new Error("Local fixture only")
 const payload = await getPayload({ config })
 try {

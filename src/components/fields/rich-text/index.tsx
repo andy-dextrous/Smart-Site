@@ -15,7 +15,7 @@ import {
   RichText as ConvertRichText,
 } from "@payloadcms/richtext-lexical/react"
 
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 type NodeTypes = DefaultNodeTypes | SerializedBlockNode<any>
 

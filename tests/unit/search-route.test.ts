@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { buildSearchText } from "../../src/website/search/search-text"
-import { reconcileSearchRoute } from "../../src/website/publication/search-route"
+import { buildSearchText } from "../../src/lib/search/search-text"
+import { reconcileSearchRoute } from "../../src/lib/publication/search-route"
 
 test("search text uses only current projection fields", () => {
   assert.equal(

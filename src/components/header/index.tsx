@@ -1,13 +1,13 @@
 import { HeaderNavigation } from "@/components/header/nav"
-import { getGlobal, getSettings } from "@/website/data/globals"
+import { getGlobal, getSettings } from "@/lib/data/globals"
 import type { Header, Setting } from "@/payload-types"
 import Link from "next/link"
 
 import type { Config } from "payload"
 import LogoPrimary from "@/components/logos/logo"
 import { MobileNavUpdated } from "@/components/header/mobile-nav"
-import { cn } from "@/utilities/ui"
-import { getSearchConfig } from "@/website/features"
+import { cn } from "@/lib/ui"
+import { getSearchConfig } from "@/lib/features"
 
 export async function Header() {
   const [headerData, settingsData] = await Promise.all([

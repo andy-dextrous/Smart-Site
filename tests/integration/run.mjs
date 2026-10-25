@@ -41,9 +41,9 @@ if (withoutRunnerSecret && process.argv.includes("--routing"))
 let client
 try {
   if (scheduledFixture) {
-    originalPages = await readFile("src/collections/pages.ts", "utf8")
+    originalPages = await readFile("src/payload/collections/pages.ts", "utf8")
     assert.ok(originalPages.includes("schedulePublish: false,"))
-    await writeFile("src/collections/pages.ts", originalPages.replace("schedulePublish: false,", "schedulePublish: true,"))
+    await writeFile("src/payload/collections/pages.ts", originalPages.replace("schedulePublish: false,", "schedulePublish: true,"))
   }
   // Materialize only in the clean disposable production fixture. Never include
   // this diagnostic endpoint in a normal source tree or deployment build.
@@ -371,7 +371,7 @@ try {
     })
   )
 } finally {
-  if (originalPages !== undefined) await writeFile("src/collections/pages.ts", originalPages)
+  if (originalPages !== undefined) await writeFile("src/payload/collections/pages.ts", originalPages)
   await mkdir("test-results", { recursive: true, mode: 0o700 })
   for (const name of ["provision.log", "app.log"])
     await copyFile(`${local}/${name}`, `test-results/${name}`).catch(() => {})

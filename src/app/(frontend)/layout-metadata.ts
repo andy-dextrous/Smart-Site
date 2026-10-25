@@ -1,4 +1,4 @@
-import { getSettings } from "@/website/data/globals"
+import { getSettings } from "@/lib/data/globals"
 
 export async function generateRootLayoutMetadata() {
   const settings = await getSettings()

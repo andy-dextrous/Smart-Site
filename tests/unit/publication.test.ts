@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { canRunPublication } from "../../src/website/publication/access"
+import { canRunPublication } from "../../src/lib/publication/access"
 test("publication runner denies missing secrets and non-admin roles", () => {
   for (const secret of [undefined, "", " "])
     assert.equal(

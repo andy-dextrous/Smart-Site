@@ -137,71 +137,71 @@
   },
   {
     "old": "admin.meta.title",
-    "owner": "src/admin/config.ts native admin.meta"
+    "owner": "src/payload/admin.ts native admin.meta"
   },
   {
     "old": "admin.meta.description",
-    "owner": "src/admin/config.ts native admin.meta"
+    "owner": "src/payload/admin.ts native admin.meta"
   },
   {
     "old": "admin.meta.favicon",
-    "owner": "src/admin/config.ts admin.meta.icons"
+    "owner": "src/payload/admin.ts admin.meta.icons"
   },
   {
     "old": "admin.theme.colors.accent",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.colors.accentLight",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.colors.accentLightest",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.colors.error",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.colors.success",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.colors.warning",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.colors.grayscale.*",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.layout.sidebarWidth",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.layout.headerHeight",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.layout.borderRadius",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.layout.contentMaxWidth",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.typography.fontFamily",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.typography.fontSize",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "admin.theme.typography.lineHeight",
-    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+    "owner": "src/components/cms/styles native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
   },
   {
     "old": "images.quality.default",

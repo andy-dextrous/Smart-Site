@@ -3,7 +3,7 @@ import config from "../../src/payload.config"
 import {
   claimPublication,
   processPublicationBatch,
-} from "../../src/website/publication/runner"
+} from "../../src/lib/publication/runner"
 const payload = await getPayload({ config })
 const work = await claimPublication(payload)
 if (!work) throw new Error("Expected claimable publication work")

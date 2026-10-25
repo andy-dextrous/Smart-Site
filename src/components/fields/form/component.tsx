@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation"
 import React, { useCallback, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
-import { getClientSideURL } from "@/utilities/get-url"
+import { getClientSideURL } from "@/lib/get-url"
 import RichText from "@/components/fields/rich-text"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 import { fields } from "@/components/fields/form/fields"
 import { formDefaultValues } from "@/components/fields/form/default-values"

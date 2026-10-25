@@ -1,6 +1,6 @@
 {
   "name": "smart-site",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Standalone website-building kit: Next.js, Payload CMS, native MCP and portable coding-agent skills.",
   "license": "MIT",
   "type": "module",
@@ -36,7 +36,7 @@
     "generate:sitemap": "tsx scripts/generate-sitemap-index.ts",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint . --max-warnings=0",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation eslint . --fix",
     "warm-cache": "tsx scripts/warm-cache.ts",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=src/payload.config.ts payload",

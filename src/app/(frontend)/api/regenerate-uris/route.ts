@@ -1,5 +1,5 @@
-import { validateSameOriginRequest } from "@/utilities/request-guards"
-import { regenerateURIs } from "@/website/routing/index-manager"
+import { validateSameOriginRequest } from "@/lib/request-guards"
+import { regenerateURIs } from "@/lib/routing/index-manager"
 import { getPayload } from "payload"
 import config from "@payload-config"
 import { headers } from "next/headers"

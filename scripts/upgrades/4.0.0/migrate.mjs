@@ -30,8 +30,8 @@ if (!request.writesQuiesced)
   throw new Error(
     "Stop old app/workers and record writesQuiesced in the original request before inspection"
   )
-if ((await json(path.join(request.siteRoot, "package.json"))).version !== "4.0.1")
-  throw new Error("Reconciled source is not 4.0.1")
+if ((await json(path.join(request.siteRoot, "package.json"))).version !== "4.0.2")
+  throw new Error("Reconciled source is not 4.0.2")
 const { after: current, differences } = await compareUpgradeDatabase(
   context,
   inspection.before

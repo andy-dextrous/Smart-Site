@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import type { Payload } from "payload"
-import { drainPublication } from "../../src/website/publication/runner"
+import { drainPublication } from "../../src/lib/publication/runner"
 
 export async function exerciseSearchPublication(
   payload: Payload,

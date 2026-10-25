@@ -1,6 +1,6 @@
 # Native Payload configuration
 
-Start at `src/payload.config.ts`. It lists collections, globals, plugins, database, email, admin options and generated types explicitly. Edit an existing collection in `src/collections`; no override or extension registry is required.
+Start at `src/payload.config.ts`. It lists collections, globals, plugins, database, email, admin options and generated types explicitly. Edit an existing collection in `src/payload/collections`; no override or extension registry is required.
 
 `src/site.config.ts` contains browser-safe presentation choices: identity defaults, navigation/search presentation, motion, breadcrumbs and image-display quality. Database credentials, storage clients, access functions and collection definitions stay on the server. CMS-managed business content remains in the database.
 
@@ -10,15 +10,15 @@ Use the nearest existing collection as the complete example. A routed collection
 
 ```ts
 import type { CollectionConfig } from "payload"
-import { authenticated } from "@/access/authenticated"
-import { authenticatedOrPublished } from "@/access/authenticatedOrPublished"
-import { slugField } from "@/fields/slug"
-import { seoFields } from "@/fields/seo"
-import { websitePreview } from "@/website/preview"
-import { beforeUniversalChange } from "@/hooks/collections/universal/before-change"
-import { afterUniversalChange } from "@/hooks/collections/universal/after-change"
-import { afterUniversalDelete } from "@/hooks/collections/universal/after-delete"
-import { lockSlugAfterPublish } from "@/hooks/utilities/lock-slug"
+import { authenticated } from "@/payload/access/authenticated"
+import { authenticatedOrPublished } from "@/payload/access/authenticatedOrPublished"
+import { slugField } from "@/payload/fields/slug"
+import { seoFields } from "@/payload/fields/seo"
+import { websitePreview } from "@/lib/preview"
+import { beforeUniversalChange } from "@/payload/hooks/collections/universal/before-change"
+import { afterUniversalChange } from "@/payload/hooks/collections/universal/after-change"
+import { afterUniversalDelete } from "@/payload/hooks/collections/universal/after-delete"
+import { lockSlugAfterPublish } from "@/payload/hooks/utilities/lock-slug"
 
 export const Projects: CollectionConfig = {
   slug: "projects",
@@ -66,13 +66,13 @@ For Lexical blocks containing shared links, register the block definition in the
 
 | Change | Edit |
 | --- | --- |
-| Collection fields, permissions, hooks, labels or drafts | Its `src/collections` definition |
-| Global fields or permissions | Its `src/globals` definition |
+| Collection fields, permissions, hooks, labels or drafts | Its `src/payload/collections` definition |
+| Global fields or permissions | Its `src/payload/globals` definition |
 | Database adapter/connection | `src/payload/db/config.ts` and the explicit environment |
 | Email adapter | `src/payload/email/config.ts` |
-| Admin metadata/live-preview defaults | `src/admin/config.ts` |
-| Admin colors, layout and typography | `src/admin/css` |
-| Upload sizes, focal point, formats or local directory | `src/collections/media.ts` |
+| Admin metadata/live-preview defaults | `src/payload/admin.ts` |
+| Admin colors, layout and typography | `src/components/cms/styles` |
+| Upload sizes, focal point, formats or local directory | `src/payload/collections/media.ts` |
 | External storage | Native storage plugin in `payload.config.ts` |
 | Schema localization | Native `localization` in `payload.config.ts` plus `localized` fields |
 | Public locale/motion/search/breadcrumb choices | `src/site.config.ts` |

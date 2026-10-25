@@ -65,7 +65,7 @@ export const Posts: CollectionConfig = {
 
 ```ts
 import type { EmailField, FieldHook } from 'payload'
-import { userHasMinimumRole } from '@/access/roles'
+import { userHasMinimumRole } from '@/payload/access/roles'
 
 const beforeValidateHook: FieldHook = ({ value }) => {
   return typeof value === 'string' ? value.trim().toLowerCase() : value
@@ -123,7 +123,7 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({ doc, req, glo
 }
 ```
 
-For routed collections follow `src/hooks/collections/universal/after-change.ts` and `after-delete.ts`: route-index updates and intent creation share the request. Normal saves drain publication work in the serving request. Verify actual public HTTP output after a publish, draft edit, rename, unpublish and delete; explicitly drain interrupted or large work through the authenticated endpoint when no optional background runner is enabled. Do not use a guessed `/${doc.slug}` path when the site has nested URIs or custom templates.
+For routed collections follow `src/payload/hooks/collections/universal/after-change.ts` and `after-delete.ts`: route-index updates and intent creation share the request. Normal saves drain publication work in the serving request. Verify actual public HTTP output after a publish, draft edit, rename, unpublish and delete; explicitly drain interrupted or large work through the authenticated endpoint when no optional background runner is enabled. Do not use a guessed `/${doc.slug}` path when the site has nested URIs or custom templates.
 
 ## Date Field Auto-Set
 

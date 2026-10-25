@@ -1,6 +1,6 @@
 import type { CollectionSlug, Field, GroupField } from "payload"
-import deepMerge from "@/utilities/deep-merge"
-import { iconPickerField } from "@/fields/icon-picker"
+import deepMerge from "@/lib/deep-merge"
+import { iconPickerField } from "@/payload/fields/icon-picker"
 import { getButtonVariantOptions } from "@/components/fields/link/button-options"
 
 const { variantOptions, layoutOptions, sizeOptions } = getButtonVariantOptions()
@@ -121,7 +121,7 @@ export const link: LinkType = ({
           admin: {
             width: "50%",
             components: {
-              Field: "@/components/content-fields/link/link-label-field#LinkLabelField",
+              Field: "@/components/fields/link/link-label-field#LinkLabelField",
             },
           },
           label: "Label",

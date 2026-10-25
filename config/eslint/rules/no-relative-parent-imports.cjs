@@ -26,7 +26,7 @@ const rule = {
   },
   create(context) {
     const filename = normalizePath(context.getFilename())
-    if (filename.includes("/src/admin/")) {
+    if (filename.includes("/src/components/cms/")) {
       return {}
     }
 

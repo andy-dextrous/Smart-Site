@@ -8,8 +8,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/cms-ui/pagination"
-import { cn } from "@/utilities/ui"
+} from "@/components/cms/ui/pagination"
+import { cn } from "@/lib/ui"
 import { useRouter } from "next/navigation"
 import React from "react"
 

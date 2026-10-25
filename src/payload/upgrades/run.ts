@@ -1,5 +1,5 @@
 import { createLocalReq, type Payload } from "payload"
-import { queuePublication } from "@/website/publication/intent"
+import { queuePublication } from "@/lib/publication/intent"
 
 /** Called only by the explicit offline upgrade helper, after backup and write freeze. */
 export async function migrateLegacyPublication(payload: Payload, fingerprint: string) {

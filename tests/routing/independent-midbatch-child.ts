@@ -3,7 +3,7 @@ import config from "../../src/payload.config"
 import {
   claimPublication,
   processPublicationBatch,
-} from "../../src/website/publication/runner"
+} from "../../src/lib/publication/runner"
 const payload = await getPayload({ config })
 const ids = new Set(JSON.parse(process.env.REVIEW_PUBLICATION_IDS!))
 const original = payload.db.updateOne.bind(payload.db)

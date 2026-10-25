@@ -5,6 +5,6 @@ export async function register() {
     process.env.NEXT_PHASE === "phase-production-build"
   )
     return
-  const { startPublicationPoller } = await import("@/website/publication/poller")
+  const { startPublicationPoller } = await import("@/lib/publication/poller")
   startPublicationPoller()
 }

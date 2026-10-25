@@ -1,5 +1,5 @@
-import { canRunPublication } from "@/website/publication/access"
-import { queuePublication } from "@/website/publication/intent"
+import { canRunPublication } from "@/lib/publication/access"
+import { queuePublication } from "@/lib/publication/intent"
 import { PayloadRequest } from "payload"
 
 const jobs = {

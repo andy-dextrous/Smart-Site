@@ -3,8 +3,8 @@ import { spawn } from "node:child_process"
 import { MongoClient, ObjectId } from "mongodb"
 import { createLocalReq, getPayload } from "payload"
 import config from "../../src/payload.config"
-import { queuePublication } from "../../src/website/publication/intent"
-import { drainPublication } from "../../src/website/publication/runner"
+import { queuePublication } from "../../src/lib/publication/intent"
+import { drainPublication } from "../../src/lib/publication/runner"
 
 const payload = await getPayload({ config })
 const mongo = new MongoClient(process.env.DATABASE_URL!)

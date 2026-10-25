@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 import { useEffect, useMemo, useState } from "react"
 
 export interface TableOfContentsItem {

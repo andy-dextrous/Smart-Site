@@ -1,6 +1,6 @@
 import { i18nRouter } from "next-i18n-router"
 import { NextRequest, NextResponse } from "next/server"
-import { getI18nConfig } from "@/website/features"
+import { getI18nConfig } from "@/lib/features"
 
 /*************************************************************************/
 /*  PROXY - DRAFT MODE ROUTING & I18N

@@ -2,14 +2,14 @@
 
 import type { StaticImageData } from "next/image"
 
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 import NextImage from "next/image"
 import React from "react"
 
 import type { Props as MediaProps } from "@/components/fields/media/types"
 
-import { mediaURL } from "@/utilities/media-url"
-import { getClientSideURL } from "@/utilities/get-url"
+import { mediaURL } from "@/lib/media-url"
+import { getClientSideURL } from "@/lib/get-url"
 import site from "@/site.config"
 
 // Get config at module level (it's frozen/cached)

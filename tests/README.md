@@ -16,8 +16,10 @@ The transfer suite installs the second site's dependencies from its frozen lockf
 | `pnpm test:build` | Real production build against its own disposable database |
 | `pnpm test:preview` | Production HTTP preview, stale-cookie recovery, safe redirects and native document/field/breadcrumb permissions |
 | `pnpm test:routing --boundaries` | Actual Mongo publication worker at zero/one/25 records, terminal empty batch, two live template groups and an unrelated collection through development HTTP/MCP; also included in every full routing run |
-| `pnpm test:acceptance` | Real Chromium frontend, mobile, form submission, public byline, draft isolation and CMS editor |
+| `pnpm test:acceptance` | Real Chromium frontend, mobile, form submission, public byline, draft isolation, CMS editor, preview-cookie exit and authenticated logout |
 | `pnpm test:docker-upgrade` | Optional Docker rehearsal: populated standalone Mongo → authenticated replica set, restart and backup recovery on separate storage |
+
+`pnpm lint` rejects warnings as well as errors. Preview-exit acceptance verifies HTTP-only preview-cookie removal and preservation of unrelated query parameters; CMS logout verifies the browser reaches the login form with no authenticated user.
 
 The first browser search waits up to 60 seconds for its matching development-route response, verifies successful JSON containing the fixture page, then checks the visible result using the normal assertion deadline. The first CMS login navigation uses the same 180-second development compilation allowance as local startup and asserts HTTP 200; subsequent navigations retain their normal timeout. These checks record only sanitized status and elapsed time; they do not retry or relax other UI assertions.
 

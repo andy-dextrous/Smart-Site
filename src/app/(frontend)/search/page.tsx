@@ -1,5 +1,5 @@
-import { getSearchConfig } from "@/website/features"
-import { getSearchResults } from "@/website/data/search"
+import { getSearchConfig } from "@/lib/features"
+import { getSearchResults } from "@/lib/data/search"
 import { Pagination } from "@/components/fields/pagination"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

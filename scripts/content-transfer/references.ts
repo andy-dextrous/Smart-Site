@@ -1,4 +1,4 @@
-import { lexicalBlockFields } from "../../src/mcp/projection"
+import { lexicalBlockFields } from "../../src/payload/mcp/projection"
 import type { Field, PayloadRequest } from "payload"
 export type Reference = { target: string; id: string; path: string; required: boolean }
 export async function mapReferences(

@@ -1,0 +1,15 @@
+import Image from "next/image"
+
+import "@/components/cms/before-login/index.scss"
+
+const baseClass = "before-login"
+
+export const BeforeLogin = () => {
+  return (
+    <aside className={baseClass}>
+      <div className={`${baseClass}__image-wrap`}>
+        <Image src="/assets/admin/images/image-login1.webp" alt="" fill />
+      </div>
+    </aside>
+  )
+}

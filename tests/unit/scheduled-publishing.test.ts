@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { runScheduledPublishing, scheduledPublishingTargets } from "../../src/payload/jobs/run-scheduled"
-import { startPublicationPoller } from "../../src/website/publication/poller"
+import { startPublicationPoller } from "../../src/lib/publication/poller"
 
 test("scheduled jobs remain untouched unless native targets opt in", async () => {
   const payload = {

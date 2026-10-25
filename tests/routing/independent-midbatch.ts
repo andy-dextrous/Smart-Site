@@ -3,12 +3,12 @@ import { spawn } from "node:child_process"
 import { MongoClient, ObjectId } from "mongodb"
 import { createLocalReq, getPayload } from "payload"
 import config from "../../src/payload.config"
-import { queuePublication } from "../../src/website/publication/intent"
+import { queuePublication } from "../../src/lib/publication/intent"
 import {
   claimPublication,
   drainPublication,
   processPublicationBatch,
-} from "../../src/website/publication/runner"
+} from "../../src/lib/publication/runner"
 const payload = await getPayload({ config })
 const mongo = new MongoClient(process.env.DATABASE_URL!)
 await mongo.connect()

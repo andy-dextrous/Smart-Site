@@ -10,7 +10,7 @@ assert.ok(
     !files.some(file => file.startsWith(".env") && !file.endsWith(".example")),
   "Preview fixture requires a clean standalone export"
 )
-const pagesPath = "src/collections/pages.ts"
+const pagesPath = "src/payload/collections/pages.ts"
 const originalPages = await readFile(pagesPath, "utf8")
 function run(args, env = cleanEnvironment()) {
   return new Promise((resolve, reject) => {

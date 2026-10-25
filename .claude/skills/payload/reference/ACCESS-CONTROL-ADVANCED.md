@@ -1,6 +1,6 @@
 # Payload Access Control - Advanced Patterns
 
-Patterns for custom application schemas. Examples using `roles`, tenants, organizations or subscriptions assume those fields are explicitly defined and protected. SmartSite uses its existing singular `role` and `@/access/roles` helpers; do not replace that schema to match these generic examples.
+Patterns for custom application schemas. Examples using `roles`, tenants, organizations or subscriptions assume those fields are explicitly defined and protected. SmartSite uses its existing singular `role` and `@/payload/access/roles` helpers; do not replace that schema to match these generic examples.
 
 ## Context-Aware Access Patterns
 

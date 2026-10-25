@@ -3,7 +3,7 @@ import type { StaticImageData } from "next/image"
 
 import type { MediaBlock as MediaBlockProps } from "@/payload-types"
 import { Media } from "@/components/fields/media"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 type Props = MediaBlockProps & {
   breakout?: boolean

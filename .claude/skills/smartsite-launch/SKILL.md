@@ -20,3 +20,7 @@ Deploy without scheduled services by default. Normal saves drain committed publi
 Finish with destination checks, actual browser inspection, durable asset verification and a rollback record. A successful build alone is not a launch. Keep untested platforms and unavailable prerequisites explicit.
 
 The 4.0 upgrade guide is `docs/upgrades/4.0.0/README.md`. Upgrade a populated site in place; do not bootstrap, seed, transfer its database or regenerate its identity. Test the new source against a restored copy before cutover. Source conflicts must remain preserved and actionable. Confirm durable publication work exists for converted legacy jobs and completes in the actual serving runtime before declaring cutover finished.
+
+For a 4.0.1 → 4.0.2 folder-layout update, follow the source-only procedure in `docs/workflows/upgrading.md` and `docs/upgrades/4.0.2/file-map.json`. Preserve customized files and component references; do not run the 3.x data migration or recreate local identity.
+
+Self-hosting is opt-in. A fresh starter and normal local/hosted setup must have no `.smartsite-self-hosted/` directory or generated `smartsite-deployment.json`. Only after the owner chooses self-hosting, follow the deployment guide: initialize the manifest, configure the destination, then prepare its private environment. The helpers create the directory when needed. Preserve existing self-hosted state when upgrading; never delete it as cleanup.

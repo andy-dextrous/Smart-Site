@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { isUnroutedDocument } from "../../src/website/routing/route-eligibility"
+import { isUnroutedDocument } from "../../src/lib/routing/route-eligibility"
 
 const args = (overrides: any = {}) => {
   const { indexed = false, children = false, routing = {}, ...rest } = overrides

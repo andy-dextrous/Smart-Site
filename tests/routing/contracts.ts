@@ -1,12 +1,12 @@
 import assert from "node:assert/strict"
 import { createLocalReq, getPayload } from "payload"
 import config from "../../src/payload.config"
-import { queuePublication } from "../../src/website/publication/intent"
+import { queuePublication } from "../../src/lib/publication/intent"
 import {
   claimPublication,
   drainPublication,
   processPublicationBatch,
-} from "../../src/website/publication/runner"
+} from "../../src/lib/publication/runner"
 
 const payload = await getPayload({ config })
 const collection = "site-publication-work" as any

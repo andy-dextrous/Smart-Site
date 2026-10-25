@@ -6,6 +6,8 @@ Snapshot retrieved 25 October 2026. MIT license retained in LICENSE.md, copyrigh
 
 SmartSite adaptations:
 
+- Follow the 4.0.2 source layout: native Payload modules under `src/payload`, React hooks under `src/hooks`, runtime services under `src/lib`, and CMS presentation under `src/components/cms`.
+
 - Route setup, content and configuration through the standalone harness and existing project scripts; do not create another app or use the Payload 4 build command.
 - Correct Local API permission defaults and user-authorized calls, update/delete query access, persisted draft states, and the project slug/URI factory.
 - Use `payload/shared` for field guards, the installed guard signatures, `AuthStrategyFunction`, `EXPERIMENTAL_TableFeature`, `createLocalReq`, and the version-3 workflow handler API.

@@ -1,6 +1,6 @@
 # Payload Plugin Development
 
-Patterns for Payload 3.92 plugins. In SmartSite, add site-local plugins under `src/plugins` and compose them in the existing config. Package scaffolding below applies only when deliberately creating a separately distributed plugin; it does not require another app inside this site.
+Patterns for Payload 3.92 plugins. In SmartSite, add site-local plugins under `src/payload/plugins` and compose them in the existing config. Package scaffolding below applies only when deliberately creating a separately distributed plugin; it does not require another app inside this site.
 
 ## Plugin Architecture
 

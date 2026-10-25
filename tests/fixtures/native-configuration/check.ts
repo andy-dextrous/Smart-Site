@@ -2,8 +2,8 @@ import assert from "node:assert/strict"
 import { getPayload, type Field } from "payload"
 import configPromise from "@payload-config"
 import site from "@/site.config"
-import { catalogue, contentTarget } from "@/mcp/contracts"
-import { assertWebsiteInventory, websiteCollections } from "@/website/collection-metadata"
+import { catalogue, contentTarget } from "@/payload/mcp/contracts"
+import { assertWebsiteInventory, websiteCollections } from "@/lib/collection-metadata"
 import { NativeProjects } from "./config"
 
 const config = await configPromise
@@ -29,7 +29,7 @@ assert.throws(
     } as any),
   /later plugin changed/
 )
-const { getSearchResults } = await import("@/website/data/search")
+const { getSearchResults } = await import("@/lib/data/search")
 assert.deepEqual((await getSearchResults({ query: "disabled search" })).items, [])
 let markedLinks = 0,
   sections = 0,

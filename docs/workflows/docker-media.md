@@ -18,7 +18,7 @@ LEGACY_CONTAINER=the-stopped-app-container
 MEDIA_VOLUME=the-existing-public-media-volume
 NODE_IMAGE=the-existing-app-image
 # Absolute directory containing the verified new release, separate from the site.
-SMARTSITE_KIT=/absolute/releases/smartsite-4.0.1
+SMARTSITE_KIT=/absolute/releases/smartsite-4.0.2
 umask 077
 MEDIA_BACKUP="$(mktemp -d)"
 MEDIA_EXPORT="$MEDIA_BACKUP/legacy"

@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { tv } from "tailwind-variants"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 const labelStyles = tv({
   base: [

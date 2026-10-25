@@ -1,6 +1,6 @@
 # Coding Standards
 
-- folders and files use kebab-case
+- folders and files use kebab-case, except established framework/generated names and the section `Component.tsx` convention
 - use named functions, not module-level arrow functions
 - use full-width block headers for major sections in large files
 - use lighter JSDoc-style block headers for related groups of hooks, helpers, constants, or render logic
@@ -36,10 +36,10 @@ The site owns every source file. Edit the module responsible for the behavior; t
 | Responsibility | Location |
 | --- | --- |
 | Native Payload assembly | `src/payload.config.ts` |
-| Collections, globals, fields and hooks | `src/collections`, `src/globals`, `src/fields`, `src/hooks` |
-| CMS layout, navigation, widgets and styling | `src/admin` |
-| URI index, public rendering, caching and publication recovery | `src/website` |
-| Native MCP transport and checked content operations | `src/mcp` |
+| Collections, globals, fields and hooks | `src/payload/collections`, `src/payload/globals`, `src/payload/fields`, `src/payload/hooks` |
+| CMS layout, navigation, widgets and styling | `src/components/cms` |
+| URI index, public rendering, caching and publication recovery | `src/lib` |
+| Native MCP transport and checked content operations | `src/payload/mcp` |
 | Database, email, storage adapters and legacy jobs | `src/payload` |
 | Sections and reusable frontend components | `src/components` |
 | Browser-safe presentation choices | `src/site.config.ts` |
@@ -71,7 +71,7 @@ Ground section work in [docs/engineering/section-development.md](section-develop
 - Wrap markup with `<Section>` and rely on design-system utilities (`gap-content`, `container`, `text-h*`).
 - Use `tailwind-variants` (or equivalent) to compute class slots once per render.
 - Guard optional content, avoid empty wrappers, leverage shared components (`CMSLink`, `Media`, `RichText`).
-- For animations, follow global data attributes or GSAP provider patterns (`@/providers/gsap`), scoping via refs.
+- For animations, follow global data attributes or GSAP provider patterns (`@/components/providers/gsap`), scoping via refs.
 
 ### 8.4 Registration & QA
 
@@ -111,7 +111,7 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
 
 - Animations
   - If global reveals are enabled → prefer `data-animate` attributes with `data-animate-target` and a single stagger IF the animation requirement is simple.
-  - If bespoke timelines are needed → add `"use client"` locally and use `@/providers/gsap` (`useGSAP`, scoped refs, cleanup).
+  - If bespoke timelines are needed → add `"use client"` locally and use `@/components/providers/gsap` (`useGSAP`, scoped refs, cleanup).
   - If the whole section’s layout/behaviour depends on hooks or coordinated timelines → mark the entire section `"use client"` (acceptable); keep the surface lean and scoped.
   - If any GSAP effects/plugins are requested → enable via config, register once in the GSAP provider. You have the full suite of plugins available via config.
   - If performance suffers → disable global animations or reduce distances/durations; prefer transforms and opacity.

@@ -14,7 +14,7 @@ import {
   Indicator as NavigationMenuIndicatorPrimitive,
 } from "@radix-ui/react-navigation-menu"
 import { tv } from "tailwind-variants"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 /****************************************************
  * Navigation Menu Types

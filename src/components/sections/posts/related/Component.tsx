@@ -1,6 +1,6 @@
 import type { PostsRelatedBlock, Post } from "@/payload-types"
-import type { PageData } from "@/website/rendering/render-sections"
-import { getRelatedPosts } from "@/website/data/posts"
+import type { PageData } from "@/lib/rendering/render-sections"
+import { getRelatedPosts } from "@/lib/data/posts"
 import { Section } from "@/components/fields/section"
 import { PostCard } from "@/components/posts/post-card"
 import { tv } from "tailwind-variants"

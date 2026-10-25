@@ -1,11 +1,11 @@
 import Link from "next/link"
 import { getPayload } from "payload"
 import config from "@payload-config"
-import { generateMetadata } from "@/website/rendering/uri-renderer/metadata"
+import { generateMetadata } from "@/lib/rendering/uri-renderer/metadata"
 import {
   SmartSitePublishedURIRenderer,
   generateStaticParams,
-} from "@/website/rendering/published-uri-renderer"
+} from "@/lib/rendering/published-uri-renderer"
 
 type Args = {
   params: Promise<{

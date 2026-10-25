@@ -1,4 +1,4 @@
-import deepMerge from "@/utilities/deep-merge"
+import deepMerge from "@/lib/deep-merge"
 import type { Field } from "payload"
 
 export const formVariant = (overrides: Partial<Field> = {}): Field => {

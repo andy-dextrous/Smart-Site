@@ -16,7 +16,7 @@ import {
   cleanEnvironment,
 } from "../../scripts/local/state.mjs"
 import { databaseURL } from "../../scripts/local/database.mjs"
-import { stopProcess } from "../../scripts/local/runtime.mjs"
+import { stopProcess, environment } from "../../scripts/local/runtime.mjs"
 import { mcpRequest } from "../../scripts/local/clients.mjs"
 const files = await readdir(".")
 if (
@@ -327,6 +327,36 @@ try {
   })
   await expect(page.locator("#field-title")).toHaveValue("Private browser draft")
   await page.screenshot({ path: "test-results/browser/cms.png", fullPage: true })
+
+  // Exercise the real preview cookie endpoint, then the toolbar navigation.
+  const env = await environment(state)
+  const previewResponse = await page.context().request.get(
+    base + "/api/preview?" + new URLSearchParams({
+      path: "/browser-acceptance",
+      collection: "pages",
+      documentId: created.document.id,
+      previewSecret: env.PREVIEW_SECRET,
+    }),
+    { maxRedirects: 0, headers: { "sec-fetch-site": "same-origin", origin: base } }
+  )
+  assert.equal(previewResponse.status(), 307)
+  assert.ok((await page.context().cookies()).some(cookie => cookie.name === "__prerender_bypass" && cookie.httpOnly))
+  await page.goto(base + "/preview/browser-acceptance?" + new URLSearchParams({ keep: "a & b", livePreview: "false" }), { waitUntil: "networkidle" })
+  await page.getByRole("button", { name: "Exit preview mode", exact: true }).click()
+  await page.waitForURL(url => url.pathname === "/browser-acceptance" && !url.searchParams.has("livePreview"))
+  assert.equal(new URL(page.url()).searchParams.get("keep"), "a & b")
+  assert.ok(!(await page.context().cookies()).some(cookie => ["__prerender_bypass", "__next_preview_data"].includes(cookie.name)))
+  await expect(page.getByRole("button", { name: "Exit preview mode", exact: true })).toHaveCount(0)
+
+  // Logout remains full-document navigation through Payload's own logout page.
+  await page.goto(base + "/admin", { waitUntil: "networkidle" })
+  await page.locator("nav").filter({ hasText: "Smart Site Admin" }).locator('[data-slot="dropdown-menu-trigger"]').click()
+  await page.getByRole("menuitem", { name: "Logout", exact: true }).click()
+  await page.waitForURL(base + "/admin/login", { timeout: 60000 })
+  await expect(page.getByRole("textbox", { name: /Email or Username/ })).toBeVisible()
+  const loggedOut = await page.context().request.get(base + "/api/users/me")
+  assert.equal((await loggedOut.json()).user, null)
+  await page.screenshot({ path: "test-results/browser/logged-out.png", fullPage: true })
   assert.deepEqual(errors, [])
   const result = {
     passed: [
@@ -340,6 +370,8 @@ try {
       "hidden-internal-collections",
       "no-page-errors",
       "authenticated-toolbar-space-desktop-mobile",
+      "preview-exit-clears-cookies-and-preserves-query",
+      "cms-logout-clears-session",
     ].filter(check => !failures.some(failure => failure.check === check)),
     failures,
     adminBar,

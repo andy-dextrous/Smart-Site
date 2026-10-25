@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import type { Config, CollectionConfig } from "payload"
-import { websiteLinksPlugin } from "../../src/plugins/website-links"
+import { websiteLinksPlugin } from "../../src/payload/plugins/website-links"
 
 test("website links resolve independently across configs and retain explicit relationships", async () => {
   const shared: CollectionConfig = {

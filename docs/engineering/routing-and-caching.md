@@ -10,7 +10,7 @@ A content save and its publication intent commit in the same database transactio
 
 `site-publication-work` records pending, running, failed or completed work. Route reconciliation uses 25-document keyset batches, a persisted checkpoint and an expiring claim. Claim ownership/generation is checked at both ends of each batch transaction. An abandoned process can be replaced without allowing its stale work to commit. Derived URI/breadcrumb changes also update the existing public search projection in the same transaction. They do not rewrite source versions, private drafts or editor timestamps.
 
-After routing work, the Next serving route invalidates cache tags and awaits actual cache delivery before marking the work completed. The pinned Next integration is isolated in `src/website/publication/cache-delivery.ts`; dependency upgrades must reverify that bridge in a production build. A plain Node script has no serving cache context and cannot certify cache completion.
+After routing work, the Next serving route invalidates cache tags and awaits actual cache delivery before marking the work completed. The pinned Next integration is isolated in `src/lib/publication/cache-delivery.ts`; dependency upgrades must reverify that bridge in a production build. A plain Node script has no serving cache context and cannot certify cache completion.
 
 Public URI, content, navigation, collection and template reads use cache tags. Save/delete hooks persist the required refresh work. Cache completion means dependencies are reconciled and invalidation acknowledged; it does not mean every page was eagerly rendered.
 
@@ -30,7 +30,7 @@ To diagnose a stale page:
 4. Repair the cause, then make an authenticated `POST /api/publication` with `{ "retryId": "<failed-work-id>" }` as an administrator or configured runner. Keep credentials private. Verify the public URL, redirects and relevant listings.
 5. Confirm completed state and cache acknowledgement. Do not issue a new content mutation merely to make the old refresh disappear.
 
-Useful modules are `src/website/routing`, `src/website/publication`, `src/website/cache` and the collection’s explicit lifecycle hooks. Use production build/start for cache acceptance; a working development preview is insufficient.
+Useful modules are `src/lib/routing`, `src/lib/publication`, `src/lib/cache` and the collection’s explicit lifecycle hooks. Use production build/start for cache acceptance; a working development preview is insufficient.
 
 ## Native scheduled publishing
 

@@ -51,7 +51,7 @@ User makes request
 
 ```ts
 import type { CollectionConfig, Access } from 'payload'
-import { userHasMinimumRole } from '@/access/roles'
+import { userHasMinimumRole } from '@/payload/access/roles'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -94,7 +94,7 @@ export const Posts: CollectionConfig = {
 
 ### Role-Based Access Control (RBAC) Pattern
 
-Payload does not impose a roles model. SmartSite already uses a singular `role` field; import `hasMinimumRole` / `userHasMinimumRole` from `@/access/roles` so developer and admin hierarchy is preserved. The following generic model deliberately defines its own `roles` array; it is not a replacement for SmartSite's Users collection.
+Payload does not impose a roles model. SmartSite already uses a singular `role` field; import `hasMinimumRole` / `userHasMinimumRole` from `@/payload/access/roles` so developer and admin hierarchy is preserved. The following generic model deliberately defines its own `roles` array; it is not a replacement for SmartSite's Users collection.
 
 ```ts
 import type { CollectionConfig } from 'payload'

@@ -18,3 +18,5 @@ Open the returned preview URL in an external browser and inspect `/admin`. Repor
 Examples: “Show me this site” means reconnect to the current runtime. “Set up a new site” means independent local state. “It stopped working” means doctor and evidence, not reset.
 
 If an existing pnpm launcher cannot select the pinned version, use `npx --yes pnpm@10.34.8 install --frozen-lockfile` under the supported Node. Do not repair or replace unrelated global package-manager installations. Subsequent scripts can likewise use `npx --yes pnpm@10.34.8 <script>`. In browser verification, inspect the actual login labels (Email or Username) rather than assuming an email-only input selector.
+
+Self-hosting is opt-in. A fresh starter and normal local/hosted setup must have no `.smartsite-self-hosted/` directory or generated `smartsite-deployment.json`. Only after the owner chooses self-hosting, follow the deployment guide: initialize the manifest, configure the destination, then prepare its private environment. The helpers create the directory when needed. Preserve existing self-hosted state when upgrading; never delete it as cleanup.

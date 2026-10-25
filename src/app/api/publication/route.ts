@@ -1,9 +1,9 @@
-import { userHasMinimumRole } from "@/access/roles"
+import { userHasMinimumRole } from "@/payload/access/roles"
 import config from "@payload-config"
 import { getPayload } from "payload"
-import { canRunPublication } from "@/website/publication/access"
-import { drainPublication, publicationStatus } from "@/website/publication/runner"
-import { deliverPublicationCache } from "@/website/publication/cache-delivery"
+import { canRunPublication } from "@/lib/publication/access"
+import { drainPublication, publicationStatus } from "@/lib/publication/runner"
+import { deliverPublicationCache } from "@/lib/publication/cache-delivery"
 import { runScheduledPublishing } from "@/payload/jobs/run-scheduled"
 export const dynamic = "force-dynamic"
 export const maxDuration = 60

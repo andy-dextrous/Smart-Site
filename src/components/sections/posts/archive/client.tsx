@@ -7,7 +7,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
 import { Pagination } from "@/components/fields/pagination"
-import { cn } from "@/utilities/ui"
+import { cn } from "@/lib/ui"
 
 /*************************************************************************/
 /*  TYPES

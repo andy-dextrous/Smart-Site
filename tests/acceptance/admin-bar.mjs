@@ -126,6 +126,14 @@ export async function checkTouchAdminBarLayout(
         )
       })
       .toBe(true)
+      .catch(async error => {
+        console.error(JSON.stringify({
+          check: "touch-admin-bar-geometry",
+          loggedOut,
+          current: await adminBarGeometry(page),
+        }))
+        throw error
+      })
     const loggedIn = await adminBarGeometry(page)
     assert.ok(loggedIn.scrollWidth <= loggedIn.width)
     await page.screenshot({ path: `${screenshots}/admin-bar-touch.png` })

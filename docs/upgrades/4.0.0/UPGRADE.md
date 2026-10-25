@@ -1,4 +1,4 @@
-# Upgrade an existing SmartSite to 4.0.1
+# Upgrade an existing SmartSite to 4.0.2
 
 This kit upgrades **3.0.0 and 3.0.1** sites in place. It preserves existing source customizations or reports a conflict, and checks database/media preservation independently of the code build. The automatic data procedure supports MongoDB replica sets. PostgreSQL and unknown baselines stop for a separately reviewed migration.
 
@@ -26,14 +26,14 @@ Keep this file outside Git with private permissions. Use absolute paths. The rep
   "siteRoot": "/private/work/my-site",
   "expectedSiteId": "existing-site-id-from-the-verified-environment",
   "sourceVersion": "3.0.1",
-  "targetVersion": "4.0.1",
+  "targetVersion": "4.0.2",
   "oldBaselineDirectory": "/private/releases/smartsite-3.0.1",
-  "targetArtifactDirectory": "/private/releases/smartsite-4.0.1",
-  "verifiedManifestPath": "/private/releases/smartsite-4.0.1/smartsite-export.json",
+  "targetArtifactDirectory": "/private/releases/smartsite-4.0.2",
+  "verifiedManifestPath": "/private/releases/smartsite-4.0.2/smartsite-export.json",
   "baselineManifestSha256": "verified-old-manifest-sha256",
   "targetManifestSha256": "verified-new-manifest-sha256",
   "environmentFile": "/private/work/my-site/.env",
-  "reportDirectory": "/private/upgrade-reports/my-site-4.0.1",
+  "reportDirectory": "/private/upgrade-reports/my-site-4.0.2",
   "restoreEnvironmentFile": "/private/upgrade-credentials/restore.env",
   "scheduledPublishing": {
     "decision": "preserve-paused",

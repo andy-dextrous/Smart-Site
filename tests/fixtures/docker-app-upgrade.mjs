@@ -153,7 +153,7 @@ const requestFile = path.join(fixture, 'request.private.json')
 const upgrade = (name, ...args) => run(process.execPath, [path.join(kit, `${name}.mjs`), '--request', requestFile, ...args], { cwd: site })
 console.log(`Owned Docker fixture: ${project}; private evidence: ${fixture}`)
 try {
-  assert.equal((await json(path.join(source, 'package.json'))).version, '4.0.1')
+  assert.equal((await json(path.join(source, 'package.json'))).version, '4.0.2')
   await run('docker', ['info'])
   await run('docker', ['compose', 'version'])
   const disk = await run('docker', ['run', '--rm', '--entrypoint', 'df', 'mongo:8', '-Pk', '/'], { capture: true })
@@ -255,7 +255,7 @@ try {
   const restoreURL = new URL(hostEnv.DATABASE_URL); restoreURL.pathname = '/docker_upgrade_restore_proof'
   const restoreEnvironmentFile = path.join(fixture, 'restore.env')
   await writePrivate(restoreEnvironmentFile, `DATABASE_URL=${restoreURL.href}\n`)
-  await writePrivate(requestFile, JSON.stringify({ schemaVersion: 1, siteRoot: site, expectedSiteId: siteId, sourceVersion: '3.0.1', targetVersion: '4.0.1', oldBaselineDirectory: baseline, targetArtifactDirectory: target, verifiedManifestPath: path.join(target, 'smartsite-export.json'), environmentFile: envFile, reportDirectory: reports, baselineManifestSha256: sha(await readFile(path.join(baseline, 'smartsite-export.json'))), targetManifestSha256: sha(await readFile(path.join(target, 'smartsite-export.json'))), restoreEnvironmentFile, writesQuiesced: true, allowedMediaHosts: [] }, null, 2))
+  await writePrivate(requestFile, JSON.stringify({ schemaVersion: 1, siteRoot: site, expectedSiteId: siteId, sourceVersion: '3.0.1', targetVersion: '4.0.2', oldBaselineDirectory: baseline, targetArtifactDirectory: target, verifiedManifestPath: path.join(target, 'smartsite-export.json'), environmentFile: envFile, reportDirectory: reports, baselineManifestSha256: sha(await readFile(path.join(baseline, 'smartsite-export.json'))), targetManifestSha256: sha(await readFile(path.join(target, 'smartsite-export.json'))), restoreEnvironmentFile, writesQuiesced: true, allowedMediaHosts: [] }, null, 2))
   step('run the shipped upgrade kit with verified backup and dry run')
   await upgrade('inspect')
   await upgrade('backup')
@@ -346,7 +346,7 @@ try {
   assert.equal((await db.collection('users').findOne({ email })).salt, originalSalt)
   assert.equal(await db.collection('site-upgrade-receipts').countDocuments(), 0)
   assert.equal(await db.collection('pages').countDocuments(), 2)
-  const result = { status: 'passed', officialSourceVersion: '3.0.1', officialSourceCommit: oldCommit, archiveSha256: archiveSha, targetVersion: '4.0.1', targetManifestSha256: sha(await readFile(path.join(target, 'smartsite-export.json'))), checks: ['official-source-docker-build', 'HTTP-MCP-population', 'authenticated-admin-and-MCP', 'legacy-Docker-media-relocation', 'persisted-original-and-variant-media', 'native-media-create-delete-recreate', 'kit-backup-restore-inspect-reconcile-dry-run-apply-verify', 'upgrade-resume', 'native-prebuilt-docker-image', 'same-identity-and-password-hash', 'container-recreation', 'publication-recovery', 'compatible-old-image-retains-new-writes', 'old-image-and-data-snapshot-rollback'], project, completedAt: new Date().toISOString() }
+  const result = { status: 'passed', officialSourceVersion: '3.0.1', officialSourceCommit: oldCommit, archiveSha256: archiveSha, targetVersion: '4.0.2', targetManifestSha256: sha(await readFile(path.join(target, 'smartsite-export.json'))), checks: ['official-source-docker-build', 'HTTP-MCP-population', 'authenticated-admin-and-MCP', 'legacy-Docker-media-relocation', 'persisted-original-and-variant-media', 'native-media-create-delete-recreate', 'kit-backup-restore-inspect-reconcile-dry-run-apply-verify', 'upgrade-resume', 'native-prebuilt-docker-image', 'same-identity-and-password-hash', 'container-recreation', 'publication-recovery', 'compatible-old-image-retains-new-writes', 'old-image-and-data-snapshot-rollback'], project, completedAt: new Date().toISOString() }
   await mkdir(path.join(source, 'test-results'), { recursive: true })
   await writeFile(path.join(source, 'test-results/docker-app-upgrade.json'), JSON.stringify(result, null, 2) + '\n')
   passed = true

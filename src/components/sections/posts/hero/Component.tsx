@@ -1,5 +1,5 @@
 import type { Post, PostsHeroBlock } from "@/payload-types"
-import type { PageData } from "@/website/rendering/render-sections"
+import type { PageData } from "@/lib/rendering/render-sections"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 import { Section } from "@/components/fields/section"
 import { Media } from "@/components/fields/media"
@@ -7,7 +7,7 @@ import {
   formatPostPublishDate,
   estimatePostReadingTime,
   resolvePostCategories,
-} from "@/utilities/posts"
+} from "@/lib/posts"
 import { tv } from "tailwind-variants"
 
 const postsHeroVariants = tv({

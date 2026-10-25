@@ -156,7 +156,7 @@ export async function snapshotArtifact(source, destination) {
   await visit()
   assert.equal(
     JSON.parse(await readFile(path.join(target, "package.json"), "utf8")).version,
-    "4.0.1"
+    "4.0.2"
   )
   await writeFile(
     path.join(target, "smartsite-export.json"),

@@ -1,5 +1,5 @@
 import type { Post, PostsContentBlock } from "@/payload-types"
-import type { PageData } from "@/website/rendering/render-sections"
+import type { PageData } from "@/lib/rendering/render-sections"
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical"
 
 import { Section } from "@/components/fields/section"

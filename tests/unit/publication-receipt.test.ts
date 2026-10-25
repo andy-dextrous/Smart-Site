@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { queuePublication } from "../../src/website/publication/intent"
+import { queuePublication } from "../../src/lib/publication/intent"
 
 // Import the configured graph without connecting to a database; all I/O is mocked.
 process.env.DATABASE_PROVIDER = "mongoose"
@@ -8,7 +8,7 @@ process.env.DATABASE_URL = "mongodb://127.0.0.1:1/unused_receipt_unit_test"
 process.env.SMARTSITE_DATABASE_TARGET = "default"
 process.env.SMARTSITE_ENVIRONMENT = "local"
 process.env.PAYLOAD_SECRET = "unit-test-only-not-a-server-secret"
-const { withOperation } = await import("../../src/mcp/operations")
+const { withOperation } = await import("../../src/payload/mcp/operations")
 
 test("operation receipts capture IDs from shallow-copied hook contexts and isolate saves", async () => {
   const receipts: any[] = [],

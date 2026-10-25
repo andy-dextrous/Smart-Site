@@ -283,7 +283,7 @@ async function main() {
           siteRoot: await realpath(site),
           expectedSiteId: env.SMARTSITE_SITE_ID,
           sourceVersion: version,
-          targetVersion: "4.0.1",
+          targetVersion: "4.0.2",
           oldBaselineDirectory: await realpath(baseline),
           targetArtifactDirectory: artifact,
           verifiedManifestPath: path.join(artifact, "smartsite-export.json"),

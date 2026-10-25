@@ -1,6 +1,6 @@
 # Working rules
 
-This is a standalone project. Use its own source, dependencies, docs and skills. The site owns all source. Edit native collections, globals, hooks, website modules and frontend components directly; `src/admin/` contains CMS presentation. There is no protected admin layer or second configuration framework.
+This is a standalone project. Use its own source, dependencies, docs and skills. The site owns all source. Edit native collections, globals, hooks, website modules and frontend components directly; `src/components/cms/` contains CMS presentation. There is no protected admin layer or second configuration framework.
 
 A request to prepare a fresh local site authorizes its empty local database, essential account/settings and preview. Use the resumable helpers, preserve credentials and existing data, and do not ask again for each routine step. Standalone agents may start the project’s own local runtime.
 

@@ -1,6 +1,6 @@
 import type React from "react"
 
-import { cache } from "@/website/cache"
+import { cache } from "@/lib/cache"
 import { notFound, redirect } from "next/navigation"
 
 interface Props {

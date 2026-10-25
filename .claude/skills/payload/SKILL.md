@@ -11,7 +11,7 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 
 | Task                     | Solution                                                                   | Details                                                                                                                          |
 | ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Auto-generate slugs      | `...slugField('title')` from `@/fields/slug`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
+| Auto-generate slugs      | `...slugField('title')` from `@/payload/fields/slug`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
 | Restrict content by user | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
 | Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
 | Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
@@ -59,7 +59,7 @@ Apply these defaults when modeling content unless there's a clear reason not to:
   `_status` field (`draft` / `published`) — **don't add your own
   `status` field**, it's redundant. Only skip versions for collections that have
   no publish/draft lifecycle (e.g. internal join tables, settings).
-- **Use SmartSite's `slugField` helper** from `@/fields/slug` for routed content. Spread `...slugField('title')` into `fields`; it supplies the slug, URI and editing controls used by website routing. Payload 3.92 has no `type: 'slug'` field.
+- **Use SmartSite's `slugField` helper** from `@/payload/fields/slug` for routed content. Spread `...slugField('title')` into `fields`; it supplies the slug, URI and editing controls used by website routing. Payload 3.92 has no `type: 'slug'` field.
 - **`position: 'sidebar'` is for short, at-a-glance fields** — status, category,
   author, publish date. Avoid it for long fields that need horizontal space to be
   usable (description, rich text content, long text). Those belong in the main
@@ -74,7 +74,7 @@ Apply these defaults when modeling content unless there's a clear reason not to:
 
 ```ts
 import type { CollectionConfig } from 'payload'
-import { slugField } from '@/fields/slug'
+import { slugField } from '@/payload/fields/slug'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -111,7 +111,7 @@ For more collection patterns (auth, upload, drafts, live preview), see [COLLECTI
 // Rich text
 { name: 'content', type: 'richText', required: true }
 
-// In a fields array; import { slugField } from '@/fields/slug'
+// In a fields array; import { slugField } from '@/payload/fields/slug'
 ...slugField('title')
 
 // Select (for genuine taxonomy — NOT publish state; use versions.drafts + _status for that)
@@ -171,7 +171,7 @@ For all hook patterns, see [HOOKS.md](reference/HOOKS.md). For access control, s
 ```ts
 import type { Access } from 'payload'
 import type { User } from '@/payload-types'
-import { userHasMinimumRole } from '@/access/roles'
+import { userHasMinimumRole } from '@/payload/access/roles'
 
 // Type-safe access control
 export const adminOnly: Access = ({ req }) => {
@@ -381,24 +381,32 @@ See [HOOKS.md#context](reference/HOOKS.md#hook-context).
 
 ## Project Structure
 
-```txt
+SmartSite uses the existing native configuration and this layout. New examples below are patterns to adapt, not files guaranteed to exist.
+
+```text
 src/
 ├── app/
-│   ├── (frontend)/
-│   │   └── page.tsx
-│   └── (payload)/
-│       └── admin/[[...segments]]/page.tsx
-├── collections/
-│   ├── Posts.ts
-│   ├── Media.ts
-│   └── Users.ts
-├── globals/
-│   └── Header.ts
+│   ├── (frontend)/[[...uri]]/page.tsx
+│   └── (payload)/admin/[[...segments]]/page.tsx
 ├── components/
-│   └── CustomField.tsx
-├── hooks/
-│   └── slugify.ts
-└── payload.config.ts
+│   ├── cms/                   # CMS presentation and its ui/styles/providers
+│   ├── fields/                # Field UI and colocated field helpers
+│   └── sections/              # Section schemas and renderers
+├── hooks/                     # React hooks
+├── lib/                       # Routing, cache, data and publication services
+├── payload/
+│   ├── access/
+│   ├── collections/
+│   ├── fields/                # Shared schema factories
+│   ├── globals/
+│   ├── hooks/                 # Payload lifecycle hooks
+│   ├── mcp/
+│   ├── plugins/
+│   └── admin.ts
+├── types/
+├── payload.config.ts
+├── payload-types.ts
+└── site.config.ts
 ```
 
 ## SmartSite / Payload 3 compatibility
@@ -423,7 +431,7 @@ This vendored official Payload skill has been adapted for SmartSite's pinned Pay
 
 - Enable `versions: { drafts: true }` by default on content collections; rely on the
   auto-injected `_status` field rather than adding a custom `status` field
-- Use `...slugField('title')` from `@/fields/slug` for SmartSite routed content
+- Use `...slugField('title')` from `@/payload/fields/slug` for SmartSite routed content
 - Use a stored top-level field for `admin.useAsTitle`; never use a computed
   `virtual: true` field as the title
 - Reserve `position: 'sidebar'` for short, at-a-glance fields (status, category,
@@ -464,8 +472,8 @@ This vendored official Payload skill has been adapted for SmartSite's pinned Pay
 ### Organization
 
 - Keep collections in separate files
-- Extract access control to `access/` directory
-- Extract hooks to `hooks/` directory
+- Extract access control to `src/payload/access`
+- Extract Payload lifecycle hooks to `src/payload/hooks`; React hooks stay in `src/hooks`
 - Use reusable field factories for common patterns
 - Document complex access control with comments
 

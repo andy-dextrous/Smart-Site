@@ -96,7 +96,7 @@ export async function loadRequest() {
   if (
     request.schemaVersion !== 1 ||
     !["3.0.0", "3.0.1"].includes(request.sourceVersion) ||
-    request.targetVersion !== "4.0.1" ||
+    request.targetVersion !== "4.0.2" ||
     !request.expectedSiteId
   )
     throw new Error("Unsupported source/target version or missing site identity")

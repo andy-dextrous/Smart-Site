@@ -1,4 +1,4 @@
-import { LinkLabelField as LinkLabelField_7f1c9d7f11cd37376a3d3cc6b87e2e5f } from '@/components/content-fields/link/link-label-field'
+import { LinkLabelField as LinkLabelField_cbd7971cef6327b78828e168664c531b } from '@/components/fields/link/link-label-field'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -23,8 +23,8 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HeadingFeatureClient as HeadingFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { default as default_c78ca7c08bdb831c34b046e13e466d27 } from '@/admin/components/assign-template'
-import { SlugComponent as SlugComponent_3a40a28053fdc7f295f2ddfa7a528d90 } from '@/fields/slug/slug-component'
+import { default as default_5d72b325d5b533909caecaf7c6ad2a83 } from '@/components/cms/assign-template'
+import { SlugComponent as SlugComponent_17775b5bf19a70d5b67fa2f5daf353ce } from '@/components/fields/slug/slug-component'
 import { FolderTableCell as FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { FolderField as FolderField_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
@@ -37,22 +37,22 @@ import { QueryPresetsColumnsCell as QueryPresetsColumnsCell_2b8867833a34864a02dd
 import { QueryPresetsColumnField as QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByCell as QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
 import { QueryPresetsGroupByField as QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40 } from '@payloadcms/next/client'
-import { RowLabel as RowLabel_db73f03449c8ffae18df89c261c6e574 } from '@/globals/header/row-label'
-import { RowLabel as RowLabel_136e5b5eb095dc39b42ab4c2528bb385 } from '@/globals/footer/RowLabel'
-import { SocialLinksRowLabel as SocialLinksRowLabel_b2d017f34d95f0645761a56bf4f3e595 } from '@/fields/social-links-row-label'
-import { default as default_66e7cd73c7af8af7070e37d01fad8f9d } from '@/admin/components/row-grid'
-import { default as default_5ef7315996a41df938ec0a0ce1ca69b7 } from '@/admin/components/nav'
-import { Icon as Icon_1fe8242824011b61674eafa7a116e7f6 } from '@/admin/components/logo'
-import { Logo as Logo_1fe8242824011b61674eafa7a116e7f6 } from '@/admin/components/logo'
-import { default as default_f4b9897609140513aac530440a5fa792 } from '@/admin/components/actions'
-import { BeforeLogin as BeforeLogin_f51bc874debdcd4b58f6ac14d77bffb0 } from '@/admin/components/before-login'
-import { AdminLayoutProvider as AdminLayoutProvider_34e86cc6539595d9d26820fc7ffd2d7b } from '@/admin/providers/layout-provider'
-import { Dashboard as Dashboard_aae4eb7777ec963acdaaf9e9b5527d40 } from '@/admin/components/dashboard'
+import { RowLabel as RowLabel_ac590f04e7b67b0cd330fd91c828079e } from '@/payload/globals/header/row-label'
+import { RowLabel as RowLabel_d4fd277a286d50f536848872bd9d5784 } from '@/payload/globals/footer/RowLabel'
+import { SocialLinksRowLabel as SocialLinksRowLabel_ef4fd835d05cf8253be249c397947071 } from '@/components/fields/social-links/row-label'
+import { default as default_5aebad6bd549618e8561a0c2cba1c897 } from '@/components/cms/row-grid'
+import { default as default_208df17e9f505e92f0e9a5cb71115fd9 } from '@/components/cms/nav'
+import { Icon as Icon_06305e252d2ff9845d91fb5b68889532 } from '@/components/cms/logo'
+import { Logo as Logo_06305e252d2ff9845d91fb5b68889532 } from '@/components/cms/logo'
+import { default as default_a4cfa35461f1446c4c1697fc4ad3fe97 } from '@/components/cms/actions'
+import { BeforeLogin as BeforeLogin_82174e2fa0bd3f7a7e281182cff7758c } from '@/components/cms/before-login'
+import { AdminLayoutProvider as AdminLayoutProvider_9ce2e24ff84b5b97b4d931b8d61d91ee } from '@/components/cms/providers/layout-provider'
+import { Dashboard as Dashboard_380df23b88521e61b8a9305285442e43 } from '@/components/cms/dashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
-  "@/components/content-fields/link/link-label-field#LinkLabelField": LinkLabelField_7f1c9d7f11cd37376a3d3cc6b87e2e5f,
+  "@/components/fields/link/link-label-field#LinkLabelField": LinkLabelField_cbd7971cef6327b78828e168664c531b,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -77,8 +77,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#HeadingFeatureClient": HeadingFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ParagraphFeatureClient": ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "@/admin/components/assign-template#default": default_c78ca7c08bdb831c34b046e13e466d27,
-  "@/fields/slug/slug-component#SlugComponent": SlugComponent_3a40a28053fdc7f295f2ddfa7a528d90,
+  "@/components/cms/assign-template#default": default_5d72b325d5b533909caecaf7c6ad2a83,
+  "@/components/fields/slug/slug-component#SlugComponent": SlugComponent_17775b5bf19a70d5b67fa2f5daf353ce,
   "@payloadcms/next/rsc#FolderTableCell": FolderTableCell_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/next/rsc#FolderField": FolderField_f9c02e79a4aed9a3924487c0cd4cafb1,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
@@ -91,16 +91,16 @@ export const importMap = {
   "@payloadcms/next/client#QueryPresetsColumnField": QueryPresetsColumnField_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByCell": QueryPresetsGroupByCell_2b8867833a34864a02ddf429b0728a40,
   "@payloadcms/next/client#QueryPresetsGroupByField": QueryPresetsGroupByField_2b8867833a34864a02ddf429b0728a40,
-  "@/globals/header/row-label#RowLabel": RowLabel_db73f03449c8ffae18df89c261c6e574,
-  "@/globals/footer/RowLabel#RowLabel": RowLabel_136e5b5eb095dc39b42ab4c2528bb385,
-  "@/fields/social-links-row-label#SocialLinksRowLabel": SocialLinksRowLabel_b2d017f34d95f0645761a56bf4f3e595,
-  "@/admin/components/row-grid#default": default_66e7cd73c7af8af7070e37d01fad8f9d,
-  "@/admin/components/nav#default": default_5ef7315996a41df938ec0a0ce1ca69b7,
-  "@/admin/components/logo#Icon": Icon_1fe8242824011b61674eafa7a116e7f6,
-  "@/admin/components/logo#Logo": Logo_1fe8242824011b61674eafa7a116e7f6,
-  "@/admin/components/actions#default": default_f4b9897609140513aac530440a5fa792,
-  "@/admin/components/before-login#BeforeLogin": BeforeLogin_f51bc874debdcd4b58f6ac14d77bffb0,
-  "@/admin/providers/layout-provider#AdminLayoutProvider": AdminLayoutProvider_34e86cc6539595d9d26820fc7ffd2d7b,
-  "@/admin/components/dashboard#Dashboard": Dashboard_aae4eb7777ec963acdaaf9e9b5527d40,
+  "@/payload/globals/header/row-label#RowLabel": RowLabel_ac590f04e7b67b0cd330fd91c828079e,
+  "@/payload/globals/footer/RowLabel#RowLabel": RowLabel_d4fd277a286d50f536848872bd9d5784,
+  "@/components/fields/social-links/row-label#SocialLinksRowLabel": SocialLinksRowLabel_ef4fd835d05cf8253be249c397947071,
+  "@/components/cms/row-grid#default": default_5aebad6bd549618e8561a0c2cba1c897,
+  "@/components/cms/nav#default": default_208df17e9f505e92f0e9a5cb71115fd9,
+  "@/components/cms/logo#Icon": Icon_06305e252d2ff9845d91fb5b68889532,
+  "@/components/cms/logo#Logo": Logo_06305e252d2ff9845d91fb5b68889532,
+  "@/components/cms/actions#default": default_a4cfa35461f1446c4c1697fc4ad3fe97,
+  "@/components/cms/before-login#BeforeLogin": BeforeLogin_82174e2fa0bd3f7a7e281182cff7758c,
+  "@/components/cms/providers/layout-provider#AdminLayoutProvider": AdminLayoutProvider_9ce2e24ff84b5b97b4d931b8d61d91ee,
+  "@/components/cms/dashboard#Dashboard": Dashboard_380df23b88521e61b8a9305285442e43,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
