@@ -19,6 +19,7 @@ Payload provides the excellent CMS foundation. SmartSite adds an integrated site
 ## Contents
 
 - [Why SmartSite?](#why-smartsite)
+- [How SmartSite builds on Payload’s website starter](#how-smartsite-builds-on-payloads-website-starter)
 - [Try it in a conversation](#try-it-in-a-conversation)
 - [What is included](#what-is-included)
 - [The CMS and editorial experience](#the-cms-and-editorial-experience)
@@ -54,6 +55,84 @@ You get real React and TypeScript source, typed configuration and Payload extens
 ### Separate code delivery from content delivery
 
 Publishing a code update should preserve production content. SmartSite documents environment identity, backups, deliberate first-launch transfer and targeted migrations so an agent has an established maintenance process to follow.
+
+## How SmartSite builds on Payload’s website starter
+
+Payload's official website template is already a capable foundation. It includes pages and posts, editable blocks, rich text, media, authentication, drafts and live preview, SEO, redirects, forms, search, cached data and on-demand revalidation. **SmartSite builds on those ideas; caching, a page builder and a CMS are not inventions unique to SmartSite.**
+
+The difference is how much of the complete website system is assembled for you. SmartSite connects content types, public URLs, reusable templates, cache refresh, site configuration and agent workflows into a shared application architecture.
+
+This comparison is based on the actual [official website-template source at revision `aebbf75`](https://github.com/payloadcms/payload/tree/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website), reviewed on **25 October 2026**, and SmartSite **3.0.1**. It compares what these starters ship, not what the Payload platform can be extended to do. Upstream may change after that revision.
+
+| Area | Official Payload website starter | What SmartSite builds around it |
+| --- | --- | --- |
+| Public routes | Separate page and post routes, using page slugs and `/posts/[slug]` | A shared catch-all renderer backed by a URI index across configured frontend collections |
+| Site hierarchy | Page routes use a single slug; the nested-docs plugin is configured for categories | Parent/child page paths and breadcrumbs, plus dependency handling when the hierarchy changes |
+| Homepage and collection locations | The page slug `home` maps to `/`; posts have their own route directory | CMS settings select the homepage and collection archive pages, which determine the paths of their content |
+| Reusable content layouts | Page layout blocks and a dedicated post renderer | A Templates collection, collection template assignments and shared section rendering for indexed content |
+| Cache reads | Focused helpers, including cached globals and document lookups | A common cache API for URIs, documents, collection queries and globals, with consistent keys and tags |
+| Cache refresh | Page/post hooks revalidate routes and sitemap tags; globals and redirects have their own hooks | Shared document/global invalidation, old/new path handling, navigation impact checks and dependent URI/template updates |
+| Changed URLs | Redirects plugin and redirect management | Automatic redirects for supported published URI changes; page/post destinations reference their content records |
+| Content models | Pages, posts, media, categories and users, with plugin collections | Services, team, testimonials, templates and a URI index alongside the familiar CMS models |
+| Site configuration | Application-specific Payload config, plugins and frontend source | Typed `smartsite.config.ts`, a local extension registry and an explicit boundary between site customization and reusable core |
+| Search | Search plugin configured for posts with a results page | Configurable search behavior with results-page, command-palette and hybrid modes |
+| Storage and integrations | Media uploads and extension points for adding services | Pre-integrated choices for local storage, Vercel Blob, S3, Cloudinary and UploadThing, plus site feature configuration |
+| Agent-driven content editing | No MCP plugin configured in the compared template | Payload's official MCP plugin, four scoped content tools, revision checks and operation receipts |
+| Development and launch | Setup instructions, environment configuration, seed and deployment guidance | Portable Codex/Claude skills, blank-site bootstrap, isolated local lifecycle helpers, environment identity, and documented content transfer, backup and recovery workflows |
+
+### The URI concept: the site's address book
+
+A **slug** is one part of a URL, such as `our-story`. A **URI** here means the complete path inside your site, such as `/about/our-story`. SmartSite gives that complete path its own indexed record rather than making each content type responsible for an independent frontend route.
+
+The URI index connects a path to its source collection, document ID, publication status, template assignment and breadcrumbs. The public renderer looks up the path, loads the corresponding content, applies the assigned template when the document has no sections of its own, and renders the sections. Static route generation reads the same index.
+
+For example:
+
+- A page called **Our story** beneath **About** can resolve to `/about/our-story`.
+- Assigning an **Insights** page as the posts archive lets an article resolve to `/insights/article-title` rather than requiring the frontend to assume `/posts/article-title`.
+- Selecting a different homepage in settings controls which page resolves to `/`.
+- A configured frontend collection can use the same routing and rendering system; a new collection still needs its schema, configuration and suitable presentation.
+
+This is useful when the business's information structure does not match database collection names. It also gives routing, templates, breadcrumbs and URL maintenance a common record to work from.
+
+See the [routing engine](src/admin/routing/uri-engine.ts), [URI index manager](src/admin/routing/index-manager.ts) and [published URI renderer](src/admin/components/published-uri-renderer.tsx).
+
+### Caching and invalidation: keeping published content current
+
+**Caching** reuses a previous result so the application does not repeat every database read. **Invalidation** tells the application which saved results are no longer current after a change.
+
+Payload's starter already uses Next.js caching and revalidation. SmartSite expands this into shared infrastructure for its broader content and routing model:
+
+- **Consistent reads:** helpers retrieve content by URI, ID or slug, query collections and load globals. Cache keys distinguish relevant query parameters and draft/published modes.
+- **Named groups:** tags identify items, collections, URI lookups, collection URI indexes and globals, so change handlers can invalidate the appropriate groups.
+- **Publication-aware updates:** hooks distinguish draft-only saves from publication changes. Publishing, unpublishing and changing published content feed into URI and cache maintenance.
+- **Old and new addresses:** invalidation handles previous paths and slugs as well as the current address when the detected change requires it.
+- **Related site elements:** existing handlers check navigation references, archive assignments and parent changes. Template edits can find the published content using that template and invalidate its cached routes.
+- **Recovery:** broader refresh and URI regeneration paths exist for repairs and changes that affect the whole site.
+
+For an editor, the aim is simple: publishing an article should refresh its page and relevant cached listings; changing a shared template should refresh the content that uses it. The developer has shared machinery for these jobs instead of recreating separate conventions for every content type.
+
+This is **explicit dependency handling**, not automatic discovery of every possible relationship in custom code. Some settings changes deliberately trigger a broad refresh. Custom queries, external caches and new extensions still need the appropriate tags, hooks and verification. Bulk updates also need attention to handler limits and successful completion; the presence of a queue entry is not proof that every affected page was updated.
+
+See the [cache API](src/admin/cache/cache.ts), [revalidation handlers](src/admin/cache/revalidation.ts) and [routing and caching guide](docs/engineering/routing-and-caching.md).
+
+### Changes that affect more than one page
+
+Renaming a parent page, changing a collection's archive page or editing a shared template can affect many public routes. SmartSite has dependency detection and a Payload task for these operations. Its hook helper queues the dependent work and invokes the job immediately; failed work still needs diagnosis and recovery.
+
+Supported published URI changes can also create redirects from the previous address. For pages and posts, the destination references the content record, allowing it to resolve that content's current URI. Other collections use a stored destination URL. Existing manual redirects are preserved. Redirect behavior depends on the operation and its options; verify old and new URLs after a significant restructure.
+
+These mechanisms connect changes that otherwise span separate concerns: stored content, public paths, breadcrumbs, templates, redirects and cached output. See the [dependency task](src/admin/payload/jobs/dependency-updates/handler.ts), [job invocation](src/admin/payload/hooks/utilities/context-management.ts) and [automatic redirects](src/admin/redirects/auto-redirects.ts).
+
+### More of the website-building workflow is included
+
+The additional collections and configuration are only part of the value. SmartSite also supplies an organized admin, reusable section conventions, optional motion and site features, storage choices, and a documented boundary for customization. Its native MCP connection lets an agent work on stored content, while the shipped skills teach setup, design, section development, data changes, repairs and launch.
+
+The resulting repository is the product: code, CMS, docs and skills stay together after you create your own site. There is no parent monorepo to reconnect to and no global SmartSite CLI or embedded AI chat service to install.
+
+Choose the official Payload website starter when you want its smaller foundation and intend to design your own site architecture. Choose SmartSite when these integrated conventions fit your project and you want more of the surrounding workflow already assembled. SmartSite adds code and conventions you will maintain; it does not remove the need to understand your hosting, content model or upgrade changes.
+
+For the upstream baseline, see its [page route](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/app/%28frontend%29/%5Bslug%5D/page.tsx), [page revalidation hook](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/collections/Pages/hooks/revalidatePage.ts), [cached globals](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/utilities/getGlobals.ts) and [configured plugins](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/plugins/index.ts).
 
 ## Try it in a conversation
 
@@ -366,7 +445,7 @@ It is an alternative for teams who want a familiar content-management experience
 
 ### How is this different from starting directly with Payload?
 
-Payload supplies the CMS and plugin ecosystem. SmartSite packages additional site models, templates, routing, admin organization, frontend conventions, local operation, MCP workflows and portable agent guidance into one starter. You still use Payload's underlying APIs and extension model.
+Payload supplies the CMS and plugin ecosystem, and its website starter already includes features such as caching, revalidation, SEO and editable blocks. SmartSite builds a broader site system around that foundation: a central URI index, configurable routing, reusable templates, dependency-aware updates, additional content models, native MCP workflows and portable agent guidance. See the [detailed source-based comparison](#how-smartsite-builds-on-payloads-website-starter) above. You still use Payload's underlying APIs and extension model.
 
 ### Do I need an AI API key?
 
