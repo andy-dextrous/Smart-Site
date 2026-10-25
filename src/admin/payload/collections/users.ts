@@ -75,7 +75,7 @@ export const Users: CollectionConfig = {
     } as CollectionCustomMetadata,
   },
   auth: {
-    useAPIKey: true, // Enable API key generation for AI agents
+    useAPIKey: false, // MCP credentials live in Payload’s scoped key collection
     tokenExpiration: 604800000, // 7 days
     // verify: true, // Require email verification before being allowed to authenticate
     maxLoginAttempts: process.env.NODE_ENV === "production" ? 5 : 100,
@@ -137,10 +137,6 @@ export const Users: CollectionConfig = {
         {
           label: "Developer",
           value: "developer",
-        },
-        {
-          label: "AI Agent",
-          value: "ai-agent",
         },
       ],
       admin: {

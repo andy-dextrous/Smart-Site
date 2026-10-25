@@ -21,22 +21,15 @@ function resolvePrimaryAuthor(post: Post): ResolvedAuthor | null {
   }
 
   const first = post.populatedAuthors[0] as (typeof post.populatedAuthors)[number] & {
-    user?: User | null
+    avatar?: MediaType | null
     teamMember?: Team | null
   }
 
   if (!first) return null
 
   const team = first.teamMember && typeof first.teamMember === "object" ? first.teamMember : null
-  const user = first.user && typeof first.user === "object" ? first.user : null
 
-  const name =
-    team?.name ||
-    user?.name ||
-    first.name ||
-    user?.username ||
-    user?.email ||
-    "Anonymous"
+  const name = team?.name || first.name || "Anonymous"
 
   const teamDetails = team as
     | (Team & {
@@ -63,7 +56,7 @@ function resolvePrimaryAuthor(post: Post): ResolvedAuthor | null {
   const avatar =
     teamDetails?.image ??
     legacyContent?.image ??
-    user?.avatar ??
+    first.avatar ??
     null
   const role = teamDetails?.role ?? legacyContent?.role ?? null
   const bio = teamDetails?.bio ?? legacyContent?.bio ?? null
@@ -101,7 +94,13 @@ export function PostAuthorCard({ post, className }: PostAuthorCardProps) {
       <div className="flex flex-col gap-content md:flex-row md:items-center md:gap-content-lg">
         {avatar ? (
           <div className="relative size-20 flex-shrink-0 overflow-hidden rounded-full border border-dark-border">
-            <Media resource={avatar} className="size-full object-cover" />
+            <Media
+              resource={avatar}
+              fill
+              size="80px"
+              className="size-full"
+              imgClassName="object-cover"
+            />
           </div>
         ) : null}
 

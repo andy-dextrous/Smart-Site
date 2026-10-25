@@ -1,3 +1,5 @@
+import { refreshAfterCommit } from "@/admin/payload/hooks/utilities/after-commit"
+import { smartsiteMcp } from "@/admin/mcp/plugin"
 import { formBuilderPlugin } from "@payloadcms/plugin-form-builder"
 import { nestedDocsPlugin } from "@payloadcms/plugin-nested-docs"
 import { redirectsPlugin } from "@payloadcms/plugin-redirects"
@@ -16,7 +18,6 @@ import { getSmartSiteConfig } from "@/admin/config"
 import { getFrontendCollections } from "@/admin/config/frontend"
 import { getSearchConfig } from "@/admin/config/features"
 import { resolveStoragePlugins } from "@/admin/config/storage-resolver"
-import { aiBridgePlugin } from "@/admin/payload/plugins/ai-bridge"
 import { revalidateCollection } from "@/admin/cache"
 
 /*************************************************************************/
@@ -85,29 +86,27 @@ const redirects = redirectsPlugin({
     },
     hooks: {
       afterChange: [
-        ({ doc, previousDoc, req: { payload } }) => {
-          payload.logger.info(`Revalidating redirects`)
+        async ({ doc, previousDoc, req }) => {
+          await refreshAfterCommit(req, async () => {
+            if (previousDoc?.from && previousDoc.from !== doc.from) {
+              revalidateTag(`redirect:${previousDoc.from}`, { expire: 0 })
+            }
 
-          if (previousDoc?.from && previousDoc.from !== doc.from) {
-            revalidateTag(`redirect:${previousDoc.from}`, { expire: 0 })
-          }
-
-          revalidateTag(`redirect:${doc.from}`, { expire: 0 })
-          revalidateTag("collection:redirects", { expire: 0 })
-
+            revalidateTag(`redirect:${doc.from}`, { expire: 0 })
+            revalidateTag("collection:redirects", { expire: 0 })
+          })
           return doc
         },
       ],
       afterDelete: [
-        ({ doc, req: { payload } }) => {
-          payload.logger.info(`Revalidating redirects after delete`)
+        async ({ doc, req }) => {
+          await refreshAfterCommit(req, async () => {
+            if (doc?.from) {
+              revalidateTag(`redirect:${doc.from}`, { expire: 0 })
+            }
 
-          if (doc?.from) {
-            revalidateTag(`redirect:${doc.from}`, { expire: 0 })
-          }
-
-          revalidateTag("collection:redirects", { expire: 0 })
-
+            revalidateTag("collection:redirects", { expire: 0 })
+          })
           return doc
         },
       ],
@@ -233,7 +232,9 @@ const forms = formBuilderPlugin({
 
 const frontendCollections = getFrontendCollections()
 const searchCollections = frontendCollections
-  .filter(collection => (collection.searchEnabled ?? true) && collection.slug !== "uri-index")
+  .filter(
+    collection => (collection.searchEnabled ?? true) && collection.slug !== "uri-index"
+  )
   .map(collection => collection.slug)
   .sort((a, b) => {
     if (a === "pages") return -1
@@ -241,10 +242,13 @@ const searchCollections = frontendCollections
     return a.localeCompare(b)
   })
 
-const defaultPriorities = searchCollections.reduce<Record<string, number>>((acc, slug, index) => {
-  acc[slug] = (index + 1) * 10
-  return acc
-}, {})
+const defaultPriorities = searchCollections.reduce<Record<string, number>>(
+  (acc, slug, index) => {
+    acc[slug] = (index + 1) * 10
+    return acc
+  },
+  {}
+)
 
 const searchPluginInstance = searchCollections.length
   ? searchPlugin({
@@ -257,14 +261,18 @@ const searchPluginInstance = searchCollections.length
         },
         hooks: {
           afterChange: [
-            async ({ doc }) => {
-              await revalidateCollection("search", "search-index-change")
+            async ({ doc, req }) => {
+              await refreshAfterCommit(req, () =>
+                revalidateCollection("search", "search-index-change")
+              )
               return doc
             },
           ],
           afterDelete: [
-            async () => {
-              await revalidateCollection("search", "search-index-delete")
+            async ({ req }) => {
+              await refreshAfterCommit(req, () =>
+                revalidateCollection("search", "search-index-delete")
+              )
             },
           ],
         },
@@ -302,7 +310,7 @@ export const plugins: Plugin[] = [
   forms,
   ...(searchEnabled && searchPluginInstance ? [searchPluginInstance] : []),
   nestedDocs,
-  aiBridgePlugin,
+  smartsiteMcp,
 ]
 
 /*************************************************************************/
@@ -318,6 +326,6 @@ export function getPlugins(): Plugin[] {
     ...(searchEnabled && searchPluginInstance ? [searchPluginInstance] : []),
     ...storagePlugins,
     nestedDocs,
-    aiBridgePlugin,
+    smartsiteMcp,
   ]
 }

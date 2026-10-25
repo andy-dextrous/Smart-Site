@@ -82,6 +82,7 @@ fi
 target_timestamp="$(printf '%s' "$target_line" | cut -d '|' -f 1)"
 target_id="$(printf '%s' "$target_line" | cut -d '|' -f 2)"
 target_image="$(printf '%s' "$target_line" | cut -d '|' -f 3)"
+target_mode="$(printf '%s' "$target_line" | cut -d '|' -f 4)"
 
 if ! docker image inspect "$target_image" >/dev/null 2>&1; then
   echo "Missing rollback image: $target_image"
@@ -94,11 +95,16 @@ set_env_value "NEXT_DEPLOYMENT_ID" "$target_id"
 echo "Rolling back SmartSite to NEXT_DEPLOYMENT_ID=$target_id"
 
 compose up -d mongo
-compose run --rm build
-compose up -d app proxy
+
+if [ "$target_mode" = "mode=prebuilt" ]; then
+  compose up -d --force-recreate app proxy
+else
+  compose run --rm build
+  compose up -d --force-recreate app proxy
+fi
 
 mkdir -p "$release_dir"
 printf '%s\n' "$target_line" > "$current_file"
-printf '%s|%s|%s|rollback-to:%s\n' "$(date -u +%Y%m%d-%H%M%S)" "$target_id" "$target_image" "$target_timestamp" >> "$history_file"
+printf '%s|%s|%s|%s|rollback-to:%s\n' "$(date -u +%Y%m%d-%H%M%S)" "$target_id" "$target_image" "${target_mode:-mode=local-build}" "$target_timestamp" >> "$history_file"
 
 compose ps

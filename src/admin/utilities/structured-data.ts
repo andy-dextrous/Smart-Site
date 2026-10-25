@@ -264,30 +264,7 @@ function generateArticleSchema(
 
     schema.author = authors.map(author => {
       const team = author?.teamMember || null
-      const user = author?.user || null
-
-      const resolvedName = (() => {
-        if (team?.name) {
-          return team.name
-        }
-
-        const nameParts = [author?.name, author?.lastName ?? user?.lastName]
-          .filter((part): part is string => typeof part === "string" && part.trim() !== "")
-
-        if (nameParts.length > 0) {
-          return nameParts.join(" ")
-        }
-
-        if (user?.username) {
-          return user.username
-        }
-
-        if (user?.email) {
-          return user.email
-        }
-
-        return author?.name || null
-      })()
+      const resolvedName = team?.name || author?.name || null
 
       const person: {
         "@type": "Person"
@@ -310,8 +287,7 @@ function generateArticleSchema(
 
       if (team?.image?.url) {
         person.image = `${baseURL}${team.image.url}`
-      } else if (user?.avatar?.url) {
-        person.image = `${baseURL}${user.avatar.url}`
+
       }
 
       return person

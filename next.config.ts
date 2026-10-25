@@ -1,5 +1,4 @@
 import { withPayload } from "@payloadcms/next/withPayload"
-import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 import redirects from "./redirects.js"
@@ -7,34 +6,21 @@ import { NextConfig } from "next"
 
 const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
 
-// Get monorepo root dynamically
-const configFilename = fileURLToPath(import.meta.url)
-const configDirname = path.dirname(configFilename)
-
-function resolveMonorepoRoot(startDir: string): string {
-  let currentDir = startDir
-  const filesystemRoot = path.parse(currentDir).root
-
-  while (currentDir !== filesystemRoot) {
-    const workspaceFile = path.join(currentDir, "pnpm-workspace.yaml")
-
-    if (fs.existsSync(workspaceFile)) {
-      return currentDir
-    }
-
-    currentDir = path.dirname(currentDir)
-  }
-
-  return startDir
-}
-
-const monorepoRoot = resolveMonorepoRoot(configDirname)
+// The project owns its build graph, including when developed inside a workspace.
+const projectRoot = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
   deploymentId: process.env.NEXT_DEPLOYMENT_ID,
   images: {
+    // Match the starter's thumbnail, default and hero quality presets.
+    qualities: [75, 85, 90],
+    localPatterns: [
+      // Payload media carries an updatedAt cache key; ordinary public assets do not.
+      { pathname: "/api/media/file/**" },
+      { pathname: "/**", search: "" },
+    ],
     remotePatterns: [
       ...[NEXT_PUBLIC_URL].map(item => {
         const url = new URL(item)
@@ -66,9 +52,9 @@ const nextConfig = {
     quietDeps: true,
     silenceDeprecations: ["import", "global-builtin", "legacy-js-api"],
   },
-  outputFileTracingRoot: monorepoRoot,
+  outputFileTracingRoot: projectRoot,
   turbopack: {
-    root: monorepoRoot,
+    root: projectRoot,
     resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".mjs", ".json"],
     rules: {
       "*.svg": {
@@ -78,7 +64,6 @@ const nextConfig = {
     },
   },
   serverExternalPackages: [
-    "@mastra/*",
     "@payloadcms/db-postgres",
     "@payloadcms/db-vercel-postgres",
     "@payloadcms/drizzle",

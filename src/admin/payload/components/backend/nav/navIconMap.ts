@@ -35,8 +35,6 @@ export const navIconMap: Partial<
   templates: HiTemplate,
   default: IoIosDocument,
   testimonials: MdReviews,
-  ai: Sparkles,
-  "ai-settings": Sparkles,
 }
 
 export const getNavIcon = (slug: string) =>

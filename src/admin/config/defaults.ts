@@ -191,11 +191,6 @@ const SearchFeatureSchema = z.union([
 ])
 
 const FeaturesConfigSchema = z.object({
-  ai: z.object({
-    enabled: z.boolean(),
-    endpoint: z.string(),
-    registrationPath: z.string().default("/api/internal/sites/apply"),
-  }),
   darkMode: z.boolean(),
   i18n: I18nFeatureSchema,
   analytics: z.boolean(),
@@ -213,6 +208,7 @@ const ExtensionsConfigSchema = z.object({
 export const SmartSiteConfigSchema = z.object({
   collections: z.record(z.union([MediaCollectionConfigSchema, CollectionConfigSchema])),
   features: FeaturesConfigSchema,
+  mcp: z.object({ enabled: z.boolean().default(true), collections: z.array(z.string()).default([]), globals: z.array(z.string()).default([]) }).default({ enabled: true, collections: [], globals: [] }),
   identity: IdentityConfigSchema,
   admin: z.object({
     theme: AdminThemeSchema,
@@ -252,10 +248,9 @@ export type UserConfig = DeepPartial<SmartSiteConfig>
 /*  SMARTSITE DEFAULT CONFIGURATION
 /*************************************************************************/
 
-const DEFAULT_AI_ENDPOINT =
-  process.env.SMARTSITE_AI_ENDPOINT?.trim() || "https://smart-site-ai-core.vercel.app"
 
 export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
+  mcp: { enabled: true, collections: [], globals: [] },
   identity: {
     siteName: "Smart Site",
     siteUrl: process.env.NEXT_PUBLIC_URL || "http://localhost:3000",
@@ -387,11 +382,6 @@ export const SMARTSITE_DEFAULTS: SmartSiteConfig = {
   /*************************************************************************/
 
   features: {
-    ai: {
-      enabled: false,
-      endpoint: DEFAULT_AI_ENDPOINT,
-      registrationPath: "/api/internal/sites/apply",
-    },
     darkMode: false,
     i18n: false,
     analytics: true,

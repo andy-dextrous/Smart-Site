@@ -1,3 +1,4 @@
+import { deferHookAfterCommit } from "@/admin/payload/hooks/utilities/after-commit"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
 import { revalidateTag } from "next/cache"
 import type { GlobalAfterChangeHook } from "payload"
@@ -13,12 +14,15 @@ import type { GlobalAfterChangeHook } from "payload"
 /*  - Simple and focused functionality
 /*************************************************************************/
 
-export const afterFooterChange: GlobalAfterChangeHook = async ({
-  doc,
-  previousDoc,
-  req: { payload, context },
-  global,
-}) => {
+export const afterFooterChange: GlobalAfterChangeHook = async args => {
+  if (deferHookAfterCommit(args, afterFooterChange)) return args.doc
+  const {
+    doc,
+    previousDoc,
+    req: { payload, context },
+    global,
+  } = args
+
   if (global.slug !== "footer") return doc
 
   if (shouldPreventHooks(payload, context)) {
@@ -29,7 +33,10 @@ export const afterFooterChange: GlobalAfterChangeHook = async ({
     revalidateTag(`global:${global.slug}`, { expire: 0 })
     payload.logger.info(`Revalidated global:${global.slug}`)
   } catch (error) {
-    payload.logger.error({ error, slug: global.slug }, `Revalidation failed for global ${global.slug}`)
+    payload.logger.error(
+      { error, slug: global.slug },
+      `Revalidation failed for global ${global.slug}`
+    )
   }
 
   return doc

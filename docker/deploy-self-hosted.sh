@@ -72,10 +72,11 @@ mkdir -p "$release_dir"
 compose up -d mongo
 compose build app build
 compose run --rm build
-compose up -d app proxy
+compose up -d --force-recreate app proxy
 
 docker tag "$image_name" "$release_tag"
-printf '%s|%s|%s\n' "$(date -u +%Y%m%d-%H%M%S)" "$deployment_id" "$release_tag" >> "$history_file"
-tail -n 1 "$history_file" > "$current_file"
+history_line="$(printf '%s|%s|%s|mode=local-build\n' "$(date -u +%Y%m%d-%H%M%S)" "$deployment_id" "$release_tag")"
+printf '%s' "$history_line" >> "$history_file"
+printf '%s' "$history_line" > "$current_file"
 
 compose ps

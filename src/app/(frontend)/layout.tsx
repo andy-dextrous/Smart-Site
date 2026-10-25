@@ -6,10 +6,8 @@ import { Header } from "@/components/header"
 import parse from "html-react-parser"
 import Providers from "@/providers"
 import React from "react"
-import { AIProvider } from "@/admin/payload/components/providers/ai-provider"
 import { getSmartSiteConfig } from "@/admin/config"
 import { getI18nConfig } from "@/admin/config/features"
-import { WorkspaceGate } from "@/admin/components/workspace/workspace-gate"
 import { generateRootLayoutMetadata } from "./layout-metadata"
 
 import "./css/globals.css"
@@ -40,7 +38,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
         {gtmId && <link href="https://www.googletagmanager.com" rel="preconnect" />}
         {gaId && <link href="https://www.google-analytics.com" rel="preconnect" />}
-        <link rel="stylesheet" href="https://use.typekit.net/dhn4bxv.css" />
         {head && parse(head)}
       </head>
 
@@ -48,8 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
 
-        <AIProvider withContainer={false}>
-          <WorkspaceGate>
+
             <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
               <SmartSiteAdminBar settings={settings} />
               <Header />
@@ -68,8 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               )}
               {bodyEnd && parse(bodyEnd)}
             </Providers>
-          </WorkspaceGate>
-        </AIProvider>
+
       </body>
     </html>
   )

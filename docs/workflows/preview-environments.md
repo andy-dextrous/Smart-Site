@@ -1,34 +1,71 @@
 # Preview Environments
 
-The preserved preview-environment guidance from the source manuscript is reproduced below.
+Preview is optional in both hosting modes. Use it when:
 
-Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
+- a site is already live
+- the change is risky
+- stakeholders need to review a production-like version before promotion
 
-## 🧪 Preview Environments
+Read [docs/product-specs/hosting-modes.md](../product-specs/hosting-modes.md) first so you choose the right preview model.
 
-Preview is optional. Use it when a site is already live, the change is risky, or stakeholders need to review a production-like environment before you promote.
+## Shared preview rules
 
-### Self-hosted preview
+- preview should be separate from production
+- preview should never share the production database
+- preview should be safe to refresh, test, and discard
+- production should stay boring while preview absorbs review risk
 
-1. Enable preview in `smartsite-deployment.json`
-   - Set `environments.preview.enabled` to `true`
-   - Give it its own HTTPS hostname
-   - Leave `allowIndexing` as `false`
+## Hosted preview
 
-2. Deploy preview
-
-   ```bash
-   pnpm self-hosted:run -- preview
-   ```
+Hosted preview means a separate hosted environment.
 
 Recommended rules:
 
-- preview and production must never share the same Mongo volume
-- preview should always run with indexing disabled
-- preview should have its own hostname and HTTPS
-- preview may run on the same VPS as production only if ports, stack names, and backup schedules differ
+- use separate environment variables
+- use a separate preview hostname when needed
+- use a separate preview database or cluster
+- keep production credentials out of the preview lane unless explicitly required
 
-### Refreshing preview from production
+Typical hosted preview flow:
+
+1. create or reuse the hosted preview environment
+2. point it at preview env vars and preview Mongo
+3. deploy the branch or preview build
+4. verify admin, forms, media, and page rendering
+
+## Refreshing hosted preview from production
+
+Hosted refresh should still be deliberate:
+
+1. take an approved production export, dump, or backup from the managed database
+2. restore or import that data into the hosted preview database
+3. redeploy the hosted preview environment if the platform requires a rebuild
+
+Do not point hosted preview straight at the production database as a convenience shortcut.
+
+## Hosted rollback expectations
+
+Hosted rollback should use the hosting platform's release history or redeploy controls. Roll back the application release first, and use database restore only when there is an actual data problem.
+
+## Self-hosted preview
+
+Self-hosted preview means a separate self-hosted stack.
+
+Recommended rules:
+
+- enable preview in `smartsite-deployment.json`
+- give preview its own HTTPS hostname
+- keep `allowIndexing` disabled
+- use separate Mongo data from production
+- keep preview and production runtime state separate
+
+Deploy preview with:
+
+```bash
+pnpm self-hosted:run -- preview
+```
+
+## Refreshing self-hosted preview from production
 
 1. Take a fresh production backup:
 
@@ -42,15 +79,15 @@ Recommended rules:
    pnpm self-hosted:run -- restore preview .smartsite-self-hosted/backups/production/<archive>.archive.gz --yes
    ```
 
-3. Rebuild preview after the restore:
+3. Rebuild or redeploy preview:
 
    ```bash
    pnpm self-hosted:run -- preview
    ```
 
-### Rolling back a self-hosted release
+## Rolling back a self-hosted release
 
-If a promote produces a bad deploy:
+If a self-hosted promote produces a bad deploy:
 
 ```bash
 pnpm self-hosted:run -- history
@@ -63,23 +100,25 @@ If you need a specific earlier release:
 pnpm self-hosted:run -- rollback production <deployment-id>
 ```
 
-Use `--force` only when the downgrade or overwrite is intentional and already verified:
+Use `--force` only when the overwrite or downgrade is intentional and already verified:
 
 ```bash
 pnpm self-hosted:run -- restore production .smartsite-self-hosted/backups/manual/source.archive.gz --yes --force
 ```
 
-### Hosted preview
+## Temporary HTTPS
 
-The existing Atlas-based staging or preview model still works for hosted deployments. Keep a separate MongoDB database or cluster, a separate public hostname, and separate environment variables when you need a hosted review environment.
+Self-hosted preview should use HTTPS. For temporary proof environments, a hostname such as:
 
-### AI and agent workflow expectations
+```bash
+https://134-199-173-182.sslip.io
+```
+
+is acceptable until a purchased domain is ready.
+
+## Agent workflow expectations
 
 - local is the safest place for schema and section changes
-- preview is where you verify real preview flows, integrations, and deployment behaviour when local is not enough
-- production changes should be boring, repeatable, and backed by a fresh backup
-- AI agents should treat restores, backup retention changes, and production env changes as explicit operational actions, not casual side effects
-
----
-
-<a id="additional-resources"></a>
+- preview is where you verify production-like behavior when local is not enough
+- production changes should be backed by a fresh backup
+- restores, backup-retention changes, and production env changes are explicit operational actions, not casual side effects

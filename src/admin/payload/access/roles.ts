@@ -6,7 +6,7 @@ type RoleKey = "editor" | "admin" | "ai-agent" | "developer"
 const ROLE_PRIORITY: Record<RoleKey, number> = {
   editor: 1,
   admin: 2,
-  "ai-agent": 2,
+  "ai-agent": 0,
   developer: 3,
 }
 
@@ -23,11 +23,11 @@ function getRoleRank(role: unknown): number | null {
 }
 
 export function userHasMinimumRole(
-  user: User | null | undefined,
+  user: unknown,
   minimumRole: RoleKey
 ): boolean {
   const minimumRank = ROLE_PRIORITY[minimumRole]
-  const userRank = getRoleRank(user?.role)
+  const userRank = getRoleRank(user && typeof user === "object" && "role" in user ? user.role : undefined)
 
   if (userRank === null) {
     return false

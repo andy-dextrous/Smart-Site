@@ -1,274 +1,277 @@
+> First publication follows [first launch](first-launch.md). Code deployments preserve content. Use Node 24.22.1 and pnpm 10.34.8. Self-hosted Mongo must run as an authenticated replica set; see the current compose file and migration notes below.
+
 # Deployment
 
-This document is the canonical deployment workflow for both hosting modes.
+This is the canonical deployment workflow for SmartSite.
 
-Read [docs/product-specs/hosting-modes.md](../product-specs/hosting-modes.md) first so you use the right operating model.
+Read [docs/product-specs/hosting-modes.md](../product-specs/hosting-modes.md) first. Hosted and self-hosted are both first-class paths, but the deploy steps are different.
 
-For most deployment-mode questions you only need:
+## Choose one path first
 
-- [docs/product-specs/hosting-modes.md](../product-specs/hosting-modes.md)
-- [docs/workflows/deployment.md](deployment.md)
-- [docs/workflows/preview-environments.md](preview-environments.md) when preview is involved
+If the site is hosted, use the hosted procedure below.
 
-Do not read [docs/workflows/getting-started.md](getting-started.md) unless the task is a fresh install/bootstrap. Do not read [docs/PRODUCT.md](../PRODUCT.md) unless the task needs big-picture product framing.
+If the site is self-hosted, use the self-hosted procedure below.
 
-### Self-hosted Mongo Deployment
+Do not mix the two in a single operational runbook.
 
-This profile is intended for cloning, restoring, and handoff.
+## Hosted deployment
 
-1. **Prepare the source env**
-   - `pnpm self-hosted:run -- promote` materializes generated runtime env files from the source env path in `smartsite-deployment.json`.
-   - By default that source env path is `.env`.
-   - Make sure the source env file exists and contains the values you want to project into the generated self-hosted env output.
+Hosted deployment means:
 
-2. **Provision the host**
-   - Any normal Linux VPS with Docker Engine and Docker Compose is sufficient.
-   - DigitalOcean is the current reference host because it maps cleanly to this workflow.
+- a managed Node-compatible host
+- a managed MongoDB service
+- build and deploy handled by the hosting platform
 
-3. **Create the deployment manifest**
+### Typical hosted flow
+
+1. Connect the repository to the hosting platform.
+2. Configure production environment variables on that platform.
+3. Provision a managed MongoDB database.
+4. Configure the media provider.
+5. Trigger a production build on the platform.
+6. Verify the public site and admin after deploy.
+
+### Hosted first deploy
+
+1. Provision the managed Mongo database.
+2. Copy the required env vars from local `.env` into the hosting platform.
+3. Set the production public URL.
+4. Configure the media provider.
+5. Trigger the first production build.
+6. Seed or migrate content only when intentionally bootstrapping the environment.
+7. Verify the public site, admin, forms, and media.
+
+### Hosted ongoing production deploys
+
+The normal hosted release loop is:
+
+1. push code to Git
+2. let the hosting platform build and deploy
+3. verify the public site and admin
+4. leave the production database in place
+
+### Hosted data rules
+
+- the managed production Mongo database is the source of truth for that environment
+- deploys should not overwrite production data
+- local refresh from production should still be deliberate, not live sync
+- preview should use separate hosted env vars and separate Mongo data when the change risk justifies it
+
+### Hosted production checklist
+
+- environment variables configured on the hosting platform
+- managed Mongo reachable from the host
+- media provider configured and tested
+- public URL matches the real hostname
+- HTTPS enabled
+- admin login verified
+- preview route verified when used
+- backup and recovery expectations documented with the hosting provider or team
+
+## Self-hosted deployment
+
+Self-hosted deployment means:
+
+- Dockerized SmartSite app
+- Dockerized MongoDB
+- `smartsite-deployment.json` as the deployment manifest
+- a VPS as the runtime host
+- `pnpm self-hosted:run -- ...` as the operational command surface
+
+### Canonical self-hosted production model
+
+The preferred production model is:
+
+1. local development happens against local Mongo
+2. GitHub Actions builds the release off the VPS
+3. the release is transferred to the VPS
+4. the VPS promotes the finished release
+5. the VPS Mongo database stays in place
+
+In other words:
+
+- GitHub Actions is the build machine
+- the VPS is the runtime machine
+- the production database is persistent state, not build output
+
+This also means the local developer workflow stays simple:
+
+- run the app locally in the usual way
+- keep one local Mongo database
+- use Docker on the VPS for production only
+
+### Self-hosted first deploy
+
+1. Create the deployment manifest:
 
    ```bash
    pnpm self-hosted:init
    ```
 
-4. **Configure the production URL**
-   - Update `smartsite-deployment.json`.
-   - Set `environments.production.url` to the real hostname.
-   - Enable preview only if you actually need it.
+2. Update `smartsite-deployment.json`:
+   - set the production URL
+   - enable preview only if you need it
+   - keep preview on its own URL and data
 
-5. **Copy the project to the host**
-   - Sync the project to the server.
-   - Keep `smartsite-deployment.json` in the app root.
-
-6. **First boot**
+3. Generate self-hosted env artifacts:
 
    ```bash
-   pnpm self-hosted:run -- promote
+   pnpm self-hosted:prepare
    ```
 
-7. **Restore real content**
-   - Dump the source database locally:
+4. Provision the VPS:
+   - install Docker and Docker Compose
+   - copy the project to the host
+   - keep `smartsite-deployment.json` at the app root
 
-     ```bash
-     pnpm self-hosted:dump -- .env .smartsite-self-hosted/backups/manual/source.archive.gz
-     ```
+5. Bootstrap the runtime stack and database:
+   - start the self-hosted lane
+   - restore approved content when needed
+   - verify health before calling the environment production-ready
 
-   - Restore it into the target stack:
+6. Configure the GitHub Actions deployment workflow for this site:
+   - start from `.github/workflows/self-hosted-prebuilt.yml`
+   - set `SELF_HOSTED_SSH_KEY`, `SELF_HOSTED_HOST`, `SELF_HOSTED_USER`, and `SELF_HOSTED_PATH`
+   - let the workflow fetch the current runtime env from the VPS
+   - let the workflow build from a snapshot of the current self-hosted production database
+   - use the `public_url` workflow input only when the runtime env URL needs an intentional override
 
-     ```bash
-     pnpm self-hosted:run -- restore production .smartsite-self-hosted/backups/manual/source.archive.gz --yes
-     pnpm self-hosted:run -- promote
-     ```
+7. Use GitHub Actions as the normal production release path.
 
-8. **Verify runtime health**
+After the first production bootstrap, return to the ordinary local development workflow. Do not keep a local Docker runtime around as the default way to work on the site.
 
-   ```bash
-   pnpm self-hosted:run -- status
-   pnpm self-hosted:run -- probe
-   ```
+### Self-hosted ongoing production deploys
 
-9. **Install automated backups**
+The normal ongoing release loop is:
 
-   ```bash
-   pnpm self-hosted:run -- install-backup-cron
-   ```
+1. push code to GitHub
+2. let GitHub Actions build the release
+3. have GitHub Actions ship the built image to the VPS
+4. promote the release on the VPS
+5. verify the site, admin, and release history
 
-10. **Inspect or roll back releases**
+The production VPS should not need to run `next build` during ordinary deploys.
 
-   ```bash
-   pnpm self-hosted:run -- history
-   pnpm self-hosted:run -- rollback
-   ```
+### Self-hosted data rules
 
-### Temporary HTTPS without a purchased domain
+- production Mongo should be the source of truth for that environment
+- deploys should not overwrite production data
+- production backups should be routine
+- restores should be explicit and guarded
+- local refresh from production should be a deliberate backup-and-restore action
 
-Self-hosted preview mode requires HTTPS. For preview or proof-of-concept deployments, point the public URL at a temporary hostname such as:
+### Self-hosted maintenance after launch
+
+Six months after launch, the safe loop should be:
+
+1. pull fresh production data into local
+2. build and test the feature locally
+3. deploy the code release
+4. run a targeted migration only if existing production data needs to change shape
+
+Use:
+
+```bash
+pnpm self-hosted:data-pull production local --yes
+pnpm self-hosted:migrate production scripts/migrations/example.ts --yes
+```
+
+`data-pull` and `migrate` use the same remote connection settings as the starter workflow template:
+
+- `SELF_HOSTED_HOST`
+- `SELF_HOSTED_USER`
+- `SELF_HOSTED_PATH`
+
+Do not treat whole-database restore as the normal way to ship feature work.
+
+This is the intended long-term maintenance loop:
+
+1. local development stays local
+2. `data-pull` brings production content down when needed
+3. deploy moves code to production
+4. `migrate` moves production data shape forward when needed
+
+### Self-hosted operational commands
+
+```bash
+pnpm self-hosted:data-pull production local --yes
+pnpm self-hosted:run -- backup
+pnpm self-hosted:run -- guard
+pnpm self-hosted:run -- history
+pnpm self-hosted:migrate production scripts/migrations/example.ts --yes
+pnpm self-hosted:run -- promote-prebuilt <archive-path> [release-image] [deployment-id]
+pnpm self-hosted:run -- probe
+pnpm self-hosted:run -- rollback
+pnpm self-hosted:run -- status
+```
+
+### Self-hosted fallback note
+
+Older self-hosted flows may still build on the host. Treat that as a legacy or emergency fallback, not the preferred production model when off-box build infrastructure is available.
+
+Likewise, old local self-hosted Docker habits should be treated as legacy or diagnostic-only behavior, not as the normal SmartSite development loop.
+
+## Temporary HTTPS without a purchased domain
+
+Self-hosted preview and some proof environments still need HTTPS. Temporary hostnames such as:
 
 ```bash
 https://134-199-173-182.sslip.io
 ```
+
+are acceptable for proof or preview use until a real domain is ready.
 
 Set both:
 
 - `NEXT_PUBLIC_URL`
 - `CADDY_SITE_ADDRESS`
 
-to the same hostname, then redeploy.
+to the same hostname before rebuilding.
 
-### Provider CLI bootstrap
+## Provider bootstrap examples
 
-For the self-hosted Mongo profile, browser setup should happen once, then host-native CLI should own the repeatable provisioning.
+### DigitalOcean
 
-#### Current recommendation
+```bash
+brew install doctl
+doctl auth init
 
-- **Primary first deploy**: DigitalOcean, because the operator workflow has already been proven there and the docs below map directly to that host.
-- **Cheapest recommended path**: Hetzner, if cost matters more than provider familiarity.
-- **Edge layer later**: Cloudflare in front of either origin once you are ready to introduce a real domain.
+doctl compute droplet create smartsite-prod \
+  --region syd1 \
+  --image ubuntu-24-04-x64 \
+  --size s-1vcpu-2gb \
+  --enable-monitoring \
+  --enable-backups \
+  --ssh-keys <ssh-key-id>
+```
 
-#### DigitalOcean
+### Hetzner
 
-1. Authenticate `doctl`
+```bash
+brew install hcloud
+hcloud context create smartsite
 
-   ```bash
-   brew install doctl
-   doctl auth init
-   ```
+hcloud server create \
+  --name smartsite-prod \
+  --type cpx22 \
+  --image ubuntu-24.04 \
+  --location hel1
+```
 
-2. Create an initial droplet
+## Database safety
 
-   ```bash
-   doctl compute droplet create smartsite-prod \
-     --region syd1 \
-     --image ubuntu-24-04-x64 \
-     --size s-1vcpu-2gb \
-     --enable-monitoring \
-     --enable-backups \
-     --ssh-keys <ssh-key-id>
-   ```
 
-3. Add a firewall for web and SSH traffic only
 
-   ```bash
-   doctl compute firewall create \
-     --name smartsite-prod \
-     --inbound-rules "protocol:tcp,ports:22,address:0.0.0.0/0,address:::/0 protocol:tcp,ports:80,address:0.0.0.0/0,address:::/0 protocol:tcp,ports:443,address:0.0.0.0/0,address:::/0" \
-     --outbound-rules "protocol:tcp,ports:1-65535,address:0.0.0.0/0,address:::/0 protocol:udp,ports:1-65535,address:0.0.0.0/0,address:::/0"
-   ```
 
-4. Install Docker on the host, sync the project, then run:
+- for schema evolution or backfills, prefer targeted migration scripts under `scripts/migrations/`
 
-   ```bash
-   pnpm self-hosted:run -- promote
-   ```
 
-#### Hetzner
+## Authenticated self-hosted replica set
 
-1. Authenticate `hcloud`
+The current compose topology keeps Mongo private on its Docker network, persists data and its replica key separately, and waits for authenticated initialization and a writable primary before build/app startup. `MONGO_REPLICA_KEY` is generated once in the private destination environment and retained. Do not regenerate it during a restart. The URI must include `replicaSet=smartsite-rs`; the advertised member is `mongo:27017` inside this network. External operator tools need an explicit secure tunnel/direct connection, not public Mongo ports.
 
-   ```bash
-   brew install hcloud
-   hcloud context create smartsite
-   ```
+For an existing standalone volume: stop writes, save and test a database/user/media backup, preserve root/app credentials, generate one replica key in its private environment, and start the upgraded mongo plus mongo-init services using the SAME compose project and data volume. Verify replica primary and a real transaction before restarting the app. Abort on identity, credential or replica-name mismatch. Never use `down -v` in this procedure. Rollback preserves the original backup and source/environment; do not downgrade Mongo data files in place.
 
-2. Create an initial server
+Backup/archive/restore scripts remain explicit operator tools. Test restore into a distinct empty database/stack first. A successful archive command alone is not a restore test. The prebuilt CI build database is disposable and independent of the destination; it must never run destination seeding/adoption.
 
-   ```bash
-   hcloud server create \
-     --name smartsite-prod \
-     --type cpx22 \
-     --image ubuntu-24.04 \
-     --location hel1
-   ```
-
-3. Harden the host, install Docker, sync the project, then run:
-
-   ```bash
-   pnpm self-hosted:run -- promote
-   ```
-
-#### Cloudflare later
-
-- Add the real domain or subdomain in Cloudflare DNS.
-- Point it at the origin droplet.
-- Keep the record proxied.
-- Update `smartsite-deployment.json`, then run:
-
-  ```bash
-  pnpm self-hosted:run -- promote
-  ```
-
-### Hosted Deployment
-
-Smart Site still supports classic hosted delivery when that fits the project better.
-
-1. **Connect repository to the host**
-   - Import the project to Vercel or another Node-compatible host.
-
-2. **Environment variables**
-   - Copy the required values from `.env`.
-   - Update `NEXT_PUBLIC_URL` to the real public hostname.
-
-3. **Database & storage**
-   - Provision MongoDB Atlas or another managed MongoDB service.
-   - Configure Cloudinary, S3-compatible storage, or Vercel Blob.
-
-4. **Deploy & validate**
-   - Trigger a production build and validate admin, preview, forms, and media uploads.
-
-### Database safety
-
-- Do not use seed flows as a routine deployment step.
-- Seed only when intentionally bootstrapping a brand-new local or hosted database and only after confirming the overwrite is wanted.
-- For existing preview or production environments, move content with backups, dumps, restores, or admin exports instead of reseeding.
-
-### AI Backend Deployment
-
-AI is optional and off by default. Only follow this section when the site has explicitly opted into AI.
-
-Current flow:
-
-1. set `features.ai.enabled = true` in `src/smartsite.config.ts`
-2. run `pnpm ai:enable`
-3. provision AI credentials explicitly with `npx smartsite ai rotate --project .`
-4. open the AI access gate in admin
-5. use the built-in “Apply for AI Access” action
-6. wait for the backend status to move from pending to active
-
-Wild Creative still owns the managed AI platform, approval backend, and support, but the request flow now exists inside the product.
-
-### Other Platforms
-
-Smart Site can deploy to any Node.js hosting platform:
-
-- **Netlify**: Use `@netlify/plugin-nextjs`
-- **Railway**: Direct deployment with managed services
-- **DigitalOcean**: Droplet for self-hosted Mongo, or App Platform for hosted Node
-- **AWS**: EC2 for self-hosted Mongo, or Amplify plus managed Mongo-compatible storage/services
-
-### Production Checklist
-
-#### Core runtime
-
-- [ ] Environment variables configured for the target environment
-- [ ] Database provisioned and connected
-- [ ] File storage configured
-- [ ] Email service configured
-- [ ] Public URL and preview URL match the real hostname
-- [ ] HTTPS enabled
-- [ ] Admin login verified
-- [ ] Preview route verified over HTTPS
-- [ ] Content seeded or migrated intentionally
-
-#### Self-hosted Mongo
-
-- [ ] `smartsite-deployment.json` configured for the target environment
-- [ ] `pnpm self-hosted:run -- promote` completes cleanly
-- [ ] `pnpm self-hosted:run -- status` shows healthy services
-- [ ] `pnpm self-hosted:run -- probe` passes
-- [ ] Nightly backup cron installed
-- [ ] Release history is recording
-- [ ] A restore has been tested against a preview or non-production environment
-- [ ] Rollback has been tested once on a preview or non-production environment
-- [ ] Mongo is not exposed publicly
-- [ ] Rollback plan documented for the team
-
-#### Hosted
-
-- [ ] Build environment variables mirrored into the hosting platform
-- [ ] MongoDB Atlas or managed Mongo reachable from the host
-- [ ] Media provider configured and tested
-
-#### AI Backend (Managed by Wild Creative)
-
-- [ ] AI is explicitly enabled in `src/smartsite.config.ts`
-- [ ] Subscription confirmed with Wild Creative
-- [ ] AI workspace approved by Wild Creative (contact andrew@wildcreative.com.au)
-- [ ] `AI_AGENT_API_KEY` provisioned through the explicit AI opt-in flow
-- [ ] Connection test completed (admin chat assistant responding)
-- [ ] Support contact: andrew@wildcreative.com.au documented for the team
-
-> **🚀 Production data:** Prefer restoring or migrating real content into preview or production. Reserve seeding for intentional bootstrap flows only, and require explicit confirmation before any database-writing action that can overwrite data.
-
----
-
-<a id="staging-environments"></a>
+The disposable `pnpm test:docker-upgrade` rehearsal proves this conversion with a populated volume, a committed transaction, restart and restoration of the pre-upgrade archive into a separate volume. It does not authorize applying the procedure to a live deployment.

@@ -1,0 +1,13 @@
+# Content MCP contract
+
+Payload 3.92.0's official `@payloadcms/plugin-mcp` owns transport and API-key authentication. SmartSite registers four tools on that endpoint: `smartsiteRead`, `smartsiteSave`, `smartsiteUploadMedia`, `smartsiteOperationStatus`. It does not register native unchecked CRUD or an additional MCP server. See [Payload documentation](https://payloadcms.com/docs/plugins/mcp) and the installed package's types before changing this integration.
+
+Each key belongs to a CMS user. Tool grants default off; provisioned local keys explicitly allow the four content tools. The user must also have an editor-or-higher role and satisfy Payload collection/field access. Keys are intended only for `/api/mcp`; ordinary API-key authentication is blocked for the MCP key collection. Accounts, keys, forms submissions, learner data, identity and operation records are not content targets. Explicit custom target opt-in lives in `mcp.collections` / `mcp.globals` in site config, and auth/system targets remain excluded.
+
+`get` returns the latest draft and a revision. `schema` accepts field and block selectors for progressive discovery. `find` caps results at 25. All response paths project schema-defined fields and reduce relationships to IDs, including hooks that populate private objects after Payload access filtering. A receipt rechecks current record access before returning its result. Rich-text extensions must preserve their declared schema without serializing populated private data.
+
+Updates require the current revision. The content change and operation receipt commit in one database transaction; two writers cannot both update the same revision. Do not automatically reapply a stale patch. Operation IDs are UUIDs scoped to the key and user, and bind to the exact input. After a lost response, query status and retry only identical input. Receipts are retained until deliberately pruned; pruning removes retry protection for those IDs, so never reuse old IDs.
+
+Image uploads accept PNG/JPEG/WebP up to 2 MiB and 40 million decoded pixels. A unique source-byte digest reservation precedes storage writes; conversion may change the stored filename. Committed duplicates reuse the existing ID without replacing alt text. If storage or a transaction fails, the reservation stays pending: retries stop rather than create another object. See repair instructions for inspection and cleanup. Storage and Mongo do not share a transaction.
+
+Draft pages/posts require explicit draft/publish/unpublish mode. Non-draft globals and collections require live mode. Hooks/cache invalidation run with the same request, with final refresh after commit. A refresh warning does not undo the content write. Verify the public route separately.

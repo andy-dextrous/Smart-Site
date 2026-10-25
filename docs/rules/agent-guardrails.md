@@ -1,33 +1,11 @@
-# Agent Guardrails
+# Working rules
 
-## Always assume
+This is a standalone project. Use its own source, dependencies, docs and skills. Site customization belongs in `src/smartsite.config.ts`, `src/extensions/` and frontend components; reusable core changes belong in `src/admin/`.
 
-- The current hosting mode must be identified before deploy, backup, restore, preview, or recovery actions.
-- The protected admin layer is not a casual customization surface for site-level changes.
-- Seed, restore, and other database-writing actions require explicit user approval every time.
+A request to prepare a fresh local site authorizes its empty local database, essential account/settings and preview. Use the resumable helpers, preserve credentials and existing data, and do not ask again for each routine step. Standalone agents may start the project’s own local runtime.
 
-## Never do these casually
+Identify the target before every data operation. Production publication, destructive reset/restore, purchases and external service changes require the actual request to cover them. Preserve earlier authorization; ask only for a genuinely missing consequential decision. Never point routine local work at production or copy production credentials into client connection files.
 
-- do not overwrite `.env`
-- do not rerun bootstrap or `smartsite init` on an already configured project without explicit user approval
-- do not run seed commands without explicit user approval
-- do not seed preview or production
-- do not rewrite, restore, or overwrite a non-local database without explicit user approval
-- do not restore production without a fresh backup
-- do not improvise around the self-hosted command surface
-- do not start active task retrieval from `README.md`, `docs/references/`, or `docs/references/legacy/`
+Use MCP for ordinary content changes with normal Payload access, revisions and receipts. Do not use raw database writes as a shortcut around rejected content operations. Preserve unrelated rows and custom source. Restore/reset is never a generic troubleshooting step.
 
-## Seeding rule
-
-- Treat seeding as a one-time bootstrap action for a fresh local database unless the user explicitly says otherwise.
-- Always warn that seeding can overwrite or replace existing content before proposing or running it.
-- If the database already contains meaningful content, stop and get confirmation before any seed, restore, or database reset action.
-- SmartSite local seed flows verify that the running site matches the current project before they write data.
-- Erasing existing data during seed is a separate explicit choice and requires destructive confirmation; additive seeding should remain possible when the user does not want a wipe.
-- SmartSite local seed flows verify that the running site matches the current project before they seed.
-
-## Bootstrap rule
-
-- Treat `.env` plus a working local install as evidence that bootstrap has already been completed.
-- Prefer manual edits to the existing configuration over rerunning bootstrap.
-- Use `smartsite-deployment.json` to decide whether the site should be operated as self-hosted.
+Respect client trust prompts. Keep secrets out of logs, transcripts and Git. Verify changed UI in the real app using an external browser, including relevant responsive states. Report unavailable checks honestly. Do not install documentation-harness checkers or automatic docs CI.

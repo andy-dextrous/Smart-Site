@@ -20,5 +20,3 @@ export function isAdminOrSelf(args: AccessArgs<User>): boolean {
 
   return false
 }
-
-export const isAdminOrAiAgent = hasMinimumRole("admin")

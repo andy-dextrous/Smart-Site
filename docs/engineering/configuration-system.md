@@ -2,7 +2,7 @@
 
 The preserved configuration, extension, and override guidance from the source manuscript is reproduced below.
 
-For common on/off behavior such as disabling AI, switching search mode, or turning off global GSAP animations, start with [docs/workflows/feature-toggles.md](../workflows/feature-toggles.md) before reading this broader engineering doc.
+For common on/off behavior such as disabling MCP, switching search mode, or turning off global GSAP animations, start with [docs/workflows/feature-toggles.md](../workflows/feature-toggles.md) before reading this broader engineering doc.
 
 
 Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
@@ -12,7 +12,8 @@ Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 - `src/smartsite.config.ts` is the primary customization surface.
 - Use `src/extensions/` for new slugs and new first-class extensions, not for built-in SmartSite collections that already exist.
 - Keep `src/admin/` protected. Shared core changes belong in SmartSite itself, not as ad hoc site-level edits.
-- For feature toggles such as AI, search, analytics, GSAP global animations, and i18n, start with `smartsite.config.ts` before considering any deeper change.
+- For feature toggles such as MCP, search, analytics, GSAP global animations, and i18n, start with `smartsite.config.ts` before considering any deeper change.
+- Image quality overrides must also be allowed by `images.qualities` in `next.config.ts`. The starter permits its 75/85/90 presets. Same-site Payload media uses local paths with version query strings; external storage hosts need an explicit `images.remotePatterns` entry.
 
 ## ⚙️ Configuration System
 
@@ -35,10 +36,6 @@ const config: UserConfig = {
     services: { enabled: false }, // example: hide services in this project
   },
   features: {
-    ai: {
-      enabled: false,
-      endpoint: "https://smart-site-ai-core.vercel.app", // managed service (override only if Wild Creative provides a custom URL)
-    },
     analytics: true,
     darkMode: false,
     i18n: false,
@@ -65,7 +62,6 @@ const config: UserConfig = {
 export default config
 ```
 
-`features.ai.endpoint` defaults to the hosted Smart Site AI service (`https://smart-site-ai-core.vercel.app`). Only change this value if Wild Creative supplies a different managed endpoint.
 
 ### Default collections and extensions
 
@@ -115,8 +111,6 @@ Each configurable collection (any slug inside `smartsite.config.ts → collectio
 
 | Feature       | Options   | Default          | Purpose                                                                         |
 | ------------- | --------- | ---------------- | ------------------------------------------------------------------------------- |
-| `ai.enabled`  | `boolean` | `false`          | Enable/disable entire AI layer including chat panel, hotkeys, and Mastra client |
-| `ai.endpoint` | `string`  | `https://smart-site-ai-core.vercel.app` | Managed AI backend URL (Wild Creative will advise if this needs to change)   |
 | `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
 | `i18n`        | `boolean` | `false`          | Internationalization                                                            |
 | `analytics`   | `boolean` | `true`           | Analytics tracking                                                              |
@@ -140,217 +134,7 @@ Each configurable collection (any slug inside `smartsite.config.ts → collectio
 | `textPlugin`        | `boolean`  | `false` | Registers TextPlugin for manual hooks                                    |
 | `globalAnimations`  | `boolean`  | `false`  | Enables the global data-attribute animation provider                    |
 
-**AI Configuration Details:**
 
-When `ai.enabled` is set to `false`:
-
-- No connection to the AI backend is attempted
-- Chat access is disabled and the AI workspace toggle no longer appears
-- Keyboard shortcuts such as `Cmd+L` are disabled
-- AI routes return disabled responses instead of forwarding to the managed backend
-- Zero performance impact from AI features
-
-```typescript
-// Disable AI completely
-features: {
-  ai: {
-    enabled: false  // Bypasses entire AI layer
-  }
-}
-
-// Enable AI with custom backend
-features: {
-  ai: {
-    enabled: true,
-    endpoint: "https://your-ai-backend.vercel.app"
-  }
-}
-```
-
-#### GSAP Plugins
-
-| Plugin           | Default | Purpose                 |
-| ---------------- | ------- | ----------------------- |
-| `scrollTrigger`  | `true`  | Scroll-based animations |
-| `scrollSmoother` | `true`  | Smooth scrolling        |
-| `flip`           | `false` | State transitions       |
-| `draggable`      | `false` | Drag interactions       |
-| `morphSVG`       | `false` | SVG morphing            |
-| `splitText`      | `false` | Text animations         |
-
-#### Admin Configuration
-
-Customize the admin panel appearance and metadata:
-
-```typescript
-admin: {
-  // Visual theme
-  theme: {
-    colors: {
-      accent: "#4f37fb",        // Primary brand color
-      error: "#dc2626",          // Error states
-      success: "#16a34a",        // Success states
-      grayscale: { /* 0-1000 scale */ }
-    },
-    layout: {
-      sidebarWidth: "240px",
-      headerHeight: "60px",
-      borderRadius: "0.375rem",
-    },
-    typography: {
-      fontFamily: "Inter, system-ui, sans-serif",
-      fontSize: "14px",
-    },
-  },
-
-  // Page metadata
-  meta: {
-    title: "Admin | Smart Site",        // Browser title
-    description: "Admin panel",         // Meta description
-    favicon: "/favicon.png",            // Optional favicon path
-  },
-}
-```
-
-#### Image Optimization
-
-Control image quality, sizes, and responsive behavior:
-
-```typescript
-images: {
-  // Quality settings by context
-  quality: {
-    default: 85,         // Default quality (1-100)
-    thumbnail: 75,       // Lower for thumbnails
-    hero: 90,           // Higher for hero images
-  },
-
-  // Image size variations generated by Payload
-  sizes: [
-    { name: "thumbnail", width: 300 },
-    { name: "square", width: 500, height: 500 },
-    { name: "small", width: 600 },
-    { name: "medium", width: 900 },
-    { name: "large", width: 1400 },
-    { name: "xlarge", width: 1920 },
-    { name: "og", width: 1200, height: 630, crop: "center" },
-  ],
-
-  // Responsive breakpoints for srcSet calculation
-  breakpoints: {
-    "3xl": 1920,
-    "2xl": 1536,
-    "xl": 1280,
-    "lg": 1024,
-    "md": 768,
-    "sm": 640,
-  },
-}
-```
-
-**Override at Component Level:**
-
-```tsx
-// Use default quality (85)
-<Media resource={image} alt="Product" />
-
-// Override quality for this image
-<Media resource={image} alt="Hero" quality={95} />
-
-// Override breakpoints
-<Media resource={image} breakpoints={{ mobile: 480, tablet: 768 }} />
-```
-
-#### Breadcrumb Configuration
-
-Control breadcrumb display, labels, and behavior:
-
-```typescript
-breadcrumbs: {
-  enabled: true,                  // Enable/disable globally
-  homeLabel: "Home",              // Customize home link text
-  separator: "slash",             // Options: "slash", "chevron", "arrow", "dot"
-  maxDepth: 0,                    // Limit depth (0 = unlimited)
-  showCurrent: true,              // Show current page in trail
-  className: "text-sm text-white/70", // Default styling
-}
-```
-
-**Example Configurations:**
-
-```typescript
-// Simple customization
-breadcrumbs: {
-  homeLabel: "Start",
-  separator: "chevron",
-}
-
-// Limited depth for deep hierarchies
-breadcrumbs: {
-  maxDepth: 3,                   // Show: Home > Parent > Current
-  showCurrent: false,            // Hide current page
-}
-
-// Localized breadcrumbs
-breadcrumbs: {
-  homeLabel: "Inicio",           // Spanish home label
-  separator: "arrow",
-}
-```
-
-**Component Overrides:**
-
-```tsx
-// Use default configuration
-<Breadcrumbs breadcrumbs={document.breadcrumbs} />
-
-// Override styles (replaces config className)
-<Breadcrumbs
-  breadcrumbs={document.breadcrumbs}
-  className="text-lg text-gray-600"
-/>
-
-// Hide home link for specific instance
-<Breadcrumbs
-  breadcrumbs={document.breadcrumbs}
-  showHome={false}
-/>
-```
-
-### Media Storage Providers
-
-Configure file storage based on your infrastructure:
-
-```typescript
-// Local storage (development)
-media: {
-  enabled: true,
-  provider: "local",
-}
-
-// Vercel Blob (production)
-media: {
-  enabled: true,
-  provider: "vercel-blob",
-  config: {
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-  },
-}
-
-// AWS S3 (enterprise)
-media: {
-  enabled: true,
-  provider: "s3",
-  config: {
-    bucket: "my-bucket",
-    region: "us-east-1",
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-}
-```
-
-<a id="extensions--overrides"></a>
 ## 🧩 Extensions & Overrides
 
 ### Extensions (registering new content)

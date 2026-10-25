@@ -6,7 +6,7 @@ import "./index.scss"
 import Image from "next/image"
 
 export const Avatar: FC<ServerProps> = props => {
-  const { user } = props
+  const user = props.user && "username" in props.user ? props.user : null
 
   const avatar = user?.avatar as any
 

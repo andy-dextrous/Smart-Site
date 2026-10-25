@@ -58,8 +58,6 @@
   ],
   "exclude": [
     "node_modules",
-    "tests",
-    "src/admin/payload/endpoints/seed/**/*",
-    "src/admin/payload/endpoints/seed"
+    "tests"
   ]
 }

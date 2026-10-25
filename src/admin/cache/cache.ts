@@ -53,6 +53,13 @@ export interface PaginatedResult<T = any> {
   page: number
 }
 
+type URIIndexLookupDoc = {
+  documentId?: string
+  sourceCollection?: string
+  templateId?: string | null
+  uri?: string
+}
+
 /*************************************************************************/
 /*  CACHE KEY GENERATION SYSTEM
 /*************************************************************************/
@@ -309,12 +316,9 @@ export const cache = {
         /**
          * Query 2 & 3: Run document and template queries in parallel
          */
-        const documentPromise = payload.findByID({
-          collection: indexDoc.sourceCollection as any,
-          id: indexDoc.documentId,
+        const documentPromise = safeFindIndexedDocument(payload, indexDoc, {
           draft,
           depth: 5,
-          overrideAccess: true,
         })
 
         /**
@@ -345,10 +349,12 @@ export const cache = {
          * If document doesn't have sections and we have a template, apply template sections
          */
         if (
-          (!document.sections || document.sections.length === 0) &&
+          (!("sections" in document) ||
+            !document.sections ||
+            document.sections.length === 0) &&
           template?.sections
         ) {
-          document.sections = template.sections
+          Object.assign(document, { sections: template.sections })
         }
 
         return {
@@ -621,18 +627,33 @@ export const cache = {
             limit: PAGE_SIZE,
             page,
             depth: 0,
-            select: { uri: true },
+            select: {
+              documentId: true,
+              sourceCollection: true,
+              uri: true,
+            },
           })
 
           if (result.docs.length === 0) {
             break
           }
 
-          result.docs.forEach((doc: any) => {
-            if (doc.uri) {
-              collectedURIs.push(doc.uri)
-            }
-          })
+          const pageURIs = await Promise.all(
+            result.docs.map(async (doc: URIIndexLookupDoc) => {
+              if (!doc.uri) {
+                return null
+              }
+
+              const document = await safeFindIndexedDocument(payload, doc, {
+                draft,
+                depth: 0,
+              })
+
+              return document ? doc.uri : null
+            })
+          )
+
+          collectedURIs.push(...pageURIs.filter((uri): uri is string => Boolean(uri)))
 
           if (!result.hasNextPage) {
             break
@@ -717,4 +738,42 @@ export const cache = {
       { tags }
     )()
   },
+}
+
+async function safeFindIndexedDocument(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  indexDoc: URIIndexLookupDoc,
+  options: {
+    draft: boolean
+    depth: number
+  }
+) {
+  if (!indexDoc.sourceCollection || !indexDoc.documentId) {
+    return null
+  }
+
+  try {
+    const document = await payload.findByID({
+      collection: indexDoc.sourceCollection as Collection,
+      id: indexDoc.documentId,
+      draft: options.draft,
+      depth: options.depth,
+      overrideAccess: true,
+    })
+    if (!options.draft && "_status" in document && document._status !== "published")
+      return null
+    return document
+  } catch (error) {
+    payload.logger.warn(
+      {
+        error,
+        collection: indexDoc.sourceCollection as Collection,
+        documentId: indexDoc.documentId,
+        uri: indexDoc.uri,
+      },
+      "Skipping stale uri-index entry with no backing document"
+    )
+
+    return null
+  }
 }

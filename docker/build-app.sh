@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+mkdir -p /app/.next
 find /app/.next -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 pnpm build
 

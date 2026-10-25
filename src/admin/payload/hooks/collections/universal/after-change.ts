@@ -2,7 +2,7 @@ import { revalidateDocument } from "@/admin/cache/revalidation"
 import { updateURI, getTemplateIdForCollection } from "@/admin/routing/index-manager"
 import { isFrontendCollection } from "@/admin/config/frontend"
 import { shouldPreventHooks } from "@/admin/utilities/prevent-hooks"
-import type { CollectionAfterChangeHook } from "payload"
+import type { CollectionAfterChangeHook, PayloadRequest } from "payload"
 
 /*************************************************************************/
 /*  UNIVERSAL AFTER CHANGE HOOK
@@ -43,7 +43,14 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
     return doc
   }
 
-  const uriIndexUpdated = await updateURIIndex(doc, previousDoc, collection, payload, context)
+  const uriIndexUpdated = await updateURIIndex(
+    doc,
+    previousDoc,
+    collection,
+    payload,
+    context,
+    req
+  )
 
   /**
    * Only revalidate when the published version actually changes
@@ -51,8 +58,9 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
    */
   const isPublishing = doc._status === "published" && previousDoc?._status === "draft"
   const isUnpublishing = doc._status === "draft" && previousDoc?._status === "published"
-  const isPublishedUpdate = doc._status === "published" && previousDoc?._status === "published"
-  const isNewPublish = !previousDoc && doc._status === "published"
+  const isPublishedUpdate =
+    doc._status === "published" && previousDoc?._status === "published"
+  const isNewPublish = !previousDoc?.id && doc._status === "published"
 
   const shouldRevalidate =
     !context.disableRevalidate &&
@@ -68,7 +76,10 @@ export const afterUniversalChange: CollectionAfterChangeHook = async ({
         logger: payload.logger,
       })
     } catch (error) {
-      payload.logger.debug({ error, collection: collection.slug }, `Smart revalidation failed for ${collection.slug}`)
+      payload.logger.debug(
+        { error, collection: collection.slug },
+        `Smart revalidation failed for ${collection.slug}`
+      )
     }
   }
 
@@ -125,7 +136,8 @@ async function updateURIIndex(
   previousDoc: any,
   collection: any,
   payload: any,
-  context: any
+  context: any,
+  req: PayloadRequest
 ): Promise<boolean> {
   if (!doc.uri) return false
 
@@ -135,14 +147,15 @@ async function updateURIIndex(
    */
   const isPublishing = doc._status === "published" && previousDoc?._status === "draft"
   const isUnpublishing = doc._status === "draft" && previousDoc?._status === "published"
-  const isPublishedUpdate = doc._status === "published" && previousDoc?._status === "published"
-  const isNewPublish = !previousDoc && doc._status === "published"
+  const isPublishedUpdate =
+    doc._status === "published" && previousDoc?._status === "published"
+  const isNewPublish = !previousDoc?.id && doc._status === "published"
 
   if (!isPublishing && !isUnpublishing && !isPublishedUpdate && !isNewPublish) {
     return false
   }
 
-  const templateId = await getTemplateIdForCollection(collection.slug, payload)
+  const templateId = await getTemplateIdForCollection(collection.slug, payload, req)
 
   try {
     const previouslyPublished = previousDoc?._status === "published"
@@ -154,13 +167,14 @@ async function updateURIIndex(
 
     const slugChanged = Boolean(
       doc?.slug &&
-        previousDoc?.slug &&
-        typeof doc.slug === "string" &&
-        typeof previousDoc.slug === "string" &&
-        doc.slug !== previousDoc.slug
+      previousDoc?.slug &&
+      typeof doc.slug === "string" &&
+      typeof previousDoc.slug === "string" &&
+      doc.slug !== previousDoc.slug
     )
 
     await updateURI({
+      req,
       uri: doc.uri,
       collection: collection.slug,
       documentId: doc.id,
@@ -184,6 +198,7 @@ async function updateURIIndex(
       `URI index update failed for ${collection.slug}/${doc.id}:`,
       error
     )
+    if (req.transactionID) throw error
     return false
   }
 }

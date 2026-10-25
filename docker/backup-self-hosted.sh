@@ -48,6 +48,11 @@ write_metadata() {
   public_url="$4"
   deployment_id="$5"
 
+  if ! command -v node >/dev/null 2>&1; then
+    echo "Skipping backup metadata write because node is not installed on the host."
+    return
+  fi
+
   (
     cd "$project_dir"
     node ./scripts/write-archive-metadata.mjs \
@@ -124,8 +129,7 @@ archive_path="$backup_root/${timestamp}-${runtime_env}-${database_name}.archive.
 
 compose exec -T mongo sh -lc '
   mongodump \
-    --uri="mongodb://$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@127.0.0.1:27017/admin?authSource=admin" \
-    --db="$MONGO_INITDB_DATABASE" \
+    --uri="mongodb://$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@127.0.0.1:27017/$MONGO_INITDB_DATABASE?authSource=admin" \
     --archive \
     --gzip
 ' > "$archive_path"

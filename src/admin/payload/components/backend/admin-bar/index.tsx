@@ -17,7 +17,6 @@ import type { Setting, User as PayloadUser } from "@/admin/payload/payload-types
 import ClearCache from "./clear-cache"
 import EditCurrentPage from "./edit-current-page"
 import ExitPreview from "./exit-preview"
-import { WorkspaceToggle } from "./workspace-toggle"
 import "./theme.css"
 import "./styles.scss"
 
@@ -126,7 +125,6 @@ export function SmartSiteAdminBar({ settings }: AdminBarProps) {
 
         {/* Right Menu Items */}
         <div className="admin-bar__right-menu">
-          <WorkspaceToggle />
           <ClearCache />
           {isPreview && <ExitPreview onExitPreview={refreshPreviewState} />}
           <UserDropdown user={user} />

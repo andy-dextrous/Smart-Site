@@ -1,21 +1,9 @@
-# SmartSite — Agent Router
+# SmartSite agent router
 
-Start here when you are working inside SmartSite.
+Read [docs/index.md](docs/index.md), then the smallest workflow for the task. This repository is a complete standalone application; no parent workspace or personal skills are required.
 
-## First move
+Use the shipped skills in `.agents/skills/` (Codex) or `.claude/skills/` (Claude). Both teach the same workflow. Startup, building, sections, content, data, repair and launch each have a focused skill. No fixed model or subagent is required.
 
-1. Read [docs/index.md](docs/index.md).
-2. From there, read only the smallest matching task docs.
+Stored copy, navigation, pages and other CMS data use the content MCP workflow. Schema/rendering/layout changes use the section/data workflow. Use normal file tools for code. Read the existing brief and design decisions before redesigning.
 
-Do not start with `README.md`, `docs/references/`, or legacy material unless the active task explicitly requires provenance or archival context.
-Do not open `docs/PLANS.md` for an ordinary task plan. Use it only when the task is specifically about creating or editing an ExecPlan for a substantial slice, not for routine section work, small UI changes, or other everyday bounded tasks.
-
-## Important boundary
-
-- For normal SmartSite work, everything you need should be inside `docs/`.
-
-## Source manuscript
-
-- [docs/references/source-manuscript.md](docs/references/source-manuscript.md) explains how the preserved README is used as source material.
-- The docs harness owns the routing and canonical homes for durable truth.
-- The preserved manuscript is not the default retrieval path for agents.
+Follow [guardrails](docs/rules/agent-guardrails.md). Preserve existing data and unrelated work. Verify visible changes in the actual app using an external browser. Do not claim a client connection from config-file presence or visual success from a compiler check.

@@ -40,7 +40,7 @@ const nextConfigWithHooks = nextConfig.map(entry => {
 
 const eslintConfig = [
   {
-    ignores: ["src/admin/payload/payload-types.ts"],
+    ignores: [".smartsite/**", ".smartsite-self-hosted/**", "test-results/**","src/admin/payload/payload-types.ts"],
   },
   ...nextConfigWithHooks,
   {

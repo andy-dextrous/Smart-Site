@@ -169,11 +169,22 @@ export function SearchCommandLauncher(props: SearchCommandLauncherProps) {
   const activeLimit = mode === "hybrid" ? HYBRID_LIMIT : MODAL_LIMIT
   const [lastFetchedQuery, setLastFetchedQuery] = React.useState("")
 
+  const changeQuery = React.useCallback((next: string) => {
+    setQuery(next)
+    if (normalizeText(next).length < QUERY_MIN_LENGTH) {
+      setHasQuery(false); setResults([]); setLastFetchedQuery(""); setLoading(false); setError(null)
+    }
+  }, [])
+  const handleOpenChange = React.useCallback((nextOpen: boolean) => {
+    setOpen(nextOpen)
+    if (!nextOpen) changeQuery("")
+  }, [changeQuery])
+
   React.useEffect(() => {
     function handleKey(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault()
-        setOpen(value => !value)
+        handleOpenChange(!open)
       }
     }
 
@@ -181,21 +192,14 @@ export function SearchCommandLauncher(props: SearchCommandLauncherProps) {
     return () => {
       window.removeEventListener("keydown", handleKey)
     }
-  }, [])
+  }, [open, handleOpenChange])
 
   React.useEffect(() => {
     if (!open) {
       return
     }
 
-    if (normalizeText(query).length < QUERY_MIN_LENGTH) {
-      setHasQuery(false)
-      setResults([])
-      setLastFetchedQuery("")
-      setLoading(false)
-      setError(null)
-      return
-    }
+    if (normalizeText(query).length < QUERY_MIN_LENGTH) return
 
     const controller = new AbortController()
     const signal = controller.signal
@@ -250,21 +254,6 @@ export function SearchCommandLauncher(props: SearchCommandLauncherProps) {
   }, [query, activeLimit, open])
 
   const showModal = mode === "modal" || mode === "hybrid"
-
-  const handleOpenChange = React.useCallback((nextOpen: boolean) => {
-    setOpen(nextOpen)
-  }, [])
-
-  React.useEffect(() => {
-    if (!open) {
-      setQuery("")
-      setResults([])
-      setHasQuery(false)
-      setLastFetchedQuery("")
-      setError(null)
-      setLoading(false)
-    }
-  }, [open])
 
   const handleSelect = React.useCallback(
     (href: string) => {
@@ -345,7 +334,7 @@ export function SearchCommandLauncher(props: SearchCommandLauncherProps) {
         >
           <CommandInput
             value={query}
-            onValueChange={setQuery}
+            onValueChange={changeQuery}
             placeholder="Search pages and posts"
             autoFocus
           />

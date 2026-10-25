@@ -55,7 +55,7 @@ export async function POST(): Promise<Response> {
         message: "URI index populated successfully",
         stats,
         timestamp: new Date().toISOString(),
-        user: user.email,
+        user: "email" in user ? user.email : undefined,
       },
       { status: 200 }
     )

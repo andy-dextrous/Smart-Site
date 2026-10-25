@@ -1,10 +1,13 @@
 # Workflows
 
-Use these docs when the question is what exact steps to follow.
+Start locally without choosing hosting. Select hosted/self-hosted only when preparing an actual deployment.
 
-- [getting-started.md](getting-started.md)
-- [development.md](development.md)
-- [feature-toggles.md](feature-toggles.md)
-- [troubleshooting.md](troubleshooting.md)
-- [deployment.md](deployment.md)
-- [preview-environments.md](preview-environments.md)
+- [Getting started](getting-started.md)
+- [Daily development](development.md)
+- [Content MCP](content-mcp.md)
+- [Feature toggles](feature-toggles.md)
+- [Troubleshooting](troubleshooting.md)
+- [First launch](first-launch.md)
+- [Deployment](deployment.md)
+- [Upgrading](upgrading.md)
+- [Preview environments](preview-environments.md)

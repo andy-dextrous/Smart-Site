@@ -17,7 +17,10 @@ function ensureLeadingSlash(path: string): string {
   return path.startsWith("/") ? path : `/${path}`
 }
 
-function buildAbsoluteUrl(pathOrUrl: string | undefined, baseUrl: string): string | undefined {
+function buildAbsoluteUrl(
+  pathOrUrl: string | undefined,
+  baseUrl: string
+): string | undefined {
   if (!pathOrUrl) {
     return undefined
   }
@@ -75,16 +78,21 @@ function buildTitle(
   collectionConfig: any
 ): string {
   const hasSEO = collectionConfig?.hasSEO !== false
-  const siteName = settings?.general?.siteName || "Wild Creative - Smart Site"
+  const siteName = settings?.general?.siteName || "SmartSite"
   const docAny = doc as any
 
+  const withSiteName = (title: string) =>
+    title.toLowerCase().includes(String(siteName).toLowerCase())
+      ? title
+      : `${title} | ${siteName}`
+
   if (hasSEO && docAny?.seo?.meta?.title) {
-    return `${docAny.seo.meta.title} | ${siteName}`
+    return withSiteName(docAny.seo.meta.title)
   }
 
   const docTitle = docAny?.title || docAny?.name || docAny?.quote || docAny?.headline
   if (docTitle) {
-    return `${docTitle} | ${siteName}`
+    return withSiteName(docTitle)
   }
 
   return siteName

@@ -41,17 +41,16 @@ import { RowLabel as RowLabel_3bab95be231b3e9aa0fb724d2d89ddd6 } from '@/admin/p
 import { RowLabel as RowLabel_6d6b76e060b56c87a47bd22280eeb127 } from '@/admin/payload/globals/footer/RowLabel'
 import { SocialLinksRowLabel as SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7 } from '@/admin/payload/fields/social-links-row-label'
 import { default as default_e5d96bbf460917257cf7b4a80fa7fc85 } from '@/admin/payload/components/backend/row-grid'
-import { AISettingsAccessGate as AISettingsAccessGate_9b2ba51a571b59e9042ad067fb16d728 } from '@/admin/payload/components/backend/ai-settings/access-gate'
 import { default as default_f2ccf5b28ea897a84aa17ece60da1642 } from '@/admin/payload/components/backend/nav'
 import { Icon as Icon_81e8042dbd61adf4500fa58396806cc9 } from '@/admin/payload/components/backend/logo'
 import { Logo as Logo_81e8042dbd61adf4500fa58396806cc9 } from '@/admin/payload/components/backend/logo'
 import { default as default_deb3d3e0d7ebd4444dedc22425d9c39c } from '@/admin/payload/components/backend/actions'
 import { BeforeLogin as BeforeLogin_7928b506e44967428d9de145b0f5de84 } from '@/admin/payload/components/backend/before-login'
-import { AIProvider as AIProvider_60a9abb034156393a5335c785c8cc821 } from '@/admin/payload/components/providers/ai-provider'
-import { AILayoutProvider as AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45 } from '@/admin/payload/components/providers/layout-provider'
+import { AdminLayoutProvider as AdminLayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45 } from '@/admin/payload/components/providers/layout-provider'
 import { Dashboard as Dashboard_2318927de43c97f7df38b2e062d88eaf } from '@/admin/payload/components/backend/dashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "@/admin/components/fields/link/link-label-field#LinkLabelField": LinkLabelField_fcfbfa303a249c0c5df3db459c69e782,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -96,14 +95,12 @@ export const importMap = {
   "@/admin/payload/globals/footer/RowLabel#RowLabel": RowLabel_6d6b76e060b56c87a47bd22280eeb127,
   "@/admin/payload/fields/social-links-row-label#SocialLinksRowLabel": SocialLinksRowLabel_483e10857ef1353b009c7ce8805461a7,
   "@/admin/payload/components/backend/row-grid#default": default_e5d96bbf460917257cf7b4a80fa7fc85,
-  "@/admin/payload/components/backend/ai-settings/access-gate#AISettingsAccessGate": AISettingsAccessGate_9b2ba51a571b59e9042ad067fb16d728,
   "@/admin/payload/components/backend/nav#default": default_f2ccf5b28ea897a84aa17ece60da1642,
   "@/admin/payload/components/backend/logo#Icon": Icon_81e8042dbd61adf4500fa58396806cc9,
   "@/admin/payload/components/backend/logo#Logo": Logo_81e8042dbd61adf4500fa58396806cc9,
   "@/admin/payload/components/backend/actions#default": default_deb3d3e0d7ebd4444dedc22425d9c39c,
   "@/admin/payload/components/backend/before-login#BeforeLogin": BeforeLogin_7928b506e44967428d9de145b0f5de84,
-  "@/admin/payload/components/providers/ai-provider#AIProvider": AIProvider_60a9abb034156393a5335c785c8cc821,
-  "@/admin/payload/components/providers/layout-provider#AILayoutProvider": AILayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45,
+  "@/admin/payload/components/providers/layout-provider#AdminLayoutProvider": AdminLayoutProvider_eb105f028ab9fa21e232dd2d86e8ac45,
   "@/admin/payload/components/backend/dashboard#Dashboard": Dashboard_2318927de43c97f7df38b2e062d88eaf,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

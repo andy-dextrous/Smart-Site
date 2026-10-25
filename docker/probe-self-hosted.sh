@@ -37,28 +37,22 @@ fi
 
 compose ps >/dev/null
 
-SMARTSITE_PUBLIC_URL="$public_url" node <<'EOF'
-const baseUrl = process.env.SMARTSITE_PUBLIC_URL
+probe_url() {
+  url="$1"
+  response_headers="$(curl -k -I -L --max-time 20 -sS "$url" || true)"
+  status_code="$(printf '%s\n' "$response_headers" | awk '/^HTTP\// { code = $2 } END { print code }')"
 
-async function check(url) {
-  const response = await fetch(url, { redirect: "manual" })
-
-  if (response.status >= 200 && response.status < 400) {
-    return
-  }
-
-  throw new Error(`${url} returned ${response.status}`)
+  case "$status_code" in
+    2*|3*) return 0 ;;
+    *)
+      echo "Probe failed for $url"
+      printf '%s\n' "$response_headers"
+      return 1
+      ;;
+  esac
 }
 
-async function main() {
-  await check(baseUrl)
-  await check(`${baseUrl.replace(/\/$/, "")}/admin`)
-}
-
-main().catch(error => {
-  console.error(error.message)
-  process.exit(1)
-})
-EOF
+probe_url "$public_url"
+probe_url "${public_url%/}/admin"
 
 echo "Probe OK: $public_url"

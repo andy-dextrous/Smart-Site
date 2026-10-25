@@ -245,7 +245,7 @@ export function PostsArchiveClient(props: PostsArchiveClientProps) {
 
   const urlPage = useMemo(() => parsePageParam(searchParams.get("page")), [searchParams])
 
-  const [data, setData] = useState<PostsArchiveResponse>(() => ({
+  const [fetchedData, setData] = useState<PostsArchiveResponse>(() => ({
     docs: initialPosts,
     page: initialPage,
     totalDocs: initialTotalDocs,
@@ -255,15 +255,7 @@ export function PostsArchiveClient(props: PostsArchiveClientProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (urlPage === initialPage) {
-      setData({
-        docs: initialPosts,
-        page: initialPage,
-        totalDocs: initialTotalDocs,
-        totalPages: initialTotalPages,
-      })
-      return
-    }
+    if (urlPage === initialPage) return
 
     const controller = new AbortController()
 
@@ -312,6 +304,7 @@ export function PostsArchiveClient(props: PostsArchiveClientProps) {
     urlPage,
   ])
 
+  const data = urlPage === initialPage ? { docs: initialPosts, page: initialPage, totalDocs: initialTotalDocs, totalPages: initialTotalPages } : fetchedData
   const rangeText = useMemo(() => {
     return getRangeText({
       currentPage: data.page,

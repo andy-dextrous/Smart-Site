@@ -1,0 +1,266 @@
+name: Build and Deploy Self-Hosted Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy the built release to the configured VPS"
+        type: boolean
+        default: true
+      public_url:
+        description: "Optional public URL override for this release"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.22.1
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SELF_HOSTED_SSH_KEY }}
+
+      - name: Add deploy host to known_hosts
+        shell: bash
+        run: |
+          host="${{ secrets.SELF_HOSTED_HOST }}"
+
+          if [ -z "$host" ]; then
+            echo "Missing repository secret SELF_HOSTED_HOST."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+
+      - name: Fetch existing runtime env
+        shell: bash
+        run: |
+          host="${{ secrets.SELF_HOSTED_HOST }}"
+          user="${{ secrets.SELF_HOSTED_USER }}"
+          target_path="${{ secrets.SELF_HOSTED_PATH }}"
+
+          if [ -z "$user" ]; then
+            user=root
+          fi
+
+          if [ -z "$target_path" ]; then
+            target_path=/opt/smartsite-self-hosted
+          fi
+
+          mkdir -p .smartsite-self-hosted/generated
+
+          if ssh "$user@$host" "test -f '$target_path/.smartsite-self-hosted/generated/production.env'"; then
+            scp "$user@$host:$target_path/.smartsite-self-hosted/generated/production.env" .smartsite-self-hosted/generated/production.env
+          fi
+
+      - name: Require existing self-hosted runtime env
+        shell: bash
+        run: |
+          if [ ! -f .smartsite-self-hosted/generated/production.env ]; then
+            echo "Self-hosted prebuilt deploys require an existing runtime env on the VPS."
+            echo "Bootstrap the self-hosted lane first with pnpm self-hosted:init, pnpm self-hosted:prepare, and pnpm self-hosted:run -- promote."
+            exit 1
+          fi
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          timestamp="$(date -u +%Y%m%d%H%M%S)"
+          short_sha="${GITHUB_SHA::7}"
+          deployment_id="deploy-${timestamp}-${short_sha}"
+          image_ref="smartsite-self-hosted-app:release-${timestamp}-${short_sha}"
+          public_url="${{ github.event.inputs.public_url }}"
+
+          if [ -z "$public_url" ]; then
+            public_url="$(grep '^NEXT_PUBLIC_URL=' .smartsite-self-hosted/generated/production.env | head -n 1 | cut -d '=' -f 2-)"
+          fi
+
+          if [ -z "$public_url" ]; then
+            echo "Unable to determine public URL. Set NEXT_PUBLIC_URL in the runtime env or provide workflow input public_url."
+            exit 1
+          fi
+
+          archive_name="smartsite-self-hosted-${deployment_id}.tar.gz"
+
+          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
+          echo "image_ref=$image_ref" >> "$GITHUB_OUTPUT"
+          echo "public_url=$public_url" >> "$GITHUB_OUTPUT"
+          echo "archive_name=$archive_name" >> "$GITHUB_OUTPUT"
+
+      - name: Capture self-hosted database snapshot
+        id: db_snapshot
+        shell: bash
+        run: |
+          host="${{ secrets.SELF_HOSTED_HOST }}"
+          user="${{ secrets.SELF_HOSTED_USER }}"
+          target_path="${{ secrets.SELF_HOSTED_PATH }}"
+
+          if [ -z "$user" ]; then
+            user=root
+          fi
+
+          if [ -z "$target_path" ]; then
+            target_path=/opt/smartsite-self-hosted
+          fi
+
+          remote_archive="$(
+            ssh "$user@$host" "cd '$target_path' && ./docker/backup-self-hosted.sh .smartsite-self-hosted/generated/production.env" \
+              | awk '/^Wrote /{print $2}' \
+              | tail -n 1
+          )"
+
+          if [ -z "$remote_archive" ]; then
+            echo "Failed to capture runtime database snapshot from $user@$host."
+            exit 1
+          fi
+
+          local_archive="${RUNNER_TEMP}/runtime-db.archive.gz"
+          scp "$user@$host:$remote_archive" "$local_archive"
+
+          echo "archive_path=$local_archive" >> "$GITHUB_OUTPUT"
+          echo "remote_archive=$remote_archive" >> "$GITHUB_OUTPUT"
+
+      - name: Start ephemeral build Mongo
+        shell: bash
+        run: |
+          docker rm -f smartsite-build-mongo >/dev/null 2>&1 || true
+          docker run -d \
+            --name smartsite-build-mongo \
+            -p 27017:27017 \
+            -e MONGO_INITDB_ROOT_USERNAME=build_root \
+            -e MONGO_INITDB_ROOT_PASSWORD=build_pass \
+            mongo:8 \
+            --bind_ip_all
+
+          for attempt in $(seq 1 30); do
+            if docker exec smartsite-build-mongo mongosh "mongodb://build_root:build_pass@127.0.0.1:27017/admin?authSource=admin" --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep 1 >/dev/null; then
+              exit 0
+            fi
+
+            sleep 2
+          done
+
+          echo "Timed out waiting for build Mongo to become ready."
+          docker logs smartsite-build-mongo
+          exit 1
+
+      - name: Restore snapshot into ephemeral build Mongo
+        shell: bash
+        run: |
+          database_name="$(grep '^MONGO_INITDB_DATABASE=' .smartsite-self-hosted/generated/production.env | head -n 1 | cut -d '=' -f 2-)"
+
+          cat "${{ steps.db_snapshot.outputs.archive_path }}" | docker exec -i smartsite-build-mongo sh -lc '
+            mongorestore \
+              --uri="mongodb://build_root:build_pass@127.0.0.1:27017/admin?authSource=admin" \
+              --archive \
+              --gzip \
+              --drop
+          '
+
+          docker exec smartsite-build-mongo mongosh "mongodb://build_root:build_pass@127.0.0.1:27017/admin?authSource=admin" --quiet --eval "const d=db.getSiblingDB(\"${database_name}\"); printjson({pages:d.pages.countDocuments(),posts:d.posts.countDocuments(),projects:d.projects.countDocuments(),media:d.media.countDocuments(),users:d.users.countDocuments()})"
+
+      - name: Create build env from self-hosted snapshot
+        shell: bash
+        run: |
+          database_name="$(grep '^MONGO_INITDB_DATABASE=' .smartsite-self-hosted/generated/production.env | head -n 1 | cut -d '=' -f 2-)"
+
+          node scripts/create-self-hosted-build-env.mjs \
+            --source .smartsite-self-hosted/generated/production.env \
+            --output .smartsite-self-hosted/generated/production.build.env \
+            --database-url "mongodb://build_root:build_pass@host.docker.internal:27017/${database_name}?authSource=admin"
+
+      - name: Build prebuilt release image
+        env:
+          SMARTSITE_BUILD_USE_HOST_GATEWAY: "1"
+        run: |
+          ./docker/build-prebuilt-release.sh \
+            .smartsite-self-hosted/generated/production.build.env \
+            "${{ steps.meta.outputs.image_ref }}" \
+            "${RUNNER_TEMP}/${{ steps.meta.outputs.archive_name }}" \
+            "${{ steps.meta.outputs.public_url }}" \
+            "${{ steps.meta.outputs.deployment_id }}"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.deployment_id }}
+          path: ${{ runner.temp }}/${{ steps.meta.outputs.archive_name }}
+          if-no-files-found: error
+
+      - name: Stop ephemeral build Mongo
+        if: always()
+        shell: bash
+        run: |
+          docker rm -f smartsite-build-mongo >/dev/null 2>&1 || true
+
+      - name: Bootstrap runtime host
+        if: github.event.inputs.deploy == 'true'
+        shell: bash
+        run: |
+          host="${{ secrets.SELF_HOSTED_HOST }}"
+          user="${{ secrets.SELF_HOSTED_USER }}"
+          target_path="${{ secrets.SELF_HOSTED_PATH }}"
+
+          if [ -z "$user" ]; then
+            user=root
+          fi
+
+          if [ -z "$target_path" ]; then
+            target_path=/opt/smartsite-self-hosted
+          fi
+
+          ssh "$user@$host" "mkdir -p '$target_path' '$target_path/.smartsite-self-hosted/generated' '$target_path/.smartsite-self-hosted/releases/incoming'"
+          ssh "$user@$host" "if ! command -v docker >/dev/null 2>&1; then apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io docker-compose-v2; systemctl enable --now docker; fi"
+          ssh "$user@$host" "if ! command -v curl >/dev/null 2>&1; then apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl; fi"
+
+      - name: Upload release archive to runtime host
+        if: github.event.inputs.deploy == 'true'
+        shell: bash
+        run: |
+          host="${{ secrets.SELF_HOSTED_HOST }}"
+          user="${{ secrets.SELF_HOSTED_USER }}"
+          target_path="${{ secrets.SELF_HOSTED_PATH }}"
+
+          if [ -z "$user" ]; then
+            user=root
+          fi
+
+          if [ -z "$target_path" ]; then
+            target_path=/opt/smartsite-self-hosted
+          fi
+
+          scp "${RUNNER_TEMP}/${{ steps.meta.outputs.archive_name }}" "$user@$host:$target_path/.smartsite-self-hosted/releases/incoming/${{ steps.meta.outputs.archive_name }}"
+
+      - name: Deploy prebuilt release on runtime host
+        if: github.event.inputs.deploy == 'true'
+        shell: bash
+        run: |
+          host="${{ secrets.SELF_HOSTED_HOST }}"
+          user="${{ secrets.SELF_HOSTED_USER }}"
+          target_path="${{ secrets.SELF_HOSTED_PATH }}"
+
+          if [ -z "$user" ]; then
+            user=root
+          fi
+
+          if [ -z "$target_path" ]; then
+            target_path=/opt/smartsite-self-hosted
+          fi
+
+          ssh "$user@$host" "cd '$target_path' && ./docker/deploy-prebuilt-self-hosted.sh .smartsite-self-hosted/generated/production.env .smartsite-self-hosted/releases/incoming/${{ steps.meta.outputs.archive_name }} '${{ steps.meta.outputs.image_ref }}' '${{ steps.meta.outputs.deployment_id }}'"
+          ssh "$user@$host" "cd '$target_path' && ./docker/probe-self-hosted.sh .smartsite-self-hosted/generated/production.env"

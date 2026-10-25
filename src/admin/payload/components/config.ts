@@ -14,8 +14,7 @@ const components = {
     Logo: "@/admin/payload/components/backend/logo#Logo",
   },
   providers: [
-    "@/admin/payload/components/providers/ai-provider#AIProvider",
-    "@/admin/payload/components/providers/layout-provider#AILayoutProvider",
+    "@/admin/payload/components/providers/layout-provider#AdminLayoutProvider",
   ],
 }
 

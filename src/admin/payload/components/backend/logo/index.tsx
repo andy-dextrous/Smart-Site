@@ -1,12 +1,12 @@
 "use client"
 
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import "./logo.scss"
 
 export const Logo = () => {
   return (
     <span style={{ position: "relative", width: "256px", height: "40px" }}>
-      <Image src="/assets/admin/logos/logo.svg" alt="" fill />
+      <Image src="/assets/admin/logos/logo.svg" alt="SmartSite" className="smartsite-admin-logo" fill />
     </span>
   )
 }
@@ -21,7 +21,7 @@ export const Icon = () => {
         marginRight: "14px",
       }}
     >
-      <Image src="/assets/admin/logos/logo.svg" alt="" fill />
+      <Image src="/assets/admin/logos/logo.svg" alt="SmartSite" className="smartsite-admin-logo" fill />
     </span>
   )
 }

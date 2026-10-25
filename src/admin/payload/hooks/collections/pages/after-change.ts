@@ -1,3 +1,4 @@
+import { deferHookAfterCommit } from "@/admin/payload/hooks/utilities/after-commit"
 import {
   getDependentUpdatesContext,
   clearDependentUpdatesContext,
@@ -18,13 +19,16 @@ import type { CollectionAfterChangeHook } from "payload"
 /*  - Uses direct database access (no caching) for data consistency
 /*************************************************************************/
 
-export const afterPageChange: CollectionAfterChangeHook = async ({
-  doc,
-  previousDoc,
-  operation,
-  req: { payload, context },
-  collection,
-}) => {
+export const afterPageChange: CollectionAfterChangeHook = async args => {
+  if (deferHookAfterCommit(args, afterPageChange)) return args.doc
+  const {
+    doc,
+    previousDoc,
+    operation,
+    req: { payload, context },
+    collection,
+  } = args
+
   if (collection.slug !== "pages") return doc
 
   if (shouldPreventHooks(payload, context)) {

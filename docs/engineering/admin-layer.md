@@ -1,6 +1,6 @@
 # Admin Layer
 
-`src/admin/` is the protected SmartSite core.
+`src/admin/` contains this project’s CMS, routing and administration core. Prefer its configuration and extension surfaces for ordinary site work.
 
 For ordinary site work, do not start by editing `src/admin`. Start with:
 
@@ -8,7 +8,7 @@ For ordinary site work, do not start by editing `src/admin`. Start with:
 - `src/extensions/`
 - frontend components under `src/components/` and `src/app/(frontend)/`
 
-Use `src/admin/` only when the task is truly core SmartSite work that should affect the shared system, not just one site.
+Use `src/admin/` when the requested behavior genuinely belongs in this project’s CMS/runtime and configuration or extensions cannot implement it cleanly. The project owns this source; no originating repository is required.
 
 Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
@@ -32,17 +32,16 @@ Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
 Edit `src/admin/` only when all of these are true:
 
-- the behavior should be reusable across SmartSite installs
 - config or extension hooks are not enough
 - the change belongs to shared CMS, routing, cache, admin UI, or plugin behavior
 
-If the request is client-specific, treat `src/admin/` as off-limits and use config, extensions, or frontend code instead.
+Keep business-specific content, branding and presentation in configuration, extensions and frontend code wherever those surfaces suffice. Preserve deliberate local core customizations during upgrades.
 
 ## Admin package manifest
 
 `src/admin/package.json` is the admin-layer manifest.
 
-When you do make a real admin-layer change:
+When preparing a versioned release of this project’s core:
 
 - bump `version`
 - update `releaseDate`

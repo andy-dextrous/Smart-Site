@@ -223,16 +223,14 @@ function buildEnv(sourceValues, existingValues, options) {
   const databaseName = resolveDatabaseName(sourceValues.DATABASE_URL)
   const rootUsername =
     existingValues.MONGO_INITDB_ROOT_USERNAME ||
-    sourceValues.MONGO_INITDB_ROOT_USERNAME ||
     "smartsite_root"
   const rootPassword =
     existingValues.MONGO_INITDB_ROOT_PASSWORD ||
-    sourceValues.MONGO_INITDB_ROOT_PASSWORD ||
     randomSecret()
   const appUsername =
-    existingValues.MONGO_APP_USERNAME || sourceValues.MONGO_APP_USERNAME || "smartsite_app"
+    existingValues.MONGO_APP_USERNAME || "smartsite_app"
   const appPassword =
-    existingValues.MONGO_APP_PASSWORD || sourceValues.MONGO_APP_PASSWORD || randomSecret()
+    existingValues.MONGO_APP_PASSWORD || randomSecret()
   const nextPublicUrl = options.publicUrl || sourceValues.NEXT_PUBLIC_URL || "http://localhost:3000"
   const stackName =
     options.stackName ||
@@ -268,18 +266,20 @@ function buildEnv(sourceValues, existingValues, options) {
     HTTPS_PORT: options.httpsPort || sourceValues.HTTPS_PORT || "443",
     CADDY_SITE_ADDRESS: caddySiteAddress,
     DATABASE_PROVIDER: "mongoose",
-    DATABASE_URL: `mongodb://${appUsername}:${appPassword}@${options.dbHost}:${options.dbPort}/${databaseName}?authSource=${databaseName}`,
+    DATABASE_URL: `mongodb://${appUsername}:${appPassword}@${options.dbHost}:${options.dbPort}/${databaseName}?authSource=${databaseName}&replicaSet=smartsite-rs`,
     MONGO_INITDB_DATABASE: databaseName,
     MONGO_INITDB_ROOT_USERNAME: rootUsername,
     MONGO_INITDB_ROOT_PASSWORD: rootPassword,
     MONGO_APP_USERNAME: appUsername,
     MONGO_APP_PASSWORD: appPassword,
-    PAYLOAD_SECRET: existingValues.PAYLOAD_SECRET || sourceValues.PAYLOAD_SECRET || randomSecret(32),
+    MONGO_REPLICA_KEY: existingValues.MONGO_REPLICA_KEY || randomBase64(48),
+    SMARTSITE_SITE_ID: existingValues.SMARTSITE_SITE_ID || crypto.randomUUID(),
+    SMARTSITE_ENVIRONMENT: runtimeEnv === "production" ? "production" : "preview",
+    PAYLOAD_SECRET: existingValues.PAYLOAD_SECRET || randomSecret(32),
     PREVIEW_SECRET:
-      existingValues.PREVIEW_SECRET || sourceValues.PREVIEW_SECRET || randomSecret(16),
+      existingValues.PREVIEW_SECRET || randomSecret(16),
     NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:
       existingValues.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY ||
-      sourceValues.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY ||
       randomBase64(32),
     NEXT_DEPLOYMENT_ID:
       options.deploymentId ||
@@ -304,9 +304,9 @@ function buildEnv(sourceValues, existingValues, options) {
     PAYLOAD_CONFIG_PATH: "./src/admin/payload/payload.config.ts",
   }
 
-  if (isLocalUrl(values.SMARTSITE_AI_ENDPOINT)) {
-    delete values.SMARTSITE_AI_ENDPOINT
-  }
+  // Local identity, production credentials and model-provider keys must not leak
+  // into a new destination. Existing destination secrets remain stable on reruns.
+  for (const key of Object.keys(values)) if (key.startsWith('SMARTSITE_AI_') || key.startsWith('AI_AGENT_') || key === 'STAGING_DATABASE_URL' || key === 'SMARTSITE_DATABASE_TARGET') delete values[key]
 
   return values
 }

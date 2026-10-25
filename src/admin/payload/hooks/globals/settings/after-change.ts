@@ -1,3 +1,4 @@
+import { deferHookAfterCommit } from "@/admin/payload/hooks/utilities/after-commit"
 import { revalidateDocument, revalidateCollection } from "@/admin/cache/revalidation"
 import {
   detectAllSettingsChanges,
@@ -26,12 +27,15 @@ import type { GlobalAfterChangeHook } from "payload"
 /*  - Stores fresh settings in Payload context for job processing
 /*************************************************************************/
 
-export const afterSettingsChange: GlobalAfterChangeHook = async ({
-  doc,
-  previousDoc,
-  req: { payload, context },
-  global,
-}) => {
+export const afterSettingsChange: GlobalAfterChangeHook = async args => {
+  if (deferHookAfterCommit(args, afterSettingsChange)) return args.doc
+  const {
+    doc,
+    previousDoc,
+    req: { payload, context },
+    global,
+  } = args
+
   if (shouldPreventHooks(payload, context)) {
     return doc
   }
@@ -201,7 +205,10 @@ export const afterSettingsChange: GlobalAfterChangeHook = async ({
     revalidateTag(`global:${global.slug}`, { expire: 0 })
     payload.logger.info(`Revalidated global:${global.slug}`)
   } catch (error) {
-    payload.logger.error({ error, slug: global.slug }, `Revalidation failed for global ${global.slug}`)
+    payload.logger.error(
+      { error, slug: global.slug },
+      `Revalidation failed for global ${global.slug}`
+    )
   }
 
   return doc

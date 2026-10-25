@@ -10,3 +10,6 @@ Use these docs when the question is how SmartSite is built.
 - [routing-and-caching.md](routing-and-caching.md)
 - [configuration-system.md](configuration-system.md)
 - [coding-standards.md](coding-standards.md)
+
+- [MCP contracts](mcp.md)
+- [Component catalogue](component-catalogue.md)

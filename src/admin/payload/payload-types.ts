@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     formBlock: FormBlock;
@@ -84,6 +85,10 @@ export interface Config {
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
+    'smartsite-operations': SmartsiteOperation;
+    'smartsite-uploads': SmartsiteUpload;
+    'smartsite-identity': SmartsiteIdentity;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -112,6 +117,10 @@ export interface Config {
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    'smartsite-operations': SmartsiteOperationsSelect<false> | SmartsiteOperationsSelect<true>;
+    'smartsite-uploads': SmartsiteUploadsSelect<false> | SmartsiteUploadsSelect<true>;
+    'smartsite-identity': SmartsiteIdentitySelect<false> | SmartsiteIdentitySelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -123,22 +132,22 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
     settings: Setting;
-    'ai-settings': AiSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
-    'ai-settings': AiSettingsSelect<false> | AiSettingsSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
       'dependent-uri-updates': TaskDependentUriUpdates;
@@ -180,6 +189,24 @@ export interface UserAuthOperations {
     | {
         username: string;
       };
+}
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -334,9 +361,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -356,9 +380,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -367,9 +388,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
@@ -961,19 +979,17 @@ export interface User {
    * Link this user to their public team profile for shared bios and SEO attribution.
    */
   teamMember?: (string | null) | Team;
-  role: 'admin' | 'editor' | 'developer' | 'ai-agent';
+  role: 'admin' | 'editor' | 'developer';
   avatar?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
   email: string;
   username: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -984,6 +1000,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * Team members are used to display the team on the website. They are different to users, which are used for the admin panel.
@@ -1855,6 +1872,97 @@ export interface Search {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "smartsite-operations".
+ */
+export interface SmartsiteOperation {
+  id: string;
+  operationKey: string;
+  fingerprint: string;
+  result:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "smartsite-uploads".
+ */
+export interface SmartsiteUpload {
+  id: string;
+  digest: string;
+  operationKey: string;
+  state: 'pending' | 'committed';
+  mediaId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "smartsite-identity".
+ */
+export interface SmartsiteIdentity {
+  id: string;
+  siteId: string;
+  environment: string;
+  setupVersion: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  'payload-mcp-tool'?: {
+    /**
+     * Reconcile a timed-out save or upload using its operationId before retrying. Returns only this key’s receipt. Unknown means no committed receipt was found; retry only the identical operation.
+     */
+    smartsiteOperationStatus?: boolean | null;
+    /**
+     * Discover SmartSite website content, inspect one field/block schema, find/read documents and globals, or inspect history. Start with catalogue. Get returns the latest draft plus expectedRevision for a checked save; it is not proof of public publication. Read only the target needed. Use schema field and block to inspect page sections progressively. History lists version IDs; version returns previous content for a deliberate recovery. Accounts, submissions, learner data and infrastructure are excluded.
+     */
+    smartsiteRead?: boolean | null;
+    /**
+     * Create or update one website content item using normal Payload validation and access checks. Read schema and current content first. Update requires expectedRevision from get; conflicts require rereading and reconciling, never blind retries. Supply only changed fields; arrays replace entire arrays, so preserve unaffected rows and IDs. Choose draft/publish/unpublish for draft-capable documents, or live for globals/non-draft content (immediate public change). No bulk writes or deletion. To recover, read history/version and deliberately save selected previous fields against the CURRENT revision. This tool does not send form submissions or deploy code.
+     */
+    smartsiteSave?: boolean | null;
+    /**
+     * Upload a new PNG, JPEG or WebP (up to 2 MiB) through the existing configured Payload storage. Supply base64 bytes and meaningful alt text; never a server path, remote URL or storage credential. Identical bytes reuse the previous upload without changing its alt text. Save the returned media ID in the intended content field. Existing media are never replaced or deleted. Larger files and other formats use the CMS upload interface.
+     */
+    smartsiteUploadMedia?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  hasAPIKey?: boolean | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -2026,14 +2134,35 @@ export interface PayloadLockedDocument {
         value: string | Search;
       } | null)
     | ({
+        relationTo: 'smartsite-operations';
+        value: string | SmartsiteOperation;
+      } | null)
+    | ({
+        relationTo: 'smartsite-uploads';
+        value: string | SmartsiteUpload;
+      } | null)
+    | ({
+        relationTo: 'smartsite-identity';
+        value: string | SmartsiteIdentity;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      } | null)
+    | ({
         relationTo: 'payload-folders';
         value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -2043,10 +2172,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -2111,6 +2245,7 @@ export interface PayloadQueryPreset {
     | number
     | boolean
     | null;
+  groupBy?: string | null;
   relatedCollection: 'pages' | 'posts' | 'categories' | 'team' | 'services' | 'testimonials';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
@@ -2635,15 +2770,13 @@ export interface UsersSelect<T extends boolean = true> {
   avatar?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
   email?: T;
   username?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -3096,6 +3229,63 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "smartsite-operations_select".
+ */
+export interface SmartsiteOperationsSelect<T extends boolean = true> {
+  operationKey?: T;
+  fingerprint?: T;
+  result?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "smartsite-uploads_select".
+ */
+export interface SmartsiteUploadsSelect<T extends boolean = true> {
+  digest?: T;
+  operationKey?: T;
+  state?: T;
+  mediaId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "smartsite-identity_select".
+ */
+export interface SmartsiteIdentitySelect<T extends boolean = true> {
+  siteId?: T;
+  environment?: T;
+  setupVersion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  'payload-mcp-tool'?:
+    | T
+    | {
+        smartsiteOperationStatus?: T;
+        smartsiteRead?: T;
+        smartsiteSave?: T;
+        smartsiteUploadMedia?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  hasAPIKey?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -3208,6 +3398,7 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
       };
   where?: T;
   columns?: T;
+  groupBy?: T;
   relatedCollection?: T;
   isTemp?: T;
   updatedAt?: T;
@@ -4160,108 +4351,6 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ai-settings".
- */
-export interface AiSetting {
-  id: string;
-  general?: {
-    /**
-     * Master switch for all AI functionality
-     */
-    enabled?: boolean | null;
-    /**
-     * Describe your business, industry, target audience, and unique value proposition
-     */
-    businessContext?: string | null;
-    /**
-     * Describe how your brand should sound (e.g., professional yet approachable, technical but clear, friendly and conversational)
-     */
-    brandVoice?: string | null;
-    /**
-     * Specific instructions for how the AI should behave, write, and represent your brand
-     */
-    customInstructions?: string | null;
-  };
-  social?: {
-    /**
-     * Automatically post content updates to social media
-     */
-    autoPosting?: boolean | null;
-    platforms?:
-      | {
-          platform: 'twitter' | 'linkedin' | 'facebook' | 'instagram';
-          /**
-           * OAuth connection status (configure via OAuth flow)
-           */
-          connected?: boolean | null;
-          postingSchedule?: ('daily' | 'twice-weekly' | 'weekly' | 'on-publish') | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  restrictions?: {
-    /**
-     * AI suggestions must be approved before applying
-     */
-    requireApproval?: boolean | null;
-    /**
-     * Select which operations the AI is allowed to perform
-     */
-    allowedOperations?: {
-      /**
-       * Allow AI to generate new content (blog posts, pages, descriptions)
-       */
-      generateContent?: boolean | null;
-      /**
-       * Allow AI to modify existing content
-       */
-      editContent?: boolean | null;
-      /**
-       * Allow AI to publish content directly without draft review
-       */
-      publishContent?: boolean | null;
-      /**
-       * Allow AI to create and schedule social media posts
-       */
-      socialPosting?: boolean | null;
-      /**
-       * Allow AI to optimize content for search engines
-       */
-      seoOptimization?: boolean | null;
-      /**
-       * Allow AI to generate images using AI models
-       */
-      imageGeneration?: boolean | null;
-    };
-  };
-  sections?: {
-    /**
-     * Control which sections the AI can use and describe how it should apply them when composing page layouts.
-     */
-    sectionGuidance?:
-      | {
-          sectionSlug:
-            | 'contact-form'
-            | 'content'
-            | 'hero'
-            | 'posts-archive'
-            | 'posts-content'
-            | 'posts-hero'
-            | 'posts-related';
-          includeInDesigns?: boolean | null;
-          /**
-           * Describe ideal use cases, required content, or sequencing notes that the AI should follow when selecting this section.
-           */
-          usageInstructions?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -4509,60 +4598,13 @@ export interface SettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ai-settings_select".
+ * via the `definition` "collections_widget".
  */
-export interface AiSettingsSelect<T extends boolean = true> {
-  general?:
-    | T
-    | {
-        enabled?: T;
-        businessContext?: T;
-        brandVoice?: T;
-        customInstructions?: T;
-      };
-  social?:
-    | T
-    | {
-        autoPosting?: T;
-        platforms?:
-          | T
-          | {
-              platform?: T;
-              connected?: T;
-              postingSchedule?: T;
-              id?: T;
-            };
-      };
-  restrictions?:
-    | T
-    | {
-        requireApproval?: T;
-        allowedOperations?:
-          | T
-          | {
-              generateContent?: T;
-              editContent?: T;
-              publishContent?: T;
-              socialPosting?: T;
-              seoOptimization?: T;
-              imageGeneration?: T;
-            };
-      };
-  sections?:
-    | T
-    | {
-        sectionGuidance?:
-          | T
-          | {
-              sectionSlug?: T;
-              includeInDesigns?: T;
-              usageInstructions?: T;
-              id?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4623,7 +4665,15 @@ export interface TaskSchedulePublish {
           value: string | Service;
         } | null);
     global?: string | null;
-    user?: (string | null) | User;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null)
+      | ({
+          relationTo: 'payload-mcp-api-keys';
+          value: string | PayloadMcpApiKey;
+        } | null);
   };
   output?: unknown;
 }

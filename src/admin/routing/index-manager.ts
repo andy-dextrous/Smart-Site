@@ -1,5 +1,5 @@
 import configPromise from "@payload-config"
-import { getPayload as loadPayload } from "payload"
+import { getPayload as loadPayload, type PayloadRequest } from "payload"
 import { getFrontendCollections } from "@/admin/config/frontend"
 import { routingEngine, BreadcrumbItem, isReservedURI } from "./uri-engine"
 import { createAutomaticRedirect } from "@/admin/redirects/auto-redirects"
@@ -28,6 +28,7 @@ export function setRoutingIndexPayloadAccessor(getter?: typeof loadPayload): voi
 /*************************************************************************/
 
 export interface URIIndexUpdate {
+  req?: PayloadRequest
   uri: string
   collection: string
   documentId: string
@@ -55,14 +56,17 @@ export async function updateURI({
   data,
   originalDoc,
   skipRedirect,
+  req,
 }: URIIndexUpdate): Promise<void> {
   try {
-    const payload = await currentGetPayload({ config: configPromise })
+    const payload = req?.payload || (await currentGetPayload({ config: configPromise }))
 
     const formattedDocumentId = formatIdForText(documentId)
 
     const existingEntries = await payload.find({
       collection: "uri-index",
+      req,
+      overrideAccess: true,
       where: {
         and: [
           { sourceCollection: { equals: collection } },
@@ -76,7 +80,7 @@ export async function updateURI({
      * Auto-detect template ID if not provided
      */
     const resolvedTemplateId =
-      templateId || (await getTemplateIdForCollection(collection, payload))
+      templateId || (await getTemplateIdForCollection(collection, payload, req))
 
     /**
      * Generate breadcrumbs if not provided
@@ -110,11 +114,13 @@ export async function updateURI({
 
     let redirectSource = normalizedPreviousURI
 
-    const publishedEntry = existingEntries.docs.find((doc: any) => doc.status === "published")
+    const publishedEntry = existingEntries.docs.find(
+      (doc: any) => doc.status === "published"
+    )
     const draftEntry = existingEntries.docs.find((doc: any) => doc.status === "draft")
 
     const targetEntry = publishedEntry || draftEntry
-    const indexStatus = publishedEntry ? "published" : status
+    const indexStatus = status
 
     const indexData = {
       uri,
@@ -130,31 +136,42 @@ export async function updateURI({
       previousURIs:
         normalizedPreviousURI && targetEntry?.previousURIs
           ? [{ uri: normalizedPreviousURI }, ...targetEntry.previousURIs]
-              .filter((prev, index, self) =>
-                prev?.uri && self.findIndex(existing => existing?.uri === prev.uri) === index
+              .filter(
+                (prev, index, self) =>
+                  prev?.uri &&
+                  self.findIndex(existing => existing?.uri === prev.uri) === index
               )
               .slice(0, 10)
           : normalizedPreviousURI
-          ? [{ uri: normalizedPreviousURI }]
-          : targetEntry?.previousURIs,
+            ? [{ uri: normalizedPreviousURI }]
+            : targetEntry?.previousURIs,
     }
 
     if (targetEntry) {
       await payload.update({
         collection: "uri-index",
+        req,
+        overrideAccess: true,
         id: targetEntry.id,
         data: indexData as any,
       })
     } else {
       await payload.create({
         collection: "uri-index",
+        req,
+        overrideAccess: true,
         data: indexData as any,
       })
     }
 
     if (status === "published" && draftEntry?.id && draftEntry.id !== targetEntry?.id) {
       try {
-        await payload.delete({ collection: "uri-index", id: draftEntry.id })
+        await payload.delete({
+          collection: "uri-index",
+          req,
+          overrideAccess: true,
+          id: draftEntry.id,
+        })
       } catch (error) {
         payload.logger.warn(
           {
@@ -194,7 +211,8 @@ export async function updateURI({
           redirectSource,
           collection,
           documentId,
-          uri
+          uri,
+          req
         )
         if (redirectResult.success) {
           payload.logger.info(
@@ -211,8 +229,9 @@ export async function updateURI({
       }
     }
   } catch (error) {
-    const payload = await currentGetPayload({ config: configPromise })
+    const payload = req?.payload || (await currentGetPayload({ config: configPromise }))
     payload.logger.error({ error }, "Failed to update URI index")
+    if (req?.transactionID) throw error
   }
 }
 
@@ -331,14 +350,17 @@ export async function checkURIConflict(
 
 export async function getTemplateIdForCollection(
   collection: string,
-  payload?: any
+  payload?: any,
+  req?: PayloadRequest
 ): Promise<string | null> {
   try {
     // Use payload parameter if provided, otherwise get fresh instance
-    const payloadInstance = payload || (await currentGetPayload({ config: configPromise }))
+    const payloadInstance =
+      payload || (await currentGetPayload({ config: configPromise }))
 
     const settings = await payloadInstance.findGlobal({
       slug: "settings",
+      req,
       depth: 0,
       overrideAccess: true,
     })

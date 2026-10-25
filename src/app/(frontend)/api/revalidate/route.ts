@@ -10,14 +10,14 @@ export async function GET(): Promise<Response> {
 
   const { user } = await payload.auth({ headers: requestHeaders })
 
-  if (!user) {
+  if (!user || !("role" in user)) {
     return Response.json(
       { success: false, message: "Authentication required" },
       { status: 401 }
     )
   }
 
-  if (!userHasMinimumRole(user, "admin") || user.role === "ai-agent") {
+  if (!userHasMinimumRole(user, "admin")) {
     return Response.json(
       { success: false, message: "Insufficient permissions" },
       { status: 403 }

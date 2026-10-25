@@ -47,13 +47,14 @@ export const ImageMedia: React.FC<MediaProps> = props => {
     height = fullHeight!
     alt = altFromResource || ""
 
-    const cacheTag = resource.updatedAt
-
-    if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
-      src = `${url}?${cacheTag}`
-    } else {
-      src = `${getClientSideURL()}${url}?${cacheTag}`
-    }
+    if (!url) return null
+    const origin = getClientSideURL()
+    const imageURL = new URL(url, origin)
+    if (resource.updatedAt) imageURL.searchParams.set("v", resource.updatedAt)
+    // Same-site media uses Next's local image route, including loopback previews.
+    src = imageURL.origin === new URL(origin).origin
+      ? `${imageURL.pathname}${imageURL.search}`
+      : imageURL.href
   }
 
   const loading = loadingFromProps || (!priority ? "lazy" : undefined)

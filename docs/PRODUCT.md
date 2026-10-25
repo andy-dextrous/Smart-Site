@@ -1,47 +1,7 @@
 # SmartSite
 
-SmartSite is an enterprise website builder built around a field-driven, section-first architecture.
+SmartSite is a complete standalone website-building kit: Next.js frontend, Payload CMS, local database lifecycle, official Payload MCP transport and portable agent skills. Open the project in Codex or Claude Code and describe the site you want. The agent handles ordinary development while you supply business facts, design direction and publication decisions.
 
-## Core features
+The site owns its source, dependencies, data configuration, tests, documentation and hosting. It does not require a factory checkout, shared registry, hosted AI account or global SmartSite CLI. The coding agent edits code and uses a browser; MCP edits permitted website content through the CMS. The CMS remains available for human editors.
 
-- Reusable field patterns
-- Type-safe components
-- Visual field editor
-- Smart defaults
-- Installable section library
-- Component isolation
-- Drag-and-drop builder
-- Responsive by default
-- O(1) URI resolution
-- Smart caching
-- SEO automation
-- Multi-language ready architecture
-- Protected admin layer
-- Configuration-driven customization
-- AI-powered features via a managed backend
-
-## Core architecture
-
-SmartSite follows a field-driven, section-first architecture where:
-
-- Fields drive everything.
-- Sections are self-contained.
-- Admin layer is protected.
-- Configuration over modification.
-
-## Supported operating models
-
-SmartSite supports two first-class deployment shapes:
-
-- hosted Mongo plus managed hosting
-- self-hosted Mongo as a Docker appliance
-
-The exact detection and operating rules are in [docs/product-specs/hosting-modes.md](product-specs/hosting-modes.md).
-
-## Product promise
-
-- build locally with the fastest loop possible
-- preserve preview, routing, caching, and Payload behavior across hosting modes
-- give agents clear, deterministic commands instead of tribal knowledge
-
-The preserved longform manuscript for SmartSite is described in [docs/references/source-manuscript.md](references/source-manuscript.md).
+A new project starts empty: one local owner, one scoped local MCP key, site identity and minimum settings. There are no invented pages, demo posts or automatic production writes. See [getting started](workflows/getting-started.md).

@@ -6,23 +6,35 @@ services:
     restart: unless-stopped
     env_file:
       - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
-    command:
-      - --bind_ip_all
-      - --auth
+    entrypoint: ["bash", "/smartsite/start-replica.sh"]
     volumes:
       - mongo-data:/data/db
+      - mongo-config:/data/configdb
+      - ./docker/mongo/start-replica.sh:/smartsite/start-replica.sh:ro
       - ./docker/mongo/init-app-user.js:/docker-entrypoint-initdb.d/init-app-user.js:ro
     healthcheck:
       test:
         - CMD-SHELL
         - >
-          echo 'db.adminCommand({ ping: 1 }).ok'
+          echo 'db.hello().isWritablePrimary ? 1 : 0'
           | mongosh "mongodb://$$MONGO_INITDB_ROOT_USERNAME:$$MONGO_INITDB_ROOT_PASSWORD@127.0.0.1:27017/admin?authSource=admin" --quiet
           | grep 1
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 15s
+
+  mongo-init:
+    image: mongo:8
+    restart: "no"
+    env_file:
+      - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
+    depends_on:
+      mongo:
+        condition: service_started
+    entrypoint: ["mongosh", "--nodb", "--quiet", "/smartsite/init-replica.js"]
+    volumes:
+      - ./docker/mongo/init-replica.js:/smartsite/init-replica.js:ro
 
   build:
     build:
@@ -34,6 +46,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
     command: ["/app/docker/build-app.sh"]
     volumes:
       - next-build:/app/.next
@@ -46,6 +60,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
     command: ["/app/docker/start-app.sh"]
     volumes:
       - next-build:/app/.next
@@ -78,6 +94,7 @@ services:
 
 volumes:
   mongo-data:
+  mongo-config:
   next-build:
   public-media:
   caddy-data:

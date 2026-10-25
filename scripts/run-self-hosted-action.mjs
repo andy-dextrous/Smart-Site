@@ -54,12 +54,16 @@ function resolveScript(action) {
   switch (action) {
     case "deploy":
       return "./docker/deploy-self-hosted.sh"
+    case "deploy-prebuilt":
+      return "./docker/deploy-prebuilt-self-hosted.sh"
     case "backup":
       return "./docker/backup-self-hosted.sh"
     case "history":
       return "./docker/history-self-hosted.sh"
     case "probe":
       return "./docker/probe-self-hosted.sh"
+    case "restore":
+      return "./docker/restore-mongo-archive.sh"
     case "rollback":
       return "./docker/rollback-self-hosted.sh"
     case "status":
@@ -74,6 +78,7 @@ function resolveScript(action) {
 function resolveEnvironment(action, positionals) {
   switch (action) {
     case "deploy":
+    case "deploy-prebuilt":
     case "backup":
     case "history":
     case "probe":
@@ -86,6 +91,8 @@ function resolveEnvironment(action, positionals) {
       return positionals[0] && ["production", "preview"].includes(positionals[0]) ? positionals[0] : "production"
     case "promote":
       return "production"
+    case "promote-prebuilt":
+      return "production"
     case "preview":
       return "preview"
     case "guard":
@@ -96,6 +103,14 @@ function resolveEnvironment(action, positionals) {
 }
 
 function resolvePassthrough(action, positionals) {
+  if (action === "deploy-prebuilt") {
+    return positionals.slice(positionals[0] ? 1 : 0)
+  }
+
+  if (action === "promote-prebuilt") {
+    return positionals
+  }
+
   if (action === "restore") {
     if (positionals[0] && ["production", "preview"].includes(positionals[0])) {
       return positionals.slice(1)
@@ -128,6 +143,8 @@ function normalizeAction(action) {
     case "promote":
     case "preview":
       return "deploy"
+    case "promote-prebuilt":
+      return "deploy-prebuilt"
     default:
       return action
   }
@@ -136,7 +153,13 @@ function normalizeAction(action) {
 function ensureUsage(action, passthrough) {
   if (!action) {
     throw new Error(
-      "Usage: node scripts/run-self-hosted-action.mjs <prepare|deploy|promote|preview|backup|history|probe|restore|rollback|status|install-backup-cron|guard> [environment] [extra args] [--config smartsite-deployment.json] [--force]",
+      "Usage: node scripts/run-self-hosted-action.mjs <prepare|deploy|deploy-prebuilt|promote|promote-prebuilt|preview|backup|history|probe|restore|rollback|status|install-backup-cron|guard> [environment] [extra args] [--config smartsite-deployment.json] [--force]",
+    )
+  }
+
+  if (["deploy-prebuilt", "promote-prebuilt"].includes(action) && !passthrough[0]) {
+    throw new Error(
+      "Usage: node scripts/run-self-hosted-action.mjs <deploy-prebuilt [production|preview] | promote-prebuilt> <archive-path> [release-image] [deployment-id] [--config smartsite-deployment.json] [--force]",
     )
   }
 
@@ -158,7 +181,7 @@ function ensureUsage(action, passthrough) {
 /*************************************************************************/
 
 function shouldGuardGit(action) {
-  return ["deploy", "promote", "preview", "rollback", "restore", "guard"].includes(action)
+  return ["deploy", "deploy-prebuilt", "promote", "promote-prebuilt", "preview", "rollback", "restore", "guard"].includes(action)
 }
 
 function runGitGuard(action, environment, force) {
@@ -192,7 +215,16 @@ function runGitGuard(action, environment, force) {
     throw new Error(`Refusing to ${action} with uncommitted changes. Commit or stash them first, or re-run with --force.`)
   }
 
-  if ((action === "promote" || (action === "deploy" && environment === "production") || (action === "rollback" && environment === "production")) && gitState.behind > 0 && !force) {
+  if (
+    (
+      action === "promote" ||
+      action === "promote-prebuilt" ||
+      ((action === "deploy" || action === "deploy-prebuilt") && environment === "production") ||
+      (action === "rollback" && environment === "production")
+    ) &&
+    gitState.behind > 0 &&
+    !force
+  ) {
     throw new Error(
       `Refusing to ${action} production while the current branch is behind upstream by ${gitState.behind} commit(s). Rebase or pull first, or re-run with --force.`,
     )

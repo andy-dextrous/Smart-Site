@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:24.22.1-bookworm AS builder
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN npm install -g pnpm@10.34.8
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+RUN chmod +x /app/docker/build-app.sh /app/docker/start-app.sh
+
+RUN --mount=type=secret,id=smartsite_env sh -eu <<'EOF'
+set -a
+. /run/secrets/smartsite_env
+set +a
+/app/docker/build-app.sh
+mkdir -p /app/.smartsite-release
+cp -R /app/.next /app/.smartsite-release/.next
+if [ -d /app/public ]; then
+  cp -R /app/public /app/.smartsite-release/public
+fi
+printf "%s\n" "${NEXT_DEPLOYMENT_ID:-unknown}" > /app/.smartsite-release/deployment-id
+EOF
+
+FROM node:24.22.1-bookworm AS runtime
+
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
+
+WORKDIR /app
+
+COPY docker ./docker
+COPY --from=builder /app/.smartsite-release /app/.smartsite-release
+
+RUN chmod +x /app/docker/start-app.sh
+
+EXPOSE 3000
+
+CMD ["/app/docker/start-app.sh"]

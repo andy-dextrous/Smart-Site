@@ -1,4 +1,4 @@
-import { getPayload } from "payload"
+import { getPayload, type PayloadRequest } from "payload"
 import configPromise from "@payload-config"
 import { revalidateTag as nextRevalidateTag } from "next/cache"
 import { formatIdForRelationship } from "@/admin/payload/db/id-utils"
@@ -14,9 +14,7 @@ export function setRedirectPayloadAccessor(getter?: typeof getPayload): void {
   currentGetPayload = getter ?? getPayload
 }
 
-export function setRedirectRevalidate(
-  revalidate?: typeof nextRevalidateTag
-): void {
+export function setRedirectRevalidate(revalidate?: typeof nextRevalidateTag): void {
   currentRevalidateTag = revalidate ?? nextRevalidateTag
 }
 
@@ -34,14 +32,15 @@ export async function createAutomaticRedirect(
   oldURI: string,
   collection: string,
   documentId: string,
-  newURI: string
+  newURI: string,
+  req?: PayloadRequest
 ): Promise<{ success: boolean; message: string }> {
   const startTime = Date.now()
 
   try {
-    const payload = await currentGetPayload({ config: configPromise })
+    const payload = req?.payload || (await currentGetPayload({ config: configPromise }))
 
-    if (await hasManualRedirect(oldURI)) {
+    if (await hasManualRedirect(oldURI, req)) {
       return {
         success: false,
         message: `Manual redirect already exists for ${oldURI} - not overriding`,
@@ -50,6 +49,8 @@ export async function createAutomaticRedirect(
 
     const existingAutoRedirect = await payload.find({
       collection: "redirects",
+      req,
+      overrideAccess: true,
       where: {
         and: [{ from: { equals: oldURI } }, { type: { equals: "automatic" } }],
       },
@@ -101,25 +102,38 @@ export async function createAutomaticRedirect(
       const existing = existingAutoRedirect.docs[0]
       await payload.update({
         collection: "redirects",
+        req,
+        overrideAccess: true,
         id: existing.id,
         data: redirectData,
       })
       redirectId = existing.id
-      payload.logger.info(`Updated automatic redirect: ${oldURI} → ${collection}/${documentId}`)
+      payload.logger.info(
+        `Updated automatic redirect: ${oldURI} → ${collection}/${documentId}`
+      )
     } else {
       const result = await payload.create({
         collection: "redirects",
+        req,
+        overrideAccess: true,
         data: {
           from: oldURI,
           ...redirectData,
         },
       })
       redirectId = result.id
-      payload.logger.info(`Created automatic redirect: ${oldURI} → ${collection}/${documentId}`)
+      payload.logger.info(
+        `Created automatic redirect: ${oldURI} → ${collection}/${documentId}`
+      )
     }
 
-    triggerRedirectRevalidate("collection:redirects")
-    triggerRedirectRevalidate(`redirect:${oldURI}`)
+    const refresh = async () => {
+      triggerRedirectRevalidate("collection:redirects")
+      triggerRedirectRevalidate(`redirect:${oldURI}`)
+    }
+    if (Array.isArray(req?.context.smartsiteAfterCommit))
+      req.context.smartsiteAfterCommit.push(refresh)
+    else await refresh()
 
     const executionTime = Date.now() - startTime
     payload.logger.info(
@@ -131,12 +145,13 @@ export async function createAutomaticRedirect(
       message: `Automatic redirect ${existingAutoRedirect.docs.length > 0 ? "updated" : "created"}: ${oldURI} → ${collection}/${documentId}`,
     }
   } catch (error) {
-    const payload = await currentGetPayload({ config: configPromise })
+    const payload = req?.payload || (await currentGetPayload({ config: configPromise }))
     payload.logger.error(
       { error, oldURI, collection, documentId },
       `Failed to create automatic redirect ${oldURI} → ${collection}/${documentId}`
     )
 
+    if (req?.transactionID) throw error
     return {
       success: false,
       message: `Failed to create redirect: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -151,12 +166,17 @@ export async function createAutomaticRedirect(
 /**
  * Check if a manual redirect exists for the given URI
  */
-export async function hasManualRedirect(uri: string): Promise<boolean> {
+export async function hasManualRedirect(
+  uri: string,
+  req?: PayloadRequest
+): Promise<boolean> {
   try {
-    const payload = await currentGetPayload({ config: configPromise })
+    const payload = req?.payload || (await currentGetPayload({ config: configPromise }))
 
     const result = await payload.find({
       collection: "redirects",
+      req,
+      overrideAccess: true,
       where: {
         and: [{ from: { equals: uri } }, { type: { equals: "manual" } }],
       },
@@ -165,7 +185,7 @@ export async function hasManualRedirect(uri: string): Promise<boolean> {
 
     return result.docs.length > 0
   } catch (error) {
-    // If we can't check, assume no conflict to be safe
+    if (req?.transactionID) throw error
     return false
   }
 }
@@ -202,7 +222,8 @@ export async function cleanupAutomaticRedirect(uri: string): Promise<void> {
 
     if (redirectsToDelete.length > 0) {
       const uniqueRedirects = redirectsToDelete.filter(
-        (redirect, index, self) => index === self.findIndex(item => item.id === redirect.id)
+        (redirect, index, self) =>
+          index === self.findIndex(item => item.id === redirect.id)
       )
 
       await Promise.all(
@@ -224,7 +245,10 @@ export async function cleanupAutomaticRedirect(uri: string): Promise<void> {
     }
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error({ error, uri }, `Failed to cleanup automatic redirect for ${uri}`)
+    payload.logger.error(
+      { error, uri },
+      `Failed to cleanup automatic redirect for ${uri}`
+    )
   }
 }
 
@@ -248,7 +272,7 @@ async function cleanupConflictingRedirects(targetURI: string): Promise<void> {
       },
       limit: 5,
     })
-    
+
     // Log potential redirect chain detection
     if (conflictingRedirects.docs.length > 0) {
       payload.logger.warn(
@@ -293,6 +317,9 @@ async function cleanupConflictingRedirects(targetURI: string): Promise<void> {
     triggerRedirectRevalidate("collection:redirects")
   } catch (error) {
     const payload = await currentGetPayload({ config: configPromise })
-    payload.logger.error({ error, targetURI }, `Failed to cleanup conflicting redirects for ${targetURI}`)
+    payload.logger.error(
+      { error, targetURI },
+      `Failed to cleanup conflicting redirects for ${targetURI}`
+    )
   }
 }

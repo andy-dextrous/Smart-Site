@@ -40,9 +40,6 @@ const config: UserConfig = {
     },
   },
   features: {
-    ai: {
-      enabled: false,
-    },
     analytics: false,
     darkMode: false,
     i18n: false,

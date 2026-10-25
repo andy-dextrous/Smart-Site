@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { spawnSync } from "child_process"
+import { fileURLToPath } from "url"
 
 const DEFAULT_CONFIG_PATH = "smartsite-deployment.json"
 const GENERATED_ROOT = ".smartsite-self-hosted/generated"
@@ -226,6 +227,6 @@ function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   main()
 }

@@ -18,36 +18,7 @@ type EnrichedAuthor = NonNullable<PopulatedAuthorProfile>[number] & {
  *
  */
 export const formatAuthors = (authors: NonNullable<Post["populatedAuthors"]>[number][]) => {
-  const enriched = authors as unknown as EnrichedAuthor[]
-
-  const authorNames = enriched
-    .map(author => {
-      const team = author.teamMember && typeof author.teamMember === "object" ? author.teamMember : null
-      const user = author.user && typeof author.user === "object" ? author.user : null
-
-      if (team?.name) {
-        return team.name
-      }
-
-      const nameParts = [author.name, author.lastName ?? user?.lastName]
-        .filter(part => typeof part === "string" && part.trim() !== "")
-        .map(part => part as string)
-
-      if (nameParts.length > 0) {
-        return nameParts.join(" ")
-      }
-
-      if (user?.username) {
-        return user.username
-      }
-
-      if (user?.email) {
-        return user.email
-      }
-
-      return author.name || null
-    })
-    .filter((name): name is string => Boolean(name))
+  const authorNames = authors.map(author => author.name).filter((name): name is string => Boolean(name))
 
   if (authorNames.length === 0) return ""
   if (authorNames.length === 1) return authorNames[0]

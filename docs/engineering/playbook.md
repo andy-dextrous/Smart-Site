@@ -3,13 +3,13 @@
 ## Startup Gate
 
 - Treat this folder as the repository root.
-- Identify the hosting mode before acting.
+- Start local work with the shipped startup skill; identify hosting only before deployment/backup/restore.
 - Use the workflow docs for operational steps.
 - Use the engineering docs for implementation rules.
 
 ## Hosting Mode Detection
 
-Before operational work, determine whether you are in:
+Before hosted operational work, determine whether you are in:
 - `hosted`
 - `self-hosted`
 

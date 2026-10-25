@@ -1,5 +1,5 @@
 import type { CollectionConfig, CollectionSlug } from "payload"
-import { isAdminOrAiAgent } from "@/admin/payload/access/admin"
+import { isAdmin } from "@/admin/payload/access/admin"
 
 export function getURIIndexCollection(relationSlugs: CollectionSlug[]): CollectionConfig {
   const uniqueRelationSlugs = Array.from(new Set(relationSlugs))
@@ -7,10 +7,10 @@ export function getURIIndexCollection(relationSlugs: CollectionSlug[]): Collecti
   return {
     slug: "uri-index",
     access: {
-      create: isAdminOrAiAgent,
-      delete: isAdminOrAiAgent,
-      read: isAdminOrAiAgent,
-      update: isAdminOrAiAgent,
+      create: isAdmin,
+      delete: isAdmin,
+      read: isAdmin,
+      update: isAdmin,
     },
     admin: {
       hidden: true,

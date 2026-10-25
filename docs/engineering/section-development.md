@@ -127,7 +127,7 @@ Smart Site provides pre-built field groups so schemas stay consistent. Import on
   - `breadcrumbs` – array used for navigational trails.
   - `searchParams` – parsed query string.
   - `params` – dynamic route params (e.g. `uri` segments). Treat these as optional; guard their usage inside the component.
-- Keep individual folders self-contained. Shared helpers belong in `src/components/fields` or `src/components/ui` so the CLI can install sections without chasing deep relative imports.
+- Keep individual folders self-contained. Shared helpers belong in `src/components/fields` or `src/components/ui` so components remain portable without deep relative imports.
 
 ### 2. Payload Config Rules (`config.ts`)
 
@@ -510,14 +510,12 @@ export function HeroComponent(props: HeroBlock) {
 - [ ] Animations use shared provider or declarative attributes; `"use client"` only when required.
 - [ ] Accessibility reviewed (heading levels, alt text, focus states).
 - [ ] Section registered in both `sections/config.ts` and `sections-map.tsx`.
-- [ ] Storybook or catalogue preview (blocks library) updated if the section is installable.
+- [ ] Local component catalogue and actual page screenshots updated when useful.
 - [ ] Manual QA on default, min, and max viewport widths to confirm fluid type/spacing behaves.
 
-### 12. Coordination with the Blocks Library
+### 12. Local reuse
 
-- When promoting a section to the public catalogue, mirror the Smart Site folder into the Blocks Library repository (`src/registry/sections/<name>/`) without diverging token usage.
-- Provide preview fixtures that use the same field schema so the catalogue renders accurately.
-- Keep dependency metadata up-to-date (`packages/cli/src/registry/sections.ts`) so the CLI installs required fields, animations, and utilities.
+Keep reusable sections and all their required fields, assets and dependencies in this repository. Add examples to the local component catalogue. No external registry, originating repository or installation CLI is required.
 
 ### 13. Evolving the Guidelines
 
@@ -528,5 +526,5 @@ export function HeroComponent(props: HeroBlock) {
   - Communication to the team before merging.
 - Treat this section as the source of truth. If you discover a helpful pattern while building sections, codify it here before rolling it out.
 
-Adhering to this checklist keeps every Smart Site section composable and ready for automation via the CLI. Break the rules only with explicit approval and documented trade-offs.
+Adhering to this checklist keeps every Smart Site section composable and ready for ordinary source editing by a coding agent. Break the rules only with explicit approval and documented trade-offs.
 <a id="routing--caching"></a>

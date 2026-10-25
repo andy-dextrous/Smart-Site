@@ -1,3 +1,4 @@
+import { deferHookAfterCommit } from "@/admin/payload/hooks/utilities/after-commit"
 import {
   getDependentUpdatesContext,
   clearDependentUpdatesContext,
@@ -20,13 +21,16 @@ import type { CollectionAfterChangeHook } from "payload"
 /*  - Uses direct database access (no caching) for data consistency
 /*************************************************************************/
 
-export const afterTemplateChange: CollectionAfterChangeHook = async ({
-  doc,
-  previousDoc,
-  operation,
-  req: { payload, context },
-  collection,
-}) => {
+export const afterTemplateChange: CollectionAfterChangeHook = async args => {
+  if (deferHookAfterCommit(args, afterTemplateChange)) return args.doc
+  const {
+    doc,
+    previousDoc,
+    operation,
+    req: { payload, context },
+    collection,
+  } = args
+
   if (collection.slug !== "templates") return doc
 
   if (shouldPreventHooks(payload, context)) {
@@ -64,7 +68,10 @@ export const afterTemplateChange: CollectionAfterChangeHook = async ({
     revalidateTag(`template:${doc.id}`, { expire: 0 })
     payload.logger.info(`Revalidated template:${doc.id}`)
   } catch (error) {
-    payload.logger.debug({ error, templateId: doc.id }, `Template revalidation failed for ${doc.id}`)
+    payload.logger.debug(
+      { error, templateId: doc.id },
+      `Template revalidation failed for ${doc.id}`
+    )
   }
 
   return doc

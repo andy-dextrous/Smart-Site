@@ -33,11 +33,11 @@ If users request unsupported tokens, advise adding them as new human-controlled 
 
 Use this as a quick map for where changes belong. Never modify the admin layer.
 
-- `src/admin/` — Protected Payload layer (collections, globals, plugins, cache, CLI wiring). Do not edit here. Use `smartsite.config.ts`, `src/extensions`, and frontend components instead.
+- `src/admin/` — Protected Payload layer (collections, globals, plugins, cache, MCP). Do not edit here. Use `smartsite.config.ts`, `src/extensions`, and frontend components instead.
 - `src/app/` — Next.js App Router.
   - `(frontend)/` — public website routes, API routes for frontend, global CSS, error/not-found, robots/sitemap.
     - `[[...uri]]/page.tsx` — dynamic page renderer (URI index).
-    - `api/` — frontend APIs (ai, seed, preview); keep server-only logic.
+    - `api/` — frontend APIs (preview, health, cache); keep server-only logic.
     - `css/` — Tailwind v4 token sheets (`spacing.css`, `typography.css`, `colors.css`, `theme.css`).
     - `(dev)/` — development-only utilities (e.g., previews, diagnostics).
   - `(payload)/` — admin UI routes. Do not customize here.
@@ -70,7 +70,7 @@ src/
 ├── app/
 │   ├── (frontend)/
 │   │   ├── [[...uri]]/page.tsx          # Dynamic page renderer
-│   │   ├── api/                         # Frontend API routes (ai, seed, preview)
+│   │   ├── api/                         # Frontend API routes (preview, health, cache)
 │   │   ├── css/                         # Tailwind v4 token sheets
 │   │   │   ├── spacing.css
 │   │   │   ├── typography.css
@@ -162,7 +162,7 @@ Ground section work in [docs/engineering/section-development.md](section-develop
 
 - Export the block in `sections/config.ts` and component in `sections-map.tsx`.
 - Run `pnpm lint` and `pnpm type-check`; manually verify at min/max breakpoints.
-- If promoting to blocks library, mention mirroring instructions and metadata updates.
+- Document reusable section examples inside this repository.
 
 ---
 
@@ -171,14 +171,12 @@ Ground section work in [docs/engineering/section-development.md](section-develop
 Use these “if this, then that” rules to route requests quickly. Prefer canonical docs over the preserved manuscript when citing operational guidance.
 
 - Setup & Environment
-  - If Node < 20 or pnpm missing → install per [docs/workflows/getting-started.md](../workflows/getting-started.md) → rerun `pnpm install`.
-  - If `.env` is missing → run `pnpm bootstrap`, then review `.env`.
-  - If `.env` already exists and the site is configured → do not rerun bootstrap unless the user explicitly asks.
-  - If you need a fast status check → run `pnpm doctor` before guessing the next command.
-  - If AI is intentionally enabled and the credentials are missing/outdated → run `npx smartsite ai rotate --project .`.
-  - If port 3000 is busy → stop the other process or run `pnpm kill`, then start dev.
-  - If Mongo connection fails → check service status (Homebrew/Chocolatey) or Atlas IP allowlist → verify `DATABASE_URL`.
-  - If seeding stalls → ensure `pnpm dev` is running → retry `pnpm seed` or `pnpm seed:demo`.
+  - Use the pinned Node 24 and pnpm versions from [getting started](../workflows/getting-started.md), matching the machine architecture.
+  - For a fresh project, run bootstrap; for a configured project, inspect doctor and resume its owned runtime.
+  - Preserve existing environment files and project data. Diagnose identity or credential mismatches before retrying.
+  - If a port is occupied, inspect ownership; never kill an unrelated process.
+  - If MCP is unavailable, check server readiness, the project connection and the client's reconnect/trust state.
+  - Bootstrap creates essentials only. Author requested business content through MCP; there is no seed or AI-key rotation workflow.
 
 - Design System
   - If a user asks to “make headings bigger on desktop” → adjust `--fluid-text-base-max` or `--fluid-text-scale-max` in `typography.css` (not per-component overrides).
@@ -191,7 +189,7 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
 - Sections
   - If creating a new section → scaffold folder (kebab-case), add `config.ts`, `Component.tsx`, register in config + map, end schema with `sectionSettings()`.
   - If the section displays content + image overlay → compute `tone = dark` and apply via variants; use `<Section>` for padding/colour.
-  - If the section repeats across multiple pages → consider a Template or a blocks-library promotion.
+  - If the section repeats across multiple pages → consider a local Template or reusable section.
   - If interactivity is required (e.g., sliders) → split client logic to a colocated client module and lazy-load.
   - If payload fields duplicate existing factories → replace with shared field presets.
   - If no existing field fits the brief → add minimal new fields to the section schema rather than bending an unrelated preset; promote to a shared pattern only if the same need repeats across sections.
@@ -222,14 +220,12 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
   - If images look blurry/heavy → use `<Media>` with appropriate sizes/qualities; avoid inline `<img>`.
   - If storage is not configured → default to local in dev; use the deployment guidance in [docs/workflows/deployment.md](../workflows/deployment.md) for production storage decisions.
 
-- AI Integration
-  - If AI features are requested without a subscription → set `features.ai.enabled = false` and proceed without AI.
-  - If the workspace is still disabled → confirm the AI agent exists (`npx smartsite ai rotate --project .`) and that Wild Creative has approved the site.
-  - If keys are lost → coordinate rotation then `npx smartsite ai rotate --project . --force`.
+- Agent content access
+  - Use the official MCP endpoint and checked SmartSite tools. Reconnect missing clients using the local startup instructions. No chat subscription or hosted AI account is required.
 
 - Deployment
   - If building for production → run `pnpm build`; ensure environment variables mirror staging; connect Mongo Atlas.
-  - If content differs between environments → use `mongodump`/`mongorestore` promotion instead of reseeding.
+  - If content differs between environments → follow the explicit first-launch transfer or approved backup/restore procedure.
 
 - Troubleshooting
   - If lint fails → fix reported files; do not disable rules.

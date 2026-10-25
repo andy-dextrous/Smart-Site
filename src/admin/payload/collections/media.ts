@@ -28,7 +28,7 @@ function resolveLocalStaticDir(staticDir?: string): string {
     return path.join(process.cwd(), "public", relative)
   }
 
-  return path.isAbsolute(trimmed) ? trimmed : path.resolve(process.cwd(), trimmed)
+  return path.isAbsolute(trimmed) ? trimmed : path.resolve(/* turbopackIgnore: true */ process.cwd(), trimmed)
 }
 
 function buildFormatOptions(quality?: number): ImageUploadFormatOptions | undefined {

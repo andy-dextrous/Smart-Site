@@ -5,7 +5,13 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 
-import { useConfig, useTranslation, usePreferences } from "@payloadcms/ui"
+import {
+  useConfig,
+  useTranslation,
+  usePreferences,
+  useEntityVisibility,
+  useAuth,
+} from "@payloadcms/ui"
 import { formatAdminURL } from "@payloadcms/ui/shared"
 import { getTranslation } from "@payloadcms/translations"
 import { usePathname } from "next/navigation"
@@ -13,7 +19,6 @@ import { CollectionIcon } from "@/admin/components/collection-icon"
 import { getNavIcon } from "@/admin/payload/components/backend/nav/navIconMap"
 import { Button } from "@/admin/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-
 
 /*************************************************************************/
 /*  NAV ITEM COMPONENT WITH TOOLTIP AND ANIMATION
@@ -134,6 +139,7 @@ function NavGroup({
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { visibleEntities } = useEntityVisibility()
   const {
     config: {
       routes: { admin: adminRoute },
@@ -141,6 +147,7 @@ export function AppSidebar() {
       globals,
     },
   } = useConfig()
+  const { permissions } = useAuth()
   const { i18n } = useTranslation()
   const { getPreference, setPreference } = usePreferences()
 
@@ -235,9 +242,17 @@ export function AppSidebar() {
   ]
 
   const visibleCollections = collections.filter(
-    ({ slug }) => !omittedEntities.includes(slug)
+    ({ slug }) =>
+      !omittedEntities.includes(slug) &&
+      visibleEntities.collections.includes(slug) &&
+      permissions?.collections?.[slug]?.read
   )
-  const visibleGlobals = globals.filter(({ slug }) => !omittedEntities.includes(slug))
+  const visibleGlobals = globals.filter(
+    ({ slug }) =>
+      !omittedEntities.includes(slug) &&
+      visibleEntities.globals.includes(slug) &&
+      permissions?.globals?.[slug]?.read
+  )
 
   /*************************************************************************/
   /*  GROUP DEFINITIONS
@@ -259,7 +274,6 @@ export function AppSidebar() {
       icon: getNavIcon("settings"),
       items: [
         "settings",
-        "ai-settings",
         "header",
         "footer",
         "templates",
@@ -310,7 +324,7 @@ export function AppSidebar() {
         icon: (props: any) => <CollectionIcon item={col} slug={col.slug} {...props} />,
       })),
     ...visibleGlobals
-      .filter(glob => !["header", "footer", "settings", "ai-settings"].includes(glob.slug))
+      .filter(glob => !["header", "footer", "settings"].includes(glob.slug))
       .map(glob => ({
         type: "global",
         slug: glob.slug,
@@ -370,7 +384,9 @@ export function AppSidebar() {
               const label = isCollection
                 ? getTranslation(item.labels?.plural || item.slug, i18n)
                 : getTranslation(item.label || item.slug, i18n)
-              const Icon = (props: any) => <CollectionIcon item={item} slug={item.slug} {...props} />
+              const Icon = (props: any) => (
+                <CollectionIcon item={item} slug={item.slug} {...props} />
+              )
               const isActive =
                 pathname.startsWith(href) &&
                 ["/", undefined].includes(pathname[href.length])
@@ -396,7 +412,9 @@ export function AppSidebar() {
               adminRoute,
               path: `/collections/${collection.slug}`,
             })
-            const Icon = (props: any) => <CollectionIcon item={collection} slug={collection.slug} {...props} />
+            const Icon = (props: any) => (
+              <CollectionIcon item={collection} slug={collection.slug} {...props} />
+            )
             const isActive =
               pathname.startsWith(href) &&
               ["/", undefined].includes(pathname[href.length])
@@ -421,7 +439,9 @@ export function AppSidebar() {
               adminRoute,
               path: `/collections/${collection.slug}`,
             })
-            const Icon = (props: any) => <CollectionIcon item={collection} slug={collection.slug} {...props} />
+            const Icon = (props: any) => (
+              <CollectionIcon item={collection} slug={collection.slug} {...props} />
+            )
             const isActive =
               pathname.startsWith(href) &&
               ["/", undefined].includes(pathname[href.length])
@@ -458,7 +478,9 @@ export function AppSidebar() {
                 adminRoute,
                 path: `/collections/${collection.slug}`,
               })
-              const Icon = (props: any) => <CollectionIcon item={collection} slug={collection.slug} {...props} />
+              const Icon = (props: any) => (
+                <CollectionIcon item={collection} slug={collection.slug} {...props} />
+              )
               const isActive =
                 pathname.startsWith(href) &&
                 ["/", undefined].includes(pathname[href.length])
@@ -494,20 +516,22 @@ export function AppSidebar() {
         >
           {groups.settings.items.map(itemSlug => {
             // Regular item handling
-            const item = [...visibleCollections, ...visibleGlobals].find(i => i.slug === itemSlug)
+            const item = [...visibleCollections, ...visibleGlobals].find(
+              i => i.slug === itemSlug
+            )
             if (!item) return null
-            
+
             const isCollection = "labels" in item
             const href = formatAdminURL({
               adminRoute,
-              path: isCollection
-                ? `/collections/${item.slug}`
-                : `/globals/${item.slug}`,
+              path: isCollection ? `/collections/${item.slug}` : `/globals/${item.slug}`,
             })
             const label = isCollection
               ? getTranslation(item.labels?.plural || item.slug, i18n)
               : getTranslation(item.label || item.slug, i18n)
-            const Icon = (props: any) => <CollectionIcon item={item} slug={item.slug} {...props} />
+            const Icon = (props: any) => (
+              <CollectionIcon item={item} slug={item.slug} {...props} />
+            )
             const isActive =
               pathname.startsWith(href) &&
               ["/", undefined].includes(pathname[href.length])

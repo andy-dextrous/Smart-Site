@@ -17,7 +17,6 @@ import { getURIIndexCollection } from "@/admin/payload/collections/uri-index"
 import { Header } from "@/admin/payload/globals/header/config"
 import { Footer } from "@/admin/payload/globals/footer/config"
 import { Settings } from "@/admin/payload/globals/settings"
-import { AISettings } from "@/admin/payload/globals/ai-settings"
 
 import { FormBlock } from "@/admin/payload/blocks/form/config"
 import { MediaBlock } from "@/admin/payload/blocks/media/config"
@@ -45,7 +44,6 @@ const defaultGlobalMap: Record<string, GlobalConfig> = {
   header: Header,
   footer: Footer,
   settings: Settings,
-  "ai-settings": AISettings
 }
 
 const defaultBlockMap: Record<string, Block> = {
