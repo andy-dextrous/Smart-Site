@@ -280,6 +280,7 @@ export function AppSidebar() {
         "redirects",
         "categories",
         "search",
+        "payload-mcp-api-keys",
       ],
     },
   }
@@ -314,6 +315,7 @@ export function AppSidebar() {
             "users",
             "media",
             "search",
+            "payload-mcp-api-keys",
           ].includes(col.slug)
       )
       .map(col => ({

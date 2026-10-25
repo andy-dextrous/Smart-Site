@@ -6,7 +6,6 @@ import { SMARTSITE_DEFAULTS, type SmartSiteConfig, type CollectionConfig, type U
 import { deepMerge, deepFreeze } from "./deep-merge"
 import userConfig from "@/smartsite.config"
 import { emitValidationWarnings, validateMergedConfig, validateUserConfig } from "./validator"
-import * as extensions from "@/extensions"
 import { getTestingUserConfigOverride } from "./testing"
 
 let cachedConfig: SmartSiteConfig | null = null
@@ -79,12 +78,13 @@ export function getFrontendCollections(): Record<string, CollectionConfig> {
         SMARTSITE_DEFAULTS.collections,
         slug
       )
-      const isExtensionRegistered = Boolean(extensions.collections[slug])
+      // This module also runs in the browser. Registry implementations are
+      // server-only; resolver.ts validates their presence when building Payload.
       const isExtensionEnabled = enabledExtensionCollections.has(slug)
 
       if (
         !isDefaultCollection &&
-        (!isExtensionRegistered || !isExtensionEnabled)
+        !isExtensionEnabled
       ) {
         continue
       }

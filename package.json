@@ -1,6 +1,6 @@
 {
   "name": "smart-site",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Standalone website-building kit: Next.js, Payload CMS, native MCP and portable coding-agent skills.",
   "license": "MIT",
   "type": "module",

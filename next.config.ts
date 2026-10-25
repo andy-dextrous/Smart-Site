@@ -10,7 +10,9 @@ const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
 const projectRoot = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig = {
-  output: "standalone",
+  // Vercel owns its deployment output; standalone is for self-hosted builds.
+  // Next 16.3 cannot combine its standalone finalizer with the Vercel adapter.
+  output: process.env.VERCEL ? undefined : "standalone",
   poweredByHeader: false,
   deploymentId: process.env.NEXT_DEPLOYMENT_ID,
   images: {

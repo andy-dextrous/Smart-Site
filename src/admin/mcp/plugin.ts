@@ -22,6 +22,14 @@ const configure = mcpPlugin({
   },
   overrideApiKeyCollection: collection => ({
     ...collection,
+    admin: {
+      ...collection.admin,
+      group: "Settings",
+      custom: {
+        ...collection.admin?.custom,
+        icon: { type: "lucide", name: "KeyRound" },
+      },
+    },
     fields: optInContentTools(collection.fields),
     hooks: {
       ...collection.hooks,

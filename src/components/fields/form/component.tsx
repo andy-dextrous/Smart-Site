@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/utilities/ui"
 
 import { fields } from "./fields"
+import { formDefaultValues } from "./default-values"
 
 export type FormBlockProps = {
   blockName?: string
@@ -45,7 +46,7 @@ export const FormBlock: React.FC<
   } = props
 
   const formMethods = useForm<any>({
-    defaultValues: formFromProps?.fields || undefined,
+    defaultValues: formDefaultValues(formFromProps?.fields),
   })
 
   const {

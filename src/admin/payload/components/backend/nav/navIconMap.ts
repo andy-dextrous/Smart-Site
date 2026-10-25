@@ -1,4 +1,4 @@
-import { Link, List, LucideProps, Sparkles } from "lucide-react"
+import { KeyRound, Link, List, LucideProps, Sparkles } from "lucide-react"
 import { ExoticComponent } from "react"
 import { FaFileAlt, FaRss, FaSearch, FaUserAlt, FaWpforms } from "react-icons/fa"
 import { IoIosDocument } from "react-icons/io"
@@ -18,6 +18,7 @@ import { RiTeamFill } from "react-icons/ri"
 export const navIconMap: Partial<
   Record<string, ExoticComponent<LucideProps> | IconType>
 > = {
+  "payload-mcp-api-keys": KeyRound,
   categories: List,
   media: MdOutlinePermMedia,
   pages: IoIosDocument,

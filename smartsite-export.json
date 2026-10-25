@@ -514,16 +514,20 @@
       "sha256": "0b8443f9713854710483e18d393f7d7aa6a6dbeb50285b8a0e4f4f067a648fd5"
     },
     {
+      "path": "LICENSE",
+      "sha256": "fa2d7e04e9aedd6a0c8b831824cd309261df55aec3266451a3bcff5c8642e9b9"
+    },
+    {
       "path": "next-env.d.ts",
       "sha256": "7b550dda9686c16f36a17bf9051d5dbf31e98555b30d114ac49fc49a1e712651"
     },
     {
       "path": "next.config.ts",
-      "sha256": "8db59ae9dba1cf1dc5e3885294f1fefe2d20d4f3915c2a5f52d9248fe95ffd3a"
+      "sha256": "304c45b1ef9c3c4ed8cd161b418f025a118765d7af8c5555b256043b597c3894"
     },
     {
       "path": "package.json",
-      "sha256": "77efe381357ea3e22705f0277f554f20dbb3699ca2617c623bd562bdc28bfdc0"
+      "sha256": "96cc34971fb348896f1990dd08ffe55f9b24d47a592d8f1fe28ddaa3399d2fa3"
     },
     {
       "path": "patches/undici@6.20.0.patch",
@@ -607,7 +611,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "02f9ad0ee558cd5d1a3f1af06995fb5ecab4457bcd1a94a9727a891a9c6be93a"
+      "sha256": "faacaedef61cff446e9b0a4eb8dc1b65e6a12d8c885eea75d736024ff6ab5d28"
     },
     {
       "path": "redirects.js",
@@ -883,7 +887,7 @@
     },
     {
       "path": "src/admin/config/index.ts",
-      "sha256": "76a2e41d31b774fba76925985c2d759414cf28a462aeda9206ae6edd71b314e1"
+      "sha256": "5f8db8f50f851c6828e9f6bd1ad6045c287bf01491bb5a11ba24d3f6e17f7fb5"
     },
     {
       "path": "src/admin/config/resolver.ts",
@@ -1039,7 +1043,7 @@
     },
     {
       "path": "src/admin/mcp/plugin.ts",
-      "sha256": "1f7e23d27388f6a980fca396d1309ffa2354e9f019a1a63585f239c796ff0c97"
+      "sha256": "049e85002784be342ad1788474cad5032912428ef4202085b91a6fcf371ac393"
     },
     {
       "path": "src/admin/mcp/projection.ts",
@@ -1055,7 +1059,7 @@
     },
     {
       "path": "src/admin/package.json",
-      "sha256": "9c1b87f69095439cd634040051417d70bc315c1688de4f4397a8b37308a37870"
+      "sha256": "fb7e95202eb1267d72768887c2b1be64b0ba7934b454683ab2e69297bfdcc291"
     },
     {
       "path": "src/admin/payload/access/admin.ts",
@@ -1299,7 +1303,7 @@
     },
     {
       "path": "src/admin/payload/components/backend/nav/navIconMap.ts",
-      "sha256": "e4cd89811987278d3d56e83f10aa6ee31a2e8ebe9898054f0922e327d01fe0ee"
+      "sha256": "b1ce735a2924d3707cde775c6300342174f16c59cdc06972b731e756ebbc7937"
     },
     {
       "path": "src/admin/payload/components/backend/nav/notification-badge.tsx",
@@ -1335,7 +1339,7 @@
     },
     {
       "path": "src/admin/payload/components/providers/layout-provider/app-sidebar.tsx",
-      "sha256": "22b5caacb242a530d6746d3768f1ef5c6c6ae95a8ce2dbd6f2d713f393c172d4"
+      "sha256": "c0f0b17cf8c002ab97a06fee9dedbb3c85e54364192ccb43bff68b5731d5966e"
     },
     {
       "path": "src/admin/payload/components/providers/layout-provider/client.tsx",
@@ -1811,7 +1815,7 @@
     },
     {
       "path": "src/components/fields/form/component.tsx",
-      "sha256": "1cbf55c3d3fd4b02f529250a28854194aeca88d0eb05f2c9e093dc09f4e523ae"
+      "sha256": "4995b55b632f5f6a923f5ecd3e50653c1ac49eb67aa7f3ee835e02af0b755de4"
     },
     {
       "path": "src/components/fields/form/country/index.tsx",
@@ -1820,6 +1824,10 @@
     {
       "path": "src/components/fields/form/country/options.ts",
       "sha256": "5c1abd3ac01b9d92c7fe773c142653883ba111eb9e718e264aea843bc5e2ac33"
+    },
+    {
+      "path": "src/components/fields/form/default-values.ts",
+      "sha256": "db8676ae9f6b6c74c1e08876d5837ce8cd74126cdba9bc81853a25883bf052bd"
     },
     {
       "path": "src/components/fields/form/email/index.tsx",
@@ -2284,6 +2292,10 @@
     {
       "path": "tests/unit/content.test.ts",
       "sha256": "2a1b3f93b5c196ab1e4cffcc64bfe9ca8ca1f3861a761939f1865fcc8d7888a2"
+    },
+    {
+      "path": "tests/unit/form-defaults.test.ts",
+      "sha256": "0bbfd22c23ab74d0ee8b2c7c7a147f248609a36c48e1039530466d3e3e0dcb94"
     },
     {
       "path": "tests/unit/lifecycle.test.ts",
