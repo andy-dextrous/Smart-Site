@@ -54,7 +54,10 @@ services:
 
   app:
     image: ${SMARTSITE_IMAGE_NAME:-smartsite-self-hosted-app}
+    init: true
     restart: unless-stopped
+    environment:
+      SMARTSITE_MEDIA_DIRECTORY: /app/public/media
     env_file:
       - ${SMARTSITE_ENV_FILE:-.smartsite-self-hosted/generated/production.env}
     depends_on:

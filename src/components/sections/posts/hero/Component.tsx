@@ -1,5 +1,5 @@
-import type { Post, PostsHeroBlock } from "@/admin/payload/payload-types"
-import type { PageData } from "@/admin/components/render-sections"
+import type { Post, PostsHeroBlock } from "@/payload-types"
+import type { PageData } from "@/website/rendering/render-sections"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 import { Section } from "@/components/fields/section"
 import { Media } from "@/components/fields/media"
@@ -7,7 +7,7 @@ import {
   formatPostPublishDate,
   estimatePostReadingTime,
   resolvePostCategories,
-} from "@/admin/utilities/posts"
+} from "@/utilities/posts"
 import { tv } from "tailwind-variants"
 
 const postsHeroVariants = tv({
@@ -17,13 +17,13 @@ const postsHeroVariants = tv({
     wrapper: "gap-content flex flex-col",
     copy: "gap-content-sm flex flex-col text-pretty",
     badges:
-      "flex flex-wrap items-center gap-content-sm text-xs uppercase tracking-widest",
-    badge: "rounded-full border px-content-sm py-content-xs",
+      "gap-content-sm flex flex-wrap items-center text-xs tracking-widest uppercase",
+    badge: "px-content-sm py-content-xs rounded-full border",
     heading: "text-balance",
-    meta: "flex flex-wrap items-center gap-content text-sm",
+    meta: "gap-content flex flex-wrap items-center text-sm",
     excerpt: "max-w-3xl text-lg",
     media:
-      "relative aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl border border-dark-border bg-neutral",
+      "border-dark-border bg-neutral relative aspect-[3/2] w-full max-w-xl overflow-hidden rounded-2xl border",
   },
   variants: {
     size: {
@@ -83,7 +83,7 @@ const postsHeroVariants = tv({
     {
       mediaPresence: "with",
       class: {
-        wrapper: "lg:flex-row lg:items-center lg:gap-grid",
+        wrapper: "lg:gap-grid lg:flex-row lg:items-center",
         copy: "lg:flex-1",
         media: "lg:flex-1",
       },
@@ -131,7 +131,9 @@ export function PostsHeroComponent(props: PostsHeroBlock & PageData) {
       : null
 
   const rawFeaturedImage = showImage ? post.featuredImage : null
-  const hasFeaturedImage = Boolean(rawFeaturedImage && typeof rawFeaturedImage === "object")
+  const hasFeaturedImage = Boolean(
+    rawFeaturedImage && typeof rawFeaturedImage === "object"
+  )
 
   const tone =
     sectionSettings?.colorScheme === "dark"

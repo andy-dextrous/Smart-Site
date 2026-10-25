@@ -11,6 +11,6 @@ Smart Site follows a **field-driven, section-first architecture** where:
 
 - **Fields drive everything** - CMS fields automatically generate admin UI and component props
 - **Sections are self-contained** - Each section has its own config and component
-- **Admin layer is protected** - Core CMS logic is isolated from frontend customizations
-- **Configuration over modification** - All customizations via `smartsite.config.ts`
+- **The site owns its source** - Native modules make CMS and frontend behavior easy to inspect and change
+- **Native composition** - Collections own fields, access and hooks; Payload config registers them explicitly
 

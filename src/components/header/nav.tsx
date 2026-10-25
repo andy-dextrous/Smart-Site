@@ -1,7 +1,7 @@
 "use client"
 
 import { CMSLink } from "@/components/fields/link"
-import type { Header as HeaderType } from "@/admin/payload/payload-types"
+import type { Header as HeaderType } from "@/payload-types"
 import { SearchCommandLauncher } from "@/components/search/search-dialog"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import * as React from "react"
@@ -98,9 +98,9 @@ const NavItemWithDropdown: React.FC<{
         <ChevronDown className="text-dark-600 ml-content-xs h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
       </CMSLink>
 
-      <div className="absolute left-0 top-full h-1 w-full opacity-0 group-hover:opacity-100" />
+      <div className="absolute top-full left-0 h-1 w-full opacity-0 group-hover:opacity-100" />
 
-      <div className="border-dark-border mt-content-xs translate-y-control-sm pointer-events-none absolute left-0 top-auto z-30 w-56 min-w-full transform rounded-md border bg-white text-sm opacity-0 shadow-lg transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+      <div className="border-dark-border mt-content-xs translate-y-control-sm pointer-events-none absolute top-auto left-0 z-30 w-56 min-w-full transform rounded-md border bg-white text-sm opacity-0 shadow-lg transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
         <div className="py-content-sm relative z-10 w-full">
           <ul className="list-none">
             {item.subItems?.map((childItem, j: number) => {
@@ -131,9 +131,9 @@ const NestedDropdownItem: React.FC<{ child: ChildItemType }> = ({ child }) => {
         <ChevronRight className="text-dark-600 ml-content-xs h-4 w-4" />
       </div>
 
-      <div className="absolute right-0 top-0 h-full w-1 opacity-0 group-hover/nested:opacity-100" />
+      <div className="absolute top-0 right-0 h-full w-1 opacity-0 group-hover/nested:opacity-100" />
 
-      <div className="border-dark-border ml-content-xs translate-y-control-sm pointer-events-none absolute left-full top-0 z-30 w-56 min-w-full transform rounded-md border bg-white text-sm opacity-0 shadow-md transition-all duration-300 group-hover/nested:pointer-events-auto group-hover/nested:translate-y-0 group-hover/nested:opacity-100">
+      <div className="border-dark-border ml-content-xs translate-y-control-sm pointer-events-none absolute top-0 left-full z-30 w-56 min-w-full transform rounded-md border bg-white text-sm opacity-0 shadow-md transition-all duration-300 group-hover/nested:pointer-events-auto group-hover/nested:translate-y-0 group-hover/nested:opacity-100">
         <div className="py-content-sm relative z-10 w-full">
           <ul className="list-none">
             {child?.subItems?.map((subItem: SubItemType, k: number) => (

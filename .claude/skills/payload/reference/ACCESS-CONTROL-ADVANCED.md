@@ -1,6 +1,6 @@
 # Payload Access Control - Advanced Patterns
 
-Advanced access control patterns including context-aware access, time-based restrictions, factory functions, and production templates.
+Patterns for custom application schemas. Examples using `roles`, tenants, organizations or subscriptions assume those fields are explicitly defined and protected. SmartSite uses its existing singular `role` and `@/access/roles` helpers; do not replace that schema to match these generic examples.
 
 ## Context-Aware Access Patterns
 
@@ -35,7 +35,7 @@ export const Posts: CollectionConfig = {
 
 ### Device-Specific Access
 
-Restrict access based on device type or user agent.
+Adapt content presentation based on user agent. This header is caller-controlled and is not an authorization boundary; combine with actual access permissions for private content.
 
 ```ts
 import type { Access } from 'payload'
@@ -77,7 +77,7 @@ export const restrictedIpAccess = (allowedIps: string[]): Access => {
 }
 
 // Usage
-const internalIps = ['192.168.1.0/24', '10.0.0.5']
+const internalIps = ['192.168.1.20', '10.0.0.5']
 
 export const InternalDocs: CollectionConfig = {
   slug: 'internal-docs',
@@ -88,7 +88,7 @@ export const InternalDocs: CollectionConfig = {
 }
 ```
 
-**Note**: Requires your server to pass IP address via headers (common with proxies/load balancers).
+**Note**: This exact-address example does not parse CIDRs or proxy chains. Only trust a canonical IP header overwritten by your trusted proxy, with direct origin access prevented; do not trust caller-supplied forwarding headers.
 
 **Source**: Synthesized (headers pattern)
 
@@ -182,7 +182,8 @@ export const scheduledContentAccess: Access = ({ req: { user } }) => {
 ```ts
 import type { Access } from 'payload'
 
-export const activeSubscriptionAccess: Access = async ({ req: { user } }) => {
+export const activeSubscriptionAccess: Access = async ({ req }) => {
+  const { user } = req
   if (!user) return false
   if (user.roles?.includes('admin')) return true
 
@@ -190,6 +191,7 @@ export const activeSubscriptionAccess: Access = async ({ req: { user } }) => {
     const subscription = await req.payload.findByID({
       collection: 'subscriptions',
       overrideAccess: true,
+      req,
       id: user.subscriptionId,
     })
 
@@ -217,7 +219,8 @@ import type { Access } from 'payload'
 export const tierBasedAccess = (requiredTier: string): Access => {
   const tierHierarchy = ['free', 'basic', 'pro', 'enterprise']
 
-  return async ({ req: { user } }) => {
+  return async ({ req }) => {
+  const { user } = req
     if (!user) return false
     if (user.roles?.includes('admin')) return true
 
@@ -225,6 +228,7 @@ export const tierBasedAccess = (requiredTier: string): Access => {
       const subscription = await req.payload.findByID({
         collection: 'subscriptions',
         overrideAccess: true,
+        req,
         id: user.subscriptionId,
       })
 
@@ -233,7 +237,7 @@ export const tierBasedAccess = (requiredTier: string): Access => {
       const userTierIndex = tierHierarchy.indexOf(subscription.tier)
       const requiredTierIndex = tierHierarchy.indexOf(requiredTier)
 
-      return userTierIndex >= requiredTierIndex
+      return requiredTierIndex >= 0 && userTierIndex >= requiredTierIndex
     } catch {
       return false
     }
@@ -543,10 +547,11 @@ export const checkArgsAccess: Access = (args) => {
 
 ```ts
 export const timedAsyncAccess: Access = async ({ req }) => {
+  if (!req.user) return false
   const start = Date.now()
 
   const result = await fetch('https://auth-service.example.com/validate', {
-    headers: { userId: req.user?.id },
+    headers: { userId: String(req.user.id) },
   })
 
   console.log(`Access check took ${Date.now() - start}ms`)
@@ -574,36 +579,15 @@ console.log('Public access result:', testAccess.docs.length)
 
 ### Async Operations Impact
 
+Prefer a database `Where` constraint to fetching each document inside access control. When an external entitlement lookup is necessary, scope caching to the current identity and request; anonymous callers must fail closed.
+
 ```ts
-// ❌ Slow: Multiple sequential async calls
-export const slowAccess: Access = async ({ req: { user } }) => {
-  const org = await req.payload.findByID({
-    collection: 'orgs',
-    id: user.orgId,
-    overrideAccess: true,
-  })
-  const team = await req.payload.findByID({
-    collection: 'teams',
-    id: user.teamId,
-    overrideAccess: true,
-  })
-  const subscription = await req.payload.findByID({
-    collection: 'subs',
-    id: user.subId,
-    overrideAccess: true,
-  })
-
-  return org.active && team.active && subscription.active
-}
-
-// ✅ Fast: Use query constraints or cache in context
-export const fastAccess: Access = ({ req: { user, context } }) => {
-  // Cache expensive lookups
-  if (!context.orgStatus) {
-    context.orgStatus = checkOrgStatus(user.orgId)
-  }
-
-  return context.orgStatus
+export const entitlementAccess: Access = async ({ req }) => {
+  if (!req.user) return false
+  const key = `entitlement:${req.user.id}`
+  const checks = (req.context.entitlementChecks ??= {}) as Record<string, Promise<boolean>>
+  checks[key] ??= checkEntitlement(req.user.id) // app-provided authoritative lookup
+  return await checks[key]
 }
 ```
 
@@ -671,8 +655,9 @@ const optimizedArrayField: ArrayField = {
 ```ts
 // ❌ N+1 Problem: Query per access check
 export const n1Access: Access = async ({ req, id }) => {
-  // Runs for EACH document in list
-  const doc = await req.payload.findByID({ collection: 'docs', id, overrideAccess: true })
+  // ID can be absent in list/bulk/admin permission checks; fetching here is not a row filter
+  if (!id) return false
+  const doc = await req.payload.findByID({ collection: 'docs', id, overrideAccess: true, req })
   return doc.isPublic
 }
 

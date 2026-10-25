@@ -1,6 +1,6 @@
 import type { Field } from "payload"
 import { link } from "@/components/fields/link/link"
-import { sectionCtaDefault } from "./defaults"
+import { sectionCtaDefault } from "@/components/fields/section-cta/defaults"
 
 /*************************************************************************/
 /*  SECTION CTA FIELD CONFIGURATION

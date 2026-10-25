@@ -34,16 +34,22 @@ const textField: TextField = {
 
 ### Slug Field
 
-Use the native `slug` field type for slugs — never hand-roll a
-`{ type: 'text', unique: true }` field. `useAsSlug` is **required** (names the
-source field; there is no `'title'` default). Defaults to `required`, `unique`,
-`index`, `position: 'sidebar'`. Optional server-side `slugify` fn.
+SmartSite uses a field factory, because Payload 3.92 has no native `slug` field type. For routed content, preserve all four fields returned by the helper:
 
 ```ts
-{ name: 'slug', type: 'slug', useAsSlug: 'title' }
+import type { CollectionConfig } from 'payload'
+import { slugField } from '@/fields/slug'
+
+export const Articles: CollectionConfig = {
+  slug: 'articles',
+  fields: [
+    { name: 'title', type: 'text', required: true },
+    ...slugField('title'),
+  ],
+}
 ```
 
-Full prop reference: <https://payloadcms.com/docs/fields/slug>
+The helper returns `slug`, `uri`, `slugLock` and `createAutomaticRedirect`. Its slug is an indexed text field with the project formatter and CMS component; it does not imply a unique slug across the collection. Routed URL validation belongs to the website routing hooks. A non-routed identifier may use a normal text field with its own validation and uniqueness requirement.
 
 ## Rich Text (Lexical)
 
@@ -83,7 +89,7 @@ import {
   ItalicFeature,
   LinkFeature,
   OrderedListFeature,
-  TableFeature,
+  EXPERIMENTAL_TableFeature,
   UnderlineFeature,
   UnorderedListFeature,
   lexicalEditor,
@@ -122,7 +128,7 @@ export default buildConfig({
           },
         }),
         IndentFeature(),
-        TableFeature(),
+        EXPERIMENTAL_TableFeature(),
       ]
     },
   }),
@@ -143,6 +149,21 @@ const richTextWithToolbars: RichTextField = {
     },
   }),
   label: false,
+}
+```
+
+## Validation
+
+Use a typed field's `validate` callback to return `true` or an error message. Draft saves may skip validation according to `versions.drafts.validate`; enforce publish-time invariants in the existing publish path and test both draft and publish behavior.
+
+```ts
+import type { TextField } from 'payload'
+
+const codeField: TextField = {
+  name: 'referenceCode',
+  type: 'text',
+  validate: (value) => typeof value === 'string' && value.startsWith('REF-')
+    ? true : 'Use a reference beginning with REF-',
 }
 ```
 
@@ -172,7 +193,7 @@ const multipleRelationship: RelationshipField = {
 }
 
 // Polymorphic relationship
-const polymorphicRelationship: PolymorphicRelationshipField = {
+const polymorphicRelationship: RelationshipField = {
   name: 'relatedContent',
   type: 'relationship',
   relationTo: ['posts', 'pages'],
@@ -322,15 +343,13 @@ const nearbyLocations = await payload.find({
   overrideAccess: true,
   where: {
     location: {
-      near: [10, 20], // [longitude, latitude]
-      maxDistance: 5000, // in meters
-      minDistance: 1000,
+      near: [10, 20, 5000, 1000], // longitude, latitude, max distance, min distance (metres)
     },
   },
 })
 
 // Query within polygon area
-const polygon: Point[] = [
+const polygon: [number, number][] = [
   [9.0, 19.0], // bottom-left
   [9.0, 21.0], // top-left
   [11.0, 21.0], // top-right
@@ -366,7 +385,7 @@ const intersecting = await payload.find({
 })
 ```
 
-**Note**: Point fields are not supported in SQLite.
+**Note**: These examples target the installed MongoDB adapter. Check another adapter’s supported operators before changing databases.
 
 ## Join Fields
 
@@ -521,7 +540,7 @@ Collapsible fields group fields in an expandable/collapsible section.
 import type { CollapsibleField } from 'payload'
 
 const collapsibleField: CollapsibleField = {
-  label: ({ data }) => data?.title || 'Advanced Options',
+  label: 'Advanced Options',
   type: 'collapsible',
   admin: {
     initCollapsed: true,
@@ -591,117 +610,9 @@ const groupField: GroupField = {
 
 ## Reusable Field Factories
 
-Create composable field patterns that can be customized with overrides.
+Reuse `src/components/fields/link/link.ts` for SmartSite links and `src/fields/slug` for routed slugs instead of introducing another schema. Inspect their arguments and current collection callers before adding overrides. SmartSite's website-link plugin resolves the collection metadata used for internal links, including Lexical links.
 
-```ts
-import type { Field, GroupField } from 'payload'
-
-// Utility for deep merging
-const deepMerge = <T>(target: T, source: Partial<T>): T => {
-  // Implementation would deeply merge objects
-  return { ...target, ...source }
-}
-
-// Reusable link field factory
-type LinkType = (options?: {
-  appearances?: ('default' | 'outline')[] | false
-  disableLabel?: boolean
-  overrides?: Record<string, unknown>
-}) => GroupField
-
-export const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = {}) => {
-  const linkField: GroupField = {
-    name: 'link',
-    type: 'group',
-    admin: {
-      hideGutter: true,
-    },
-    fields: [
-      {
-        type: 'row',
-        fields: [
-          {
-            name: 'type',
-            type: 'radio',
-            options: [
-              { label: 'Internal link', value: 'reference' },
-              { label: 'Custom URL', value: 'custom' },
-            ],
-            defaultValue: 'reference',
-            admin: {
-              layout: 'horizontal',
-              width: '50%',
-            },
-          },
-          {
-            name: 'newTab',
-            type: 'checkbox',
-            label: 'Open in new tab',
-            admin: {
-              width: '50%',
-              style: {
-                alignSelf: 'flex-end',
-              },
-            },
-          },
-        ],
-      },
-      {
-        name: 'reference',
-        type: 'relationship',
-        relationTo: ['pages'],
-        required: true,
-        maxDepth: 1,
-        admin: {
-          condition: (_, siblingData) => siblingData?.type === 'reference',
-        },
-      },
-      {
-        name: 'url',
-        type: 'text',
-        label: 'Custom URL',
-        required: true,
-        admin: {
-          condition: (_, siblingData) => siblingData?.type === 'custom',
-        },
-      },
-    ],
-  }
-
-  if (!disableLabel) {
-    linkField.fields.push({
-      name: 'label',
-      type: 'text',
-      required: true,
-    })
-  }
-
-  if (appearances !== false) {
-    linkField.fields.push({
-      name: 'appearance',
-      type: 'select',
-      defaultValue: 'default',
-      options: [
-        { label: 'Default', value: 'default' },
-        { label: 'Outline', value: 'outline' },
-      ],
-    })
-  }
-
-  return deepMerge(linkField, overrides) as GroupField
-}
-
-// Usage
-const navItem = link({ appearances: false })
-const ctaButton = link({
-  overrides: {
-    name: 'cta',
-    admin: {
-      description: 'Call to action button',
-    },
-  },
-})
-```
+For a new field factory, return a typed `Field` or concrete field type. Preserve nested `admin`, `hooks` and `fields` deliberately: object spread only merges one level and can accidentally replace existing behavior. Avoid pretending a shallow spread is a deep merge.
 
 ## Field Type Guards
 
@@ -709,7 +620,7 @@ Type guards for runtime field type checking and safe type narrowing.
 
 | Type Guard                  | Checks For                                                  | Use When                                 |
 | --------------------------- | ----------------------------------------------------------- | ---------------------------------------- |
-| `fieldAffectsData`          | Field stores data (has name, not UI-only)                   | Need to access field data or name        |
+| `fieldAffectsData`          | Named non-UI field (may be virtual)                   | Need to access field data or name        |
 | `fieldHasSubFields`         | Field contains nested fields (group/array/row/collapsible)  | Need to recursively traverse fields      |
 | `fieldIsArrayType`          | Field is array type                                         | Distinguish arrays from other containers |
 | `fieldIsBlockType`          | Field is blocks type                                        | Handle blocks-specific logic             |
@@ -719,18 +630,18 @@ Type guards for runtime field type checking and safe type narrowing.
 | `fieldIsPresentationalOnly` | Field is UI-only (no data storage)                          | Exclude from data operations             |
 | `fieldIsSidebar`            | Field positioned in sidebar                                 | Separate sidebar rendering               |
 | `fieldIsID`                 | Field name is 'id'                                          | Special ID field handling                |
-| `fieldIsHiddenOrDisabled`   | Field is hidden or disabled                                 | Filter from UI operations                |
+| `fieldIsHiddenOrDisabled`   | Top-level hidden or admin.disabled                                 | Filter from UI operations                |
 | `fieldShouldBeLocalized`    | Field needs localization handling                           | Proper locale table checks               |
 | `fieldIsVirtual`            | Field is virtual (computed/no DB column)                    | Skip in database transforms              |
 | `tabHasName`                | Tab is named (stores data)                                  | Distinguish named vs unnamed tabs        |
 | `groupHasName`              | Group is named (stores data)                                | Distinguish named vs unnamed groups      |
 | `optionIsObject`            | Option is `{label, value}` format                           | Access option properties safely          |
-| `optionsAreObjects`         | All options are objects                                     | Batch option processing                  |
+| `optionsAreObjects`         | First option is an object                                     | Batch option processing                  |
 | `optionIsValue`             | Option is string value                                      | Handle string options                    |
 | `valueIsValueWithRelation`  | Value is polymorphic relationship                           | Handle polymorphic relationships         |
 
 ```ts
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
 
 function processField(field: Field) {
   if (fieldAffectsData(field)) {

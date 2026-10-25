@@ -1,6 +1,6 @@
 {
   "name": "smart-site",
-  "version": "3.0.1",
+  "version": "4.0.1",
   "description": "Standalone website-building kit: Next.js, Payload CMS, native MCP and portable coding-agent skills.",
   "license": "MIT",
   "type": "module",
@@ -39,7 +39,7 @@
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation eslint . --fix",
     "warm-cache": "tsx scripts/warm-cache.ts",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=src/admin/payload/payload.config.ts payload",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation PAYLOAD_CONFIG_PATH=src/payload.config.ts payload",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "self-hosted:env": "node scripts/generate-self-hosted-env.mjs",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
@@ -49,12 +49,18 @@
     "local:start": "node scripts/local/start.mjs",
     "local:stop": "node scripts/local/stop.mjs",
     "test:build": "node tests/fixtures/build-project.mjs",
+    "test:preview": "node tests/fixtures/preview.mjs",
     "test:unit": "tsx --test tests/unit/*.test.ts",
     "test:integration": "node tests/integration/run.mjs",
     "test:transfer": "node tests/transfer/run.mjs",
     "test:acceptance": "node tests/acceptance/run.mjs",
     "test:startup": "node tests/fixtures/bootstrap-resume.mjs",
-    "test:docker-upgrade": "node tests/fixtures/docker-upgrade.mjs"
+    "test:docker-upgrade": "node tests/fixtures/docker-upgrade.mjs",
+    "test:routing": "node tests/routing/run.mjs",
+    "test:configuration": "node tests/fixtures/mcp-disabled.mjs",
+    "test:upgrade": "node tests/upgrades/run.mjs",
+    "test:native-configuration": "node tests/fixtures/native-configuration.mjs",
+    "test:docker-app-upgrade": "node tests/fixtures/docker-app-upgrade.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.937.0",

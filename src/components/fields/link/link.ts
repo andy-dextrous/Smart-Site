@@ -1,8 +1,7 @@
 import type { CollectionSlug, Field, GroupField } from "payload"
-import deepMerge from "@/admin/utilities/deep-merge"
-import { getFrontendCollections } from "@/admin/config/frontend"
-import { iconPickerField } from "@/admin/payload/fields/icon-picker"
-import { getButtonVariantOptions } from "./button-options"
+import deepMerge from "@/utilities/deep-merge"
+import { iconPickerField } from "@/fields/icon-picker"
+import { getButtonVariantOptions } from "@/components/fields/link/button-options"
 
 const { variantOptions, layoutOptions, sizeOptions } = getButtonVariantOptions()
 
@@ -89,9 +88,8 @@ export const link: LinkType = ({
         condition: (_, siblingData) => siblingData?.type === "reference",
       },
       label: "Document to link to",
-      relationTo: getFrontendCollections().map(
-        collection => collection.slug
-      ) as CollectionSlug[],
+      relationTo: ["__smartsite_website_link__"] as unknown as CollectionSlug[],
+      custom: { smartsiteWebsiteLink: true },
       required: !optional,
     },
     {
@@ -122,9 +120,9 @@ export const link: LinkType = ({
           type: "text",
           admin: {
             width: "50%",
-          components: {
-            Field: "@/admin/components/fields/link/link-label-field#LinkLabelField",
-          },
+            components: {
+              Field: "@/components/content-fields/link/link-label-field#LinkLabelField",
+            },
           },
           label: "Label",
           required: !optional,
@@ -194,7 +192,8 @@ export const link: LinkType = ({
         label: "Icon button",
         defaultValue: false,
         admin: {
-          description: "Render the button as icon-only with optional label for screen readers.",
+          description:
+            "Render the button as icon-only with optional label for screen readers.",
           width: "100%",
         },
       },

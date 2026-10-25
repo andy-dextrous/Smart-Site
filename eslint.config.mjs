@@ -2,7 +2,7 @@ import { createRequire } from "module"
 import nextConfig from "eslint-config-next"
 
 const require = createRequire(import.meta.url)
-const smartSiteAdminPlugin = require("./src/admin/eslint/index.cjs")
+const smartSiteAdminPlugin = require("./config/eslint/index.cjs")
 
 const nextConfigWithHooks = nextConfig.map(entry => {
   if (entry?.rules) {
@@ -40,7 +40,12 @@ const nextConfigWithHooks = nextConfig.map(entry => {
 
 const eslintConfig = [
   {
-    ignores: [".smartsite/**", ".smartsite-self-hosted/**", "test-results/**","src/admin/payload/payload-types.ts"],
+    ignores: [
+      ".smartsite/**",
+      ".smartsite-self-hosted/**",
+      "test-results/**",
+      "src/payload-types.ts",
+    ],
   },
   ...nextConfigWithHooks,
   {
@@ -59,16 +64,13 @@ const eslintConfig = [
     },
   },
   {
-    files: ["src/admin/payload/payload-types.ts"],
+    files: ["src/payload-types.ts"],
     rules: {
       "eslint-comments/no-unused-disable": "off",
     },
   },
   {
-    files: [
-      "src/components/sections/**/*.{ts,tsx}",
-      "src/app/(frontend)/**/*.{ts,tsx}",
-    ],
+    files: ["src/components/sections/**/*.{ts,tsx}", "src/app/(frontend)/**/*.{ts,tsx}"],
     rules: {
       "smart-site-admin/no-tailwind-var": "error",
       "smart-site-admin/section-requires-wrapper": "error",

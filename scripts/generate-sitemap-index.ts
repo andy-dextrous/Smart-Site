@@ -40,19 +40,9 @@ ${sitemapEntries}
 </sitemapindex>`
 }
 
-async function loadFrontendCollections(): Promise<Record<string, { label: string }>> {
-  const configModule = (await import("../src/admin/config/index")) as {
-    getFrontendCollections?: () => Record<string, { label: string }>
-    default?: { getFrontendCollections?: () => Record<string, { label: string }> }
-  }
-  const getter =
-    configModule.getFrontendCollections || configModule.default?.getFrontendCollections
-
-  if (!getter) {
-    throw new Error("getFrontendCollections export not found in config index")
-  }
-
-  return getter()
+async function loadFrontendCollections(): Promise<SitemapCollectionEntry[]> {
+  const { getFrontendCollections } = await import("../src/website/collections")
+  return (await getFrontendCollections()).filter(item => item.sitemap?.enabled !== false)
 }
 
 export async function generateSitemapIndexFile(
@@ -64,10 +54,11 @@ export async function generateSitemapIndexFile(
   siteUrl: string
 }> {
   const workingDir = options.cwd ?? process.cwd()
-  const siteUrl = options.siteUrl || process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
+  const siteUrl =
+    options.siteUrl || process.env.NEXT_PUBLIC_URL || "http://localhost:3000"
   const collectionsObject = await loadFrontendCollections()
-  const collections = Object.entries(collectionsObject).map(([slug, collection]) => ({
-    slug,
+  const collections = collectionsObject.map(collection => ({
+    slug: collection.slug,
     label: collection.label,
   }))
 

@@ -1,7 +1,7 @@
 "use client"
 
-import canUseDOM from "@/admin/utilities/can-use-dom"
-import { getSmartSiteConfig } from "@/admin/config"
+import canUseDOM from "@/utilities/can-use-dom"
+import site from "@/site.config"
 import { useGSAP } from "@gsap/react"
 import { gsap } from "gsap"
 import { ScrollSmoother } from "gsap/ScrollSmoother"
@@ -11,7 +11,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { initializeGSAP } from "@/providers/gsap/gsap-loader"
 
 // Import effects to register them
-import "./effects"
+import "@/providers/gsap/effects"
 
 /****************************************************
  * Setup GSAP Plugins and Defaults
@@ -79,14 +79,16 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
 
   useGSAP(
     () => {
-      const config = getSmartSiteConfig()
+      const config = site
       if (!gsapLoaded || !config.gsap.scrollSmoother || omittedPaths.includes(pathname)) {
         return
       }
 
       // Ensure ScrollSmoother is available before creating
       if (typeof ScrollSmoother?.create !== "function") {
-        console.warn("ScrollSmoother plugin not available; skipping smooth scroll initialization")
+        console.warn(
+          "ScrollSmoother plugin not available; skipping smooth scroll initialization"
+        )
         return
       }
 
@@ -127,7 +129,7 @@ const SmoothScrollProvider = ({ children }: { children: React.ReactNode }) => {
     }
   )
 
-  const config = getSmartSiteConfig()
+  const config = site
   return config.gsap.scrollSmoother ? (
     <GSAPContext.Provider value={{ smootherInstance, scrollToTop }}>
       {children}

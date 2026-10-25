@@ -12,9 +12,9 @@ import {
 import React from "react"
 import { Controller } from "react-hook-form"
 
-import { Error } from "../error"
-import { Width } from "../width"
-import { stateOptions } from "./options"
+import { Error } from "@/components/fields/form/error/index"
+import { Width } from "@/components/fields/form/width/index"
+import { stateOptions } from "@/components/fields/form/state/options"
 
 export const State: React.FC<
   StateField & {

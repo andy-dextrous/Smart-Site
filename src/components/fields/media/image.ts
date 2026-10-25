@@ -1,4 +1,4 @@
-import deepMerge from "@/admin/utilities/deep-merge"
+import deepMerge from "@/utilities/deep-merge"
 import type { Field } from "payload"
 
 export const backgroundImage = (overrides: Partial<Field> = {}): Field => {

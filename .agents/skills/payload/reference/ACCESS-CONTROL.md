@@ -6,7 +6,8 @@ Complete reference for access control patterns across collections, fields, and g
 
 | Feature               | Scope                                                     | Returns                | Use Case                           |
 | --------------------- | --------------------------------------------------------- | ---------------------- | ---------------------------------- |
-| **Collection Access** | create, read, update, delete, admin, unlock, readVersions | boolean \| Where query | Document-level permissions         |
+| **Collection documents** | read, update, delete, readVersions | boolean \| Where query | Document-level permissions |
+| **Collection gates** | create, admin, unlock | Use boolean | Allow or deny the operation |
 | **Field Access**      | create, read, update                                      | boolean only           | Field-level visibility/editability |
 | **Global Access**     | read, update, readVersions                                | boolean \| Where query | Global document permissions        |
 
@@ -50,9 +51,11 @@ User makes request
 
 ```ts
 import type { CollectionConfig, Access } from 'payload'
+import { userHasMinimumRole } from '@/access/roles'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
+  versions: { drafts: true },
   access: {
     // Boolean: Only authenticated users can create
     create: ({ req: { user } }) => Boolean(user),
@@ -60,28 +63,26 @@ export const Posts: CollectionConfig = {
     // Query constraint: Public sees published, users see all
     read: ({ req: { user } }) => {
       if (user) return true
-      return { status: { equals: 'published' } }
+      return { _status: { equals: 'published' } }
     },
 
-    // User-specific: Admins or document owner
-    update: ({ req: { user }, id }) => {
-      if (user?.roles?.includes('admin')) return true
-      return { author: { equals: user?.id } }
+    // User-specific: editor can update their own posts
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (userHasMinimumRole(user, 'admin')) return true
+      return { author: { equals: user.id } }
     },
 
-    // Async: Check related data
-    delete: async ({ req, id }) => {
-      const hasComments = await req.payload.count({
-        collection: 'comments',
-        overrideAccess: true,
-        where: { post: { equals: id } },
-      })
-      return hasComments === 0
+    // Query constraint works for ID and bulk delete operations too
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if (userHasMinimumRole(user, 'admin')) return true
+      return { author: { equals: user.id } }
     },
 
     // Admin panel visibility
     admin: ({ req: { user } }) => {
-      return user?.roles?.includes('admin') || user?.roles?.includes('editor')
+      return userHasMinimumRole(user, 'editor')
     },
   },
   fields: [
@@ -93,7 +94,7 @@ export const Posts: CollectionConfig = {
 
 ### Role-Based Access Control (RBAC) Pattern
 
-Payload does NOT provide a roles system by default. The following is a commonly accepted pattern for implementing role-based access control in auth collections:
+Payload does not impose a roles model. SmartSite already uses a singular `role` field; import `hasMinimumRole` / `userHasMinimumRole` from `@/access/roles` so developer and admin hierarchy is preserved. The following generic model deliberately defines its own `roles` array; it is not a replacement for SmartSite's Users collection.
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -114,7 +115,8 @@ export const Users: CollectionConfig = {
       // Save roles to JWT for access control without database lookups
       saveToJWT: true,
       access: {
-        // Only admins can update roles
+        // Only admins can assign or update roles
+        create: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
         update: ({ req: { user } }) => user?.roles?.includes('admin'),
       },
     },
@@ -124,7 +126,7 @@ export const Users: CollectionConfig = {
 
 **Important Notes:**
 
-1. **Not Built-In**: Payload does not provide a roles system out of the box. You must add a `roles` field to your auth collection.
+1. **Not Built-In**: Payload does not provide a roles system out of the box. Choose a role schema appropriate to the app; SmartSite already has one.
 2. **Save to JWT**: Use `saveToJWT: true` to include roles in the JWT token, enabling role checks without database queries.
 3. **Default Value**: Set a `defaultValue` to automatically assign new users a default role.
 4. **Access Control**: Restrict who can modify roles (typically only admins).
@@ -137,7 +139,7 @@ import type { Access } from 'payload'
 
 // Check for specific role
 export const adminOnly: Access = ({ req: { user } }) => {
-  return user?.roles?.includes('admin')
+  return Boolean(user?.roles?.includes('admin'))
 }
 
 // Check for multiple roles
@@ -145,13 +147,12 @@ export const adminOrEditor: Access = ({ req: { user } }) => {
   return Boolean(user?.roles?.some((role) => ['admin', 'editor'].includes(role)))
 }
 
-// Role hierarchy check
-export const hasMinimumRole: Access = ({ req: { user } }, minRole: string) => {
+// Factory: Payload calls an Access function with one argument
+export const hasMinimumRole = (minRole: string): Access => ({ req: { user } }) => {
   const roleHierarchy = ['user', 'editor', 'admin']
   const userHighestRole = Math.max(...(user?.roles?.map((r) => roleHierarchy.indexOf(r)) || [-1]))
   const requiredRoleIndex = roleHierarchy.indexOf(minRole)
-
-  return userHighestRole >= requiredRoleIndex
+  return requiredRoleIndex >= 0 && userHighestRole >= requiredRoleIndex
 }
 ```
 
@@ -174,7 +175,7 @@ export const authenticatedOrPublished: Access = ({ req: { user } }) => {
 
 // Admin only
 export const admins: Access = ({ req: { user } }) => {
-  return user?.roles?.includes('admin')
+  return Boolean(user?.roles?.includes('admin'))
 }
 
 // Admin or editor
@@ -184,6 +185,7 @@ export const adminsOrEditors: Access = ({ req: { user } }) => {
 
 // Self or admin
 export const adminsOrSelf: Access = ({ req: { user } }) => {
+  if (!user) return false
   if (user?.roles?.includes('admin')) return true
   return { id: { equals: user?.id } }
 }
@@ -208,8 +210,10 @@ import type { Access } from 'payload'
 
 // Organization-scoped access
 export const organizationScoped: Access = ({ req: { user } }) => {
+  if (!user) return false
   if (user?.roles?.includes('admin')) return true
 
+  if (!user.organization) return false
   // Users see only their organization's data
   return {
     organization: {
@@ -222,10 +226,13 @@ export const organizationScoped: Access = ({ req: { user } }) => {
 export const complexAccess: Access = ({ req: { user } }) => {
   return {
     and: [
-      { status: { equals: 'published' } },
+      { _status: { equals: 'published' } },
       { 'author.isActive': { equals: true } },
       {
-        or: [{ visibility: { equals: 'public' } }, { author: { equals: user?.id } }],
+        or: [
+          { visibility: { equals: 'public' } },
+          ...(user ? [{ author: { equals: user.id } }] : []),
+        ],
       },
     ],
   }
@@ -282,14 +289,15 @@ import type { NumberField, FieldAccess } from 'payload'
 
 const salaryReadAccess: FieldAccess = ({ req: { user }, doc }) => {
   // Self can read own salary
-  if (user?.id === doc?.id) return true
+  if (!user) return false
+  if (user.id === doc?.id) return true
   // Admin can read all salaries
-  return user?.roles?.includes('admin')
+  return Boolean(user?.roles?.includes('admin'))
 }
 
 const salaryUpdateAccess: FieldAccess = ({ req: { user } }) => {
   // Only admins can update salary
-  return user?.roles?.includes('admin')
+  return Boolean(user?.roles?.includes('admin'))
 }
 
 const salaryField: NumberField = {
@@ -340,7 +348,7 @@ const arrayField: ArrayField = {
 import type { GroupField, FieldAccess } from 'payload'
 
 const internalOnlyAccess: FieldAccess = ({ req: { user } }) => {
-  return user?.roles?.includes('admin') || user?.roles?.includes('internal')
+  return Boolean(user?.roles?.includes('admin') || user?.roles?.includes('internal'))
 }
 
 const groupField: GroupField = {
@@ -376,7 +384,8 @@ export const Users: CollectionConfig = {
       access: {
         // Hide from UI, but still saved/queried
         read: ({ req: { user } }) => user?.roles?.includes('admin'),
-        // Only admins can update roles
+        // Only admins can assign or update roles
+        create: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
         update: ({ req: { user } }) => user?.roles?.includes('admin'),
       },
     },
@@ -390,7 +399,7 @@ export const Users: CollectionConfig = {
 import type { GlobalConfig, Access } from 'payload'
 
 const adminOnly: Access = ({ req: { user } }) => {
-  return user?.roles?.includes('admin')
+  return Boolean(user?.roles?.includes('admin'))
 }
 
 export const SiteSettings: GlobalConfig = {
@@ -480,13 +489,17 @@ export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   access: {
-    // Anyone can read user profiles
-    read: () => true,
+    // Private user records: only the caller's own record or an administrator
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.roles?.includes('admin')) return true
+      return { id: { equals: user.id } }
+    },
 
     // Users can update themselves, admins can update anyone
     update: ({ req: { user }, id }) => {
       if (user?.roles?.includes('admin')) return true
-      return user?.id === id
+      return Boolean(user && id !== undefined && user.id === id)
     },
 
     // Only admins can delete
@@ -522,6 +535,7 @@ export const Users: CollectionConfig = {
       hasMany: true,
       options: ['admin', 'editor', 'user'],
       access: {
+        create: preventSelfRoleChange,
         update: preventSelfRoleChange,
       },
     },
@@ -531,49 +545,25 @@ export const Users: CollectionConfig = {
 
 ## Cross-Collection Validation
 
+For membership stored on the document, use a `Where` constraint so list, ID and bulk requests receive the same policy:
+
 ```ts
 import type { Access } from 'payload'
 
-// Check if user is a project member before allowing access
-export const projectMemberAccess: Access = async ({ req, id }) => {
-  const { user, payload } = req
-
-  if (!user) return false
-  if (user.roles?.includes('admin')) return true
-
-  // Check if document exists and user is member
-  const project = await payload.findByID({
-    collection: 'projects',
-    overrideAccess: true,
-    id: id as string,
-    depth: 0,
-  })
-
-  return project.members?.includes(user.id)
-}
-
-// Prevent deletion if document has dependencies
-export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
-  const { payload } = req
-
-  const dependencyCount = await payload.count({
-    collection: 'related-items',
-    overrideAccess: true,
-    where: {
-      parent: { equals: id },
-    },
-  })
-
-  return dependencyCount === 0
+export const projectMemberAccess: Access = ({ req }) => {
+  if (!req.user) return false
+  return { members: { contains: req.user.id } }
 }
 ```
+
+For a rule such as “do not delete a document with dependencies”, retain the real delete permission policy and validate dependencies in `beforeDelete`, where each document ID is available. Thread `req` into the related lookup and use `countResult.totalDocs`, not the count-result object. Access checks can run without an ID during lists, bulk operations and CMS permission inspection.
 
 ## Access Control Function Arguments
 
 ### Collection Create
 
 ```ts
-create: ({ req, data }) => boolean | Where
+create: ({ req, data }) => boolean
 
 // req: PayloadRequest
 //   - req.user: Authenticated user (if any)
@@ -654,7 +644,7 @@ access: {
 
 ## Important Notes
 
-1. **Local API `overrideAccess`**: Where optional, it defaults to `false` — Local API operations respect access control unless told otherwise. When passing a `user`, leave it at the default (or set `overrideAccess: false` explicitly) so that user's permissions apply:
+1. **Local API `overrideAccess`**: Local API CRUD defaults to `true`, even when `user` or `req` is supplied. Explicitly set `overrideAccess: false` to enforce that caller’s permissions:
 
    ```ts
    // ❌ WRONG: Passes user but bypasses access control
@@ -678,9 +668,9 @@ access: {
 
 3. **Admin Panel Visibility**: The `admin` access control determines if a collection appears in the admin panel for a user.
 
-4. **Access Before Hooks**: Access control executes BEFORE hooks run, so hooks cannot modify access behavior.
+4. **Access Before Hooks**: `beforeOperation` runs before collection access checks. Do not treat later validation/change hooks as permission enforcement. Use access functions and explicit Local API access checks.
 
-5. **Query Constraints**: Only collection-level `read` access supports query constraints. All other operations and field-level access require boolean returns.
+5. **Query Constraints**: Collection `read`, `update`, `delete` and `readVersions` support `Where` constraints, including ID operations. Use boolean for create/admin/unlock gates and field access. Globals also use `Access` and can constrain the existing global document; prefer clear boolean permissions for singleton settings.
 
 ## Best Practices
 

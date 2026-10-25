@@ -26,4 +26,4 @@ jobs:
       - name: Warm cache
         env:
           BASE_URL: ${{ github.event.deployment_status.target_url }}
-        run: pnpm --filter @product-studio/smart-site warm-cache
+        run: pnpm warm-cache

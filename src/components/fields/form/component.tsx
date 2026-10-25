@@ -7,13 +7,13 @@ import { useRouter } from "next/navigation"
 import React, { useCallback, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
-import { getClientSideURL } from "@/admin/utilities/get-url"
+import { getClientSideURL } from "@/utilities/get-url"
 import RichText from "@/components/fields/rich-text"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/utilities/ui"
 
-import { fields } from "./fields"
-import { formDefaultValues } from "./default-values"
+import { fields } from "@/components/fields/form/fields"
+import { formDefaultValues } from "@/components/fields/form/default-values"
 
 export type FormBlockProps = {
   blockName?: string
@@ -134,7 +134,11 @@ export const FormBlock: React.FC<
         />
       )}
 
-      <div className={cn("rounded-2xl border border-dark-border bg-white p-content md:p-content-lg")}>
+      <div
+        className={cn(
+          "border-dark-border p-content md:p-content-lg rounded-2xl border bg-white"
+        )}
+      >
         <FormProvider {...formMethods}>
           {!isLoading && hasSubmitted && confirmationType === "message" && (
             <RichText data={confirmationMessage} />
@@ -146,11 +150,11 @@ export const FormBlock: React.FC<
 
           {!hasSubmitted && (
             <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="flex flex-col gap-content">
+              <div className="gap-content flex flex-col">
                 {formFromProps?.fields?.map((field, index) => {
-                  const FieldComponent = fields[field.blockType as keyof typeof fields] as
-                    | React.FC<any>
-                    | undefined
+                  const FieldComponent = fields[
+                    field.blockType as keyof typeof fields
+                  ] as React.FC<any> | undefined
 
                   if (!FieldComponent) {
                     console.log("field not found", field)

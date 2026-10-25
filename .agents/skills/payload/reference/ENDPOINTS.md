@@ -31,16 +31,18 @@ Custom REST API endpoints extend Payload's auto-generated CRUD operations with c
 | `req.i18n`        | `I18n`                  | i18n instance                                          |
 | `req.t`           | `TFunction`             | Translation function                                   |
 
+Type standalone endpoint objects as `Endpoint` from `payload`. Examples with app-specific helper functions assume those helpers are implemented and tested.
+
 ## Common Patterns
 
 ### Authentication Check
 
-Custom endpoints are **not authenticated by default**. Check `req.user` to enforce authentication.
+Payload can populate `req.user` from the request, but custom endpoints do not automatically require a login or apply collection access to arbitrary handler code. Check identity and the operation’s permission policy; Local API calls need explicit `overrideAccess: false`.
 
 ```ts
 import { APIError } from 'payload'
 
-export const authenticatedEndpoint = {
+export const authenticatedEndpoint: Endpoint = {
   path: '/protected',
   method: 'get',
   handler: async (req) => {
@@ -59,11 +61,11 @@ export const authenticatedEndpoint = {
 Use `req.payload` for database operations with access control and hooks.
 
 ```ts
-export const getRelatedPosts = {
+export const getRelatedPosts: Endpoint = {
   path: '/:id/related',
   method: 'get',
   handler: async (req) => {
-    const { id } = req.routeParams
+    const { id } = req.routeParams ?? {}
 
     // Find related posts
     const posts = await req.payload.find({
@@ -89,13 +91,14 @@ export const getRelatedPosts = {
 Access path parameters via `req.routeParams`.
 
 ```ts
-export const getTrackingEndpoint = {
+export const getTrackingEndpoint: Endpoint = {
   path: '/:id/tracking',
   method: 'get',
   handler: async (req) => {
-    const orderId = req.routeParams.id
+    const orderId = req.routeParams?.id
 
-    const tracking = await getTrackingInfo(orderId)
+    // App helper must authorize this user's access to this order.
+    const tracking = await getTrackingInfo(orderId, req)
 
     if (!tracking) {
       return Response.json({ error: 'not found' }, { status: 404 })
@@ -111,7 +114,7 @@ export const getTrackingEndpoint = {
 **Option 1: Manual JSON parsing**
 
 ```ts
-export const createEndpoint = {
+export const createEndpoint: Endpoint = {
   path: '/create',
   method: 'post',
   handler: async (req) => {
@@ -134,7 +137,7 @@ export const createEndpoint = {
 ```ts
 import { addDataAndFileToRequest } from 'payload'
 
-export const uploadEndpoint = {
+export const uploadEndpoint: Endpoint = {
   path: '/upload',
   method: 'post',
   handler: async (req) => {
@@ -163,7 +166,7 @@ Use `headersWithCors` helper to apply config CORS settings.
 ```ts
 import { headersWithCors } from 'payload'
 
-export const corsEndpoint = {
+export const corsEndpoint: Endpoint = {
   path: '/public-data',
   method: 'get',
   handler: async (req) => {
@@ -186,7 +189,7 @@ Throw `APIError` with status codes for proper error responses.
 ```ts
 import { APIError } from 'payload'
 
-export const validateEndpoint = {
+export const validateEndpoint: Endpoint = {
   path: '/validate',
   method: 'post',
   handler: async (req) => {
@@ -207,13 +210,14 @@ export const validateEndpoint = {
 Extract query params from URL.
 
 ```ts
-export const searchEndpoint = {
+export const searchEndpoint: Endpoint = {
   path: '/search',
   method: 'get',
   handler: async (req) => {
-    const url = new URL(req.url)
+    const url = new URL(req.url ?? 'http://localhost')
     const query = url.searchParams.get('q')
-    const limit = parseInt(url.searchParams.get('limit') || '10')
+    const requestedLimit = Number(url.searchParams.get('limit') ?? 10)
+    const limit = Number.isFinite(requestedLimit) ? Math.min(100, Math.max(1, Math.floor(requestedLimit))) : 10
 
     const results = await req.payload.find({
       collection: 'posts',
@@ -241,7 +245,7 @@ Parses request body and attaches to `req.data` and `req.file`.
 ```ts
 import { addDataAndFileToRequest } from 'payload'
 
-export const endpoint = {
+export const endpoint: Endpoint = {
   path: '/process',
   method: 'post',
   handler: async (req) => {
@@ -269,7 +273,7 @@ Extracts locale from request data and validates against config.
 ```ts
 import { addLocalesToRequestFromData } from 'payload'
 
-export const endpoint = {
+export const endpoint: Endpoint = {
   path: '/translate',
   method: 'post',
   handler: async (req) => {
@@ -297,7 +301,7 @@ Applies CORS headers from Payload config.
 ```ts
 import { headersWithCors } from 'payload'
 
-export const endpoint = {
+export const endpoint: Endpoint = {
   path: '/data',
   method: 'get',
   handler: async (req) => {
@@ -324,7 +328,7 @@ From `examples/multi-tenant`:
 ```ts
 import { APIError, generatePayloadCookie, headersWithCors } from 'payload'
 
-export const externalUsersLogin = {
+export const externalUsersLogin: Endpoint = {
   path: '/login-external',
   method: 'post',
   handler: async (req) => {
@@ -383,7 +387,7 @@ export const externalUsersLogin = {
 From `packages/plugin-ecommerce`:
 
 ```ts
-export const webhookEndpoint = {
+export const webhookEndpoint: Endpoint = {
   path: '/webhooks',
   method: 'post',
   handler: async (req) => {
@@ -419,7 +423,7 @@ From `packages/plugin-import-export`:
 ```ts
 import { addDataAndFileToRequest } from 'payload'
 
-export const previewEndpoint = {
+export const previewEndpoint: Endpoint = {
   path: '/preview',
   method: 'post',
   handler: async (req) => {
@@ -450,7 +454,6 @@ export const previewEndpoint = {
     return Response.json({
       docs: results.docs,
       totalDocs: results.totalDocs,
-      fields: collectionConfig.fields,
     })
   },
 }
@@ -458,18 +461,21 @@ export const previewEndpoint = {
 
 ### Reindex Action Endpoint
 
-From `packages/plugin-search`:
+App-provided maintenance handler; require the existing administrative role and explicitly authorize the requested collection before starting bulk work:
 
 ```ts
+import { userHasMinimumRole } from '@/access/roles'
+import { APIError } from 'payload'
+
 export const reindexEndpoint = (pluginConfig) => ({
   path: '/reindex',
   method: 'post',
   handler: async (req) => {
-    if (!req.user) {
-      throw new APIError('Unauthorized', 401)
+    if (!userHasMinimumRole(req.user, 'admin')) {
+      throw new APIError('Forbidden', 403)
     }
 
-    const { collection } = req.routeParams
+    const { collection } = req.routeParams ?? {}
 
     // Reindex collection
     const result = await reindexCollection(req.payload, collection, pluginConfig)
@@ -500,7 +506,7 @@ export const Orders: CollectionConfig = {
       method: 'get',
       handler: async (req) => {
         // Available at: /api/orders/:id/tracking
-        const orderId = req.routeParams.id
+        const orderId = req.routeParams?.id
         return Response.json({ orderId })
       },
     },
@@ -514,6 +520,8 @@ Mounted at `/api/globals/{global-slug}/{path}`.
 
 ```ts
 import type { GlobalConfig } from 'payload'
+import { APIError } from 'payload'
+import { userHasMinimumRole } from '@/access/roles'
 
 export const Settings: GlobalConfig = {
   slug: 'settings',
@@ -524,6 +532,7 @@ export const Settings: GlobalConfig = {
       method: 'post',
       handler: async (req) => {
         // Available at: /api/globals/settings/clear-cache
+        if (!userHasMinimumRole(req.user, 'admin')) throw new APIError('Forbidden', 403)
         await clearCache()
         return Response.json({ message: 'Cache cleared' })
       },
@@ -545,11 +554,12 @@ export const createWebhookEndpoint = (config) => ({
   handler: async (req) => {
     const signature = req.headers.get('x-webhook-signature')
 
-    if (!verifySignature(signature, config.secret)) {
+    const rawBody = await req.text()
+    if (!verifySignature(rawBody, signature, config.secret)) {
       throw new APIError('Invalid signature', 401)
     }
 
-    const data = await req.json()
+    const data = JSON.parse(rawBody)
     await processWebhook(req.payload, data, config)
 
     return Response.json({ received: true })
@@ -591,11 +601,11 @@ export const MyCollection: CollectionConfig = {
 Use `custom` property for API documentation metadata.
 
 ```ts
-export const endpoint = {
+export const endpoint: Endpoint = {
   path: '/search',
   method: 'get',
   handler: async (req) => {
-    // Handler implementation
+    return Response.json([])
   },
   custom: {
     openapi: {
@@ -625,8 +635,8 @@ export const endpoint = {
 
 ## Best Practices
 
-1. **Always check authentication** - Custom endpoints are not authenticated by default
-2. **Use `req.payload` for operations** - Ensures access control and hooks execute
+1. **Authorize private endpoints** - Check identity and the requested operation’s permissions
+2. **Use `req.payload` with `req` and `overrideAccess: false`** - Enforces caller permissions and preserves hook/transaction context
 3. **Use helpers for common tasks** - `addDataAndFileToRequest`, `headersWithCors`, etc.
 4. **Throw `APIError` for errors** - Provides consistent error responses
 5. **Return Web API `Response`** - Use `Response.json()` for consistent responses

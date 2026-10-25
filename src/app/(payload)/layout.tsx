@@ -5,7 +5,7 @@ import "@payloadcms/next/css"
 import { handleServerFunctions, RootLayout } from "@payloadcms/next/layouts"
 import type { ServerFunctionClient } from "payload"
 import React from "react"
-import { importMap } from "./admin/importMap.js"
+import { importMap } from "@/app/(payload)/admin/importMap"
 
 import "@/admin/css/admin.scss"
 import "@/admin/css/styles.css"

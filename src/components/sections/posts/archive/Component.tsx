@@ -1,38 +1,38 @@
-import type { Media, PostsArchiveBlock, Post } from "@/admin/payload/payload-types"
-import type { PageData } from "@/admin/components/render-sections"
-import { getPostsWithPagination } from "@/admin/data/posts"
+import type { Media, PostsArchiveBlock, Post } from "@/payload-types"
+import type { PageData } from "@/website/rendering/render-sections"
+import { getPostsWithPagination } from "@/website/data/posts"
 import {
   estimatePostReadingTime,
   formatPostPublishDate,
   resolvePostCategories,
-} from "@/admin/utilities/posts"
+} from "@/utilities/posts"
 import { Section } from "@/components/fields/section"
 import { PageRange } from "@/components/fields/pagination/page-range"
 import { Pagination } from "@/components/fields/pagination"
 import { PostCard } from "@/components/posts/post-card"
 import { Suspense } from "react"
 import { tv } from "tailwind-variants"
-import { PostsArchiveClient } from "./client"
+import { PostsArchiveClient } from "@/components/sections/posts/archive/client"
 
 type ArchiveLayout = NonNullable<PostsArchiveBlock["layout"]>
 type ArchiveColumns = NonNullable<PostsArchiveBlock["columns"]>
 
 const archiveVariants = tv({
   slots: {
-    container: "flex flex-col gap-content-lg",
+    container: "gap-content-lg flex flex-col",
     grid: "",
-    controls: "flex flex-col gap-content",
+    controls: "gap-content flex flex-col",
     range: "text-sm",
     card: "",
   },
   variants: {
     layout: {
       grid: {
-        grid: "grid gap-grid",
+        grid: "gap-grid grid",
       },
       list: {
-        grid: "flex flex-col gap-content",
-        card: "flex flex-col md:flex-row md:items-center md:gap-content",
+        grid: "gap-content flex flex-col",
+        card: "md:gap-content flex flex-col md:flex-row md:items-center",
       },
     },
     columns: {
@@ -84,7 +84,14 @@ type ArchivePostItem = {
   featuredImage: { url: string; alt: string | null } | null
 }
 
-function toArchivePostItem(post: Post, options: { includeCategories: boolean; includePublishedDate: boolean; includeReadingTime: boolean }): ArchivePostItem {
+function toArchivePostItem(
+  post: Post,
+  options: {
+    includeCategories: boolean
+    includePublishedDate: boolean
+    includeReadingTime: boolean
+  }
+): ArchivePostItem {
   const image =
     post.featuredImage && typeof post.featuredImage === "object"
       ? (post.featuredImage as Media)
@@ -98,8 +105,12 @@ function toArchivePostItem(post: Post, options: { includeCategories: boolean; in
     href,
     excerpt: post.seo?.meta?.description || "",
     categories: options.includeCategories ? resolvePostCategories(post) : [],
-    publishDate: options.includePublishedDate ? formatPostPublishDate(post.publishedAt) : null,
-    readingTime: options.includeReadingTime ? estimatePostReadingTime(post.content) : null,
+    publishDate: options.includePublishedDate
+      ? formatPostPublishDate(post.publishedAt)
+      : null,
+    readingTime: options.includeReadingTime
+      ? estimatePostReadingTime(post.content)
+      : null,
     featuredImage:
       image && typeof image.url === "string" && image.url.length > 0
         ? { url: image.url, alt: typeof image.alt === "string" ? image.alt : null }
@@ -238,13 +249,7 @@ export async function PostsArchiveComponent(props: PostsArchiveBlock & PageData)
   const archiveUri =
     document?.breadcrumbs?.[document.breadcrumbs.length - 1]?.url || "/posts"
 
-  const {
-    container,
-    grid,
-    controls,
-    range,
-    card,
-  } = archiveVariants({
+  const { container, grid, controls, range, card } = archiveVariants({
     layout: resolvedLayout,
     columns: resolvedLayout === "grid" ? resolvedColumns : undefined,
     tone,

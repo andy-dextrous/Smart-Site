@@ -1,4 +1,4 @@
-import type { ContactFormBlock } from "@/admin/payload/payload-types"
+import type { ContactFormBlock } from "@/payload-types"
 import { Section } from "@/components/fields/section"
 import { CMSForm } from "@/components/fields/form"
 import RichText from "@/components/fields/rich-text"
@@ -6,19 +6,19 @@ import { tv } from "tailwind-variants"
 
 const contactFormVariants = tv({
   slots: {
-    container: "flex flex-col gap-content-lg",
+    container: "gap-content-lg flex flex-col",
     layout: "",
-    supporting: "flex flex-col gap-content text-pretty",
-    formWrapper: "rounded-2xl border border-dark-border bg-white p-content-lg shadow-sm",
+    supporting: "gap-content flex flex-col text-pretty",
+    formWrapper: "border-dark-border p-content-lg rounded-2xl border bg-white shadow-sm",
   },
   variants: {
     layout: {
       split: {
-        layout: "grid gap-grid-lg md:grid-cols-2 md:items-start",
+        layout: "gap-grid-lg grid md:grid-cols-2 md:items-start",
         supporting: "md:pr-content",
       },
       stacked: {
-        layout: "flex flex-col gap-content-lg",
+        layout: "gap-content-lg flex flex-col",
       },
     },
     tone: {
@@ -43,7 +43,7 @@ export function ContactFormComponent(props: ContactFormBlock) {
   const { supportingContent, layout, form, sectionSettings } = props
 
   const hasSupportingContent = Boolean(supportingContent)
-  const resolvedLayout = hasSupportingContent ? layout ?? "split" : "stacked"
+  const resolvedLayout = hasSupportingContent ? (layout ?? "split") : "stacked"
   const tone =
     sectionSettings?.colorScheme === "dark"
       ? "dark"
@@ -51,7 +51,12 @@ export function ContactFormComponent(props: ContactFormBlock) {
         ? "neutral"
         : "light"
 
-  const { container, layout: layoutSlot, supporting, formWrapper } = contactFormVariants({
+  const {
+    container,
+    layout: layoutSlot,
+    supporting,
+    formWrapper,
+  } = contactFormVariants({
     layout: resolvedLayout,
     tone,
   })

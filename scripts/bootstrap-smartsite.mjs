@@ -13,7 +13,7 @@ import {
   runNode,
 } from "./local/state.mjs"
 import { ensureDatabase, databaseURL } from "./local/database.mjs"
-import { environment, startApp } from "./local/runtime.mjs"
+import { environment, startApp, health } from "./local/runtime.mjs"
 import { configureClients, mcpRequest } from "./local/clients.mjs"
 const unlock = await lock()
 try {
@@ -88,6 +88,7 @@ try {
       DATABASE_PROVIDER: "mongoose",
       DATABASE_URL: databaseURL(state, credentials),
       PAYLOAD_SECRET: credentials.payloadSecret,
+      CRON_SECRET: randomBytes(32).toString("hex"),
       SMARTSITE_SITE_ID: state.siteId,
       SMARTSITE_ENVIRONMENT: "local",
       NEXT_PUBLIC_URL: `http://127.0.0.1:${state.appPort}`,
@@ -122,25 +123,39 @@ try {
     await startApp(state)
     state.stage = "app-ready"
     await saveState(state)
-    await configureClients(state)
-    state.stage = "client-configured"
-    await saveState(state)
-    const catalogue = await mcpRequest(state, credentials, "tools/call", {
-      name: "smartsiteRead",
-      arguments: { action: "catalogue" },
-    })
-    const identity = JSON.parse(catalogue.content[0].text)
-    if (identity.siteId !== state.siteId) throw new Error("MCP identity mismatch")
-    state.serverMcpVerified = true
-    await saveState(state)
-    console.log(
-      JSON.stringify({
-        status: "client-action-required",
-        siteId: state.siteId,
-        url: `http://127.0.0.1:${state.appPort}`,
-        next: "Reconnect the project MCP server in your client; accept its normal trust prompt if requested. Call smartsiteRead catalogue from the client. Private local account details are in .smartsite/local/credentials.json.",
+    if ((await health(state)).mcpEnabled === false) {
+      state.serverMcpVerified = false
+      state.stage = "app-ready-mcp-disabled"
+      await saveState(state)
+      console.log(
+        JSON.stringify({
+          status: "ready-mcp-disabled",
+          siteId: state.siteId,
+          url: `http://127.0.0.1:${state.appPort}`,
+          next: "MCP is intentionally disabled in Payload config. Use the CMS; existing keys and client files are preserved.",
+        })
+      )
+    } else {
+      await configureClients(state)
+      state.stage = "client-configured"
+      await saveState(state)
+      const catalogue = await mcpRequest(state, credentials, "tools/call", {
+        name: "smartsiteRead",
+        arguments: { action: "catalogue" },
       })
-    )
+      const identity = JSON.parse(catalogue.content[0].text)
+      if (identity.siteId !== state.siteId) throw new Error("MCP identity mismatch")
+      state.serverMcpVerified = true
+      await saveState(state)
+      console.log(
+        JSON.stringify({
+          status: "client-action-required",
+          siteId: state.siteId,
+          url: `http://127.0.0.1:${state.appPort}`,
+          next: "Reconnect the project MCP server in your client; accept its normal trust prompt if requested. Call smartsiteRead catalogue from the client. Private local account details are in .smartsite/local/credentials.json.",
+        })
+      )
+    }
   }
 } finally {
   await unlock()

@@ -1,9 +1,9 @@
 import { writeFile } from "node:fs/promises"
 import { createLocalReq, getPayload } from "payload"
-import config from "../../src/admin/payload/payload.config"
+import config from "../../src/payload.config"
 import sharp from "sharp"
-import { contentSave, uploadMedia } from "../../src/admin/mcp/tools"
-import { withOperation } from "../../src/admin/mcp/operations"
+import { contentSave, uploadMedia } from "../../src/mcp/tools"
+import { withOperation } from "../../src/mcp/operations"
 const payload = await getPayload({ config })
 try {
   const owner = (await payload.find({ collection: "users", limit: 1 })).docs[0]

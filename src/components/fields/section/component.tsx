@@ -1,10 +1,16 @@
 import clsx from "clsx"
 import React, { forwardRef } from "react"
 
-import type { SectionAttribute, SectionContainerWidth, SectionSettings } from "./types"
+import type {
+  SectionAttribute,
+  SectionContainerWidth,
+  SectionSettings,
+} from "@/components/fields/section/types"
 
-export interface SectionProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
+export interface SectionProps extends Omit<
+  React.HTMLAttributes<HTMLElement>,
+  "children"
+> {
   sectionSettings?: SectionSettings | null
   disableContainer?: boolean
   containerClassName?: string
@@ -61,7 +67,9 @@ interface NormalizedAttributes {
   className: string | undefined
 }
 
-function normalizeAttributes(attributes?: SectionAttribute[] | null): NormalizedAttributes {
+function normalizeAttributes(
+  attributes?: SectionAttribute[] | null
+): NormalizedAttributes {
   if (!attributes || attributes.length === 0) {
     return { attributes: {}, className: undefined }
   }
@@ -94,57 +102,62 @@ function normalizeAttributes(attributes?: SectionAttribute[] | null): Normalized
   }
 }
 
-export const Section = forwardRef<HTMLElement, SectionProps>(function Section(props, ref) {
-  const {
-    sectionSettings,
-    disableContainer = false,
-    containerClassName,
-    children,
-    className,
-    ...rest
-  } = props
+export const Section = forwardRef<HTMLElement, SectionProps>(
+  function Section(props, ref) {
+    const {
+      sectionSettings,
+      disableContainer = false,
+      containerClassName,
+      children,
+      className,
+      ...rest
+    } = props
 
-  const { attributes, className: attributeClasses } = normalizeAttributes(
-    sectionSettings?.attributes
-  )
+    const { attributes, className: attributeClasses } = normalizeAttributes(
+      sectionSettings?.attributes
+    )
 
-  const baseContainerClassName =
-    containerClassMap[sectionSettings?.containerWidth ?? "default"]
-  const finalContainerClassName = clsx(baseContainerClassName, containerClassName)
+    const baseContainerClassName =
+      containerClassMap[sectionSettings?.containerWidth ?? "default"]
+    const finalContainerClassName = clsx(baseContainerClassName, containerClassName)
 
-  const colorSchemeClass =
-    colorSchemeClassMap[sectionSettings?.colorScheme ?? "light"]
+    const colorSchemeClass = colorSchemeClassMap[sectionSettings?.colorScheme ?? "light"]
 
-  const paddingClasses = [
-    "px-section-x",
-    "py-section-y",
-    resolvePaddingClass("top", sectionSettings?.paddingTop),
-    resolvePaddingClass("bottom", sectionSettings?.paddingBottom),
-    resolvePaddingClass("left", sectionSettings?.paddingLeft),
-    resolvePaddingClass("right", sectionSettings?.paddingRight),
-  ]
+    const paddingClasses = [
+      "px-section-x",
+      "py-section-y",
+      resolvePaddingClass("top", sectionSettings?.paddingTop),
+      resolvePaddingClass("bottom", sectionSettings?.paddingBottom),
+      resolvePaddingClass("left", sectionSettings?.paddingLeft),
+      resolvePaddingClass("right", sectionSettings?.paddingRight),
+    ]
 
-  const combinedClassName = clsx(
-    "relative w-full border-b",
-    paddingClasses,
-    colorSchemeClass,
-    attributeClasses,
-    className
-  )
+    const combinedClassName = clsx(
+      "relative w-full border-b",
+      paddingClasses,
+      colorSchemeClass,
+      attributeClasses,
+      className
+    )
 
-  const content = disableContainer ? children : <div className={finalContainerClassName}>{children}</div>
+    const content = disableContainer ? (
+      children
+    ) : (
+      <div className={finalContainerClassName}>{children}</div>
+    )
 
-  const colorScheme = sectionSettings?.colorScheme ?? "light"
+    const colorScheme = sectionSettings?.colorScheme ?? "light"
 
-  return (
-    <section
-      ref={ref as any}
-      className={combinedClassName}
-      data-section-scheme={colorScheme}
-      {...attributes}
-      {...rest}
-    >
-      {content}
-    </section>
-  )
-})
+    return (
+      <section
+        ref={ref as any}
+        className={combinedClassName}
+        data-section-scheme={colorScheme}
+        {...attributes}
+        {...rest}
+      >
+        {content}
+      </section>
+    )
+  }
+)

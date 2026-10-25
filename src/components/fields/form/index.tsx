@@ -1,5 +1,5 @@
-import { FormBlock } from "./component"
-import type { Form } from "@/admin/payload/payload-types"
+import { FormBlock } from "@/components/fields/form/component"
+import type { Form } from "@/payload-types"
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical"
 import React from "react"
 

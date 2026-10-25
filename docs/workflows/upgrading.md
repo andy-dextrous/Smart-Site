@@ -1,15 +1,11 @@
 # Upgrade and recovery
 
-For this transition, read the [native MCP migration notes](../releases/native-mcp-transition.md).
+An existing site owns all its source and data. Upgrade with a reviewed three-way comparison of the original release, the customized site and the new release. Preserve custom code, dependencies, scripts, workflows, environment identity and content.
 
-An exported project is independent. Obtain a verified release archive through the owner's chosen release channel; never reach into a former factory checkout at runtime. Keep the old source revision, lockfile, environment, database backup and media backup. Prove restore on disposable storage before touching live data.
+For **3.0.0 or 3.0.1 → 4.0.1**, follow the [versioned upgrade kit](../upgrades/4.0.0/README.md). It includes inspection, source reconciliation, backup/restore verification, idempotent legacy-job conversion and preservation checks. Run it in a restored rehearsal first, then in the original site directory during the authorized cutover. Do not bootstrap, seed, adopt a new identity or move local runtime state to another folder as an upgrade shortcut.
 
-Compare the old baseline, customized project and new release in a three-way source merge. Review package and runtime requirements, `src/admin`, site config/extensions, section registries, environment changes, docs and both skill mirrors. Preserve custom components and edited core; surface conflicts instead of overwriting. Install the frozen lock, regenerate types/import map, and test with a separate restored database and storage.
+Older sites first need a separately verified 3.x transition. Unknown baselines and unresolved customizations stop with a report. PostgreSQL needs its own reviewed migration; automatic 4.0 data migration supports Mongo replica sets.
 
-For the MCP transition, preserve useful existing AI brand/context as reviewed facts in `docs/project/brief.md` and design.md before removing runtime config. Never copy conversations or credentials into public docs. Remove old AI routes/providers, shared agent keys, seed/control endpoints and the global CLI from active instructions. External hosted services and live key revocation are separate owner-authorized actions.
+Source rollback restores the prior code/lockfile against compatible data. Whole-database restoration is different: freeze writes, preserve edits made after cutover, and restore coordinated source/database/media snapshots only within the owner's authorized recovery scope. Never silently discard post-cutover edits.
 
-Existing Mongo databases must be authenticated replica sets before checked MCP writes work. Back up data and users, preserve credentials and enable replication using the controlled deployment procedure. Do not start a new empty volume and call it an upgrade. PostgreSQL requires an explicit tested migration with schema push disabled outside local environments.
-
-Use `scripts/environment-adoption.ts` only with an explicit private request, intended environment and existing administrator, after reviewing stored identity. It creates missing internal identity on a verified legacy/hosted database; it does not seed content or change users. Configure an MCP key in the CMS and test catalogue/read before granting writes.
-
-Deploy compatible code first, verify CMS/public behavior, then run any separately approved data migration. Source rollback restores the old code/lock. Content rollback restores selected fields from versions/current-revision checked saves. Whole database/media restore replaces state and needs explicit downtime/target approval; it is not a normal code rollback. Keep acceptance evidence and the recovery pointer with the project.
+The earlier [native MCP transition notes](../releases/native-mcp-transition.md) remain relevant to sites that still contain the retired chat/AI runtime. They are not the 4.0 procedure.

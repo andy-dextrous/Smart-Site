@@ -1,171 +1,116 @@
-# Configuration System
+# Native Payload configuration
 
-The preserved configuration, extension, and override guidance from the source manuscript is reproduced below.
+Start at `src/payload.config.ts`. It lists collections, globals, plugins, database, email, admin options and generated types explicitly. Edit an existing collection in `src/collections`; no override or extension registry is required.
 
-For common on/off behavior such as disabling MCP, switching search mode, or turning off global GSAP animations, start with [docs/workflows/feature-toggles.md](../workflows/feature-toggles.md) before reading this broader engineering doc.
+`src/site.config.ts` contains browser-safe presentation choices: identity defaults, navigation/search presentation, motion, breadcrumbs and image-display quality. Database credentials, storage clients, access functions and collection definitions stay on the server. CMS-managed business content remains in the database.
 
+## Add a website collection
 
-Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
+Use the nearest existing collection as the complete example. A routed collection needs its own slug/URI fields, publication access and lifecycle hooks. Metadata declares its role; it does not add those behaviors automatically.
 
-## Canonical decision rules
+```ts
+import type { CollectionConfig } from "payload"
+import { authenticated } from "@/access/authenticated"
+import { authenticatedOrPublished } from "@/access/authenticatedOrPublished"
+import { slugField } from "@/fields/slug"
+import { seoFields } from "@/fields/seo"
+import { websitePreview } from "@/website/preview"
+import { beforeUniversalChange } from "@/hooks/collections/universal/before-change"
+import { afterUniversalChange } from "@/hooks/collections/universal/after-change"
+import { afterUniversalDelete } from "@/hooks/collections/universal/after-delete"
+import { lockSlugAfterPublish } from "@/hooks/utilities/lock-slug"
 
-- `src/smartsite.config.ts` is the primary customization surface.
-- Use `src/extensions/` for new slugs and new first-class extensions, not for built-in SmartSite collections that already exist.
-- Keep `src/admin/` protected. Shared core changes belong in SmartSite itself, not as ad hoc site-level edits.
-- For feature toggles such as MCP, search, analytics, GSAP global animations, and i18n, start with `smartsite.config.ts` before considering any deeper change.
-- Image quality overrides must also be allowed by `images.qualities` in `next.config.ts`. The starter permits its 75/85/90 presets. Same-site Payload media uses local paths with version query strings; external storage hosts need an explicit `images.remotePatterns` entry.
-
-## ⚙️ Configuration System
-
-Smart Site uses a **comprehensive configuration system** via `src/smartsite.config.ts` that controls all aspects without modifying core files.
-
-### Configuration Structure
-
-```typescript
-import type { UserConfig } from "@/admin/config/defaults"
-
-const config: UserConfig = {
-  admin: {
-    meta: {
-      title: "Admin | Smart Site",
-      description: "Advanced admin panel",
-      favicon: "/favicon.png",
+export const Projects: CollectionConfig = {
+  slug: "projects",
+  labels: { singular: "Project", plural: "Projects" },
+  custom: {
+    smartsite: {
+      route: true, label: "Projects", seo: true, search: true, mcp: true,
+      sitemap: { enabled: true, priority: 0.7, changefreq: "weekly", respectNoIndex: true },
     },
   },
-  collections: {
-    services: { enabled: false }, // example: hide services in this project
+  access: {
+    create: authenticated, update: authenticated, delete: authenticated,
+    read: authenticatedOrPublished,
   },
-  features: {
-    analytics: true,
-    darkMode: false,
-    i18n: false,
-    search: {
-      enabled: true,
-      mode: "page",
-    },
-    sitemaps: true,
+  admin: { useAsTitle: "title", ...websitePreview("projects") },
+  fields: [
+    { name: "title", type: "text", required: true },
+    { name: "summary", type: "textarea" },
+    { type: "tabs", tabs: [{ name: "seo", label: "SEO", fields: seoFields({ seoSchemaType: "WebPage" }) }] },
+    ...slugField("title"),
+  ],
+  hooks: {
+    beforeOperation: [lockSlugAfterPublish],
+    beforeChange: [beforeUniversalChange],
+    afterChange: [afterUniversalChange],
+    afterDelete: [afterUniversalDelete],
   },
-  gsap: {
-    scrollTrigger: true,
-    scrollSmoother: true,
-    splitText: false,
-    globalAnimations: false,
-  },
-  extensions: {
-    collections: [],
-    blocks: [],
-    globals: [],
-    plugins: [],
-  },
+  versions: { drafts: true },
 }
-
-export default config
 ```
 
+Import `Projects` and add it once to the `collections` array before `inventory` is calculated. This makes Settings archive/template choices, URI-index relationships, preview, search and sitemap consumers see the collection. Choose a template/renderer that handles its actual fields; registration alone does not design a public page. Generate types/import map, then test draft/publish, access denial, a public route and an MCP schema/read/save.
 
-### Default collections and extensions
+A private data collection can use a normal `CollectionConfig` without website metadata or routing hooks. Custom globals opt into content MCP with `custom: { smartsite: { mcp: true } }`. Users, keys, submissions, operations and internal collections remain excluded. Metadata never overrides Payload role or field access.
 
-Smart Site ships with a full set of first-party collections that already cover typical marketing needs. The defaults live in `src/admin/config/defaults.ts` (`SMARTSITE_DEFAULTS`) and every collection defined there starts with `enabled: true`. That means services, team, testimonials, templates, media, categories, pages, and posts are available the moment the app boots—you only need to touch `smartsite.config.ts` if you want to rename them, change SEO/front-end behaviour, or explicitly disable something.
+Register website collections before schema factories run. Plugins that add or remove a routed collection afterwards are rejected with a configuration error. During upgrades, move that registration into the explicit list rather than weakening the assertion.
 
-- **System collections** (`uri-index`, `users`, `templates`) are always registered by the resolver in `src/admin/config/resolver.ts`, even if you try to disable them. They keep routing, authentication, and layout scaffolding intact.
-- **Content collections** (`pages`, `posts`, `services`, `team`, `testimonials`, `categories`, `media`) stay on by default. Set `enabled: false` in `smartsite.config.ts` to hide one.
-- **Extensions** are only for new slugs that do not exist in the default registry. Declare the slug in `smartsite.config.ts → extensions` and provide the actual config in `src/extensions`. Do **not** add built-in collections such as `services` or `testimonials` to extensions—they already exist.
-- **Plugin collections** (`forms`, `form-submissions`, `redirects`, `search`, etc.) are installed automatically by the default plugin stack in `src/admin/payload/plugins`. They will appear in `payload-types.ts` without any manual configuration.
-- **Search controls**: The same plugin stack registers the `search` collection when `features.search.enabled` is `true`. Configure the command palette vs. results page behaviour through `features.search.mode` (`"page" | "modal" | "hybrid"`). The collection is grouped under **Settings → Search Results** in Payload admin so reindexing and manual inspection stay tidy.
+## Sections and links
 
-### Inspecting the active Payload configuration
+Section schemas/renderers remain in `src/components/sections`; register them in its config and component map. Shared link fields carry an explicit marker that `websiteLinksPlugin` binds to the website collection inventory before Payload sanitization. The plugin preserves explicit relationship restrictions and clones shared schemas so one build cannot contaminate another.
 
-1. Open `src/admin/config/defaults.ts` to see every baseline setting, including the default labels, SEO flags, sitemap weights, and feature toggles.
-2. Review `src/smartsite.config.ts` for project-specific overrides—the file is merged deeply, so any key you omit uses the default above.
-3. Check `src/extensions/index.ts` (and the folders it imports) to find custom collections/globals/blocks that replace or extend the defaults. The resolver automatically swaps them in when the slug matches.
-4. Confirm the final build output in `src/admin/payload/payload-types.ts`. Payload regenerates this file on build and it lists every collection/global/block that is actually registered.
+For Lexical blocks containing shared links, register the block definition in the top-level `blocks` array, then reference its slug from `BlocksFeature`. A schema hidden only inside an editor feature callback is not available to the binding pass. Ordinary inline section blocks and object entries in `blockReferences` are traversed.
 
-### Complete Configuration Options
+## Native settings
 
-#### Collections Configuration
+| Change | Edit |
+| --- | --- |
+| Collection fields, permissions, hooks, labels or drafts | Its `src/collections` definition |
+| Global fields or permissions | Its `src/globals` definition |
+| Database adapter/connection | `src/payload/db/config.ts` and the explicit environment |
+| Email adapter | `src/payload/email/config.ts` |
+| Admin metadata/live-preview defaults | `src/admin/config.ts` |
+| Admin colors, layout and typography | `src/admin/css` |
+| Upload sizes, focal point, formats or local directory | `src/collections/media.ts` |
+| External storage | Native storage plugin in `payload.config.ts` |
+| Schema localization | Native `localization` in `payload.config.ts` plus `localized` fields |
+| Public locale/motion/search/breadcrumb choices | `src/site.config.ts` |
+| MCP transport enabled/disabled | `smartsiteMcp({ enabled: true })` in the plugin list |
+| MCP eligibility | Definition’s `custom.smartsite.mcp`, with normal access/grants |
 
-| Collection       | Default state        | Frontend default | Purpose                       |
-| ---------------- | -------------------- | ---------------- | ----------------------------- |
-| `pages`          | Enabled              | Yes              | Primary marketing pages       |
-| `posts`          | Enabled              | Yes              | Blog articles                 |
-| `services`       | Enabled              | Yes              | Service or offering pages     |
-| `team`           | Enabled              | Yes              | Team member bios              |
-| `testimonials`   | Enabled              | No               | Social proof library          |
-| `categories`     | Enabled              | No               | Content categorization        |
-| `media`          | Enabled (`local`)    | No               | Asset storage + adapters      |
-| `templates`*     | Enabled (system)     | No               | Page blueprint library        |
-| `users`*         | Enabled (system)     | No               | Admin authentication          |
-| `uri-index`*     | Always included      | N/A              | Global URI → document index   |
+Disabling MCP preserves existing key/identity/receipt collections and removes the transport endpoint. It does not delete or rotate credentials. A deliberately disabled endpoint is not a startup failure; use the CMS or an explicitly authorized operator workflow for content.
 
-`*` System collections cannot be removed; Smart Site requires them for routing and admin access.
+## Storage recipes
 
-Each configurable collection (any slug inside `smartsite.config.ts → collections`) supports:
-
-- `enabled`: Turn on/off
-- `frontend`: Enable frontend features (SEO, preview)
-- `seo`: Add SEO fields
-- `frontendOptions.seoSchemaType`: Schema.org type
-- `sitemap`: Include in sitemap
-
-#### Feature Flags
-
-| Feature       | Options   | Default          | Purpose                                                                         |
-| ------------- | --------- | ---------------- | ------------------------------------------------------------------------------- |
-| `darkMode`    | `boolean` | `false`          | Dark/light theme toggle                                                         |
-| `i18n`        | `boolean` | `false`          | Internationalization                                                            |
-| `analytics`   | `boolean` | `true`           | Analytics tracking                                                              |
-| `search.enabled` | `boolean` | `true`       | Toggle the entire search stack (plugin registration, nav affordances, API)      |
-| `search.mode` | `"page" \| "modal" \| "hybrid"` | `"page"` | Choose between full results page, command palette, or both                    |
-| `sitemaps`    | `boolean` | `true`           | XML sitemap generation                                                          |
-
-#### GSAP Configuration
-
-| Option              | Type       | Default | Purpose                                                                  |
-| ------------------- | ---------- | ------- | ------------------------------------------------------------------------ |
-| `scrollTrigger`     | `boolean`  | `true`  | Registers `ScrollTrigger` for manual hooks and global animations         |
-| `scrollSmoother`    | `boolean`  | `true`  | Enables smooth scrolling context                                         |
-| `flip`              | `boolean`  | `false` | Loads GSAP Flip plugin                                                   |
-| `draggable`         | `boolean`  | `false` | Loads Draggable plugin                                                   |
-| `morphSVG`          | `boolean`  | `false` | Loads MorphSVG plugin                                                    |
-| `drawSVG`           | `boolean`  | `false` | Loads DrawSVG plugin                                                     |
-| `splitText`         | `boolean`  | `false` | Registers SplitText for manual hooks                                     |
-| `customEase`        | `boolean`  | `false` | Loads CustomEase                                                         |
-| `physics2D`         | `boolean`  | `false` | Loads Physics2D helpers                                                  |
-| `textPlugin`        | `boolean`  | `false` | Registers TextPlugin for manual hooks                                    |
-| `globalAnimations`  | `boolean`  | `false`  | Enables the global data-attribute animation provider                    |
-
-
-## 🧩 Extensions & Overrides
-
-### Extensions (registering new content)
-
-Extensions let you ship additional Payload collections, globals, blocks, or plugins without touching `src/admin`.
-
-1. **Create the config** under `src/extensions/<type>/<slug>.ts`. Export a standard Payload config object (e.g., `CollectionConfig`).
-2. **Register it in the extension registry** (`src/extensions/index.ts`). Import your file and add it to the appropriate export map (`collections`, `globals`, `blocks`, `plugins`).
-3. **Enable it in `smartsite.config.ts`** by adding the slug to the corresponding `extensions.<type>` array. The resolver will pull the config from the registry and apply the same frontend wrappers used for core collections.
+Local uploads need no plugin. For hosted storage, add the chosen native plugin to `payload.config.ts` and retain the site's existing options. Configure credentials explicitly; do not silently fall back to local storage when a hosted provider is missing credentials.
 
 ```ts
-// src/smartsite.config.ts
-extensions: {
-  collections: ["faq"],
-  blocks: ["testimonial-grid"],
-  globals: [],
-  plugins: [],
-},
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob"
+const blobToken = process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN
+if (!blobToken) throw new Error("Hosted media requires a Vercel Blob token")
+// Add to plugins:
+vercelBlobStorage({ collections: { media: true }, token: blobToken })
 ```
-
-> Arrays in the `extensions` section replace the defaults rather than merging (see `deep-merge.ts`). Declare every extension slug you want active.
-
-### Overrides (replacing core behaviour)
-
-If you need to replace a built-in collection/global/block, drop a config with the same slug into the registry and the resolver will swap it automatically. Root collections (`users`, `uri-index`, `templates`) are always loaded, but any matching entry in the registry wins over the default.
 
 ```ts
-defaultCollectionMap["pages"] // core definition
-extensions.collections.pages   // optional override
+import { s3Storage } from "@payloadcms/storage-s3"
+s3Storage({
+  collections: { media: true }, bucket: process.env.S3_BUCKET!,
+  config: {
+    region: process.env.S3_REGION!,
+    credentials: { accessKeyId: process.env.S3_ACCESS_KEY_ID!, secretAccessKey: process.env.S3_SECRET_ACCESS_KEY! },
+  },
+})
 ```
 
-The merge order is: defaults → registry overrides → user config (`smartsite.config.ts`). System collections always load exactly once. Custom extensions declared via `smartsite.config.ts` that are not found in the registry will throw a runtime error, preventing silent typos.
+```ts
+import { uploadthingStorage } from "@payloadcms/storage-uploadthing"
+uploadthingStorage({ collections: { media: true }, options: { token: process.env.UPLOADTHING_TOKEN! } })
+```
 
-<a id="development-workflow"></a>
+The Blob adapter intentionally disables itself when its token is missing, so validate hosted credentials before creating it. A TypeScript non-null assertion (`!`) does not perform that validation. If a local preview deliberately uses local files, omit the hosted plugin explicitly for that environment; never let a missing hosted token choose the storage destination.
+
+The retained Cloudinary adapter is `cloudinaryStorage` from `@/payload/storage/cloudinary`. It accepts explicit `cloudName`, `apiKey`, `apiSecret`, `folder`, `uploadOptions`, `destroyOptions`, `deliveryOptions` and collection overrides, with the documented Cloudinary environment aliases as fallback. Preserve existing folders/public IDs during upgrades.
+
+Keep existing provider-specific options, image sizes and download/access rules when translating old configuration. Verify originals, variants, upload/delete and Next image rendering using isolated provider objects. Provider-specific acceptance is recorded separately; a local build alone does not prove external storage works.

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { spawn } from "node:child_process"
-import { readdir, rm } from "node:fs/promises"
+import { readdir, readFile, writeFile, mkdir, rm } from "node:fs/promises"
 import { MongoClient } from "mongodb"
 import {
   loadState,
@@ -10,6 +10,7 @@ import {
 } from "../../scripts/local/state.mjs"
 import { databaseURL } from "../../scripts/local/database.mjs"
 import { stopProcess } from "../../scripts/local/runtime.mjs"
+import { readAdminCompileSummary } from "../../scripts/local/admin-readiness.mjs"
 const files = await readdir(".")
 if (
   files.some(f => f.startsWith(".env") && !f.endsWith(".example")) ||
@@ -37,6 +38,8 @@ const stages = [
   "server-mcp-verified",
 ]
 let client
+let doctorExitCode
+const completedCheckpoints = []
 try {
   let siteId
   for (const stage of stages) {
@@ -55,10 +58,13 @@ try {
     const state = await loadState()
     siteId ??= state.siteId
     assert.equal(state.siteId, siteId)
+    completedCheckpoints.push(stage)
     console.log(JSON.stringify({ interrupted: stage, identityPreserved: true }))
   }
   assert.equal(await run(["scripts/bootstrap-smartsite.mjs"]), 0)
-  assert.equal(await run(["scripts/doctor-smartsite.mjs"]), 0)
+  assert.ok(!(await readFile(`${local}/app.log`, "utf8")).includes("GET /admin/login"), "Admin route must be cold before doctor")
+  doctorExitCode = await run(["scripts/doctor-smartsite.mjs"])
+  assert.equal(doctorExitCode, 0)
   const state = await loadState(),
     credentials = await readJSON(local + "/credentials.json")
   client = await new MongoClient(databaseURL(state, credentials)).connect()
@@ -76,10 +82,18 @@ try {
         "stable-identity",
         "no-duplicate-essentials",
         "read-only-doctor",
+        "cold-admin-readiness",
       ],
     })
   )
 } finally {
+  // Keep only allowlisted compiler/timing diagnostics after disposable state cleanup.
+  try {
+    await mkdir("test-results", { recursive: true, mode: 0o700 })
+    await writeFile("test-results/startup-diagnostics.json", JSON.stringify({ completedCheckpoints, doctorExitCode, compilation: await readAdminCompileSummary() }, null, 2) + "\n", { mode: 0o600 })
+  } catch {
+    console.error("Could not retain sanitized startup diagnostics; continuing owned-process cleanup")
+  }
   await client?.close()
   const state = await loadState()
   await stopProcess(state.appProcess)

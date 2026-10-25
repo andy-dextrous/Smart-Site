@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next"
-import { getSmartSiteConfig } from "@/admin/config"
-import { getFrontendCollectionKeys, shouldIncludeCollectionInSitemap } from "@/admin/sitemaps/config"
-import { generateSitemap } from "@/admin/sitemaps/generator"
-import { getServerSideURL } from "@/admin/utilities/get-url"
+import site from "@/site.config"
+import {
+  getFrontendCollectionKeys,
+  shouldIncludeCollectionInSitemap,
+} from "@/website/sitemaps/config"
+import { generateSitemap } from "@/website/sitemaps/generator"
+import { getServerSideURL } from "@/utilities/get-url"
 
 /*************************************************************************/
 /*  GENERATE SITEMAPS - ONE PER FRONTEND COLLECTION
@@ -10,11 +13,11 @@ import { getServerSideURL } from "@/admin/utilities/get-url"
 
 export async function generateSitemaps() {
   try {
-    const config = getSmartSiteConfig()
+    const config = site
     if (!config.features.sitemaps) {
       return []
     }
-    const activeSitemapKeys = getFrontendCollectionKeys()
+    const activeSitemapKeys = await getFrontendCollectionKeys()
 
     return activeSitemapKeys.map(collectionSlug => ({
       id: collectionSlug,
@@ -32,18 +35,19 @@ export async function generateSitemaps() {
 export default async function sitemap({
   id,
 }: {
-  id: string
+  id: Promise<string>
 }): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getServerSideURL()
+  const collectionSlug = await id
 
   try {
-    const config = getSmartSiteConfig()
+    const config = site
     if (!config.features.sitemaps) {
       return []
     }
 
     const getSitemapEntries = async (collectionName: string) => {
-      if (!shouldIncludeCollectionInSitemap(collectionName)) {
+      if (!(await shouldIncludeCollectionInSitemap(collectionName))) {
         return []
       }
 
@@ -63,17 +67,9 @@ export default async function sitemap({
         priority: entry.priority,
       }))
     }
-    // ,
-    // [`sitemap-${id}`, "sitemap-generation"],
-    // {
-    //   tags: [`sitemap:${id}`, "sitemap:all"],
-    //   revalidate: 3600, // 1 hour
-    //
-    // }
-
-    return await getSitemapEntries(id)
+    return await getSitemapEntries(collectionSlug)
   } catch (error) {
-    console.error(`❌  Error generating sitemap for collection ${id}:`, error)
+    console.error(`❌  Error generating sitemap for collection ${collectionSlug}:`, error)
     return []
   }
 }

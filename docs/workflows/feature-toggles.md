@@ -1,5 +1,7 @@
-# Feature toggles
+# Feature choices
 
-Use `src/smartsite.config.ts`. Its type and `src/admin/config/defaults.ts` are the schema truth. Search, analytics, dark mode, i18n, sitemaps and animations have their own configuration; inspect the current type before editing. Verify the rendered result, not only compilation.
+Browser-safe presentation settings live in `src/site.config.ts`: dark mode, public locale/search presentation, sitemaps, animations, breadcrumbs and image quality. Verify the rendered result after changes.
 
-MCP is enabled by default. Disable it with `mcp: { enabled: false }` if the site does not need content tools. Optional custom content targets use `mcp.collections` and `mcp.globals`; audit access and projection first. Private/auth collections cannot be exposed by this switch. The old AI feature, chat UI and provider-key configuration have been removed.
+Server features use normal Payload configuration. Register collections/plugins in `src/payload.config.ts`; configure localization, storage, email and admin options in their native owners. [Configuration](../engineering/configuration-system.md) explains the boundaries and examples.
+
+MCP is enabled by the explicit `smartsiteMcp({ enabled: true })` plugin option. Set it to false to remove the endpoint while preserving stored identities, keys and receipts. Each content collection/global separately opts in with `custom.smartsite.mcp: true`; existing Payload access and key grants still apply. Private/internal targets cannot be exposed through metadata.

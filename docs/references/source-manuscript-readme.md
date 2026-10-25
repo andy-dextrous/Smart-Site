@@ -1,3 +1,5 @@
+> Historical reference only. This document describes an earlier SmartSite structure and is not current agent instructions. Use the [SmartSite 4 documentation](../index.md) for setup, development and upgrades. Old paths, CLI commands and protected-admin rules below are retained only as history.
+
 # Smart Site - Enterprise Website Builder
 
 A **field-driven, section-first website builder** powered by **Next.js 16**, **Payload CMS 3**, **Tailwind CSS v4**, **GSAP**, and **AI integration via Mastra**, designed for rapid development of dynamic websites with enterprise-grade features.

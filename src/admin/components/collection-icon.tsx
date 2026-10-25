@@ -3,8 +3,8 @@
 import { ComponentType, Suspense, createElement, useMemo } from "react"
 import { IoIosDocument } from "react-icons/io"
 import dynamic from "next/dynamic"
-import { navIconMap } from "@/admin/payload/components/backend/nav/navIconMap"
-import { IconConfig, CollectionCustomMetadata } from "@/admin/payload/types/icon-types"
+import { navIconMap } from "@/admin/components/nav/navIconMap"
+import { IconConfig, CollectionCustomMetadata } from "@/types/icon-types"
 
 /*************************************************************************/
 /*  UNIFIED COLLECTION ICON COMPONENT
@@ -20,7 +20,7 @@ import { IconConfig, CollectionCustomMetadata } from "@/admin/payload/types/icon
 const iconLoaders: Record<string, () => Promise<any>> = {
   // Lucide icons
   lucide: () => import("lucide-react"),
-  
+
   // React Icons libraries
   fa: () => import("react-icons/fa"),
   fa6: () => import("react-icons/fa6"),
@@ -69,12 +69,12 @@ function getIconCacheKey(config: IconConfig) {
 
 function createDynamicIcon(config: IconConfig): ComponentType<{ className?: string }> {
   const cacheKey = getIconCacheKey(config)
-  
+
   // Check cache first
   if (componentCache.has(cacheKey)) {
     return componentCache.get(cacheKey)!
   }
-  
+
   const DynamicIcon = dynamic(
     async () => {
       try {
@@ -89,23 +89,23 @@ function createDynamicIcon(config: IconConfig): ComponentType<{ className?: stri
         } else if (config.type === "react-icons") {
           const [lib, iconName] = config.name.split("/")
           const loader = iconLoaders[lib]
-          
+
           if (!loader) {
             console.warn(`React Icons library not found: ${lib}`)
             return { default: IoIosDocument }
           }
-          
+
           const mod = await loader()
           const Icon = mod[iconName]
-          
+
           if (!Icon) {
             console.warn(`React icon not found: ${config.name}`)
             return { default: IoIosDocument }
           }
-          
+
           return { default: Icon }
         }
-        
+
         // Custom icons not supported yet
         return { default: IoIosDocument }
       } catch (error) {
@@ -113,15 +113,15 @@ function createDynamicIcon(config: IconConfig): ComponentType<{ className?: stri
         return { default: IoIosDocument }
       }
     },
-    { 
+    {
       loading: () => <IoIosDocument className="animate-pulse" />,
-      ssr: true // Enable SSR with fallback
+      ssr: true, // Enable SSR with fallback
     }
   )
-  
+
   // Cache the component
   componentCache.set(cacheKey, DynamicIcon)
-  
+
   return DynamicIcon
 }
 
@@ -134,13 +134,19 @@ interface CollectionIconProps {
   item?: any
 }
 
-export function CollectionIcon({ slug, iconConfig, item, className }: CollectionIconProps) {
+export function CollectionIcon({
+  slug,
+  iconConfig,
+  item,
+  className,
+}: CollectionIconProps) {
   const resolvedConfig = useMemo<IconConfig | null>(() => {
     if (iconConfig) {
       return iconConfig
     }
     if (item) {
-      const customMetadata = (item.admin?.custom || item.custom) as CollectionCustomMetadata | undefined
+      const customMetadata = (item.admin?.custom || item.custom) as
+        CollectionCustomMetadata | undefined
       if (customMetadata?.icon) {
         return customMetadata.icon
       }

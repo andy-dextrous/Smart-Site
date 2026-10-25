@@ -10,7 +10,7 @@ Checks if field contains nested fields (group, array, row, or collapsible).
 
 ```ts
 import type { Field } from 'payload'
-import { fieldHasSubFields } from 'payload'
+import { fieldHasSubFields } from 'payload/shared'
 
 function traverseFields(fields: Field[]): void {
   fields.forEach((field) => {
@@ -25,9 +25,7 @@ function traverseFields(fields: Field[]): void {
 **Signature:**
 
 ```ts
-fieldHasSubFields<TField extends ClientField | Field>(
-  field: TField
-): field is TField & (FieldWithSubFieldsClient | FieldWithSubFields)
+fieldHasSubFields<TField extends ClientField | Field | TabAsField>(field: TField): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields);
 ```
 
 **Common Pattern - Exclude Arrays:**
@@ -43,7 +41,7 @@ if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
 Checks if field type is `'array'`.
 
 ```ts
-import { fieldIsArrayType } from 'payload'
+import { fieldIsArrayType } from 'payload/shared'
 
 if (fieldIsArrayType(field)) {
   // field.type === 'array'
@@ -55,9 +53,7 @@ if (fieldIsArrayType(field)) {
 **Signature:**
 
 ```ts
-fieldIsArrayType<TField extends ClientField | Field>(
-  field: TField
-): field is TField & (ArrayFieldClient | ArrayField)
+fieldIsArrayType<TField extends ClientField | Field>(field: TField): field is TField & (TField extends ClientField ? ArrayFieldClient : ArrayField);
 ```
 
 ### fieldIsBlockType
@@ -65,7 +61,7 @@ fieldIsArrayType<TField extends ClientField | Field>(
 Checks if field type is `'blocks'`.
 
 ```ts
-import { fieldIsBlockType } from 'payload'
+import { fieldIsBlockType } from 'payload/shared'
 
 if (fieldIsBlockType(field)) {
   // field.type === 'blocks'
@@ -78,9 +74,7 @@ if (fieldIsBlockType(field)) {
 **Signature:**
 
 ```ts
-fieldIsBlockType<TField extends ClientField | Field>(
-  field: TField
-): field is TField & (BlocksFieldClient | BlocksField)
+fieldIsBlockType<TField extends ClientField | Field>(field: TField): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField);
 ```
 
 **Common Pattern - Distinguish Containers:**
@@ -98,7 +92,7 @@ if (fieldIsArrayType(field)) {
 Checks if field type is `'group'`.
 
 ```ts
-import { fieldIsGroupType } from 'payload'
+import { fieldIsGroupType } from 'payload/shared'
 
 if (fieldIsGroupType(field)) {
   // field.type === 'group'
@@ -109,9 +103,7 @@ if (fieldIsGroupType(field)) {
 **Signature:**
 
 ```ts
-fieldIsGroupType<TField extends ClientField | Field>(
-  field: TField
-): field is TField & (GroupFieldClient | GroupField)
+fieldIsGroupType<TField extends ClientField | Field>(field: TField): field is TField & (TField extends ClientField ? GroupFieldClient : GroupField);
 ```
 
 ## Capability Guards
@@ -121,7 +113,7 @@ fieldIsGroupType<TField extends ClientField | Field>(
 Checks if field can have multiple values (select, relationship, or upload with `hasMany`).
 
 ```ts
-import { fieldSupportsMany } from 'payload'
+import { fieldSupportsMany } from 'payload/shared'
 
 if (fieldSupportsMany(field)) {
   // field.type is 'select' | 'relationship' | 'upload'
@@ -135,9 +127,7 @@ if (fieldSupportsMany(field)) {
 **Signature:**
 
 ```ts
-fieldSupportsMany<TField extends ClientField | Field>(
-  field: TField
-): field is TField & (FieldWithManyClient | FieldWithMany)
+fieldSupportsMany<TField extends ClientField | Field>(field: TField): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany);
 ```
 
 ### fieldHasMaxDepth
@@ -145,7 +135,7 @@ fieldSupportsMany<TField extends ClientField | Field>(
 Checks if field is relationship/upload/join with numeric `maxDepth` property.
 
 ```ts
-import { fieldHasMaxDepth } from 'payload'
+import { fieldHasMaxDepth } from 'payload/shared'
 
 if (fieldHasMaxDepth(field)) {
   // field.type is 'upload' | 'relationship' | 'join'
@@ -157,9 +147,7 @@ if (fieldHasMaxDepth(field)) {
 **Signature:**
 
 ```ts
-fieldHasMaxDepth<TField extends ClientField | Field>(
-  field: TField
-): field is TField & (FieldWithMaxDepthClient | FieldWithMaxDepth)
+fieldHasMaxDepth<TField extends ClientField | Field>(field: TField): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth);
 ```
 
 ### fieldShouldBeLocalized
@@ -167,7 +155,7 @@ fieldHasMaxDepth<TField extends ClientField | Field>(
 Checks if field needs localization handling (accounts for parent localization).
 
 ```ts
-import { fieldShouldBeLocalized } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 function processField(field: Field, parentIsLocalized: boolean) {
   if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
@@ -179,13 +167,10 @@ function processField(field: Field, parentIsLocalized: boolean) {
 **Signature:**
 
 ```ts
-fieldShouldBeLocalized({
-  field,
-  parentIsLocalized,
-}: {
-  field: ClientField | ClientTab | Field | Tab
-  parentIsLocalized: boolean
-}): boolean
+fieldShouldBeLocalized({ field, parentIsLocalized, }: {
+    field: ClientField | ClientTab | Field | Tab;
+    parentIsLocalized: boolean;
+}): boolean;
 ```
 
 ```ts
@@ -200,9 +185,9 @@ if (fieldShouldBeLocalized({ field, parentIsLocalized: false })) {
 Checks if field is virtual (computed or virtual relationship).
 
 ```ts
-import { fieldIsVirtual } from 'payload'
+import { fieldIsVirtual } from 'payload/shared'
 
-if (fieldIsVirtual(field)) {
+if (fieldIsVirtual(field) && 'virtual' in field) {
   // field.virtual is truthy
   if (typeof field.virtual === 'string') {
     // Virtual relationship path
@@ -216,17 +201,17 @@ if (fieldIsVirtual(field)) {
 **Signature:**
 
 ```ts
-fieldIsVirtual(field: Field | Tab): boolean
+fieldIsVirtual(field: Field | Tab): boolean;
 ```
 
 ## Data Guards
 
 ### fieldAffectsData
 
-**Most commonly used guard.** Checks if field stores data (has name and is not UI-only).
+**Most commonly used guard.** Checks whether a field has a name and is not UI-only. Virtual fields also match; use `fieldIsVirtual` separately before treating a field as persisted.
 
 ```ts
-import { fieldAffectsData } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 function generateSchema(fields: Field[]) {
   fields.forEach((field) => {
@@ -241,9 +226,7 @@ function generateSchema(fields: Field[]) {
 **Signature:**
 
 ```ts
-fieldAffectsData<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: TField
-): field is TField & (FieldAffectingDataClient | FieldAffectingData)
+fieldAffectsData<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(field: TField): field is TField & (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData);
 ```
 
 **Pattern - Data Fields Only:**
@@ -257,7 +240,7 @@ const dataFields = fields.filter(fieldAffectsData)
 Checks if field is UI-only (type `'ui'`).
 
 ```ts
-import { fieldIsPresentationalOnly } from 'payload'
+import { fieldIsPresentationalOnly } from 'payload/shared'
 
 if (fieldIsPresentationalOnly(field)) {
   // field.type === 'ui'
@@ -269,9 +252,7 @@ if (fieldIsPresentationalOnly(field)) {
 **Signature:**
 
 ```ts
-fieldIsPresentationalOnly<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: TField
-): field is TField & (UIFieldClient | UIField)
+fieldIsPresentationalOnly<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(field: TField): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField);
 ```
 
 ### fieldIsID
@@ -279,7 +260,7 @@ fieldIsPresentationalOnly<TField extends ClientField | Field | TabAsField | TabA
 Checks if field name is exactly `'id'`.
 
 ```ts
-import { fieldIsID } from 'payload'
+import { fieldIsID } from 'payload/shared'
 
 if (fieldIsID(field)) {
   // field.name === 'id'
@@ -290,17 +271,17 @@ if (fieldIsID(field)) {
 **Signature:**
 
 ```ts
-fieldIsID<TField extends ClientField | Field>(
-  field: TField
-): field is { name: 'id' } & TField
+fieldIsID<TField extends ClientField | Field>(field: TField): field is {
+    name: 'id';
+} & TField;
 ```
 
 ### fieldIsHiddenOrDisabled
 
-Checks if field is hidden or admin-disabled.
+Checks top-level `hidden` or `admin.disabled`. It does not check `admin.hidden`; inspect that separately for UI visibility.
 
 ```ts
-import { fieldIsHiddenOrDisabled } from 'payload'
+import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 const visibleFields = fields.filter((field) => !fieldIsHiddenOrDisabled(field))
 ```
@@ -308,9 +289,11 @@ const visibleFields = fields.filter((field) => !fieldIsHiddenOrDisabled(field))
 **Signature:**
 
 ```ts
-fieldIsHiddenOrDisabled<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: TField
-): field is { admin: { hidden: true } } & TField
+fieldIsHiddenOrDisabled<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(field: TField): field is {
+    admin: {
+        hidden: true;
+    };
+} & TField;
 ```
 
 ## Layout Guards
@@ -320,7 +303,7 @@ fieldIsHiddenOrDisabled<TField extends ClientField | Field | TabAsField | TabAsF
 Checks if field is positioned in sidebar.
 
 ```ts
-import { fieldIsSidebar } from 'payload'
+import { fieldIsSidebar } from 'payload/shared'
 
 const [mainFields, sidebarFields] = fields.reduce(
   ([main, sidebar], field) => {
@@ -336,9 +319,11 @@ const [mainFields, sidebarFields] = fields.reduce(
 **Signature:**
 
 ```ts
-fieldIsSidebar<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(
-  field: TField
-): field is { admin: { position: 'sidebar' } } & TField
+fieldIsSidebar<TField extends ClientField | Field | TabAsField | TabAsFieldClient>(field: TField): field is {
+    admin: {
+        position: 'sidebar';
+    };
+} & TField;
 ```
 
 ## Tab & Group Guards
@@ -348,7 +333,7 @@ fieldIsSidebar<TField extends ClientField | Field | TabAsField | TabAsFieldClien
 Checks if tab is named (stores data under tab name).
 
 ```ts
-import { tabHasName } from 'payload'
+import { tabHasName } from 'payload/shared'
 
 tabs.forEach((tab) => {
   if (tabHasName(tab)) {
@@ -362,9 +347,7 @@ tabs.forEach((tab) => {
 **Signature:**
 
 ```ts
-tabHasName<TField extends ClientTab | Tab>(
-  tab: TField
-): tab is NamedTab & TField
+tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is NamedTab & TField;
 ```
 
 ### groupHasName
@@ -372,7 +355,7 @@ tabHasName<TField extends ClientTab | Tab>(
 Checks if group is named (stores data under group name).
 
 ```ts
-import { groupHasName } from 'payload'
+import { groupHasName } from 'payload/shared'
 
 if (groupHasName(group)) {
   // group.name exists
@@ -383,7 +366,7 @@ if (groupHasName(group)) {
 **Signature:**
 
 ```ts
-groupHasName(group: Partial<NamedGroupFieldClient>): group is NamedGroupFieldClient
+groupHasName(group: Partial<NamedGroupFieldClient>): group is NamedGroupFieldClient;
 ```
 
 ## Option & Value Guards
@@ -393,7 +376,7 @@ groupHasName(group: Partial<NamedGroupFieldClient>): group is NamedGroupFieldCli
 Checks if option is object format `{label, value}` vs string.
 
 ```ts
-import { optionIsObject } from 'payload'
+import { optionIsObject } from 'payload/shared'
 
 field.options.forEach((option) => {
   if (optionIsObject(option)) {
@@ -407,18 +390,18 @@ field.options.forEach((option) => {
 **Signature:**
 
 ```ts
-optionIsObject(option: Option): option is OptionObject
+optionIsObject(option: Option): option is OptionObject;
 ```
 
 ### optionsAreObjects
 
-Checks if entire options array contains objects.
+Narrows an options array by checking its first element. Use homogeneous configured options; this is not validation of every untrusted array element.
 
 ```ts
-import { optionsAreObjects } from 'payload'
+import { optionsAreObjects } from 'payload/shared'
 
 if (optionsAreObjects(field.options)) {
-  // All options are OptionObject[]
+  // TypeScript narrows to OptionObject[]; the runtime check only examines the first item
   const labels = field.options.map((opt) => opt.label)
 }
 ```
@@ -426,7 +409,7 @@ if (optionsAreObjects(field.options)) {
 **Signature:**
 
 ```ts
-optionsAreObjects(options: Option[]): options is OptionObject[]
+optionsAreObjects(options: Option[]): options is OptionObject[];
 ```
 
 ### optionIsValue
@@ -434,7 +417,7 @@ optionsAreObjects(options: Option[]): options is OptionObject[]
 Checks if option is string value (not object).
 
 ```ts
-import { optionIsValue } from 'payload'
+import { optionIsValue } from 'payload/shared'
 
 if (optionIsValue(option)) {
   // option is string
@@ -445,7 +428,7 @@ if (optionIsValue(option)) {
 **Signature:**
 
 ```ts
-optionIsValue(option: Option): option is string
+optionIsValue(option: Option): option is string;
 ```
 
 ### valueIsValueWithRelation
@@ -453,7 +436,7 @@ optionIsValue(option: Option): option is string
 Checks if relationship value is polymorphic format `{relationTo, value}`.
 
 ```ts
-import { valueIsValueWithRelation } from 'payload'
+import { valueIsValueWithRelation } from 'payload/shared'
 
 if (valueIsValueWithRelation(fieldValue)) {
   // fieldValue.relationTo exists
@@ -465,7 +448,7 @@ if (valueIsValueWithRelation(fieldValue)) {
 **Signature:**
 
 ```ts
-valueIsValueWithRelation(value: unknown): value is ValueWithRelation
+valueIsValueWithRelation(value: unknown): value is ValueWithRelation;
 ```
 
 ## Common Patterns
@@ -473,7 +456,7 @@ valueIsValueWithRelation(value: unknown): value is ValueWithRelation
 ### Recursive Field Traversal
 
 ```ts
-import { fieldAffectsData, fieldHasSubFields } from 'payload'
+import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
 
 function traverseFields(fields: Field[], callback: (field: Field) => void) {
   fields.forEach((field) => {
@@ -491,7 +474,7 @@ function traverseFields(fields: Field[], callback: (field: Field) => void) {
 ### Filter Data-Bearing Fields
 
 ```ts
-import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsHiddenOrDisabled } from 'payload'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldIsHiddenOrDisabled } from 'payload/shared'
 
 const dataFields = fields.filter(
   (field) =>
@@ -502,7 +485,7 @@ const dataFields = fields.filter(
 ### Container Type Switching
 
 ```ts
-import { fieldIsArrayType, fieldIsBlockType, fieldHasSubFields } from 'payload'
+import { fieldIsArrayType, fieldIsBlockType, fieldHasSubFields } from 'payload/shared'
 
 if (fieldIsArrayType(field)) {
   // Handle array-specific logic
@@ -516,7 +499,7 @@ if (fieldIsArrayType(field)) {
 ### Safe Property Access
 
 ```ts
-import { fieldSupportsMany, fieldHasMaxDepth } from 'payload'
+import { fieldSupportsMany, fieldHasMaxDepth } from 'payload/shared'
 
 // Without guard - TypeScript error
 // if (field.hasMany) { /* ... */ }
@@ -537,7 +520,7 @@ All guards preserve the original type constraint:
 
 ```ts
 import type { ClientField, Field } from 'payload'
-import { fieldHasSubFields } from 'payload'
+import { fieldHasSubFields } from 'payload/shared'
 
 function processServerField(field: Field) {
   if (fieldHasSubFields(field)) {

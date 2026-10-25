@@ -4,8 +4,8 @@
 - use named functions, not module-level arrow functions
 - use full-width block headers for major sections in large files
 - use lighter JSDoc-style block headers for related groups of hooks, helpers, constants, or render logic
-- never add inline comments
-- always use absolute `@/...` imports
+- explain non-obvious invariants with concise comments
+- use `@/...` imports in application TypeScript; CSS and portable scripts use appropriate relative paths
 - never create Payload types manually without explicit approval
 - use Next.js App Router only
 
@@ -18,7 +18,7 @@ These standards are the canonical rules for SmartSite implementation work.
 Anchor responses in [docs/engineering/design-system.md](design-system.md).
 
 - **Token taxonomy:** explain human-controlled vs derived tokens across `spacing.css`, `typography.css`, `colors.css`, `theme.css`.
-- **Safe adjustments:** modify only the first `@theme` block; never edit derived tokens. Encourage small, tested changes.
+- **Safe adjustments:** modify only the first `@theme` block; keep derived tokens consistent with their documented inputs. Encourage small, tested changes.
 - **Typography:** use `text-h*`, body scale utilities, and the `RichText` component. No custom pixel values.
 - **Spacing:** use section/content/grid/control ladders, container utilities, and Section Settings overrides.
 - **Colour schemes:** rely on Section Settings and palette tokens (`text-primary-500`, `bg-neutral`, `border-dark-border`).
@@ -29,108 +29,23 @@ If users request unsupported tokens, advise adding them as new human-controlled 
 
 ---
 
-## 7.1 Source Layout (Do / Don’t)
+## Source layout
 
-Use this as a quick map for where changes belong. Never modify the admin layer.
+The site owns every source file. Edit the module responsible for the behavior; there is no protected framework layer or extension registry.
 
-- `src/admin/` — Protected Payload layer (collections, globals, plugins, cache, MCP). Do not edit here. Use `smartsite.config.ts`, `src/extensions`, and frontend components instead.
-- `src/app/` — Next.js App Router.
-  - `(frontend)/` — public website routes, API routes for frontend, global CSS, error/not-found, robots/sitemap.
-    - `[[...uri]]/page.tsx` — dynamic page renderer (URI index).
-    - `api/` — frontend APIs (preview, health, cache); keep server-only logic.
-    - `css/` — Tailwind v4 token sheets (`spacing.css`, `typography.css`, `colors.css`, `theme.css`).
-    - `(dev)/` — development-only utilities (e.g., previews, diagnostics).
-  - `(payload)/` — admin UI routes. Do not customize here.
-- `src/components/` — frontend building blocks.
-  - `sections/` — installable/custom sections; each folder has `config.ts` + `Component.tsx`; register in `config.ts` and `sections-map.tsx`.
-  - `fields/` — shared field presets and UI components (links, media, rich text, pagination, section wrapper, etc.).
-  - `header/`, `footer/`, `ui/`, `posts/`, `icons/`, `logos/` — site chrome and shared UI pieces. Header/footer components wire into the corresponding Payload globals; do not rebuild them as sections.
-- `src/extensions/` — user-defined Payload configs (collections/globals/blocks/plugins). Enable via `smartsite.config.ts → extensions`.
-- `src/providers/` — GSAP provider, effects, global animation hooks, utilities for motion.
-- `src/hooks/` — shared React hooks (client/server where appropriate).
-- `src/lib/` — domain loaders and helpers that wrap cache access; prefer here over direct payload calls.
-- `src/utilities/`, `src/types/` — misc utilities, shared types.
-- `src/smartsite.config.ts` — developer configuration surface (features, gsap, extensions, admin meta).
-- `src/proxy.ts` — Next.js proxy handler.
+| Responsibility | Location |
+| --- | --- |
+| Native Payload assembly | `src/payload.config.ts` |
+| Collections, globals, fields and hooks | `src/collections`, `src/globals`, `src/fields`, `src/hooks` |
+| CMS layout, navigation, widgets and styling | `src/admin` |
+| URI index, public rendering, caching and publication recovery | `src/website` |
+| Native MCP transport and checked content operations | `src/mcp` |
+| Database, email, storage adapters and legacy jobs | `src/payload` |
+| Sections and reusable frontend components | `src/components` |
+| Browser-safe presentation choices | `src/site.config.ts` |
+| Generated content types | `src/payload-types.ts` |
 
-Rules of thumb
-
-- Never touch `src/admin` for ordinary site work; make shared admin changes only when the change truly belongs in SmartSite core.
-- Sections live under `src/components/sections/<kebab-name>/` with schema + component colocated.
-- Put new shared UI patterns under `components/ui` or `components/fields` so they can be reused.
-- Add new Payload entities through `src/extensions` and register slugs in `smartsite.config.ts`.
-- Header/footer are managed by dedicated components (`src/components/header`, `src/components/footer`) backed by Payload globals (`globals/header`, `globals/footer`). Never build them as sections; edit the globals in admin or via `smartsite.config.ts`/extensions.
-
----
-
-### Folder Map (Quick Tree)
-
-```
-src/
-├── app/
-│   ├── (frontend)/
-│   │   ├── [[...uri]]/page.tsx          # Dynamic page renderer
-│   │   ├── api/                         # Frontend API routes (preview, health, cache)
-│   │   ├── css/                         # Tailwind v4 token sheets
-│   │   │   ├── spacing.css
-│   │   │   ├── typography.css
-│   │   │   ├── colors.css
-│   │   │   └── theme.css
-│   │   ├── layout.tsx, error.tsx, not-found.tsx, robots.ts, sitemap.ts
-│   └── (payload)/                       # Admin UI routes (do not customize)
-│       ├── admin/
-│       ├── api/
-│       └── layout.tsx
-├── admin/                                # Protected Payload layer (do not edit)
-├── components/
-│   ├── sections/
-│   │   ├── config.ts                    # Block registry
-│   │   ├── sections-map.tsx             # Slug → Component map
-│   │   └── <section-name>/
-│   │       ├── config.ts                # Payload Block schema
-│   │       └── Component.tsx            # React component
-│   ├── fields/                          # Shared field presets & UI
-│   ├── ui/                              # Reusable UI patterns
-│   ├── header/, footer/, posts/, icons/, logos/
-├── extensions/                          # User-defined Payload configs
-├── providers/                           # GSAP provider, effects, hooks
-├── hooks/                               # Shared React hooks
-├── lib/                                 # Domain loaders wrapping cache
-├── utilities/, types/
-├── smartsite.config.ts                  # Developer configuration surface
-└── proxy.ts
-```
-
-### Most-Edited Files (Quick Links)
-
-- Sections registry: `src/components/sections/config.ts`
-- Sections map: `src/components/sections/sections-map.tsx`
-- Section wrapper: `src/components/fields/section/component.tsx` (import via `@/components/fields/section`)
-- Design tokens: `src/app/(frontend)/css/spacing.css`, `src/app/(frontend)/css/typography.css`, `src/app/(frontend)/css/colors.css`, `src/app/(frontend)/css/theme.css`
-- Config surface: `src/smartsite.config.ts`
-- GSAP: `src/providers/gsap/global-animations.tsx`, `src/providers/gsap/effects.ts`
-- Frontend entry: `src/app/(frontend)/[[...uri]]/page.tsx`
-- Generated types (read-only import): `@/admin/payload/payload-types`
-
-Never edit `src/admin/` directly in client projects.
-
-Use `src/extensions/` only when you are introducing a genuinely new slug or capability that does not already exist. If a built-in collection or feature already exists, configure or extend it through `smartsite.config.ts` and the documented extension points instead of duplicating it.
-
----
-
-### Where to Put Things
-
-| Task / Asset                            | Put it here                                                    | Notes                                                 |
-| --------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
-| New section (schema + component)        | `src/components/sections/<kebab-name>/`                        | Register in `sections/config.ts` + `sections-map.tsx` |
-| Shared UI pattern / building block      | `src/components/ui/` (or `fields/` if tied to CMS fields)      | Keep token utilities and responsive behaviour         |
-| Domain loader or complex cache query    | `src/lib/`                                                     | Use `@/admin/cache`; return normalized shapes         |
-| New Payload collection/global/block     | `src/extensions/<type>/<slug>.ts` + `src/extensions/index.ts`  | Enable via `smartsite.config.ts → extensions`         |
-| Configuration overrides / feature flags | `src/smartsite.config.ts`                                      | Adjust features, GSAP flags, extensions               |
-| Design tokens / theme tuning            | `src/app/(frontend)/css/{spacing,typography,colors,theme}.css` | Modify only human-controlled tokens                   |
-| Animation utilities / shared effects    | `src/providers/gsap/`                                          | Register global attributes or effects                 |
-
----
+Register collections once in `payload.config.ts`. Their definitions own access, fields, hooks and explicit website metadata. See [native configuration](configuration-system.md) for a complete collection example. Import generated types from `@/payload-types`. Keep credentials and server configuration out of browser modules.
 
 ## 8. Section Development Workflow
 
@@ -202,7 +117,7 @@ Use these “if this, then that” rules to route requests quickly. Prefer canon
   - If performance suffers → disable global animations or reduce distances/durations; prefer transforms and opacity.
 
 - Routing & Caching
-  - If a live page 404s after a slug change → allow the URI job to rebuild; check redirects; use `pnpm regenerate-uris` only for recovery.
+  - If a live page 404s after a slug change → inspect the durable publication work and redirects; retry failed work after repairing its cause.
   - If content looks stale → verify cache invalidation on save; confirm you’re not viewing a draft without preview.
   - If sitemap is wrong → re-run build or sitemap generation; check URI index.
 

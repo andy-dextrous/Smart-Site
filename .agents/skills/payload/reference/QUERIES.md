@@ -11,7 +11,7 @@ import type { Where } from 'payload'
 const equalsQuery: Where = { color: { equals: 'blue' } }
 
 // Not equals
-const notEqualsQuery: Where = { status: { not_equals: 'draft' } }
+const notEqualsQuery: Where = { _status: { not_equals: 'draft' } }
 
 // Greater/less than
 const greaterThanQuery: Where = { price: { greater_than: 100 } }
@@ -61,13 +61,16 @@ const nestedQuery: Where = {
 
 ## Local API
 
+The CRUD examples below act for an authenticated `user`. Use `req` instead inside an existing request, preserving its transaction and identity.
+
 ```ts
 // Find documents
 const posts = await payload.find({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   where: {
-    status: { equals: 'published' },
+    _status: { equals: 'published' },
     'author.name': { contains: 'john' },
   },
   depth: 2,
@@ -84,7 +87,8 @@ const posts = await payload.find({
 // Find by ID
 const post = await payload.findByID({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   id: '123',
   depth: 2,
 })
@@ -92,36 +96,40 @@ const post = await payload.findByID({
 // Create
 const post = await payload.create({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   data: {
     title: 'New Post',
-    status: 'draft',
+    _status: 'draft',
   },
 })
 
 // Update
 await payload.update({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   id: '123',
   data: {
-    status: 'published',
+    _status: 'published',
   },
 })
 
 // Delete
 await payload.delete({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   id: '123',
 })
 
 // Count
 const count = await payload.count({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   where: {
-    status: { equals: 'published' },
+    _status: { equals: 'published' },
   },
 })
 ```
@@ -135,7 +143,7 @@ When performing operations in hooks or nested operations, pass the `req` paramet
 const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
   await req.payload.create({
     collection: 'audit-log',
-    overrideAccess: true,
+    overrideAccess: true, // trusted audit write
     data: { action: 'created', docId: doc.id },
     req, // Maintains transaction atomicity
   })
@@ -145,7 +153,7 @@ const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
 const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
   await req.payload.create({
     collection: 'audit-log',
-    overrideAccess: true,
+    overrideAccess: true, // trusted audit write
     data: { action: 'created', docId: doc.id },
     // Missing req - runs in separate transaction
   })
@@ -156,7 +164,7 @@ This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threadi
 
 ### Access Control in Local API
 
-**Important**: Where `overrideAccess` is optional, it defaults to `false` — Local API respects access control unless told otherwise. Set it to `true` to bypass access control.
+**Important**: Payload 3.92 Local API CRUD defaults to `overrideAccess: true`, including when `user` or `req` is supplied. Set `overrideAccess: false` explicitly for operations authorized as that user (or as the anonymous caller).
 
 ```ts
 // ❌ WRONG: User is passed but access control is bypassed anyway
@@ -189,7 +197,7 @@ const allPosts = await payload.find({
 - Performing operations on behalf of a user
 - Testing access control logic
 - API routes that should respect user permissions
-- Any operation where `user` parameter is provided
+- Calls intended to enforce the supplied user’s permissions
 
 **When `overrideAccess: true` is appropriate:**
 
@@ -205,7 +213,7 @@ See [ACCESS-CONTROL.md#important-notes](ACCESS-CONTROL.md#important-notes) for m
 import { stringify } from 'qs-esm'
 
 const query = {
-  status: { equals: 'published' },
+  _status: { equals: 'published' },
 }
 
 const queryString = stringify(
@@ -239,7 +247,7 @@ POST   /api/globals/{slug}         - Update global
 
 ```graphql
 query {
-  Posts(where: { status: { equals: published } }, limit: 10, sort: "-createdAt") {
+  Posts(where: { _status: { equals: published } }, limit: 10, sort: "-createdAt") {
     docs {
       id
       title
@@ -253,16 +261,16 @@ query {
 }
 
 mutation {
-  createPost(data: { title: "New Post", status: draft }) {
+  createPost(data: { title: "New Post", _status: draft }) {
     id
     title
   }
 }
 
 mutation {
-  updatePost(id: "123", data: { status: published }) {
+  updatePost(id: "123", data: { _status: published }) {
     id
-    status
+    _status
   }
 }
 

@@ -30,7 +30,7 @@ for (const key of [
   delete process.env[key]
 Object.assign(process.env, values)
 const { getPayload } = await import("payload")
-const { default: config } = await import("../src/admin/payload/payload.config")
+const { default: config } = await import("../src/payload.config")
 const payload = await getPayload({ config })
 try {
   const user = await payload.findByID({

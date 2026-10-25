@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { getSearchConfig } from "@/admin/config/features"
-import { getSearchResults } from "@/admin/data/search"
+import { getSearchConfig } from "@/website/features"
+import { getSearchResults } from "@/website/data/search"
 
 function parseInteger(value: string | null, fallback: number): number {
   if (!value) {

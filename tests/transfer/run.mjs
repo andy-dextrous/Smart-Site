@@ -45,7 +45,7 @@ try {
   })
   await run(
     "npx",
-    ["--yes", "pnpm@10.34.8", "install", "--frozen-lockfile", "--offline"],
+    ["--yes", "pnpm@10.34.8", "install", "--frozen-lockfile"],
     target
   )
   await node(["scripts/bootstrap-smartsite.mjs", "--prepare-only"])

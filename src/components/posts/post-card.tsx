@@ -1,10 +1,10 @@
-import type { Media, Post } from "@/admin/payload/payload-types"
+import type { Media, Post } from "@/payload-types"
 import { Media as PayloadMedia } from "@/components/fields/media"
 import {
   formatPostPublishDate,
   estimatePostReadingTime,
   resolvePostCategories,
-} from "@/admin/utilities/posts"
+} from "@/utilities/posts"
 import { cn } from "@/utilities/ui"
 import Link from "next/link"
 
@@ -73,24 +73,28 @@ export function PostCard(props: PostCardProps) {
         </div>
       ) : null}
 
-      <div className="flex flex-1 flex-col gap-content p-content md:p-content-lg">
-        <div className="flex flex-wrap items-center gap-content-sm text-xs uppercase tracking-[0.18em]">
+      <div className="gap-content p-content md:p-content-lg flex flex-1 flex-col">
+        <div className="gap-content-sm flex flex-wrap items-center text-xs tracking-[0.18em] uppercase">
           {publishDate ? (
             <span className={metaTextClassMap[appearance]}>{publishDate}</span>
           ) : null}
           {readingTime ? (
-            <span className={metaTextClassMap[appearance]}>{`${readingTime} min read`}</span>
+            <span
+              className={metaTextClassMap[appearance]}
+            >{`${readingTime} min read`}</span>
           ) : null}
         </div>
 
         {categories.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-content-sm text-xs uppercase tracking-[0.18em]">
+          <div className="gap-content-sm flex flex-wrap items-center text-xs tracking-[0.18em] uppercase">
             {categories.map(category => (
               <span
                 key={category}
                 className={cn(
-                  "rounded-full border px-content-sm py-content-xs",
-                  appearance === "dark" ? "border-light-border/70 text-white/80" : "border-dark-border/70 text-dark-600"
+                  "px-content-sm py-content-xs rounded-full border",
+                  appearance === "dark"
+                    ? "border-light-border/70 text-white/80"
+                    : "border-dark-border/70 text-dark-600"
                 )}
               >
                 {category}
@@ -99,13 +103,13 @@ export function PostCard(props: PostCardProps) {
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-content-sm">
+        <div className="gap-content-sm flex flex-col">
           {href ? (
-            <Link href={href} className="text-balance text-h3 hover:text-primary">
+            <Link href={href} className="text-h3 hover:text-primary text-balance">
               {post.title}
             </Link>
           ) : (
-            <h3 className="text-balance text-h3">{post.title}</h3>
+            <h3 className="text-h3 text-balance">{post.title}</h3>
           )}
 
           {showExcerpt ? (

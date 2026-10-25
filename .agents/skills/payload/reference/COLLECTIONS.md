@@ -6,6 +6,7 @@ Complete reference for collection configurations and patterns.
 
 ```ts
 import type { CollectionConfig } from 'payload'
+import { slugField } from '@/fields/slug'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -21,7 +22,7 @@ export const Posts: CollectionConfig = {
     description: 'Blog posts and articles',
     listSearchableFields: ['title', 'slug'],
   },
-  // Enable drafts by default — auto-injects the _status field (draft/published/changed)
+  // Enable drafts by default — auto-injects the _status field (draft/published)
   versions: {
     drafts: true,
   },
@@ -32,7 +33,7 @@ export const Posts: CollectionConfig = {
       required: true,
       index: true,
     },
-    { name: 'slug', type: 'slug', useAsSlug: 'title' }, // unique + indexed, sidebar position — don't hand-roll a slug text field
+    ...slugField('title'),
   ],
   defaultSort: '-createdAt',
   timestamps: true,
@@ -41,7 +42,7 @@ export const Posts: CollectionConfig = {
 
 > Don't add a custom `status` select for publish state — enabling
 > `versions: { drafts: true }` injects a managed `_status` field
-> (`draft` / `published` / `changed`) that the admin UI and Draft Preview already
+> (`draft` / `published`) that the admin UI and Draft Preview already
 > understand. Use it in `defaultColumns` and access control directly.
 
 ## `useAsTitle`
@@ -77,6 +78,8 @@ This string-path form is queryable. It is different from a computed
 `virtual: true` field populated by an `afterRead` hook.
 
 ## Auth Collection
+
+This is a generic auth model with a custom `roles` array. SmartSite already has a singular `role` field and `hasMinimumRole` / `userHasMinimumRole` in `@/access/roles`; use those rather than replacing its Users schema.
 
 ```ts
 export const Users: CollectionConfig = {
@@ -196,7 +199,7 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     { name: 'title', type: 'text' },
-    { name: 'slug', type: 'slug', useAsSlug: 'title' },
+    ...slugField('title'),
   ],
 }
 ```
@@ -225,7 +228,7 @@ export const Posts: CollectionConfig = {
   fields: [{ name: 'title', type: 'text' }],
 }
 
-// Full configuration with autosave and scheduled publish
+// Optional future publishing: enable only with an explicitly configured runner
 export const Pages: CollectionConfig = {
   slug: 'pages',
   versions: {
@@ -242,34 +245,41 @@ export const Pages: CollectionConfig = {
 
 ### Draft API Usage
 
+These calls act for an authenticated editor. Pass their `user` and explicitly enable access checks.
+
 ```ts
 // Create draft
 await payload.create({
   collection: 'posts',
-  overrideAccess: true,
-  data: { title: 'Draft Post' },
+  overrideAccess: false,
+  user,
+  data: { title: 'Draft Post', _status: 'draft' },
   draft: true, // Saves as draft, skips required field validation
 })
 
 // Update as draft
 await payload.update({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   id: '123',
-  data: { title: 'Updated Draft' },
+  data: { title: 'Updated Draft', _status: 'draft' },
   draft: true,
 })
 
 // Read with drafts (returns newest draft if available)
 const post = await payload.findByID({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   id: '123',
   draft: true, // Returns draft version if exists
 })
 
 // Query only published (REST API)
-// GET /api/posts (returns only _status: 'published')
+// GET /api/posts?where[_status][equals]=published
+// Enforce published-only public reads with access control, as below.
+// Enabling drafts alone does not restrict public access.
 
 // Access control for drafts
 export const Posts: CollectionConfig = {
@@ -289,11 +299,11 @@ export const Posts: CollectionConfig = {
 
 ### Document Status
 
-The `_status` field is auto-injected when drafts are enabled:
+Payload 3.92 stores only `draft` and `published` in `_status`. An unpublished document is a draft; saving changes with `draft: true` and `_status: 'draft'` creates a newer draft version while the published document remains available. Read `draft: true` only with the appropriate access checks. Publish explicitly with `data: { _status: 'published' }` and `draft: false`.
 
-- `draft` - Never published
-- `published` - Published with no newer drafts
-- `changed` - Published but has newer unpublished drafts
+The CMS can display “Changed” when a published document has newer draft changes. That is derived UI state, not a third persisted `_status` value. Do not write `_status: 'changed'`.
+
+SmartSite's native collections default to `schedulePublish: false`. Opt in per collection/global only when future publishing is wanted, then explicitly configure and verify a jobs executor. Setting `schedulePublish: true` exposes scheduling and queues work; it does not provide a timer. The optional persistent-process timer uses `SMARTSITE_BACKGROUND_RECOVERY=true` and `CRON_SECRET`; hosted scheduling is separately configured. Review unfinished jobs before enabling a target because overdue jobs may run immediately.
 
 ## Globals
 

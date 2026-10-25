@@ -10,8 +10,8 @@ import { Controller } from "react-hook-form"
 import { PhoneInput } from "@/components/ui/phone-input"
 import { Label } from "@/components/ui/label"
 
-import { Error } from "../error"
-import { Width } from "../width"
+import { Error } from "@/components/fields/form/error/index"
+import { Width } from "@/components/fields/form/width/index"
 
 export interface PhoneField {
   name: string

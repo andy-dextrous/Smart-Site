@@ -1,4 +1,4 @@
-import type { Media as MediaType, Post, Team, User } from "@/admin/payload/payload-types"
+import type { Media as MediaType, Post, Team, User } from "@/payload-types"
 import { Media } from "@/components/fields/media"
 import { cn } from "@/utilities/ui"
 
@@ -27,7 +27,8 @@ function resolvePrimaryAuthor(post: Post): ResolvedAuthor | null {
 
   if (!first) return null
 
-  const team = first.teamMember && typeof first.teamMember === "object" ? first.teamMember : null
+  const team =
+    first.teamMember && typeof first.teamMember === "object" ? first.teamMember : null
 
   const name = team?.name || first.name || "Anonymous"
 
@@ -36,7 +37,10 @@ function resolvePrimaryAuthor(post: Post): ResolvedAuthor | null {
         image?: MediaType | string | null
         role?: string | null
         bio?: string | null
-        socialLinks?: Array<{ platform?: string | null; url?: string | null } | null> | null
+        socialLinks?: Array<{
+          platform?: string | null
+          url?: string | null
+        } | null> | null
       })
     | null
 
@@ -47,21 +51,19 @@ function resolvePrimaryAuthor(post: Post): ResolvedAuthor | null {
               image?: MediaType | string | null
               role?: string | null
               bio?: string | null
-              socialLinks?: Array<{ platform?: string | null; url?: string | null } | null> | null
+              socialLinks?: Array<{
+                platform?: string | null
+                url?: string | null
+              } | null> | null
             }
           | null
           | undefined)
       : null
 
-  const avatar =
-    teamDetails?.image ??
-    legacyContent?.image ??
-    first.avatar ??
-    null
+  const avatar = teamDetails?.image ?? legacyContent?.image ?? first.avatar ?? null
   const role = teamDetails?.role ?? legacyContent?.role ?? null
   const bio = teamDetails?.bio ?? legacyContent?.bio ?? null
-  const socials =
-    teamDetails?.socialLinks ?? legacyContent?.socialLinks ?? null
+  const socials = teamDetails?.socialLinks ?? legacyContent?.socialLinks ?? null
 
   return {
     name,
@@ -87,13 +89,13 @@ export function PostAuthorCard({ post, className }: PostAuthorCardProps) {
   return (
     <aside
       className={cn(
-        "rounded-2xl border border-dark-border bg-white p-content-lg shadow-sm",
+        "border-dark-border p-content-lg rounded-2xl border bg-white shadow-sm",
         className
       )}
     >
-      <div className="flex flex-col gap-content md:flex-row md:items-center md:gap-content-lg">
+      <div className="gap-content md:gap-content-lg flex flex-col md:flex-row md:items-center">
         {avatar ? (
-          <div className="relative size-20 flex-shrink-0 overflow-hidden rounded-full border border-dark-border">
+          <div className="border-dark-border relative size-20 flex-shrink-0 overflow-hidden rounded-full border">
             <Media
               resource={avatar}
               fill
@@ -104,19 +106,19 @@ export function PostAuthorCard({ post, className }: PostAuthorCardProps) {
           </div>
         ) : null}
 
-        <div className="flex flex-1 flex-col gap-content-sm">
+        <div className="gap-content-sm flex flex-1 flex-col">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-dark-600">
+            <p className="text-dark-600 text-sm tracking-[0.18em] uppercase">
               Written By
             </p>
-            <h3 className="text-xl text-dark">{name}</h3>
-            {role ? <p className="text-sm text-dark-600">{role}</p> : null}
+            <h3 className="text-dark text-xl">{name}</h3>
+            {role ? <p className="text-dark-600 text-sm">{role}</p> : null}
           </div>
 
-          {bio ? <p className="text-base text-dark-600">{bio}</p> : null}
+          {bio ? <p className="text-dark-600 text-base">{bio}</p> : null}
 
           {filteredSocials.length > 0 ? (
-            <ul className="flex flex-wrap items-center gap-content-sm text-sm text-dark-600">
+            <ul className="gap-content-sm text-dark-600 flex flex-wrap items-center text-sm">
               {filteredSocials.map(link => {
                 if (!link?.platform || !link.url) return null
                 return (

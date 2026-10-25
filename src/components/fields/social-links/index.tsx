@@ -1,6 +1,6 @@
 import React from "react"
 import Link from "next/link"
-import { cn } from "@/admin/utilities/ui"
+import { cn } from "@/utilities/ui"
 import {
   FaFacebook,
   FaInstagram,

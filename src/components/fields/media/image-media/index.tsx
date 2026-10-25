@@ -2,17 +2,18 @@
 
 import type { StaticImageData } from "next/image"
 
-import { cn } from "@/admin/utilities/ui"
+import { cn } from "@/utilities/ui"
 import NextImage from "next/image"
 import React from "react"
 
-import type { Props as MediaProps } from "../types"
+import type { Props as MediaProps } from "@/components/fields/media/types"
 
-import { getClientSideURL } from "@/admin/utilities/get-url"
-import { getSmartSiteConfig } from "@/admin/config"
+import { mediaURL } from "@/utilities/media-url"
+import { getClientSideURL } from "@/utilities/get-url"
+import site from "@/site.config"
 
 // Get config at module level (it's frozen/cached)
-const config = getSmartSiteConfig()
+const config = site
 const defaultBreakpoints = config.images.breakpoints
 const defaultQuality = config.images.quality.default
 
@@ -52,10 +53,13 @@ export const ImageMedia: React.FC<MediaProps> = props => {
     const imageURL = new URL(url, origin)
     if (resource.updatedAt) imageURL.searchParams.set("v", resource.updatedAt)
     // Same-site media uses Next's local image route, including loopback previews.
-    src = imageURL.origin === new URL(origin).origin
-      ? `${imageURL.pathname}${imageURL.search}`
-      : imageURL.href
+    src =
+      imageURL.origin === new URL(origin).origin
+        ? `${imageURL.pathname}${imageURL.search}`
+        : imageURL.href
   }
+
+  if (typeof src === "string" && src) src = mediaURL(src)
 
   const loading = loadingFromProps || (!priority ? "lazy" : undefined)
 

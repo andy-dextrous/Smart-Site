@@ -12,8 +12,8 @@ import {
 import React from "react"
 import { Controller } from "react-hook-form"
 
-import { Error } from "../error"
-import { Width } from "../width"
+import { Error } from "@/components/fields/form/error/index"
+import { Width } from "@/components/fields/form/width/index"
 
 export const Select: React.FC<
   SelectField & {

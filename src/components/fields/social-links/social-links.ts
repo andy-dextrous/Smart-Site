@@ -1,6 +1,6 @@
-import deepMerge from "@/admin/utilities/deep-merge"
+import deepMerge from "@/utilities/deep-merge"
 import type { Field } from "payload"
-import { socialLinksDefault } from "./defaults"
+import { socialLinksDefault } from "@/components/fields/social-links/defaults"
 
 /*************************************************************************/
 /*  SOCIAL PLATFORM OPTIONS
@@ -75,7 +75,7 @@ export const socialLinks = (overrides: Partial<Field> = {}): Field => {
         description: "Add social media links",
         initCollapsed: true,
         components: {
-          RowLabel: "@/admin/payload/fields/social-links-row-label#SocialLinksRowLabel",
+          RowLabel: "@/fields/social-links-row-label#SocialLinksRowLabel",
         },
       },
       defaultValue: socialLinksDefault,

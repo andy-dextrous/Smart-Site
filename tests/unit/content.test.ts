@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { projectFields } from "../../src/admin/mcp/projection"
-import { revision, validatePatch } from "../../src/admin/mcp/contracts"
+import { projectFields } from "../../src/mcp/projection"
+import { revision, validatePatch } from "../../src/mcp/contracts"
 
 test("projection drops hook-added private objects and applies nested field access", async () => {
   const req: any = {}

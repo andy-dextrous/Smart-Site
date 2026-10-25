@@ -1,16 +1,18 @@
+import configPromise from "@payload-config"
+import { websiteMetadata } from "@/website/collection-metadata"
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
-import { SmartSiteAdminBar } from "@/admin/payload/components/backend/admin-bar"
-import { getSettings } from "@/admin/data/globals"
+import { SmartSiteAdminBar } from "@/admin/components/admin-bar"
+import { getSettings } from "@/website/data/globals"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
 import parse from "html-react-parser"
 import Providers from "@/providers"
 import React from "react"
-import { getSmartSiteConfig } from "@/admin/config"
-import { getI18nConfig } from "@/admin/config/features"
-import { generateRootLayoutMetadata } from "./layout-metadata"
+import site from "@/site.config"
+import { getI18nConfig } from "@/website/features"
+import { generateRootLayoutMetadata } from "@/app/(frontend)/layout-metadata"
 
-import "./css/globals.css"
+import "@/app/(frontend)/css/globals.css"
 
 /*************************************************************************/
 /*  ROOT LAYOUT
@@ -18,8 +20,16 @@ import "./css/globals.css"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings()
+  const config = await configPromise
+  const adminCollections = config.collections
+    .filter(collection => websiteMetadata(collection).route)
+    .map(collection => ({
+      slug: collection.slug,
+      label: websiteMetadata(collection).label || String(collection.labels.plural),
+      singular: String(collection.labels.singular),
+    }))
   const { integrations } = settings
-  const smartSiteConfig = getSmartSiteConfig()
+  const smartSiteConfig = site
   const i18n = getI18nConfig()
   const smoothScrollEnabled = Boolean(smartSiteConfig.gsap.scrollSmoother)
   /**
@@ -45,26 +55,28 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {gtmId && <GoogleTagManager gtmId={gtmId} />}
         {gaId && <GoogleAnalytics gaId={gaId} />}
 
-
-            <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
-              <SmartSiteAdminBar settings={settings} />
-              <Header />
-              {smoothScrollEnabled ? (
-                <div id="smooth-wrapper">
-                  <div id="smooth-content">
-                    {children}
-                    <Footer />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {children}
-                  <Footer />
-                </>
-              )}
-              {bodyEnd && parse(bodyEnd)}
-            </Providers>
-
+        <Providers enableDarkMode={smartSiteConfig.features.darkMode}>
+          <SmartSiteAdminBar
+            settings={settings}
+            collections={adminCollections}
+            reserveSpace={!smoothScrollEnabled}
+          />
+          <Header />
+          {smoothScrollEnabled ? (
+            <div id="smooth-wrapper">
+              <div id="smooth-content">
+                {children}
+                <Footer />
+              </div>
+            </div>
+          ) : (
+            <>
+              {children}
+              <Footer />
+            </>
+          )}
+          {bodyEnd && parse(bodyEnd)}
+        </Providers>
       </body>
     </html>
   )

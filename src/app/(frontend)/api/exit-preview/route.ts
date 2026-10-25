@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createRequestUrl } from "@/admin/utilities/request-origin"
+import { createRequestUrl } from "@/utilities/request-origin"
+import { publicPreviewPath } from "@/utilities/preview-path"
 
 /*************************************************************************/
 /*  EXIT PREVIEW API ROUTE
@@ -9,16 +10,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl
   const redirectParam = searchParams.get("redirect") || "/"
 
-  let redirectPath = "/"
-
-  try {
-    if (redirectParam.startsWith("/")) {
-      const url = createRequestUrl(request, redirectParam)
-      redirectPath = `${url.pathname}${url.search}`
-    }
-  } catch (error) {
-    redirectPath = "/"
-  }
+  const redirectPath = publicPreviewPath(redirectParam) ?? "/"
 
   const response = NextResponse.redirect(createRequestUrl(request, redirectPath), 307)
 

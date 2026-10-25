@@ -7,8 +7,8 @@ import { Checkbox as CheckboxUi } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import React from "react"
 
-import { Error } from "../error"
-import { Width } from "../width"
+import { Error } from "@/components/fields/form/error/index"
+import { Width } from "@/components/fields/form/width/index"
 
 export const Checkbox: React.FC<
   CheckboxField & {
@@ -21,7 +21,7 @@ export const Checkbox: React.FC<
 
   return (
     <Width width={width}>
-      <div className="flex items-center gap-content-sm">
+      <div className="gap-content-sm flex items-center">
         <CheckboxUi
           defaultChecked={defaultValue}
           id={name}

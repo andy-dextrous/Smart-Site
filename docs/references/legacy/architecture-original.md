@@ -1,3 +1,5 @@
+> Historical reference only. This document describes an earlier SmartSite structure and is not current agent instructions. Use the [SmartSite 4 documentation](../../index.md) for setup, development and upgrades. Old paths, CLI commands and protected-admin rules below are retained only as history.
+
 # Architecture
 
 This file is the high-level map of SmartSite as a standalone starter.

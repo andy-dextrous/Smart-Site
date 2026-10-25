@@ -1,14 +1,14 @@
-import type { PostsRelatedBlock, Post } from "@/admin/payload/payload-types"
-import type { PageData } from "@/admin/components/render-sections"
-import { getRelatedPosts } from "@/admin/data/posts"
+import type { PostsRelatedBlock, Post } from "@/payload-types"
+import type { PageData } from "@/website/rendering/render-sections"
+import { getRelatedPosts } from "@/website/data/posts"
 import { Section } from "@/components/fields/section"
 import { PostCard } from "@/components/posts/post-card"
 import { tv } from "tailwind-variants"
 
 const relatedVariants = tv({
   slots: {
-    container: "flex flex-col gap-content-lg",
-    grid: "grid gap-grid md:grid-cols-3",
+    container: "gap-content-lg flex flex-col",
+    grid: "gap-grid grid md:grid-cols-3",
   },
 })
 
@@ -19,11 +19,7 @@ function resolveAppearance(colorScheme?: string | null) {
 }
 
 export async function PostsRelatedComponent(props: PostsRelatedBlock & PageData) {
-  const {
-    maxPosts = 3,
-    document,
-    sectionSettings,
-  } = props
+  const { maxPosts = 3, document, sectionSettings } = props
 
   if (!document) {
     return null

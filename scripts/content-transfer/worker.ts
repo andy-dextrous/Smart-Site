@@ -3,18 +3,18 @@ import { atomicJSON } from "../local/state.mjs"
 import path from "node:path"
 import { createHash } from "node:crypto"
 import { createLocalReq, getPayload } from "payload"
-import config from "../../src/admin/payload/payload.config"
-import { contentTarget, revision, catalogue } from "../../src/admin/mcp/contracts"
-import { projectContentResponse } from "../../src/admin/mcp/projection"
-import { contentSave, uploadMedia } from "../../src/admin/mcp/tools"
-import { withOperation, operationStatus } from "../../src/admin/mcp/operations"
+import config from "../../src/payload.config"
+import { contentTarget, revision, catalogue } from "../../src/mcp/contracts"
+import { projectContentResponse } from "../../src/mcp/projection"
+import { contentSave, uploadMedia } from "../../src/mcp/tools"
+import { withOperation, operationStatus } from "../../src/mcp/operations"
 import { mapReferences, schemaShape, type Reference } from "./references"
 
 const request = JSON.parse(await readFile(process.argv[2], "utf8"))
 const payload = await getPayload({ config })
 const output = atomicJSON
 const configFor = (target: string): any =>
-  contentTarget(target) === "global"
+  contentTarget(target, payload.config) === "global"
     ? payload.config.globals.find(g => g.slug === target)
     : payload.collections[target as keyof typeof payload.collections]?.config
 const hash = (value: any) => revision(value)
@@ -81,7 +81,7 @@ try {
     const seen = new Set<string>()
     const external: Reference[] = []
     const gather = async (target: string, id?: string) => {
-      const kind = contentTarget(target),
+      const kind = contentTarget(target, payload.config),
         itemKey = key(target, id || target)
       if (seen.has(itemKey)) return
       seen.add(itemKey)
@@ -155,10 +155,15 @@ try {
       items.push(item)
       for (const ref of relations) {
         try {
-          contentTarget(ref.target)
+          contentTarget(ref.target, payload.config)
           await gather(ref.target, ref.id)
         } catch (error) {
-          if ([...catalogue().collections, ...catalogue().globals].includes(ref.target))
+          if (
+            [
+              ...catalogue(payload.config).collections,
+              ...catalogue(payload.config).globals,
+            ].includes(ref.target)
+          )
             throw error
           external.push(ref)
         }

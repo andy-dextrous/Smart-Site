@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
-import { getServerSideURL } from "@/admin/utilities/get-url"
-import { allowSearchIndexing } from "@/admin/utilities/runtime-environment"
+import { getServerSideURL } from "@/utilities/get-url"
+import { allowSearchIndexing } from "@/utilities/runtime-environment"
 
 /*************************************************************************/
 /*  ROBOTS.TXT GENERATION - SIMPLIFIED FOR SITEMAP INDEX

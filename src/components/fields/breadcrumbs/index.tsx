@@ -3,8 +3,8 @@ import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import Link from "next/link"
 
-import { BreadcrumbItem as BreadcrumbItemType } from "@/admin/routing/uri-engine"
-import { getSmartSiteConfig } from "@/admin/config"
+import { BreadcrumbItem as BreadcrumbItemType } from "@/website/routing/uri-engine"
+import site from "@/site.config"
 import { cn } from "@/utilities/ui"
 
 export function Breadcrumb(props: React.ComponentProps<"nav">) {
@@ -16,7 +16,7 @@ export function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        "text-dark-600 flex flex-wrap items-center gap-content-xs text-sm break-words sm:gap-content-sm",
+        "text-dark-600 gap-content-xs sm:gap-content-sm flex flex-wrap items-center text-sm break-words",
         className
       )}
       {...props}
@@ -28,7 +28,7 @@ export function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li
   return (
     <li
       data-slot="breadcrumb-item"
-      className={cn("inline-flex items-center gap-content-xs", className)}
+      className={cn("gap-content-xs inline-flex items-center", className)}
       {...props}
     />
   )
@@ -99,7 +99,7 @@ export function BreadcrumbEllipsis({
   )
 }
 
-const config = getSmartSiteConfig()
+const config = site
 const breadcrumbConfig = config.breadcrumbs
 
 const separators = {
@@ -145,20 +145,26 @@ export function Breadcrumbs({
 
   const finalBreadcrumbs =
     showHome && !processedBreadcrumbs.some(crumb => crumb.uri === "/")
-      ? [{ label: breadcrumbConfig.homeLabel, uri: "/", isCurrentPage: false }, ...processedBreadcrumbs]
+      ? [
+          { label: breadcrumbConfig.homeLabel, uri: "/", isCurrentPage: false },
+          ...processedBreadcrumbs,
+        ]
       : processedBreadcrumbs
 
   return (
     <Breadcrumb className={cn("mb-content-lg", breadcrumbConfig.className, className)}>
-      <BreadcrumbList className={cn("text-sm text-dark-600", breadcrumbConfig.className)}>
+      <BreadcrumbList className={cn("text-dark-600 text-sm", breadcrumbConfig.className)}>
         {finalBreadcrumbs.map((crumb, index) => (
-          <div key={`${crumb.uri}-${index}`} className="flex items-center gap-content-xs">
+          <div key={`${crumb.uri}-${index}`} className="gap-content-xs flex items-center">
             <BreadcrumbItem>
               {crumb.isCurrentPage ? (
                 <BreadcrumbPage className="text-dark">{crumb.label}</BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
-                  <Link href={crumb.uri} className="text-sm text-dark-600 hover:text-dark">
+                  <Link
+                    href={crumb.uri}
+                    className="text-dark-600 hover:text-dark text-sm"
+                  >
                     {crumb.label}
                   </Link>
                 </BreadcrumbLink>

@@ -1,7 +1,7 @@
 import React from "react"
 import type { StaticImageData } from "next/image"
 
-import type { MediaBlock as MediaBlockProps } from "@/admin/payload/payload-types"
+import type { MediaBlock as MediaBlockProps } from "@/payload-types"
 import { Media } from "@/components/fields/media"
 import { cn } from "@/utilities/ui"
 
@@ -27,12 +27,7 @@ export function MediaBlock({
   const caption = media && typeof media === "object" ? media.caption : null
 
   return (
-    <div
-      className={cn(
-        enableGutter ? "container" : undefined,
-        className
-      )}
-    >
+    <div className={cn(enableGutter ? "container" : undefined, className)}>
       {(media || staticImage) && (
         <Media
           imgClassName={cn("rounded-[0.8rem] border border-dark-border", imgClassName)}

@@ -1,5 +1,5 @@
 import type { Field } from "payload"
-import { richContent } from "../rich-text/content"
+import { richContent } from "@/components/fields/rich-text/content"
 
 /*************************************************************************/
 /*  SECTION INTRO FIELD CONFIGURATION

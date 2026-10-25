@@ -15,4 +15,8 @@ Later code deployments preserve live edits: do not rerun initial content transfe
 
 An upgrade is a reviewed source merge from a verified release, including skills/docs/config/dependencies. Preserve customized sections, config and edited core or report conflicts. Preserve useful old AI brand context as reviewed project facts before retiring its runtime. Do not shut down external services or revoke shared production keys merely because source was removed.
 
+Deploy without scheduled services by default. Normal saves drain committed publication work and administrators can recover pending work without `CRON_SECRET`. Only opt into native future publishing or a background runner when wanted. Follow the deployment guide: select native collection/global targets, review existing unfinished jobs, configure the explicit runner and verify its cadence/authentication. The persistent poller requires `SMARTSITE_BACKGROUND_RECOVERY=true`; Vercel ships no cron. Keep the existing hosting account/project unless the user asks to move it; never purchase a plan to satisfy an optional feature.
+
 Finish with destination checks, actual browser inspection, durable asset verification and a rollback record. A successful build alone is not a launch. Keep untested platforms and unavailable prerequisites explicit.
+
+The 4.0 upgrade guide is `docs/upgrades/4.0.0/README.md`. Upgrade a populated site in place; do not bootstrap, seed, transfer its database or regenerate its identity. Test the new source against a restored copy before cutover. Source conflicts must remain preserved and actionable. Confirm durable publication work exists for converted legacy jobs and completes in the actual serving runtime before declaring cutover finished.

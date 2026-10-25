@@ -3,11 +3,11 @@
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet"
 import { CMSLink } from "@/components/fields/link"
 import { SocialLinks } from "@/components/fields/social-links"
-import type { Header as HeaderType, Setting } from "@/admin/payload/payload-types"
+import type { Header as HeaderType, Setting } from "@/payload-types"
 import Link from "next/link"
 import * as React from "react"
-import { Hamburger } from "./hamburger"
-import LogoPrimary from "../logos/logo"
+import { Hamburger } from "@/components/header/hamburger"
+import LogoPrimary from "@/components/logos/logo"
 import { SearchCommandLauncher } from "@/components/search/search-dialog"
 
 /*************************************************************************/
@@ -46,14 +46,14 @@ export const MobileNavUpdated: React.FC<MobileNavProps> = ({
       <Hamburger isOpen={open} onClick={handleToggle} />
       <SheetContent
         side="left"
-        className="border-dark-border fixed inset-y-0 left-0 z-[1000] h-full w-[80%] border-r bg-white p-0 lg:hidden"
+        className="smartsite-mobile-menu border-dark-border fixed inset-y-0 left-0 z-[1000] h-full w-[80%] border-r bg-white p-0 lg:hidden"
       >
         <div className="relative flex h-full w-full flex-col overflow-hidden">
           <div className="border-dark-border px-section-x py-content-lg flex items-center justify-between border-b">
             <Link href="/" aria-label="Return to homepage" onClick={handleLinkClick}>
               <LogoPrimary className="h-logo w-auto" />
             </Link>
-            <span className="text-dark-600 text-xs uppercase tracking-[0.18em]">
+            <span className="text-dark-600 text-xs tracking-[0.18em] uppercase">
               Menu
             </span>
           </div>

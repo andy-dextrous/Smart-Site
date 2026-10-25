@@ -1,4 +1,4 @@
-import type { Media as MediaType } from "@/admin/payload/payload-types"
+import type { Media as MediaType } from "@/payload-types"
 import { Button, type ButtonProps } from "@/components/ui/button"
 import { cn } from "@/utilities/ui"
 import Link from "next/link"
@@ -86,7 +86,7 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
 
   const newTabProps = newTab ? { rel: "noopener noreferrer", target: "_blank" } : {}
   const normalizedAppearance =
-    appearanceProp === "inline" ? "link" : (appearanceProp || "link")
+    appearanceProp === "inline" ? "link" : appearanceProp || "link"
   const isButtonAppearance = normalizedAppearance !== "link"
 
   const resolvedVariant: ButtonProps["variant"] | undefined = (() => {
@@ -98,15 +98,17 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
   })()
 
   const resolvedSize: ButtonProps["size"] | undefined = isButtonAppearance
-    ? (sizeFromProps || "lg") || "lg"
+    ? sizeFromProps || "lg" || "lg"
     : undefined
 
   const resolvedLayout: ButtonProps["layout"] | undefined = isButtonAppearance
-    ? (layout || "default") || "default"
+    ? layout || "default" || "default"
     : undefined
 
   const iconAsset =
-    typeof icon === "object" && icon !== null && "url" in icon ? (icon as MediaType) : null
+    typeof icon === "object" && icon !== null && "url" in icon
+      ? (icon as MediaType)
+      : null
 
   const renderIcon = (position: IconPosition) => {
     if (!iconAsset?.url) return null
@@ -120,12 +122,7 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
         key={`${position}-${iconAsset.id ?? iconAsset.url}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          alt=""
-          className="h-5 w-5"
-          loading="lazy"
-          src={iconAsset.url}
-        />
+        <img alt="" className="h-5 w-5" loading="lazy" src={iconAsset.url} />
       </span>
     )
   }
@@ -148,7 +145,8 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
 
   const buttonContent = hasChildren ? children : defaultButtonContent
   const ariaLabel =
-    (linkProps["aria-label"] as string | undefined) || (iconOnly ? label ?? undefined : undefined)
+    (linkProps["aria-label"] as string | undefined) ||
+    (iconOnly ? (label ?? undefined) : undefined)
 
   if (isButtonAppearance) {
     const buttonClassName = cn("inline-flex items-center gap-content-sm", className)
@@ -186,12 +184,7 @@ export const CMSLink: React.FC<CMSLinkType> = props => {
   }
 
   return (
-    <Link
-      {...newTabProps}
-      {...linkProps}
-      className={cn(className)}
-      href={href}
-    >
+    <Link {...newTabProps} {...linkProps} className={cn(className)} href={href}>
       {textContent}
     </Link>
   )

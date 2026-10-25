@@ -1,0 +1,314 @@
+[
+  {
+    "old": "identity.siteName",
+    "owner": "src/site.config.ts identity; preserve saved Settings independently"
+  },
+  {
+    "old": "identity.siteUrl",
+    "owner": "src/site.config.ts identity; preserve saved Settings independently"
+  },
+  {
+    "old": "features.darkMode",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.analytics",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.sitemaps",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.search",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.search.enabled",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.search.mode",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.i18n",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.i18n.defaultLocale",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.i18n.locales",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.i18n.prefixDefaultLocale",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "features.i18n.localeCookie",
+    "owner": "src/site.config.ts features; native Payload localization remains separate from URL locale routing"
+  },
+  {
+    "old": "mcp.enabled",
+    "owner": "smartsiteMcp({ enabled }) in src/payload.config.ts"
+  },
+  {
+    "old": "mcp.collections",
+    "owner": "custom.smartsite.mcp on each explicitly registered collection/global"
+  },
+  {
+    "old": "mcp.globals",
+    "owner": "custom.smartsite.mcp on each explicitly registered collection/global"
+  },
+  {
+    "old": "collections.*.enabled",
+    "owner": "Explicit collection registration; false means omit registration only after checking stored data and references"
+  },
+  {
+    "old": "collections.*.frontend",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.label",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.seo",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.search.enabled",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.sitemap.enabled",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.sitemap.priority",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.sitemap.changefreq",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.sitemap.respectNoIndex",
+    "owner": "Collection custom.smartsite metadata; SEO also requires native seoFields"
+  },
+  {
+    "old": "collections.*.frontendOptions.seoSchemaType",
+    "owner": "seoFields({ seoSchemaType }) in the native collection"
+  },
+  {
+    "old": "collections.*.frontendOptions.enablePreview",
+    "owner": "Native collection admin.preview and admin.livePreview; websitePreview helper can supply both"
+  },
+  {
+    "old": "collections.*.frontendOptions.enableLivePreview",
+    "owner": "Native collection admin.preview and admin.livePreview; websitePreview helper can supply both"
+  },
+  {
+    "old": "collections.*.frontendOptions.customHooks",
+    "owner": "Explicit beforeChange/afterChange/afterDelete website hooks; preserve intentional opt-out after evaluating routing requirements"
+  },
+  {
+    "old": "collections.*.frontendOptions.slugLocked",
+    "owner": "Explicit lockSlugAfterPublish beforeOperation hook, or omit for intentionally unlocked collections"
+  },
+  {
+    "old": "collections.media.provider",
+    "owner": "Native storage plugin/adapter and all existing options, environment references and prefixes"
+  },
+  {
+    "old": "collections.media.config",
+    "owner": "Native storage plugin/adapter and all existing options, environment references and prefixes"
+  },
+  {
+    "old": "collections.media.config.**",
+    "owner": "Native storage plugin/adapter and all existing options, environment references and prefixes"
+  },
+  {
+    "old": "collections.media.staticDir",
+    "owner": "Media upload.staticDir; custom directories require a separately verified backup procedure"
+  },
+  {
+    "old": "admin.meta.title",
+    "owner": "src/admin/config.ts native admin.meta"
+  },
+  {
+    "old": "admin.meta.description",
+    "owner": "src/admin/config.ts native admin.meta"
+  },
+  {
+    "old": "admin.meta.favicon",
+    "owner": "src/admin/config.ts admin.meta.icons"
+  },
+  {
+    "old": "admin.theme.colors.accent",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.colors.accentLight",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.colors.accentLightest",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.colors.error",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.colors.success",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.colors.warning",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.colors.grayscale.*",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.layout.sidebarWidth",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.layout.headerHeight",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.layout.borderRadius",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.layout.contentMaxWidth",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.typography.fontFamily",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.typography.fontSize",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "admin.theme.typography.lineHeight",
+    "owner": "src/admin/css native CSS variables/styles; inspect old generated theme CSS and preserve exact values"
+  },
+  {
+    "old": "images.quality.default",
+    "owner": "src/site.config.ts display quality and native Media upload formatOptions/imageSizes formatOptions; verify both outputs"
+  },
+  {
+    "old": "images.quality.thumbnail",
+    "owner": "src/site.config.ts display quality and native Media upload formatOptions/imageSizes formatOptions; verify both outputs"
+  },
+  {
+    "old": "images.quality.hero",
+    "owner": "src/site.config.ts display quality and native Media upload formatOptions/imageSizes formatOptions; verify both outputs"
+  },
+  {
+    "old": "images.sizes",
+    "owner": "Media upload.imageSizes; preserve every name/width/height/crop and existing stored variant references"
+  },
+  {
+    "old": "images.breakpoints.*",
+    "owner": "src/site.config.ts images.breakpoints"
+  },
+  {
+    "old": "gsap.scrollTrigger",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.scrollSmoother",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.flip",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.draggable",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.morphSVG",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.drawSVG",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.splitText",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.customEase",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.physics2D",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.textPlugin",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.scrambleText",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "gsap.globalAnimations",
+    "owner": "src/site.config.ts gsap"
+  },
+  {
+    "old": "breadcrumbs.enabled",
+    "owner": "src/site.config.ts breadcrumbs"
+  },
+  {
+    "old": "breadcrumbs.homeLabel",
+    "owner": "src/site.config.ts breadcrumbs"
+  },
+  {
+    "old": "breadcrumbs.separator",
+    "owner": "src/site.config.ts breadcrumbs"
+  },
+  {
+    "old": "breadcrumbs.maxDepth",
+    "owner": "src/site.config.ts breadcrumbs"
+  },
+  {
+    "old": "breadcrumbs.showCurrent",
+    "owner": "src/site.config.ts breadcrumbs"
+  },
+  {
+    "old": "breadcrumbs.className",
+    "owner": "src/site.config.ts breadcrumbs"
+  },
+  {
+    "old": "extensions.collections",
+    "owner": "Native explicit registration in src/payload.config.ts; translate each extension behavior, not only its name"
+  },
+  {
+    "old": "extensions.globals",
+    "owner": "Native explicit registration in src/payload.config.ts; translate each extension behavior, not only its name"
+  },
+  {
+    "old": "extensions.blocks",
+    "owner": "Native explicit registration in src/payload.config.ts; translate each extension behavior, not only its name"
+  },
+  {
+    "old": "extensions.plugins",
+    "owner": "Native explicit registration in src/payload.config.ts; translate each extension behavior, not only its name"
+  }
+]

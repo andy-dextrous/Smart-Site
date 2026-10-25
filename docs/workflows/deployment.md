@@ -25,7 +25,7 @@ Hosted deployment means:
 ### Typical hosted flow
 
 1. Connect the repository to the hosting platform.
-2. Configure production environment variables on that platform.
+2. Configure production environment variables on that platform, including separate random `PAYLOAD_SECRET` and `PREVIEW_SECRET` values. `CRON_SECRET` is only needed for an explicitly configured bearer-authenticated runner. Follow `.env.example` and configure durable storage explicitly in `src/payload.config.ts`; missing storage credentials must fail instead of falling back to ephemeral files.
 3. Provision a managed MongoDB database.
 4. Configure the media provider.
 5. Trigger a production build on the platform.
@@ -34,12 +34,25 @@ Hosted deployment means:
 ### Hosted first deploy
 
 1. Provision the managed Mongo database.
-2. Copy the required env vars from local `.env` into the hosting platform.
+2. Set destination variables from `.env.example`, with a new site UUID and separate destination secrets. Never copy the local database URL, local identity, account credentials or MCP keys into production.
 3. Set the production public URL.
 4. Configure the media provider.
 5. Trigger the first production build.
-6. Seed or migrate content only when intentionally bootstrapping the environment.
+6. Follow [first launch](first-launch.md) for destination adoption, administrator/key creation and a reviewed content transfer. Do not run local bootstrap against the hosted database.
 7. Verify the public site, admin, forms, and media.
+
+### Optional scheduling and recovery
+
+SmartSite works on the existing hosting account without cron. The shipped `vercel.json` has no scheduled jobs, native future-publishing controls are off, and ordinary saves drain publication work immediately. An administrator can recover pending work with `POST /api/publication`; no runner secret is needed for administrator authentication. Bounded or interrupted work may need repeated recovery calls, and static traffic does not process it automatically.
+
+Only configure a scheduler when the site needs unattended recovery or future publishing:
+
+1. For future publishing, enable `versions.drafts.schedulePublish: true` in the chosen native collection/global definitions. Inspect existing queued jobs before enabling them; overdue work must be deliberately reviewed.
+2. For a persistent Node host, opt into the built-in poller with `SMARTSITE_BACKGROUND_RECOVERY=true` and a private random `CRON_SECRET`. This flag controls the timer, not which collections can schedule.
+3. For Vercel or another serverless host, deliberately add a scheduler calling `GET /api/publication` with `Authorization: Bearer <CRON_SECRET>`. Verify the actual plan supports the chosen cadence. [Vercel Hobby cron limits](https://vercel.com/docs/cron-jobs/usage-and-pricing) allow daily rather than minute-level execution; use a suitable explicitly approved alternative if the site needs tighter timing. Do not transfer projects or purchase a plan merely to deploy the default site.
+4. Test future publish/unpublish, disabled-target isolation and crash recovery in the serving environment. Avoid overlapping native scheduled-job runners; read their [recovery limits](../engineering/routing-and-caching.md).
+
+Set `PAYLOAD_CONFIG_PATH=src/payload.config.ts` if the platform has an explicit override; remove an old `src/admin/payload/payload.config.ts` override during upgrade. Vercel needs durable media storage; local uploads are not persistent there. Preview deployments do not execute Vercel cron: if scheduling is opted in, test the authenticated endpoint explicitly and verify automatic invocation after production promotion. Keep preview database, identity and credentials distinct from production.
 
 ### Hosted ongoing production deploys
 
@@ -69,6 +82,8 @@ The normal hosted release loop is:
 - backup and recovery expectations documented with the hosting provider or team
 
 ## Self-hosted deployment
+
+Local Docker uploads use the persistent `/app/public/media` directory. Before upgrading an existing 3.x Docker deployment, follow [the checked media relocation and rollback procedure](docker-media.md); the old standalone runtime may have stored uploads inside its build directory.
 
 Self-hosted deployment means:
 
@@ -137,6 +152,8 @@ This also means the local developer workflow stays simple:
    - use the `public_url` workflow input only when the runtime env URL needs an intentional override
 
 7. Use GitHub Actions as the normal production release path.
+
+Build environment inputs use Node 24 dotenv syntax: quote values containing `#` and multiline values. `$NAME`, `${NAME}` and shell expressions remain literal; resolve any intended substitutions before supplying the file. Both prebuilt helpers use the same serializer and accept its generated build files, which are private (`0600`) and never log environment values. Edit the source dotenv file rather than the generated shell file; malformed generated files are rejected.
 
 After the first production bootstrap, return to the ordinary local development workflow. Do not keep a local Docker runtime around as the default way to work on the site.
 
@@ -275,3 +292,5 @@ For an existing standalone volume: stop writes, save and test a database/user/me
 Backup/archive/restore scripts remain explicit operator tools. Test restore into a distinct empty database/stack first. A successful archive command alone is not a restore test. The prebuilt CI build database is disposable and independent of the destination; it must never run destination seeding/adoption.
 
 The disposable `pnpm test:docker-upgrade` rehearsal proves this conversion with a populated volume, a committed transaction, restart and restoration of the pre-upgrade archive into a separate volume. It does not authorize applying the procedure to a live deployment.
+
+For every serving host, test a real save, persisted publication work and cache acknowledgement as described in [first launch](first-launch.md). Verify administrator recovery after interruption. If background recovery or future publishing was explicitly enabled, also test its runner, authentication and cadence; absence of an optional scheduler or cron secret is not a deployment failure.

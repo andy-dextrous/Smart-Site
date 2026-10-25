@@ -1,4 +1,4 @@
-import { sectionCtaDefault } from "./defaults"
+import { sectionCtaDefault } from "@/components/fields/section-cta/defaults"
 
 type DefaultValue = typeof sectionCtaDefault
 

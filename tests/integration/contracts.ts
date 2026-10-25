@@ -2,9 +2,9 @@ import assert from "node:assert/strict"
 import { writeFile, rm, access } from "node:fs/promises"
 import { createLocalReq, getPayload } from "payload"
 import sharp from "sharp"
-import config from "../../src/admin/payload/payload.config"
-import { contentRead, contentSave, uploadMedia } from "../../src/admin/mcp/tools"
-import { withOperation, operationStatus } from "../../src/admin/mcp/operations"
+import config from "../../src/payload.config"
+import { contentRead, contentSave, uploadMedia } from "../../src/mcp/tools"
+import { withOperation, operationStatus } from "../../src/mcp/operations"
 if (process.env.SMARTSITE_ENVIRONMENT !== "local") throw new Error("Local fixture only")
 const payload = await getPayload({ config })
 try {

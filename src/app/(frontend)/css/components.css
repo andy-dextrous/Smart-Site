@@ -3,10 +3,6 @@
 */
 
 @layer frontend-components {
-  html.smartsite-has-admin-bar .smartsite-header {
-    top: 32px;
-  }
-
   .gradient-border {
     border: 1px solid transparent;
     background: transparent;

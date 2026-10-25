@@ -1,0 +1,323 @@
+// Keep this layout contract outside Tailwind layers so fixed top-0/h-full
+// utilities cannot place website navigation underneath the authenticated toolbar.
+.admin-bar-space {
+  height: var(--smartsite-admin-bar-height, 32px);
+}
+
+html.smartsite-has-admin-bar {
+  .smartsite-header {
+    top: var(--smartsite-admin-bar-height);
+  }
+
+  // Smoother layouts reserve space here instead of the flow spacer. This works
+  // with both its fixed desktop wrapper and its normal-flow touch wrapper.
+  #smooth-content {
+    padding-top: var(--smartsite-admin-bar-height);
+  }
+
+  .smartsite-mobile-menu {
+    top: var(--smartsite-admin-bar-height);
+    height: calc(100% - var(--smartsite-admin-bar-height));
+  }
+}
+
+.admin-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 9999;
+  display: flex;
+  min-height: 32px;
+  height: auto;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background-color: #18181a !important;
+  padding: 0 1rem;
+  font-family: sans-serif;
+  font-size: 13px;
+  color: white;
+  isolation: isolate;
+
+  &__site-name {
+    max-width: 20ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  &__left-menu,
+  &__right-menu {
+    min-width: 0;
+    max-width: 100%;
+    min-height: 32px;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  &__left-menu {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+  }
+
+  &__right-menu {
+    display: flex;
+    align-items: center;
+    column-gap: 1rem;
+  }
+
+  &__dashboard-link {
+    display: flex;
+    height: 1.25rem;
+    flex-shrink: 0;
+    align-items: center;
+    border-radius: 0.125rem;
+    border: none;
+    background-color: transparent;
+    padding: 0 0.5rem;
+    font-size: 14px !important;
+    color: white;
+
+    &:hover {
+      background-color: #37373c;
+    }
+  }
+
+  &__button {
+    cursor: pointer;
+    border-radius: 0.125rem;
+    border: none;
+    background-color: transparent;
+    padding: 0 0.5rem;
+    color: white;
+
+    &:hover {
+      background-color: #37373c;
+      cursor: pointer;
+    }
+  }
+
+  &__edit-link {
+    cursor: pointer;
+    border-radius: 0.125rem;
+    border: none;
+    background-color: transparent;
+    padding: 0 0.5rem;
+    color: white;
+    display: inline-block;
+
+    &:hover {
+      background-color: #37373c;
+    }
+  }
+
+  &__dropdown-trigger {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.125rem;
+    border: none;
+    background-color: transparent;
+    padding: 0 0.5rem;
+    color: white;
+    cursor: pointer;
+
+    &-text {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    &:hover {
+      background-color: #37373c;
+    }
+  }
+
+  &__dropdown-list {
+    background-color: #202023 !important;
+    border: 1px solid #505056;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    min-width: 12rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 9999999 !important;
+    position: relative;
+  }
+
+  &__dropdown-content {
+    background-color: #202023 !important;
+    border: 1px solid #505056 !important;
+    border-radius: 0.25rem !important;
+    padding: 0.25rem !important;
+    min-width: 12rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    z-index: 9999999 !important;
+  }
+
+  &__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 14px;
+    color: #ebebed;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #37373c;
+      color: #f8f8f9;
+    }
+  }
+
+  &__separator {
+    height: 1px;
+    background-color: #505056;
+    margin: 0.25rem 0;
+  }
+
+  &__user-container {
+    border-bottom: 1px solid #505056;
+    padding: 1rem;
+  }
+
+  &__user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__avatar-container {
+    display: flex;
+    height: 4rem;
+    width: 4rem;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 9999px;
+    background-color: #81818b;
+
+    &--small {
+      height: 1.5rem;
+      width: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 9999px;
+      background-color: #81818b;
+    }
+  }
+
+  &__user-text-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+  }
+
+  &__user-text-link {
+    font-size: 0.875rem;
+    color: #4f37fb;
+  }
+
+  &__menu-item {
+    color: white;
+    background: #18181a !important;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #37373c !important;
+    }
+  }
+
+  &__menu-item-link {
+    cursor: pointer;
+    font-size: 14px !important;
+    color: white;
+
+    &:hover {
+      background-color: #37373c !important;
+    }
+  }
+
+  &__user-icon {
+    &--small {
+      height: 1rem;
+      width: 1rem;
+      color: white;
+    }
+
+    &--large {
+      height: 2.5rem;
+      width: 2.5rem;
+      color: white;
+    }
+  }
+
+  &__avatar-image {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  &__chevron-icon {
+    height: 1rem;
+    width: 1rem;
+  }
+
+  &__plus-icon {
+    height: 1rem;
+    width: 1rem;
+  }
+
+  &__toaster-success-icon {
+    color: #4f37fb;
+  }
+
+  &__toaster-error-icon {
+    color: #dc2626;
+  }
+
+  &__workspace-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    border-radius: 0.125rem;
+    padding: 0 0.5rem;
+    height: 1.25rem;
+    background: rgba(79, 55, 251, 0.22);
+    color: #f8f8f9;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition:
+      background 0.18s ease,
+      color 0.18s ease;
+
+    &:hover {
+      background: rgba(79, 55, 251, 0.38);
+      color: #ffffff;
+    }
+
+    &--active {
+      background: rgba(248, 248, 249, 0.18);
+      color: #ffffff;
+    }
+  }
+
+  &__workspace-button-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.admin-bar-toaster {
+  background: linear-gradient(90deg, #18181a 0%, #1c1c1f 100%);
+}

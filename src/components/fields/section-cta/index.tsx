@@ -1,5 +1,5 @@
 import { CMSLink } from "@/components/fields/link"
-import type { SectionCtaValue } from "./types"
+import type { SectionCtaValue } from "@/components/fields/section-cta/types"
 
 interface SectionCtaComponentProps extends SectionCtaValue {
   containerClassName?: string
@@ -19,7 +19,7 @@ export function SectionCta(props: SectionCtaComponentProps) {
       {button ? (
         <CMSLink
           {...(button as any)}
-          className="inline-flex items-center gap-content-sm md:shrink-0"
+          className="gap-content-sm inline-flex items-center md:shrink-0"
         />
       ) : null}
     </div>

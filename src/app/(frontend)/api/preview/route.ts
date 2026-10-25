@@ -1,9 +1,11 @@
-import type { CollectionSlug, PayloadRequest } from "payload"
+import type { PayloadRequest } from "payload"
 import { getPayload } from "payload"
 import { NextResponse, NextRequest } from "next/server"
 import configPromise from "@payload-config"
 import { draftMode } from "next/headers"
-import { createRequestUrl } from "@/admin/utilities/request-origin"
+import { createRequestUrl } from "@/utilities/request-origin"
+import { publicPreviewPath } from "@/utilities/preview-path"
+import { isFrontendCollection } from "@/website/collections"
 
 /*************************************************************************/
 /*  PREVIEW API ROUTE - OPTIMIZED FOR STATIC GENERATION
@@ -14,7 +16,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl
 
   const path = searchParams.get("path")
-  const collection = searchParams.get("collection") as CollectionSlug
+  const collection = searchParams.get("collection")
   const previewSecret = searchParams.get("previewSecret")
   const documentId = searchParams.get("documentId")
   const isLivePreview = searchParams.get("livePreview") === "true"
@@ -28,19 +30,21 @@ export async function GET(request: NextRequest): Promise<Response> {
     return new Response("Insufficient search params", { status: 404 })
   }
 
-  if (!path.startsWith("/")) {
+  const publicPath = publicPreviewPath(path)
+  if (!publicPath || !(await isFrontendCollection(collection))) {
     return new Response("This endpoint can only be used for relative previews", {
-      status: 500,
+      status: 400,
     })
   }
 
   // Verify user authentication
   let user
   try {
-    user = await payload.auth({
+    const authentication = await payload.auth({
       req: request as unknown as PayloadRequest,
       headers: request.headers,
     })
+    user = authentication.user
   } catch (error) {
     payload.logger.error({ err: error }, "Error verifying token for live preview")
     return new Response("You are not allowed to preview this page", { status: 403 })
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     return new Response("You are not allowed to preview this page", { status: 403 })
   }
 
-  const previewTarget = createRequestUrl(request, path)
+  const previewTarget = createRequestUrl(request, publicPath)
   previewTarget.searchParams.set("preview", "true")
 
   if (collection) {

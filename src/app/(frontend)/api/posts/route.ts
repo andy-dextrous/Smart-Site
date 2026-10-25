@@ -1,10 +1,10 @@
-import type { Media, Post } from "@/admin/payload/payload-types"
-import { getPostsWithPagination } from "@/admin/data/posts"
+import type { Media, Post } from "@/payload-types"
+import { getPostsWithPagination } from "@/website/data/posts"
 import {
   estimatePostReadingTime,
   formatPostPublishDate,
   resolvePostCategories,
-} from "@/admin/utilities/posts"
+} from "@/utilities/posts"
 import type { NextRequest } from "next/server"
 
 /*************************************************************************/
@@ -50,7 +50,11 @@ function resolveFeaturedImage(post: Post): ArchivePostItem["featuredImage"] {
 
 function toArchivePostItem(
   post: Post,
-  options: { includeCategories: boolean; includePublishedDate: boolean; includeReadingTime: boolean }
+  options: {
+    includeCategories: boolean
+    includePublishedDate: boolean
+    includeReadingTime: boolean
+  }
 ): ArchivePostItem {
   const href = post.uri || (post.slug ? `/posts/${post.slug}` : null)
 
@@ -60,8 +64,12 @@ function toArchivePostItem(
     href,
     excerpt: post.seo?.meta?.description || "",
     categories: options.includeCategories ? resolvePostCategories(post) : [],
-    publishDate: options.includePublishedDate ? formatPostPublishDate(post.publishedAt) : null,
-    readingTime: options.includeReadingTime ? estimatePostReadingTime(post.content) : null,
+    publishDate: options.includePublishedDate
+      ? formatPostPublishDate(post.publishedAt)
+      : null,
+    readingTime: options.includeReadingTime
+      ? estimatePostReadingTime(post.content)
+      : null,
     featuredImage: resolveFeaturedImage(post),
   }
 }
@@ -107,4 +115,3 @@ export async function GET(request: NextRequest): Promise<Response> {
     page: result.page,
   })
 }
-

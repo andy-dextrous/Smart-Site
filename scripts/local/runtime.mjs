@@ -1,5 +1,5 @@
 import { open, readFile } from "node:fs/promises"
-import { spawn } from "node:child_process"
+import { execFileSync, spawn } from "node:child_process"
 import path from "node:path"
 import { parse } from "dotenv"
 import { databaseURL } from "./database.mjs"
@@ -35,7 +35,7 @@ export async function environment(state) {
     throw new Error(
       "Local database configuration was changed; inspect before starting or provisioning"
     )
-  return cleanEnvironment({ ...values, NODE_ENV: "development" })
+  return cleanEnvironment({ ...values, DISABLE_PAYLOAD_HMR: "true", NODE_ENV: "development" })
 }
 export async function health(state) {
   const response = await fetch(`http://127.0.0.1:${state.appPort}/api/smartsite/health`, {
@@ -51,7 +51,7 @@ export async function health(state) {
     throw new Error("App identity or database readiness mismatch")
   return body
 }
-export async function startApp(state) {
+export async function startApp(state, { mode = "development" } = {}) {
   if (owned(state.appProcess)) {
     await waitFor(() => health(state), 120000)
     return
@@ -61,7 +61,7 @@ export async function startApp(state) {
     process.execPath,
     [
       path.join(root, "node_modules/next/dist/bin/next"),
-      "dev",
+      mode === "production" ? "start" : "dev",
       "--hostname",
       "127.0.0.1",
       "--port",
@@ -69,7 +69,7 @@ export async function startApp(state) {
     ],
     {
       cwd: root,
-      env: await environment(state),
+      env: { ...await environment(state), PORT: String(state.appPort), DISABLE_PAYLOAD_HMR: mode === "production" ? "true" : "false", NODE_ENV: mode },
       detached: true,
       stdio: ["ignore", file.fd, file.fd],
     }
@@ -93,7 +93,43 @@ export async function stopProcess(info) {
       )
     return false
   }
-  process.kill(info.pid, "SIGTERM")
-  await waitFor(() => !owned(info), 20000)
+  if (process.platform === "win32")
+    throw new Error("Cannot verify POSIX process groups on this platform; preserve state and stop the owned process manually")
+  let group
+  try {
+    group = Number(execFileSync("ps", ["-p", String(info.pid), "-o", "pgid="], {
+      encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+    }).trim())
+    if (!Number.isSafeInteger(group) || group <= 0) throw new Error("Invalid process group")
+  } catch {
+    if (!alive(info.pid)) return false
+    throw new Error("Cannot verify process group ownership; preserve state before cleanup")
+  }
+  // Only an owned, still-live detached leader authorizes a group signal. A
+  // non-detached process may share our shell/database caller's group.
+  if (!owned(info)) {
+    if (alive(info.pid)) throw new Error("Process ownership changed before shutdown; preserve state")
+    return false
+  }
+  const target = group === info.pid ? -info.pid : info.pid
+  try {
+    process.kill(target, "SIGTERM")
+  } catch (error) {
+    if (error.code === "ESRCH") return false
+    throw error
+  }
+  const groupStopped = () => {
+    if (target > 0) return true
+    try {
+      process.kill(target, 0)
+      return false
+    } catch (error) {
+      if (error.code === "ESRCH") return true
+      throw error
+    }
+  }
+  // Do not report success just because Next's leader exited while workers live.
+  // No escalation or later signal can target an unverified/reused group.
+  await waitFor(() => !owned(info) && groupStopped(), 20000)
   return true
 }

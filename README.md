@@ -156,13 +156,13 @@ SmartSite builds a fuller site architecture around those capabilities. Content t
 | Cache refresh | Page/post hooks revalidate routes and sitemap tags; globals and redirects have their own hooks | Shared document and global invalidation covering old and new paths, navigation references and template usage |
 | Changed URLs | Redirects plugin and redirect management | Automatic redirects for supported published URL changes |
 | Content models | Pages, posts, media, categories and users, plus plugin collections | Adds services, team, testimonials, templates and the URI index |
-| Configuration | Application-specific Payload config, plugins and frontend source | Typed `smartsite.config.ts`, a local extension registry and a clear boundary between site code and shared core |
+| Configuration | Application-specific Payload config, plugins and frontend source | Direct native Payload composition, explicit website hooks and portable upgrade guides |
 | Search | Search plugin for posts with a results page | Results-page, command-palette and hybrid modes |
 | Storage | Media uploads, with extension points for other services | Ready-to-configure local, Vercel Blob, S3, Cloudinary and UploadThing storage |
 | Agent content editing | No MCP plugin configured | Payload's official MCP plugin with four scoped tools, revision checks and operation receipts |
 | Development and launch | Setup instructions, environment configuration, seed and deployment guidance | Portable Codex/Claude skills, blank-site bootstrap, isolated local lifecycle, environment identity, and content transfer, backup and recovery workflows |
 
-<sub>Compared with the [Payload website template at revision `aebbf75`](https://github.com/payloadcms/payload/tree/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website) (October 2026) and SmartSite 3.0.1. The comparison covers what each starter ships, not everything Payload can be extended to do. Upstream reference points: [page route](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/app/%28frontend%29/%5Bslug%5D/page.tsx), [page revalidation hook](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/collections/Pages/hooks/revalidatePage.ts), [cached globals](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/utilities/getGlobals.ts), [plugins](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/plugins/index.ts).</sub>
+<sub>Compared with the [Payload website template at revision `aebbf75`](https://github.com/payloadcms/payload/tree/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website) (October 2026) and SmartSite 4.0.1. The comparison covers what each starter ships, not everything Payload can be extended to do. Upstream reference points: [page route](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/app/%28frontend%29/%5Bslug%5D/page.tsx), [page revalidation hook](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/collections/Pages/hooks/revalidatePage.ts), [cached globals](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/utilities/getGlobals.ts), [plugins](https://github.com/payloadcms/payload/blob/aebbf75b93e218be4b53a3c7922e0bc82924830b/templates/website/src/plugins/index.ts).</sub>
 
 ### URIs: the site's address book
 
@@ -177,7 +177,7 @@ In practice:
 - Choose a different homepage in settings, and that page resolves to `/`.
 - A new frontend collection can use the same routing and rendering once you've given it a schema, configuration and a suitable presentation.
 
-Your site's structure can follow how the business thinks about its information, not how the database names its collections, and routing, breadcrumbs, templates and redirects all work from the same record. See the [routing engine](src/admin/routing/uri-engine.ts), [URI index manager](src/admin/routing/index-manager.ts) and [published URI renderer](src/admin/components/published-uri-renderer.tsx).
+Your site's structure can follow how the business thinks about its information, not how the database names its collections, and routing, breadcrumbs, templates and redirects all work from the same record. See the [routing engine](src/website/routing/uri-engine.ts), [URI index manager](src/website/routing/index-manager.ts) and [published URI renderer](src/website/rendering/published-uri-renderer.tsx).
 
 ### Caching and invalidation
 
@@ -192,13 +192,13 @@ Your site's structure can follow how the business thinks about its information, 
 
 Publishing an article triggers refreshes for its page and cached collection queries. A template change uses the URI index to find published content to refresh. Developers use the same mechanisms across supported content types.
 
-This dependency handling is explicit: it covers the relationships SmartSite knows about. When you add custom queries, external caches or new extensions, give them the appropriate tags and hooks. Bulk operations should be checked for completion and handler limits. See the [cache API](src/admin/cache/cache.ts), [revalidation handlers](src/admin/cache/revalidation.ts) and the [routing and caching guide](docs/engineering/routing-and-caching.md).
+This dependency handling is explicit: it covers the relationships SmartSite knows about. When you add custom queries, external caches or new extensions, give them the appropriate tags and hooks. Bulk operations should be checked for completion and handler limits. See the [cache API](src/website/cache/cache.ts), [revalidation handlers](src/website/cache/revalidation.ts) and the [routing and caching guide](docs/engineering/routing-and-caching.md).
 
 ### Changes that ripple across the site
 
 Renaming a parent page, moving a collection's archive or editing a shared template can change many public routes at once. SmartSite detects the dependent content and hands the follow-up work to a Payload task, which the hook queues and runs straight away. That work updates the affected URIs, breadcrumbs and cached output together.
 
-When a supported published URL changes, SmartSite can create a redirect from the old address automatically. Redirects for pages and posts point at the content record itself, so they keep following that content to its current address. Redirects for other collections store a destination URL. Redirects you've created by hand are left as they are. After a significant restructure, spot-check a few old and new URLs. See the [dependency task](src/admin/payload/jobs/dependency-updates/handler.ts), [job invocation](src/admin/payload/hooks/utilities/context-management.ts) and [automatic redirects](src/admin/redirects/auto-redirects.ts).
+When a supported published URL changes, SmartSite can create a redirect from the old address automatically. Redirects for pages and posts point at the content record itself, so they keep following that content to its current address. Redirects for other collections store a destination URL. Redirects you've created by hand are left as they are. After a significant restructure, spot-check a few old and new URLs. See the [durable publication worker](src/website/publication/runner.ts), [publication intent](src/website/publication/intent.ts) and [automatic redirects](src/website/redirects/auto-redirects.ts).
 
 ## Building with an AI coding agent
 
@@ -240,32 +240,16 @@ Codex skills live in `.agents/skills/` and Claude skills in `.claude/skills/`. E
 
 ## Customize and extend
 
-[`src/smartsite.config.ts`](src/smartsite.config.ts) is the main place to shape your site: identity, collection options, feature switches, storage, animation and extensions.
+[`src/payload.config.ts`](src/payload.config.ts) assembles the CMS using normal Payload configuration. Collections own their fields, access and hooks; the site owns every source file. Browser-safe presentation choices live in [`src/site.config.ts`](src/site.config.ts).
 
-```ts
-import type { UserConfig } from "@/admin/config/defaults"
+- **A new visual section:** add its schema and renderer using shared fields and layout conventions.
+- **A new content type:** define it in `src/collections` and register it once in the Payload config. Add explicit website metadata and hooks when it needs public routes.
+- **An existing collection:** edit its definition directly. There is no override registry to learn.
+- **A new MCP target:** opt it in explicitly and review role access, key grants and exposed fields.
+- **Styling:** edit frontend components/design tokens or CMS presentation in `src/admin`.
+- **Storage, email or localization:** configure the corresponding native Payload adapter or plugin.
 
-const config: UserConfig = {
-  identity: { siteName: "My Studio" },
-  features: {
-    search: { enabled: true, mode: "hybrid" },
-    darkMode: false,
-    i18n: false,
-  },
-}
-
-export default config
-```
-
-Anything you leave out inherits the core defaults, and the configuration types are the definitive reference for available options.
-
-- **A new visual section:** add a schema and renderer following the section guide, reusing shared fields and layout conventions.
-- **A new content type:** create a Payload config in `src/extensions/`, register it, then enable its slug in configuration.
-- **A built-in collection:** configure the existing collection (or disable it) rather than registering a duplicate.
-- **A new MCP target:** opt it in explicitly and review its access rules and exposed fields.
-- **Styling:** change your frontend components and design system.
-
-`src/admin/` is the shared SmartSite core. Keeping site-specific work in the frontend, configuration and extensions makes future core upgrades much easier to review. See [configuration and extensions](docs/engineering/configuration-system.md), the [admin layer](docs/engineering/admin-layer.md) and [upgrading](docs/workflows/upgrading.md).
+See [native configuration](docs/engineering/configuration-system.md) for a complete collection example and storage recipes. Existing sites upgrade through a reviewed three-way source merge and a versioned [upgrade kit](docs/upgrades/4.0.0/README.md), with backup/restore and content-preservation checks.
 
 ## Project structure
 
@@ -276,10 +260,17 @@ Anything you leave out inherits the core defaults, and the configuration types a
 ├── .claude/skills/             Claude skills and Payload reference
 ├── src/
 │   ├── app/                    Next.js routes and application entry points
-│   ├── admin/                  Shared SmartSite CMS core
-│   ├── components/             Site sections, shared fields and UI
-│   ├── extensions/             Site-specific Payload extensions
-│   └── smartsite.config.ts     Site configuration
+│   ├── payload.config.ts       Native CMS assembly
+│   ├── collections/            Content schemas, access and hooks
+│   ├── globals/                Settings, header and footer
+│   ├── fields/                 Shared field definitions
+│   ├── hooks/                  Content lifecycle behavior
+│   ├── website/                URI routing, caching and publication recovery
+│   ├── mcp/                    Native transport and checked content tools
+│   ├── payload/                Database, email, storage and migrations
+│   ├── admin/                  CMS layout, widgets and styling
+│   ├── components/             Site sections and shared UI
+│   └── site.config.ts          Browser-safe presentation choices
 ├── docs/                       Project brief, design notes and workflows
 ├── scripts/                    Local lifecycle and operational helpers
 ├── tests/                      Unit tests and disposable integration fixtures
@@ -297,6 +288,10 @@ Anything you leave out inherits the core defaults, and the configuration types a
 **Forms and email.** Forms and submissions are managed in Payload. Email delivery is inactive locally, so configure and test production delivery before relying on a contact form.
 
 **Optional features.** Search, dark mode, localization, analytics and GSAP animation are switched in configuration. Some also need content, a provider account or design work. See [feature toggles](docs/workflows/feature-toggles.md).
+
+### Optional scheduled publishing
+
+Ordinary edits publish and refresh without a cron service. Future publishing is off by default; enable it on the native Payload collections that need it and deliberately configure a runner. Background recovery is optional too. Interrupted or large refreshes can be resumed by an administrator without repeating the content save. See the [deployment guide](docs/workflows/deployment.md#optional-scheduling-and-recovery).
 
 ## Deploy and maintain
 

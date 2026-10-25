@@ -1,8 +1,8 @@
 import LogoPrimary from "@/components/logos/logo"
-import { getGlobal, getSettings } from "@/admin/data/globals"
+import { getGlobal, getSettings } from "@/website/data/globals"
 import { CMSLink } from "@/components/fields/link"
 import { SocialLinks } from "@/components/fields/social-links"
-import type { Footer as FooterType, Setting } from "@/admin/payload/payload-types"
+import type { Footer as FooterType, Setting } from "@/payload-types"
 import Link from "next/link"
 
 /*************************************************************************/
@@ -112,7 +112,7 @@ export async function Footer() {
           {/* Left Side - Legal Links */}
           <div className="gap-content-sm flex flex-col">
             {footer?.legals && footer.legals.length > 0 && (
-              <div className="gap-content-sm text-sm text-dark-600 flex flex-wrap justify-center md:justify-start">
+              <div className="gap-content-sm text-dark-600 flex flex-wrap justify-center text-sm md:justify-start">
                 {footer.legals.map((legal, index) => (
                   <div key={index} className="gap-content-sm flex items-center">
                     <CMSLink {...legal.link} className="hover:text-dark">
@@ -129,7 +129,7 @@ export async function Footer() {
 
           {/* Center - Copyright */}
           <div className="text-dark-600 text-center">
-            <p className="text-sm text-dark-600">
+            <p className="text-dark-600 text-sm">
               © {new Date().getFullYear()}{" "}
               {settings?.general?.siteName || "smart-site.info"} | All Rights Reserved
             </p>

@@ -21,18 +21,23 @@ export const Posts: CollectionConfig = {
     // Before save
     beforeChange: [
       async ({ data, req, operation, originalDoc }) => {
-        if (operation === 'update' && data.status === 'published') {
-          data.publishedAt = new Date()
+        if (operation === 'update' && data._status === 'published') {
+          data.publishedAt = new Date().toISOString()
         }
         return data
       },
     ],
 
-    // After save
+    // After the write, but BEFORE the enclosing transaction commits
     afterChange: [
       async ({ doc, req, operation, previousDoc }) => {
         if (operation === 'create') {
-          await sendNotification(doc)
+          await req.payload.jobs.queue({
+            task: 'sendNotification', // register this task in jobs.tasks
+            input: { documentId: doc.id },
+            overrideAccess: true, // trusted system notification
+            req, // job and document commit together
+          })
         }
         return doc
       },
@@ -49,7 +54,7 @@ export const Posts: CollectionConfig = {
     // Before delete
     beforeDelete: [
       async ({ req, id }) => {
-        await cleanupRelatedData(id)
+        await cleanupRelatedData(id, req) // thread req into its nested Local API calls
       },
     ],
   },
@@ -60,25 +65,18 @@ export const Posts: CollectionConfig = {
 
 ```ts
 import type { EmailField, FieldHook } from 'payload'
+import { userHasMinimumRole } from '@/access/roles'
 
 const beforeValidateHook: FieldHook = ({ value }) => {
-  return value.trim().toLowerCase()
-}
-
-const afterReadHook: FieldHook = ({ value, req }) => {
-  // Hide email from non-admins
-  if (!req.user?.roles?.includes('admin')) {
-    return value.replace(/(.{2})(.*)(@.*)/, '$1***$3')
-  }
-  return value
+  return typeof value === 'string' ? value.trim().toLowerCase() : value
 }
 
 const emailField: EmailField = {
   name: 'email',
   type: 'email',
+  access: { read: ({ req }) => userHasMinimumRole(req.user, 'admin') },
   hooks: {
     beforeValidate: [beforeValidateHook],
-    afterRead: [afterReadHook],
   },
 }
 ```
@@ -109,43 +107,23 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-## Next.js Revalidation with Context Control
+## SmartSite Publication and Cache Invalidation
+
+Collection `afterChange` runs before the enclosing database transaction commits. Direct `revalidatePath`, email delivery or other external effects there can escape a later rollback or refill a cache with old data. Write a durable intent/job with the same `req`, then let the configured worker process committed work.
+
+SmartSite already wires universal collection hooks and global publication hooks. Preserve those hooks when extending a collection; do not add a second direct invalidation path. A settings-like global can request a refresh using the existing helper:
 
 ```ts
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
-import { revalidatePath } from 'next/cache'
-import type { Page } from '../payload-types'
+import type { GlobalAfterChangeHook } from 'payload'
+import { queuePublication } from '@/website/publication/intent'
 
-export const revalidatePage: CollectionAfterChangeHook<Page> = ({
-  doc,
-  previousDoc,
-  req: { payload, context },
-}) => {
-  if (!context.disableRevalidate) {
-    if (doc._status === 'published') {
-      const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
-      payload.logger.info(`Revalidating page at path: ${path}`)
-      revalidatePath(path)
-    }
-
-    // Revalidate old path if unpublished
-    if (previousDoc?._status === 'published' && doc._status !== 'published') {
-      const oldPath = previousDoc.slug === 'home' ? '/' : `/${previousDoc.slug}`
-      payload.logger.info(`Revalidating old page at path: ${oldPath}`)
-      revalidatePath(oldPath)
-    }
-  }
-  return doc
-}
-
-export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { context } }) => {
-  if (!context.disableRevalidate) {
-    const path = doc?.slug === 'home' ? '/' : `/${doc?.slug}`
-    revalidatePath(path)
-  }
+export const afterSettingsChange: GlobalAfterChangeHook = async ({ doc, req, global }) => {
+  await queuePublication(req, 'refresh', `global/${global.slug}`)
   return doc
 }
 ```
+
+For routed collections follow `src/hooks/collections/universal/after-change.ts` and `after-delete.ts`: route-index updates and intent creation share the request. Normal saves drain publication work in the serving request. Verify actual public HTTP output after a publish, draft edit, rename, unpublish and delete; explicitly drain interrupted or large work through the authenticated endpoint when no optional background runner is enabled. Do not use a guessed `/${doc.slug}` path when the site has nested URIs or custom templates.
 
 ## Date Field Auto-Set
 
@@ -167,7 +145,7 @@ const publishedOnField: DateField = {
     beforeChange: [
       ({ siblingData, value }) => {
         if (siblingData._status === 'published' && !value) {
-          return new Date()
+          return new Date().toISOString()
         }
         return value
       },
@@ -180,7 +158,7 @@ const publishedOnField: DateField = {
 
 - Use `beforeValidate` for data formatting
 - Use `beforeChange` for business logic
-- Use `afterChange` for side effects
+- Use `afterChange` for transactional follow-up writes; queue external effects for execution after commit
 - Use `afterRead` for computed fields
 - Store expensive operations in `context`
 - Pass `req` to nested operations for transaction safety (see [ADAPTERS.md#threading-req-through-operations](ADAPTERS.md#threading-req-through-operations))

@@ -4,7 +4,7 @@ import type {
   SectionColorScheme,
   SectionContainerWidth,
   SectionPaddingValue,
-} from "./types"
+} from "@/components/fields/section/types"
 
 const containerWidthOptions: Array<{ label: string; value: SectionContainerWidth }> = [
   { label: "Container (standard)", value: "lg" },

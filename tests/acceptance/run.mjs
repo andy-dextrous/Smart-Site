@@ -3,6 +3,11 @@ import { spawn } from "node:child_process"
 import { readdir, mkdir, rm, writeFile, copyFile, chmod } from "node:fs/promises"
 import { chromium, expect } from "@playwright/test"
 import sharp from "sharp"
+import {
+  adminBarGeometry,
+  checkAdminBarLayout,
+  checkTouchAdminBarLayout,
+} from "./admin-bar.mjs"
 import { MongoClient, ObjectId } from "mongodb"
 import {
   local,
@@ -167,9 +172,44 @@ try {
   page.on("pageerror", e => errors.push(e.message))
   await page.goto(base + "/browser-acceptance", { waitUntil: "networkidle" })
   await expect(page.getByRole("heading", { name: "A standalone website" })).toBeVisible()
+  const loggedOutGeometry = await adminBarGeometry(page)
+  assert.equal(loggedOutGeometry.bar, null)
   await page.screenshot({ path: "test-results/browser/desktop.png", fullPage: true })
   await page.getByRole("button", { name: "Search", exact: true }).click()
-  await page.getByPlaceholder("Search pages and posts").fill("Browser acceptance")
+  // This is the first request to the development search route. Wait for its
+  // actual response within a bounded compile window, then check data and UI.
+  // page.setDefaultTimeout does not change Playwright's assertion timeout.
+  const searchStarted = performance.now()
+  let searchDeadline
+  try {
+    await Promise.race([
+      (async () => {
+        const [searchResponse] = await Promise.all([
+          page.waitForResponse(response => {
+            const url = new URL(response.url())
+            return url.origin === base && url.pathname === "/api/search" &&
+              url.searchParams.get("q") === "Browser acceptance" &&
+              response.request().method() === "GET"
+          }, { timeout: 60000 }),
+          page.getByPlaceholder("Search pages and posts").fill("Browser acceptance"),
+        ])
+        assert.equal(searchResponse.status(), 200, "Search must return a successful response")
+        const searchResult = await searchResponse.json()
+        assert.ok(searchResult.items.some(item => item.title === "Browser acceptance"))
+        console.log(JSON.stringify({
+          check: "cold-browser-search",
+          status: searchResponse.status(),
+          durationMs: Math.round(performance.now() - searchStarted),
+          matched: true,
+        }))
+      })(),
+      new Promise((_, reject) => {
+        searchDeadline = setTimeout(() => reject(new Error("Cold browser search exceeded 60 seconds")), 60000)
+      }),
+    ])
+  } finally {
+    clearTimeout(searchDeadline)
+  }
   await expect(
     page
       .getByRole("dialog")
@@ -243,7 +283,19 @@ try {
       })
     }
   }
-  await page.goto(base + "/admin/login", { waitUntil: "networkidle" })
+  // The first CMS navigation compiles the development admin catch-all route.
+  // Match the owned local startup allowance; other navigations stay at 30s.
+  const adminStarted = performance.now()
+  const adminResponse = await page.goto(base + "/admin/login", {
+    waitUntil: "networkidle",
+    timeout: 180000,
+  })
+  assert.equal(adminResponse?.status(), 200, "Cold CMS login page must load successfully")
+  console.log(JSON.stringify({
+    check: "cold-browser-admin",
+    status: adminResponse.status(),
+    durationMs: Math.round(performance.now() - adminStarted),
+  }))
   await page.getByRole("textbox", { name: /Email or Username/ }).fill("owner")
   await page.locator("input[type=password]").fill(credentials.adminPassword)
   await page.getByRole("button", { name: "Login", exact: true }).click()
@@ -259,6 +311,17 @@ try {
       .count(),
     0
   )
+  const adminBar = await checkAdminBarLayout(page, {
+    url: base + "/browser-acceptance",
+    loggedOut: loggedOutGeometry,
+    screenshots: "test-results/browser",
+  })
+  const touchAdminBar = await checkTouchAdminBarLayout(browser, {
+    url: base + "/browser-acceptance",
+    email: state.email,
+    password: credentials.adminPassword,
+    screenshots: "test-results/browser",
+  })
   await page.goto(base + "/admin/collections/pages/" + created.document.id, {
     waitUntil: "networkidle",
   })
@@ -276,8 +339,11 @@ try {
       "cms-login-and-editor",
       "hidden-internal-collections",
       "no-page-errors",
+      "authenticated-toolbar-space-desktop-mobile",
     ].filter(check => !failures.some(failure => failure.check === check)),
     failures,
+    adminBar,
+    touchAdminBar,
   }
   await writeFile("test-results/browser/result.json", JSON.stringify(result, null, 2))
   console.log(JSON.stringify(result))

@@ -1,13 +1,13 @@
 "use client"
 
-import { getSmartSiteConfig } from "@/admin/config"
+import site from "@/site.config"
 
 /*************************************************************************/
 /*  GSAP PLUGIN LOADER
 /*************************************************************************/
 
 export async function initializeGSAP() {
-  const config = getSmartSiteConfig()
+  const config = site
   const hasAnyPlugin = Object.values(config.gsap).some(enabled => enabled)
 
   if (!hasAnyPlugin) return null

@@ -32,21 +32,6 @@ export default buildConfig({
 })
 ```
 
-### SQLite
-
-```ts
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
-
-export default buildConfig({
-  db: sqliteAdapter({
-    client: {
-      url: 'file:./payload.db',
-    },
-    transactionOptions: {}, // Enable transactions (disabled by default)
-  }),
-})
-```
-
 ## Transactions
 
 Payload automatically uses transactions for all-or-nothing database operations. Pass `req` to include operations in the same transaction.
@@ -66,6 +51,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req, doc }) => {
 
 // Manual transaction control
 const transactionID = await payload.db.beginTransaction()
+if (!transactionID) throw new Error('This operation requires transaction support')
 try {
   await payload.create({
     collection: 'orders',
@@ -87,7 +73,7 @@ try {
 }
 ```
 
-**Note**: MongoDB requires replicaset for transactions. SQLite requires `transactionOptions: {}` to enable.
+**Note**: MongoDB requires a replica set for transactions. Verify the selected adapter’s transaction support before relying on atomic nested writes.
 
 ### Threading req Through Operations
 
@@ -143,7 +129,6 @@ const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) =
 
 - **MongoDB (with replica sets)**: Creates atomic session across operations
 - **PostgreSQL**: All operations use same Drizzle transaction
-- **SQLite (with transactions enabled)**: Ensures rollback on errors
 - **Without req**: Each operation runs independently, breaking atomicity
 
 **When req is Required:**
@@ -157,17 +142,11 @@ const brokenHook: CollectionAfterChangeHook = async ({ collection, doc, req }) =
 
 - Read-only lookups independent of current transaction
 - Operations with `disableTransaction: true`
-- Administrative operations with `overrideAccess: true`
+`overrideAccess: true` only changes permission checks; it never removes the need to share `req` for atomic work.
 
 ## Storage Adapters
 
-Available storage adapters:
-
-- **@payloadcms/storage-s3** - AWS S3
-- **@payloadcms/storage-azure** - Azure Blob Storage
-- **@payloadcms/storage-gcs** - Google Cloud Storage
-- **@payloadcms/storage-r2** - Cloudflare R2
-- **@payloadcms/storage-vercel-blob** - Vercel Blob
+SmartSite ships S3-compatible and Vercel Blob integrations. Keep its existing environment-based storage selection and prefix settings. When adding another provider, install its Payload-3.92-compatible adapter and read that installed package’s types; do not copy an unversioned provider recipe into the config.
 
 ### AWS S3
 
@@ -193,70 +172,6 @@ export default buildConfig({
 })
 ```
 
-### Azure Blob Storage
-
-```ts
-import { azureStorage } from '@payloadcms/storage-azure'
-
-export default buildConfig({
-  plugins: [
-    azureStorage({
-      collections: {
-        media: true,
-      },
-      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
-      containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
-    }),
-  ],
-})
-```
-
-### Google Cloud Storage
-
-```ts
-import { gcsStorage } from '@payloadcms/storage-gcs'
-
-export default buildConfig({
-  plugins: [
-    gcsStorage({
-      collections: {
-        media: true,
-      },
-      bucket: process.env.GCS_BUCKET,
-      options: {
-        projectId: process.env.GCS_PROJECT_ID,
-        credentials: JSON.parse(process.env.GCS_CREDENTIALS),
-      },
-    }),
-  ],
-})
-```
-
-### Cloudflare R2
-
-```ts
-import { r2Storage } from '@payloadcms/storage-r2'
-
-export default buildConfig({
-  plugins: [
-    r2Storage({
-      collections: {
-        media: true,
-      },
-      bucket: process.env.R2_BUCKET,
-      config: {
-        credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID,
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-        },
-        region: 'auto',
-        endpoint: process.env.R2_ENDPOINT,
-      },
-    }),
-  ],
-})
-```
-
 ### Vercel Blob
 
 ```ts
@@ -275,27 +190,6 @@ export default buildConfig({
 ```
 
 ## Email Adapters
-
-### Nodemailer (SMTP)
-
-```ts
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-
-export default buildConfig({
-  email: nodemailerAdapter({
-    defaultFromAddress: 'noreply@example.com',
-    defaultFromName: 'My App',
-    transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    },
-  }),
-})
-```
 
 ### Resend
 

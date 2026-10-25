@@ -11,7 +11,7 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 
 | Task                     | Solution                                                                   | Details                                                                                                                          |
 | ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Auto-generate slugs      | `{ type: 'slug', useAsSlug: 'title' }`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
+| Auto-generate slugs      | `...slugField('title')` from `@/fields/slug`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
 | Restrict content by user | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
 | Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
 | Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
@@ -22,11 +22,11 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 | Filter relationship list | `filterOptions` on field                                                   | [FIELDS.md#relationship](reference/FIELDS.md#relationship)                                                                       |
 | Select specific fields   | `select` parameter                                                         | [QUERIES.md#field-selection](reference/QUERIES.md#field-selection)                                                               |
 | Auto-set author/dates    | beforeChange hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
-| Prevent hook loops       | `req.context` check                                                        | [HOOKS.md#context](reference/HOOKS.md#context)                                                                                   |
+| Prevent hook loops       | `req.context` check                                                        | [HOOKS.md#context](reference/HOOKS.md#hook-context)                                                                                   |
 | Cascading deletes        | beforeDelete hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
 | Geospatial queries       | `point` field with `near`/`within`                                         | [FIELDS.md#point-geolocation](reference/FIELDS.md#point-geolocation)                                                             |
 | Reverse relationships    | `join` field type                                                          | [FIELDS.md#join-fields](reference/FIELDS.md#join-fields)                                                                         |
-| Next.js revalidation     | Context control in afterChange                                             | [HOOKS.md#nextjs-revalidation-with-context-control](reference/HOOKS.md#nextjs-revalidation-with-context-control)                 |
+| Next.js revalidation     | Durable publication intent with the original request                                             | [HOOKS.md#nextjs-revalidation-with-context-control](reference/HOOKS.md#smartsite-publication-and-cache-invalidation)                 |
 | Query by relationship    | Nested property syntax                                                     | [QUERIES.md#nested-properties](reference/QUERIES.md#nested-properties)                                                           |
 | Complex queries          | AND/OR logic                                                               | [QUERIES.md#andor-logic](reference/QUERIES.md#andor-logic)                                                                       |
 | Transactions             | Pass `req` to operations                                                   | [ADAPTERS.md#threading-req-through-operations](reference/ADAPTERS.md#threading-req-through-operations)                           |
@@ -44,36 +44,9 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 
 Use the existing project config and local startup skill; these generic examples explain Payload APIs, not replacement setup.
 
-### Minimal Config
+### Project Config
 
-```ts
-import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-export default buildConfig({
-  admin: {
-    user: 'users',
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [Users, Media],
-  editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URL,
-  }),
-})
-```
+Edit `src/payload.config.ts` and the existing native collection/global modules. Keep their factory arguments, plugin composition, storage and website metadata. For a new collection, use the examples below and follow the site's content-model workflow for routing, search and publication hooks. Regenerate types and the import map after changing the schema.
 
 ## Essential Patterns
 
@@ -83,14 +56,10 @@ Apply these defaults when modeling content unless there's a clear reason not to:
 
 - **Enable drafts/versions by default:** `versions: { drafts: true }`. This is the
   recommended starting point for any content collection. It auto-injects a
-  `_status` field (`draft` / `published` / `changed`) — **don't add your own
+  `_status` field (`draft` / `published`) — **don't add your own
   `status` field**, it's redundant. Only skip versions for collections that have
   no publish/draft lifecycle (e.g. internal join tables, settings).
-- **Use the native `slug` field type for all slugs** instead of hand-rolling
-  `{ name: 'slug', type: 'text', unique: true }`. It auto-generates the slug from
-  a source field, adds a regenerate toggle, and defaults to `required`, `unique`,
-  `index`, and `position: 'sidebar'`. `useAsSlug` is **required** — name the
-  source field to generate from: `{ name: 'slug', type: 'slug', useAsSlug: 'title' }`.
+- **Use SmartSite's `slugField` helper** from `@/fields/slug` for routed content. Spread `...slugField('title')` into `fields`; it supplies the slug, URI and editing controls used by website routing. Payload 3.92 has no `type: 'slug'` field.
 - **`position: 'sidebar'` is for short, at-a-glance fields** — status, category,
   author, publish date. Avoid it for long fields that need horizontal space to be
   usable (description, rich text content, long text). Those belong in the main
@@ -105,6 +74,7 @@ Apply these defaults when modeling content unless there's a clear reason not to:
 
 ```ts
 import type { CollectionConfig } from 'payload'
+import { slugField } from '@/fields/slug'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -118,7 +88,7 @@ export const Posts: CollectionConfig = {
   },
   fields: [
     { name: 'title', type: 'text', required: true },
-    { name: 'slug', type: 'slug', useAsSlug: 'title' }, // auto-generates from `title`, unique + indexed, sidebar position
+    ...slugField('title'), // SmartSite slug, URI, lock and redirect controls
     { name: 'content', type: 'richText' }, // long field — stays in the main area, not the sidebar
     // short, at-a-glance field — good sidebar candidate
     { name: 'author', type: 'relationship', relationTo: 'users', admin: { position: 'sidebar' } },
@@ -141,8 +111,8 @@ For more collection patterns (auth, upload, drafts, live preview), see [COLLECTI
 // Rich text
 { name: 'content', type: 'richText', required: true }
 
-// Slug — use the native field type instead of a hand-rolled text field
-{ name: 'slug', type: 'slug', useAsSlug: 'title' }
+// In a fields array; import { slugField } from '@/fields/slug'
+...slugField('title')
 
 // Select (for genuine taxonomy — NOT publish state; use versions.drafts + _status for that)
 { name: 'category', type: 'select', options: ['news', 'tutorial', 'opinion'] }
@@ -155,7 +125,7 @@ For all field types (array, blocks, point, join, virtual, conditional, etc.), se
 
 ### Hook Example
 
-Hooks live at one of two levels and they are not interchangeable. **Collection hooks** receive `{ doc, data, req, operation, ... }` and act on the whole document. **Field hooks** live inside an individual field's `hooks` object, receive `{ value, siblingData, ... }`, and **return the new value** for that field. Computed/virtual fields, per-field formatters, and per-field access masking are field hooks; cross-field business logic is a collection hook.
+Hooks live at one of two levels and they are not interchangeable. **Collection hooks** receive `{ doc, data, req, operation, ... }` and act on the whole document. **Field hooks** live inside an individual field's `hooks` object, receive `{ value, siblingData, ... }`, and **return the new value** for that field. Computed/virtual fields, per-field formatters, and per-field presentation formatting are field hooks; cross-field business logic is a collection hook.
 
 ```ts
 // Collection-level: business logic across the document
@@ -201,18 +171,19 @@ For all hook patterns, see [HOOKS.md](reference/HOOKS.md). For access control, s
 ```ts
 import type { Access } from 'payload'
 import type { User } from '@/payload-types'
+import { userHasMinimumRole } from '@/access/roles'
 
 // Type-safe access control
 export const adminOnly: Access = ({ req }) => {
   const user = req.user as User
-  return user?.roles?.includes('admin') || false
+  return userHasMinimumRole(user, 'admin')
 }
 
 // Row-level access control
 export const ownPostsOnly: Access = ({ req }) => {
   const user = req.user as User
   if (!user) return false
-  if (user.roles?.includes('admin')) return true
+  if (userHasMinimumRole(user, 'admin')) return true
 
   return {
     author: { equals: user.id },
@@ -226,9 +197,10 @@ export const ownPostsOnly: Access = ({ req }) => {
 // Local API
 const posts = await payload.find({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user, // authenticated caller; use req inside a hook/endpoint
   where: {
-    status: { equals: 'published' },
+    _status: { equals: 'published' },
     'author.name': { contains: 'john' },
   },
   depth: 2,
@@ -239,16 +211,18 @@ const posts = await payload.find({
 // Query with populated relationships
 const post = await payload.findByID({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user, // authenticated caller; use req inside a hook/endpoint
   id: '123',
   depth: 2, // Populates relationships (default is 2)
 })
 // Returns: { author: { id: "user123", name: "John" } }
 
-// Without depth, relationships return IDs only
+// With depth: 0, relationships return IDs only
 const post = await payload.findByID({
   collection: 'posts',
-  overrideAccess: true,
+  overrideAccess: false,
+  user, // authenticated caller; use req inside a hook/endpoint
   id: '123',
   depth: 0,
 })
@@ -262,6 +236,7 @@ For all query operators and REST/GraphQL examples, see [QUERIES.md](reference/QU
 ```ts
 // In API routes (Next.js)
 import { getPayload } from 'payload'
+
 import config from '@payload-config'
 
 export async function GET(request: Request) {
@@ -280,6 +255,7 @@ export async function GET(request: Request) {
 // In Server Components
 import { headers } from 'next/headers'
 import { getPayload } from 'payload'
+
 import config from '@payload-config'
 
 export default async function Page() {
@@ -309,16 +285,17 @@ await payload.find({
   overrideAccess: true, // Access control is BYPASSED!
 })
 
-// ✅ SECURE: Respects the user's permissions — this is the default, overrideAccess can be omitted
+// ✅ SECURE: Explicitly enable access checks for this user
 await payload.find({
   collection: 'posts',
   user: someUser,
+  overrideAccess: false,
 })
 ```
 
-On Local API operations where `overrideAccess` is optional, it defaults to `false` — Access Control is respected unless explicitly bypassed.
+Payload 3.92 Local API CRUD operations default to `overrideAccess: true`. Supplying `user` or `req` alone does not enable access checks.
 
-- Omit it, or set `overrideAccess: false` - operating on behalf of a user (API routes, user-facing server functions, and webhooks acting as a user). Pass `user` alongside it.
+- Explicitly set `overrideAccess: false` - operating on behalf of a user (API routes, user-facing server functions, and webhooks acting as a user). Pass `user` alongside it.
 - `overrideAccess: true` - trusted system work (cron jobs, seeds, migrations, system tasks, and independently authenticated webhooks intentionally granted full permissions)
 
 Never set `overrideAccess: true` out of habit or by copying a nearby call — pick the value this call means.
@@ -400,7 +377,7 @@ hooks: {
 }
 ```
 
-See [HOOKS.md#context](reference/HOOKS.md#context).
+See [HOOKS.md#context](reference/HOOKS.md#hook-context).
 
 ## Project Structure
 
@@ -430,7 +407,7 @@ This vendored official Payload skill has been adapted for SmartSite's pinned Pay
 
 ## Common Gotchas
 
-1. **Local API operations with optional `overrideAccess` respect access control by default** — set it to `true` only for trusted server-side work
+1. **Local API CRUD bypasses access control by default** — explicitly set `overrideAccess: false` plus `user` or `req` for user-authorized work; reserve explicit `true` for trusted system work
 2. **Missing `req` in nested operations** breaks transaction atomicity
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints
@@ -438,9 +415,7 @@ This vendored official Payload skill has been adapted for SmartSite's pinned Pay
 6. **Draft status** — `_status` field is auto-injected when drafts are enabled
 7. **Generate types/import maps** after schema changes using the project scripts, then type-check and inspect the actual CMS.
 8. **MongoDB transactions** require replica set configuration
-9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
-10. **Point fields** are not supported in SQLite
-11. **Computed virtual titles** — fields configured with `virtual: true` cannot be used in `admin.useAsTitle`; use a stored top-level field
+9. **Computed virtual titles** — fields configured with `virtual: true` cannot be used in `admin.useAsTitle`; use a stored top-level field
 
 ## Best Practices
 
@@ -448,7 +423,7 @@ This vendored official Payload skill has been adapted for SmartSite's pinned Pay
 
 - Enable `versions: { drafts: true }` by default on content collections; rely on the
   auto-injected `_status` field rather than adding a custom `status` field
-- Use the native `slug` field type for slugs instead of hand-rolling a unique text field
+- Use `...slugField('title')` from `@/fields/slug` for SmartSite routed content
 - Use a stored top-level field for `admin.useAsTitle`; never use a computed
   `virtual: true` field as the title
 - Reserve `position: 'sidebar'` for short, at-a-glance fields (status, category,
@@ -513,5 +488,5 @@ This vendored official Payload skill has been adapted for SmartSite's pinned Pay
 - llms-full.txt: <https://payloadcms.com/llms-full.txt>
 - Docs: <https://payloadcms.com/docs>
 - GitHub: <https://github.com/payloadcms/payload>
-- Examples: <https://github.com/payloadcms/payload/tree/main/examples>
-- Templates: <https://github.com/payloadcms/payload/tree/main/templates>
+- Examples: <https://github.com/payloadcms/payload/tree/v3.92.0/examples>
+- Templates: <https://github.com/payloadcms/payload/tree/v3.92.0/templates>

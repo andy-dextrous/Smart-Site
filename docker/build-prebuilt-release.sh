@@ -34,57 +34,22 @@ fi
 temp_env="$(mktemp)"
 trap 'rm -f "$temp_env"' EXIT HUP INT TERM
 
-cp "$source_path" "$temp_env"
+# Normalize dotenv input (or the generated stage-one shell file) and apply all
+# release overrides through the same literal serializer before Docker sources it.
+node "$project_dir/scripts/create-self-hosted-build-env.mjs" \
+  --source "$source_path" \
+  --output "$temp_env" \
+  --public-url "$public_url" \
+  --deployment-id "$deployment_id"
 
-python3 - "$temp_env" "$public_url" "$deployment_id" <<'PY'
-import pathlib
-import sys
-
-env_path = pathlib.Path(sys.argv[1])
-public_url = sys.argv[2]
-deployment_id = sys.argv[3]
-
-updates = {
-    "NODE_ENV": "production",
-    "SMARTSITE_DEPLOYMENT_PROFILE": "self-hosted-mongo",
-    "NEXT_PUBLIC_URL": public_url,
-    "NEXT_PUBLIC_SITE_URL": public_url,
-    "NEXT_PUBLIC_PRODUCTION_URL": public_url,
-    "NEXT_DEPLOYMENT_ID": deployment_id,
-}
-
-lines = env_path.read_text().splitlines()
-seen = set()
-output = []
-
-for raw in lines:
-    if "=" not in raw or raw.lstrip().startswith("#"):
-      output.append(raw)
-      continue
-
-    key, _ = raw.split("=", 1)
-    key = key.strip()
-
-    if key in updates:
-      output.append(f"{key}={updates[key]}")
-      seen.add(key)
-    else:
-      output.append(raw)
-
-for key, value in updates.items():
-    if key not in seen:
-      output.append(f"{key}={value}")
-
-env_path.write_text("\n".join(output) + "\n")
-PY
-
+# BuildKit secret contents do not invalidate a cached build. Rebuild the builder
+# stage so public URL/deployment settings always match this release environment.
 echo "Building prebuilt SmartSite release image: $image_ref"
 echo "Source env: $source_path"
-echo "Public URL: $public_url"
-echo "Deployment ID: $deployment_id"
 
 if [ "${SMARTSITE_BUILD_USE_HOST_GATEWAY:-}" = "1" ]; then
   DOCKER_BUILDKIT=1 docker build \
+    --no-cache-filter builder \
     --add-host=host.docker.internal:host-gateway \
     --file "$project_dir/Dockerfile.prebuilt" \
     --secret id=smartsite_env,src="$temp_env" \
@@ -92,6 +57,7 @@ if [ "${SMARTSITE_BUILD_USE_HOST_GATEWAY:-}" = "1" ]; then
     "$project_dir"
 else
   DOCKER_BUILDKIT=1 docker build \
+    --no-cache-filter builder \
     --file "$project_dir/Dockerfile.prebuilt" \
     --secret id=smartsite_env,src="$temp_env" \
     --tag "$image_ref" \

@@ -1,4 +1,4 @@
-import type { HeroBlock } from "@/admin/payload/payload-types"
+import type { HeroBlock } from "@/payload-types"
 import { parseHeadingGradient } from "@/components/heading-gradient"
 import { CMSLink } from "@/components/fields/link"
 import { Media } from "@/components/fields/media"

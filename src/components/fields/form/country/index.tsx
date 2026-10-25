@@ -12,9 +12,9 @@ import {
 import React from "react"
 import { Controller } from "react-hook-form"
 
-import { Error } from "../error"
-import { Width } from "../width"
-import { countryOptions } from "./options"
+import { Error } from "@/components/fields/form/error/index"
+import { Width } from "@/components/fields/form/width/index"
+import { countryOptions } from "@/components/fields/form/country/options"
 
 export const Country: React.FC<
   CountryField & {

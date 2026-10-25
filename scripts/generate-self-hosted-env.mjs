@@ -218,20 +218,17 @@ function resolveDatabaseName(databaseUrl) {
 
 function buildEnv(sourceValues, existingValues, options) {
   const runtimeEnv = resolveRuntimeEnvironment(
-    options.runtimeEnv || existingValues.SMARTSITE_RUNTIME_ENV || sourceValues.SMARTSITE_RUNTIME_ENV,
+    options.runtimeEnv ||
+      existingValues.SMARTSITE_RUNTIME_ENV ||
+      sourceValues.SMARTSITE_RUNTIME_ENV
   )
   const databaseName = resolveDatabaseName(sourceValues.DATABASE_URL)
-  const rootUsername =
-    existingValues.MONGO_INITDB_ROOT_USERNAME ||
-    "smartsite_root"
-  const rootPassword =
-    existingValues.MONGO_INITDB_ROOT_PASSWORD ||
-    randomSecret()
-  const appUsername =
-    existingValues.MONGO_APP_USERNAME || "smartsite_app"
-  const appPassword =
-    existingValues.MONGO_APP_PASSWORD || randomSecret()
-  const nextPublicUrl = options.publicUrl || sourceValues.NEXT_PUBLIC_URL || "http://localhost:3000"
+  const rootUsername = existingValues.MONGO_INITDB_ROOT_USERNAME || "smartsite_root"
+  const rootPassword = existingValues.MONGO_INITDB_ROOT_PASSWORD || randomSecret()
+  const appUsername = existingValues.MONGO_APP_USERNAME || "smartsite_app"
+  const appPassword = existingValues.MONGO_APP_PASSWORD || randomSecret()
+  const nextPublicUrl =
+    options.publicUrl || sourceValues.NEXT_PUBLIC_URL || "http://localhost:3000"
   const stackName =
     options.stackName ||
     existingValues.SMARTSITE_STACK_NAME ||
@@ -276,11 +273,12 @@ function buildEnv(sourceValues, existingValues, options) {
     SMARTSITE_SITE_ID: existingValues.SMARTSITE_SITE_ID || crypto.randomUUID(),
     SMARTSITE_ENVIRONMENT: runtimeEnv === "production" ? "production" : "preview",
     PAYLOAD_SECRET: existingValues.PAYLOAD_SECRET || randomSecret(32),
-    PREVIEW_SECRET:
-      existingValues.PREVIEW_SECRET || randomSecret(16),
+    CRON_SECRET: existingValues.CRON_SECRET || randomSecret(32),
+    SMARTSITE_BACKGROUND_RECOVERY:
+      existingValues.SMARTSITE_BACKGROUND_RECOVERY || sourceValues.SMARTSITE_BACKGROUND_RECOVERY || "false",
+    PREVIEW_SECRET: existingValues.PREVIEW_SECRET || randomSecret(16),
     NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:
-      existingValues.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY ||
-      randomBase64(32),
+      existingValues.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY || randomBase64(32),
     NEXT_DEPLOYMENT_ID:
       options.deploymentId ||
       existingValues.NEXT_DEPLOYMENT_ID ||
@@ -301,12 +299,19 @@ function buildEnv(sourceValues, existingValues, options) {
       existingValues.SMARTSITE_BACKUP_CRON_SCHEDULE ||
       sourceValues.SMARTSITE_BACKUP_CRON_SCHEDULE ||
       "30 2 * * *",
-    PAYLOAD_CONFIG_PATH: "./src/admin/payload/payload.config.ts",
+    PAYLOAD_CONFIG_PATH: "./src/payload.config.ts",
   }
 
   // Local identity, production credentials and model-provider keys must not leak
   // into a new destination. Existing destination secrets remain stable on reruns.
-  for (const key of Object.keys(values)) if (key.startsWith('SMARTSITE_AI_') || key.startsWith('AI_AGENT_') || key === 'STAGING_DATABASE_URL' || key === 'SMARTSITE_DATABASE_TARGET') delete values[key]
+  for (const key of Object.keys(values))
+    if (
+      key.startsWith("SMARTSITE_AI_") ||
+      key.startsWith("AI_AGENT_") ||
+      key === "STAGING_DATABASE_URL" ||
+      key === "SMARTSITE_DATABASE_TARGET"
+    )
+      delete values[key]
 
   return values
 }
@@ -335,6 +340,7 @@ function serializeEnv(values) {
     "MONGO_APP_USERNAME",
     "MONGO_APP_PASSWORD",
     "PAYLOAD_SECRET",
+    "CRON_SECRET",
     "PREVIEW_SECRET",
     "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY",
     "SMARTSITE_BACKUP_DIR",

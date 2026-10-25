@@ -1,6 +1,6 @@
 "use client"
 
-import { getSmartSiteConfig } from "@/admin/config"
+import site from "@/site.config"
 import { useGSAP } from "@gsap/react"
 import { gsap, ScrollTrigger } from "@/providers/gsap"
 import { usePathname } from "next/navigation"
@@ -28,7 +28,7 @@ export default function GlobalAnimationsProvider({
 }: {
   children: React.ReactNode
 }) {
-  const config = getSmartSiteConfig()
+  const config = site
   const pathname = usePathname()
   const animationsEnabled = config.gsap.globalAnimations
 
@@ -91,7 +91,9 @@ export default function GlobalAnimationsProvider({
               scrollTrigger: {
                 trigger: element,
                 start: `top ${offset}`,
-                toggleActions: once ? "play none none none" : "restart pause resume pause",
+                toggleActions: once
+                  ? "play none none none"
+                  : "restart pause resume pause",
               },
               onComplete: () => {
                 targets.forEach(target => target.classList.remove("transition-none"))
@@ -202,7 +204,9 @@ export default function GlobalAnimationsProvider({
                   scrollTrigger: {
                     trigger: element,
                     start,
-                    toggleActions: once ? "play none none none" : "restart pause resume pause",
+                    toggleActions: once
+                      ? "play none none none"
+                      : "restart pause resume pause",
                   },
                 })
 

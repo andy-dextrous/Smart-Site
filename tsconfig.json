@@ -28,13 +28,10 @@
         "./src/*"
       ],
       "@payload-config": [
-        "./src/admin/payload/payload.config.ts"
+        "./src/payload.config.ts"
       ],
       "@payload-types": [
-        "./src/admin/payload/types"
-      ],
-      "@smartsite-config": [
-        "src/smartsite.config.ts"
+        "./src/types"
       ],
       "@public/*": [
         "./public/*"

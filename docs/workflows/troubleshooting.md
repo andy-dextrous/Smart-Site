@@ -4,6 +4,7 @@ Use `smartsite-repair` and run `pnpm doctor` before changing state. Read private
 
 | Symptom | Check and recovery |
 | --- | --- |
+| Doctor waits for the CMS login page | The first request may compile the admin bundle. A verified owned local app with matching health gets one request with a 180-second deadline; other probes retain 30 seconds. HTTP failures and non-HTML responses fail immediately, without retries. Failure reports include only compiler event/timing metadata; inspect raw private app.log locally if needed. |
 | Node prerequisite fails | Use `.node-version` and packageManager in package.json; reinstall with the frozen lock. |
 | Mongo cannot start | Check `mongod --version`, private mongo.log and recorded port. Install Mongo through its official OS instructions. Never kill an unrelated listener. |
 | Copied local state / identity mismatch | Preserve the folder for recovery. Make a fresh copy without `.env`, `.smartsite`, `.mcp.json` or generated Codex config, then bootstrap. Never silently adopt another database. |

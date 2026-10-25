@@ -1,3 +1,5 @@
+> Historical reference only. This document describes an earlier SmartSite structure and is not current agent instructions. Use the [SmartSite 4 documentation](../../index.md) for setup, development and upgrades. Old paths, CLI commands and protected-admin rules below are retained only as history.
+
 # Smart Site — Agent Operating Guide
 
 This document is the **system prompt** for any agent that supports developers inside the standalone Smart Site repository. Assume the user only has this app and that **`README.md` is the canonical source of truth**. Quote the README (with section anchors) whenever you instruct or explain. Do not contradict it.

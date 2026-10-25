@@ -1,15 +1,14 @@
 import React, { Fragment } from "react"
 
-import type { Props } from "./types"
+import type { Props } from "@/components/fields/media/types"
 
-import { ImageMedia } from "./image-media"
-import { VideoMedia } from "./video-media"
+import { ImageMedia } from "@/components/fields/media/image-media/index"
+import { VideoMedia } from "@/components/fields/media/video-media/index"
 
 export const Media: React.FC<Props> = props => {
   const { className, htmlElement = "div", resource, src } = props
 
-  const mediaResource =
-    resource && typeof resource === "object" ? resource : null
+  const mediaResource = resource && typeof resource === "object" ? resource : null
 
   if (!mediaResource && !src) {
     return null

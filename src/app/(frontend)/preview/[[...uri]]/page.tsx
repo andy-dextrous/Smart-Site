@@ -1,5 +1,5 @@
-import { SmartSiteURIRenderer } from "@/admin/components/uri-renderer"
-import { generateMetadata } from "@/admin/components/uri-renderer/metadata"
+import { SmartSiteURIRenderer } from "@/website/rendering/uri-renderer"
+import { generateMetadata } from "@/website/rendering/uri-renderer/metadata"
 
 export const dynamic = "force-dynamic"
 
@@ -17,4 +17,3 @@ export default function Page(props: Args) {
 }
 
 export { generateMetadata }
-

@@ -1,5 +1,5 @@
-import { revalidateAll } from "@/admin/cache/revalidation"
-import { userHasMinimumRole } from "@/admin/payload/access/roles"
+import { revalidateAll } from "@/website/cache/revalidation"
+import { userHasMinimumRole } from "@/access/roles"
 import config from "@payload-config"
 import { headers } from "next/headers"
 import { getPayload } from "payload"

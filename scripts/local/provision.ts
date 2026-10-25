@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { getPayload } from "payload"
-import config from "../../src/admin/payload/payload.config"
+import config from "../../src/payload.config"
 
 const local = path.resolve(".smartsite/local")
 const state = JSON.parse(await readFile(path.join(local, "state.json"), "utf8"))
@@ -15,10 +15,12 @@ if (
   throw new Error("Local provisioning identity mismatch")
 const payload = await getPayload({ config })
 try {
+  payload.logger.info("Local setup: checking database indexes")
   // Wait for Mongo model/index initialization before the first transaction.
   await Promise.all(
     Object.values((payload.db as any).collections ?? {}).map((model: any) => model.init())
   )
+  payload.logger.info("Local setup: checking site identity")
   const identities = await payload.find({
     collection: "smartsite-identity" as any,
     limit: 2,
@@ -54,6 +56,7 @@ try {
     depth: 0,
   })
   const settings = await payload.findGlobal({ slug: "settings", depth: 0 })
+  payload.logger.info("Local setup: reconciling essentials")
   const transactionID = await payload.db.beginTransaction()
   if (!transactionID) throw new Error("Mongo transactions unavailable")
   const req: any = { payload, transactionID, context: { preventHooks: true } }
@@ -81,8 +84,9 @@ try {
         },
         req,
       })
-    if (!keys.docs.length) changed = true
-    if (!keys.docs.length)
+    const mcpEnabled = payload.config.custom?.smartsiteMcpEnabled === true
+    if (mcpEnabled && !keys.docs.length) changed = true
+    if (mcpEnabled && !keys.docs.length)
       await payload.create({
         collection: "payload-mcp-api-keys" as any,
         data: {
@@ -106,17 +110,22 @@ try {
         data: { general: { siteName: state.siteName } },
         req,
       })
+    payload.logger.info(
+      `Local setup: finishing essentials (${changed ? "changed" : "unchanged"})`
+    )
     if (changed) await payload.db.commitTransaction(transactionID)
     else await payload.db.rollbackTransaction(transactionID).catch(() => undefined)
   } catch (error) {
     await payload.db.rollbackTransaction(transactionID).catch(() => undefined)
     throw error
   }
+  payload.logger.info("Local setup: saving checkpoint")
   await writeFile(
     path.join(local, "essentials.json"),
     JSON.stringify({ siteId: state.siteId, setupVersion: 1 }),
     { mode: 0o600 }
   )
 } finally {
+  payload.logger.info("Local setup: closing database connection")
   await payload.destroy()
 }

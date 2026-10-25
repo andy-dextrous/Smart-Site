@@ -1,4 +1,4 @@
-import type { ContentBlock } from "@/admin/payload/payload-types"
+import type { ContentBlock } from "@/payload-types"
 import { Section } from "@/components/fields/section"
 import { Media } from "@/components/fields/media"
 import RichText from "@/components/fields/rich-text"
@@ -7,22 +7,22 @@ import { tv } from "tailwind-variants"
 
 const contentVariants = tv({
   slots: {
-    container: "flex flex-col gap-content-lg",
-    layout: "flex flex-col gap-content",
-    copy: "flex flex-col gap-content text-pretty",
-    media: "relative overflow-hidden border border-dark-border bg-neutral",
+    container: "gap-content-lg flex flex-col",
+    layout: "gap-content flex flex-col",
+    copy: "gap-content flex flex-col text-pretty",
+    media: "border-dark-border bg-neutral relative overflow-hidden border",
     richText: "[&>*+*]:mt-content",
     buttonContainer: "flex",
-    button: "inline-flex items-center gap-content-sm",
+    button: "gap-content-sm inline-flex items-center",
   },
   variants: {
     layout: {
       stacked: {},
       split: {
-        layout: "grid gap-grid-lg md:grid-cols-2 md:items-start",
+        layout: "gap-grid-lg grid md:grid-cols-2 md:items-start",
       },
       columns: {
-        layout: "flex flex-col gap-content lg:gap-content-lg",
+        layout: "gap-content lg:gap-content-lg flex flex-col",
         richText: "lg:columns-2",
       },
     },
@@ -49,7 +49,7 @@ const contentVariants = tv({
       mediaPresence: "with",
       mediaPosition: "right",
       class: {
-        copy: "md:order-1 md:pr-content",
+        copy: "md:pr-content md:order-1",
         media: "md:order-2",
       },
     },
@@ -58,7 +58,7 @@ const contentVariants = tv({
       mediaPresence: "with",
       mediaPosition: "left",
       class: {
-        copy: "md:order-2 md:pl-content",
+        copy: "md:pl-content md:order-2",
         media: "md:order-1",
       },
     },
@@ -95,9 +95,8 @@ export function ContentComponent(props: ContentBlock) {
   const effectiveLayout =
     requestedLayout === "split" && !hasMedia ? "stacked" : requestedLayout
 
-  const resolvedAlignment =
-    effectiveLayout === "split" ? "start" : alignment ?? "start"
-  const resolvedMediaPosition = hasMedia ? mediaPosition ?? "right" : "right"
+  const resolvedAlignment = effectiveLayout === "split" ? "start" : (alignment ?? "start")
+  const resolvedMediaPosition = hasMedia ? (mediaPosition ?? "right") : "right"
   const mediaPresence = hasMedia ? "with" : "without"
 
   const {

@@ -1,5 +1,5 @@
-import type { Post, PostsContentBlock } from "@/admin/payload/payload-types"
-import type { PageData } from "@/admin/components/render-sections"
+import type { Post, PostsContentBlock } from "@/payload-types"
+import type { PageData } from "@/website/rendering/render-sections"
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical"
 
 import { Section } from "@/components/fields/section"
@@ -86,12 +86,12 @@ function gatherPlainText(node: any): string {
 
 const postsContentVariants = tv({
   slots: {
-    container: "flex flex-col gap-content-lg",
-    grid: "grid gap-grid-lg lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]",
-    aside: "flex flex-col gap-content lg:sticky lg:top-24 lg:self-start",
+    container: "gap-content-lg flex flex-col",
+    grid: "gap-grid-lg grid lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]",
+    aside: "gap-content flex flex-col lg:sticky lg:top-24 lg:self-start",
     breadcrumbs: "text-sm",
     richText:
-      "text-pretty text-dark-700 prose-h2:text-3xl prose-h3:text-2xl prose-h4:text-xl",
+      "text-dark-700 prose-h2:text-3xl prose-h3:text-2xl prose-h4:text-xl text-pretty",
   },
   variants: {
     tone: {
@@ -192,7 +192,10 @@ export function PostsContentComponent(props: PostsContentBlock & PageData) {
       ) : null}
 
       {showBreadcrumbs !== false && breadcrumbs ? (
-        <DocumentBreadcrumbs document={{ breadcrumbs }} className={breadcrumbsClassName} />
+        <DocumentBreadcrumbs
+          document={{ breadcrumbs }}
+          className={breadcrumbsClassName}
+        />
       ) : null}
 
       <div className={gridClassName}>

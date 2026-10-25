@@ -1,3 +1,5 @@
+> Historical reference only. This document describes an earlier SmartSite structure and is not current agent instructions. Use the [SmartSite 4 documentation](../../index.md) for setup, development and upgrades. Old paths, CLI commands and protected-admin rules below are retained only as history.
+
 # Legacy References
 
 This folder preserves older guidance surfaces and source material that should not vanish during the harness conversion.

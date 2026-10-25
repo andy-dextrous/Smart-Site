@@ -1,6 +1,6 @@
 # Payload Plugin Development
 
-Complete guide to creating Payload plugins with TypeScript patterns, package structure, and best practices from the official Payload plugin template.
+Patterns for Payload 3.92 plugins. In SmartSite, add site-local plugins under `src/plugins` and compose them in the existing config. Package scaffolding below applies only when deliberately creating a separately distributed plugin; it does not require another app inside this site.
 
 ## Plugin Architecture
 
@@ -136,29 +136,29 @@ plugin-<name>/
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@payloadcms/translations": "^3.82.1",
-    "@payloadcms/ui": "^3.82.1"
+    "@payloadcms/translations": "3.92.0",
+    "@payloadcms/ui": "3.92.0"
   },
   "devDependencies": {
-    "@payloadcms/db-mongodb": "^3.82.1",
-    "@payloadcms/next": "^3.82.1",
-    "@payloadcms/richtext-lexical": "^3.82.1",
+    "@payloadcms/db-mongodb": "3.92.0",
+    "@payloadcms/next": "3.92.0",
+    "@payloadcms/richtext-lexical": "3.92.0",
     "@playwright/test": "^1.63.0",
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
     "copyfiles": "^2.4.1",
     "cross-env": "10.1.0",
     "eslint": "^9.39.2",
-    "next": "^16.4.2",
-    "payload": "^3.82.1",
+    "next": "16.3.3",
+    "payload": "3.92.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "rimraf": "^6.0.1",
-    "typescript": "^6.0.3",
+    "typescript": "^5.9.3",
     "vitest": "5.0.1"
   },
   "peerDependencies": {
-    "payload": "^3.82.1"
+    "payload": "3.92.0"
   },
   "engines": {
     "node": ">=24.22.1"
@@ -244,24 +244,14 @@ export const redirectsPlugin =
 ```ts
 import type { Config, Plugin, CollectionAfterChangeHook } from 'payload'
 
-const resaveChildrenHook: CollectionAfterChangeHook = async ({ doc, req, operation }) => {
-  if (operation === 'update') {
-    // Resave child documents
-    const children = await req.payload.find({
-      collection: 'pages',
-      overrideAccess: true,
-      where: { parent: { equals: doc.id } },
-    })
-
-    for (const child of children.docs) {
-      await req.payload.update({
-        collection: 'pages',
-        overrideAccess: true,
-        id: child.id,
-        data: child,
-      })
-    }
-  }
+const auditChange: CollectionAfterChangeHook = async ({ doc, req, collection }) => {
+  // The plugin must register this audit collection. Keep the original transaction.
+  await req.payload.create({
+    collection: 'audit-log',
+    overrideAccess: true, // trusted system record, not a user-authorized content write
+    req,
+    data: { collection: collection.slug, documentId: String(doc.id) },
+  })
   return doc
 }
 
@@ -275,7 +265,7 @@ export const nestedDocsPlugin =
           ...collection,
           hooks: {
             ...(collection.hooks || {}),
-            afterChange: [resaveChildrenHook, ...(collection.hooks?.afterChange || [])],
+            afterChange: [auditChange, ...(collection.hooks?.afterChange || [])],
           },
         }
       }
@@ -598,20 +588,8 @@ export const myPlugin =
       // Plugin initialization
       payload.logger.info('Plugin initialized')
 
-      // Example: Seed data
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        overrideAccess: true,
-        where: { id: { equals: 'seeded-by-plugin' } },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          overrideAccess: true,
-          data: { id: 'seeded-by-plugin' },
-        })
-      }
+      // Keep seeding in an explicit, idempotent setup task. onInit also runs
+      // during scripts and build tooling; do not create content on every boot.
     }
 
     return config
@@ -669,7 +647,7 @@ import type { MyPluginConfig } from '@payloadcms/plugin-example/types'
 // src/fields/CustomField/Component.tsx
 'use client'
 import type React from 'react'
-import { useField } from '@payloadcms/ui'
+import { FieldLabel, useField } from '@payloadcms/ui'
 import type { TextFieldClientProps } from 'payload'
 
 export const CustomFieldComponent: React.FC<TextFieldClientProps> = ({ field, path }) => {
@@ -677,7 +655,7 @@ export const CustomFieldComponent: React.FC<TextFieldClientProps> = ({ field, pa
 
   return (
     <div>
-      <label>{field.label}</label>
+      <FieldLabel label={field.label} required={field.required} />
       <input value={value || ''} onChange={(e) => setValue(e.target.value)} />
     </div>
   )
@@ -780,7 +758,7 @@ Always call existing `onInit` before your initialization. See [onInit Hook](#oni
 
 ## Advanced Patterns
 
-These patterns are extracted from official Payload plugins and represent production-ready techniques for complex plugin development.
+These are composition patterns. App-specific collections, callbacks and policies must be supplied and tested against the generated types.
 
 ### Advanced Configuration
 
@@ -793,13 +771,13 @@ export const myPlugin =
   (pluginConfig?: PluginConfig) =>
   async (incomingConfig: Config): Promise<Config> => {
     // Can await async operations during initialization
-    const customCollection = await pluginConfig.collectionOverride?.({
+    const customCollection = (await pluginConfig?.collectionOverride?.({
       defaultCollection,
-    })
+    })) ?? defaultCollection
 
     return {
       ...incomingConfig,
-      collections: [...incomingConfig.collections, customCollection],
+      collections: [...(incomingConfig.collections ?? []), customCollection],
     }
   }
 ```
@@ -888,32 +866,7 @@ const collectionSlugMap = getCollectionSlugMap({ config: pluginConfig })
 
 #### Multi-Collection Configuration
 
-Plugin operates on multiple collections with collection-specific config:
-
-```ts
-interface PluginConfig {
-  sync: Array<{
-    collection: string
-    fields?: string[]
-    onSync?: (doc: any) => Promise<void>
-  }>
-}
-
-// In plugin
-for (const collection of config.collections!) {
-  const syncConfig = pluginConfig.sync?.find((s) => s.collection === collection.slug)
-  if (!syncConfig) continue
-
-  collection.hooks.afterChange = [
-    ...(collection.hooks?.afterChange || []),
-    async ({ doc, operation }) => {
-      if (operation === 'create' || operation === 'update') {
-        await syncConfig.onSync?.(doc)
-      }
-    },
-  ]
-}
-```
+For collection-specific behavior, map the configured collection list, preserve each existing hook array, and return its document from new hooks. Keep nested database writes on the same `req`. For external sync, record a job/intent in that transaction and perform delivery after commit; follow [HOOKS.md](HOOKS.md#smartsite-publication-and-cache-invalidation).
 
 ### TypeScript Extensions
 
@@ -950,7 +903,9 @@ incomingConfig.typescript.schema.push((args) => {
 Extend Payload types for plugin-specific field properties:
 
 ```ts
-// In plugin types file
+// In a module, augment rather than replace Payload's declarations
+import 'payload'
+
 declare module 'payload' {
   export interface FieldCustom {
     'plugin-import-export'?: {
@@ -984,6 +939,7 @@ Add global error handling:
 return {
   ...config,
   hooks: {
+    ...config.hooks,
     afterError: [
       ...(config.hooks?.afterError ?? []),
       async (args) => {
@@ -994,7 +950,6 @@ return {
           captureException(error, {
             tags: {
               collection: args.collection?.slug,
-              operation: args.operation,
             },
             user: args.req?.user ? { id: args.req.user.id } : undefined,
           })
@@ -1007,118 +962,70 @@ return {
 
 #### Multiple Hook Types on Same Collection
 
-Coordinate multiple lifecycle hooks together for complex workflows (e.g., validation → sync → cache → cleanup):
-
-```ts
-collection.hooks = {
-  ...collection.hooks,
-
-  beforeValidate: [
-    ...(collection.hooks?.beforeValidate || []),
-    async ({ data }) => {
-      // Normalize before validation
-      return data
-    },
-  ],
-
-  beforeChange: [
-    ...(collection.hooks?.beforeChange || []),
-    async ({ data, operation }) => {
-      // Sync to external service
-      if (operation === 'create') {
-        data.externalId = await externalService.create(data)
-      }
-      return data
-    },
-  ],
-
-  afterChange: [
-    ...(collection.hooks?.afterChange || []),
-    async ({ doc }) => {
-      // Invalidate cache
-      await cache.invalidate(`doc:${doc.id}`)
-    },
-  ],
-
-  afterDelete: [
-    ...(collection.hooks?.afterDelete || []),
-    async ({ doc }) => {
-      // Cleanup external resources
-      await externalService.delete(doc.externalId)
-    },
-  ],
-}
-```
+Preserve existing hook arrays. `beforeValidate` can normalize data; `beforeChange` can make transactional database decisions; `afterChange` can queue committed follow-up work by passing `req`. External writes and cache invalidation need post-commit processing. See [HOOKS.md](HOOKS.md) for SmartSite's publication helper and examples.
 
 ### Access Control & Filtering
 
 #### Access Control Wrapper Pattern
 
-Wrap existing access control with plugin-specific logic:
+Await the previous access function and handle both booleans and `Where` before combining constraints. The example assumes a custom, protected `tenant` field on the user and collection.
 
 ```ts
-// From plugin-multi-tenant
-export const multiTenantPlugin =
-  (pluginOptions: PluginOptions) =>
-  (config: Config): Config => ({
-    ...config,
-    collections: (config.collections || []).map((collection) => {
-      if (!pluginOptions.collections.includes(collection.slug)) {
-        return collection
-      }
+import type { Access, CollectionConfig, Where } from 'payload'
 
-      return {
-        ...collection,
-        access: {
-          ...collection.access,
-          read: ({ req }) => {
-            // Inject tenant filter
-            return {
-              and: [
-                collection.access?.read ? collection.access.read({ req }) : {},
-                { tenant: { equals: req.user?.tenant } },
-              ],
-            }
-          },
-        },
-      }
-    }),
-  })
+export function addTenantRead(collection: CollectionConfig) {
+  const previousRead = collection.access?.read
+  const read: Access = async (args) => {
+    const tenant = args.req.user?.tenant
+    if (!tenant) return false
+    const previous = previousRead ? await previousRead(args) : Boolean(args.req.user)
+    if (previous === false) return false
+    const tenantWhere: Where = { tenant: { equals: tenant } }
+    return previous === true ? tenantWhere : { and: [previous, tenantWhere] }
+  }
+  return { ...collection, access: { ...collection.access, read } }
+}
 ```
 
 #### BaseFilter Composition
 
-Combine plugin filters with existing baseListFilter:
+`admin.baseFilter` is a function; `baseListFilter` is its deprecated predecessor. These affect admin selection, not API authorization.
 
 ```ts
-// From plugin-multi-tenant
-const existingBaseFilter = collection.admin?.baseListFilter
-const tenantFilter = { tenant: { equals: req.user?.tenant } }
-
+const previousFilter = collection.admin?.baseFilter ?? collection.admin?.baseListFilter
 collection.admin = {
   ...collection.admin,
-  baseListFilter: existingBaseFilter ? { and: [existingBaseFilter, tenantFilter] } : tenantFilter,
+  baseFilter: async (args) => {
+    const previous = await previousFilter?.(args)
+    const tenantFilter = { tenant: { equals: args.req.user?.tenant } }
+    return previous ? { and: [previous, tenantFilter] } : tenantFilter
+  },
 }
 ```
 
 #### Relationship FilterOptions Modification
 
-Add filters to relationship field options:
+`filterOptions` can be a `Where` object or a function returning a boolean or `Where`. Preserve false, await functions, and pass their full arguments. It filters selectable related records; collection access still protects their API.
 
 ```ts
-// From plugin-multi-tenant
+import type { FilterOptionsProps } from 'payload'
+
 collection.fields = collection.fields.map((field) => {
-  if (field.type === 'relationship') {
-    return {
-      ...field,
-      filterOptions: ({ relationTo }) => {
-        return {
-          and: [field.filterOptions?.(relationTo) || {}, { tenant: { equals: req.user?.tenant } }],
-        }
-      },
-    }
+  if (field.type !== 'relationship') return field
+  const previousFilter = field.filterOptions
+  return {
+    ...field,
+    filterOptions: async (args: FilterOptionsProps) => {
+      const previous = typeof previousFilter === 'function'
+        ? await previousFilter(args) : previousFilter
+      if (previous === false) return false
+      const tenant = args.req.user?.tenant
+      if (!tenant) return false
+      const tenantFilter = { tenant: { equals: tenant } }
+      return previous && previous !== true
+        ? { and: [previous, tenantFilter] } : tenantFilter
+    },
   }
-  return field
 })
 ```
 
@@ -1126,64 +1033,27 @@ collection.fields = collection.fields.map((field) => {
 
 #### Metadata Storage Pattern
 
-Use admin.meta for plugin-specific UI state without database fields:
+Use `collection.admin.custom` for custom client-visible metadata. Keep secrets in server-only configuration. `admin.meta` is page metadata, not arbitrary plugin state.
 
 ```ts
-// From plugin-nested-docs
-export const nestedDocsPlugin =
-  (pluginOptions: PluginOptions) =>
-  (config: Config): Config => ({
-    ...config,
-    collections: config.collections?.map((collection) => ({
-      ...collection,
-      admin: {
-        ...collection.admin,
-        meta: {
-          ...collection.admin?.meta,
-          nestedDocs: {
-            breadcrumbsFieldSlug: pluginOptions.breadcrumbsFieldSlug || 'breadcrumbs',
-            parentFieldSlug: pluginOptions.parentFieldSlug || 'parent',
-          },
-        },
-      },
-    })),
-  })
-```
-
-#### Conditional Component Rendering
-
-Add components based on plugin configuration:
-
-```ts
-// From plugin-seo
-const beforeFields = collection.admin?.components?.beforeFields || []
-
-if (pluginOptions.uploadsCollection === collection.slug) {
-  beforeFields.push('/path/to/ImagePreview#ImagePreview')
-}
-
 collection.admin = {
   ...collection.admin,
-  components: {
-    ...collection.admin?.components,
-    beforeFields,
-  },
+  custom: { ...collection.admin?.custom, myPlugin: { enabled: true } },
 }
 ```
 
 #### Custom Provider Pattern
 
-Inject context providers for shared state:
+Providers belong to the root admin config:
 
 ```ts
-// From plugin-nested-docs
-collection.admin = {
-  ...collection.admin,
+config.admin = {
+  ...config.admin,
   components: {
-    ...collection.admin?.components,
+    ...config.admin?.components,
     providers: [
-      ...(collection.admin?.components?.providers || []),
-      '/components/NestedDocsProvider#NestedDocsProvider',
+      ...(config.admin?.components?.providers ?? []),
+      '/components/MyProvider#MyProvider',
     ],
   },
 }
@@ -1191,17 +1061,15 @@ collection.admin = {
 
 #### Custom Actions
 
-Add collection-level action buttons:
+Use the installed collection component slots such as `components.views.list.actions`, `components.listMenuItems` or `components.edit.beforeDocumentControls`. For example:
 
 ```ts
-// From plugin-import-export
 collection.admin = {
   ...collection.admin,
   components: {
     ...collection.admin?.components,
-    actions: [
-      ...(collection.admin?.components?.actions || []),
-      '/components/ImportButton#ImportButton',
+    listMenuItems: [
+      ...(collection.admin?.components?.listMenuItems ?? []),
       '/components/ExportButton#ExportButton',
     ],
   },
@@ -1318,6 +1186,7 @@ PAYLOAD_SECRET=your-secret-here
 
 ```ts
 import { buildConfig } from 'payload'
+
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { myPlugin } from '../src/index.js'
 
@@ -1351,7 +1220,8 @@ Create `dev/int.spec.ts`:
 ```ts
 import type { Payload } from 'payload'
 import config from '@payload-config'
-import { createPayloadRequestFromWebRequest, getPayload } from 'payload'
+import { createLocalReq, getPayload } from 'payload'
+
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { customEndpointHandler } from '../src/endpoints/handler.js'
 
@@ -1385,8 +1255,7 @@ describe('Plugin integration tests', () => {
   })
 
   test('should query custom endpoint', async () => {
-    const request = new Request('http://localhost:3000/api/my-endpoint')
-    const payloadRequest = await createPayloadRequestFromWebRequest({ config, request })
+    const payloadRequest = await createLocalReq({ urlSuffix: '/my-endpoint' }, payload)
     const response = await customEndpointHandler(payloadRequest)
     const data = await response.json()
     expect(data).toMatchObject({ message: 'Hello' })
@@ -1441,5 +1310,5 @@ Provides infrastructure (database, storage, email)
 
 ## Resources
 
-- [Plugin Examples](https://github.com/payloadcms/payload/tree/main/packages/) - Official plugins source code, payload-\* prefix
-- [Plugin Template](https://github.com/payloadcms/payload/tree/main/templates/plugin) - Starter template for new plugins
+- [Plugin Examples](https://github.com/payloadcms/payload/tree/v3.92.0/packages/) - Official plugins source code, payload-\* prefix
+- [Plugin Template](https://github.com/payloadcms/payload/tree/v3.92.0/templates/plugin) - Starter template for new plugins

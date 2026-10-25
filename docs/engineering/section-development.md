@@ -31,7 +31,7 @@ Import only the helpers a section truly needs:
 - use shared field factories and shared components
 - end config fields with `sectionSettings()`
 - wrap render output with the shared `<Section>` component
-- trust Payload defaults instead of re-normalizing everything in the component
+- use Payload defaults without redundant normalization, while rendering incomplete drafts safely
 - use design-system utilities, not hard-coded pixel values
 - keep data access in shared loaders or injected context, not direct fetches inside sections
 - do not set `minRows` on array fields unless the user explicitly requires a non-removable minimum
@@ -52,7 +52,7 @@ Source: [source-manuscript-readme.md](../references/source-manuscript-readme.md)
 
 ## 📦 Building Sections
 
-Sections are the core building blocks of Smart Site. The guidance below merges the full `SMARTSITE-SECTION-DESIGN.md` playbook into this README; follow it whenever you plan, implement, or review a section.
+Use this guide with the nearest section in this repository when planning, implementing or reviewing a section. The local code and installed Payload types are the implementation reference.
 
 ### Section Architecture
 
@@ -75,18 +75,16 @@ Sections are the core building blocks of Smart Site. The guidance below merges t
    touch src/components/sections/hero-banner/{config.ts,Component.tsx}
    ```
 
-3. Register the section immediately in both registries.
+3. Register the section immediately in both registries, preserving every existing entry. Exporting a block alone does not register it with Payload.
 
    ```typescript
    // src/components/sections/config.ts
-   export { HeroBanner } from "./hero-banner/config"
+   import { HeroBanner } from "./hero-banner/config"
+   // Add HeroBanner to the existing sections.sectionBlocks array.
 
    // src/components/sections/sections-map.tsx
    import { HeroBannerComponent } from "./hero-banner/Component"
-
-   export const sectionsMap = {
-     "hero-banner": HeroBannerComponent,
-   }
+   // Add "hero-banner": HeroBannerComponent to the existing sectionsMap.
    ```
 
 4. Populate `config.ts` / `Component.tsx` using the rules that follow.
@@ -144,7 +142,7 @@ Follow the patterns in this section.
 - Provide `label`, `admin.description`, and `admin.placeholder` strings to explain author intent.
 - Set `slug` equal to the folder name; set `interfaceName` so TypeScript components receive strong types (`HeroBlock`, `FeatureGridBlock`).
 - Run `sectionSettings()` as the final field to expose shared colour/container/padding controls.
-- Avoid bespoke collections unless absolutely required. When you need additional relationships, prefer existing global collections or propose extensions in ADRs before adding new ones.
+- Use an existing collection when it already represents the content. Otherwise, add an ordinary Payload collection under `src/collections` and register it in `src/payload.config.ts`; no separate extension layer or approval step is required for a requested feature. Follow [native configuration](configuration-system.md) for access, hooks, optional website routes and explicit content-tool opt-in. Preserve existing fields, records, relationships and private drafts; use the [data skill](../../.agents/skills/smartsite-data/SKILL.md) when changing stored shapes.
 - Keep defaults sensible: choose the most common layout or toggle as `defaultValue`, especially for stylistic selectors (alignment, size, colour scheme, layout variants). Components should be able to rely on these defaults without re-normalising values.
 - When you have multiple small, related settings (e.g. paired toggles, select boxes, numeric inputs), wrap them in a `type: "row"` so editors see them inline.
 - For `array` fields, omit `minRows` unless the product requirement explicitly says the editor must never be able to remove the last item.
@@ -248,11 +246,11 @@ export const Hero: Block = {
 
 ### 3. Component Rules (`Component.tsx`)
 
-- Import generated types from `@/admin/payload/payload-types` and annotate the function signature (e.g. `export function HeroComponent(props: HeroBlock)`).
+- Import generated types from `@/payload-types` and annotate the function signature (e.g. `export function HeroComponent(props: HeroBlock)`).
 - Wrap every section in the shared `<Section>` component. Only set `disableContainer` when the design truly needs full-bleed content.
 - Reach for design-system utilities instead of custom values. Cross-reference the design system rules; never hard-code pixel sizes or bespoke Tailwind classes that duplicate the shared tokens.
 - Re-use shared field components (`CMSLink`, `RichText`, `Media`, `ButtonsGroup`, etc.) so data normalization stays consistent. When a field returns an array, map through a normalized helper before rendering.
-- Let Payload defaults do the heavy lifting. Avoid re-normalizing enum values inside the component—read the generated types, trust `defaultValue`, and handle `null` cases only when the schema marks a field as optional.
+- Use Payload defaults for normal saved content, and guard optional values and incomplete drafts before rendering. Draft saves can bypass validation, so a successful draft write does not prove required fields, array limits or publish-time constraints are satisfied. Check those constraints separately without publishing private test content.
 - Drive layout and tone through `tailwind-variants` (or an equivalent class map) and resolve all slot classes up front:
   - Declare slots for every region (`section`, `content`, `wrapper`, `copy`, `supporting`, `buttonItem`, etc.).
   - Assign the resolved strings to constants (e.g. `const wrapperClassName = wrapper()`) and pass them to JSX. Do not call the slot helpers inline.
@@ -327,7 +325,7 @@ export function HeroComponent(props: HeroBlock) {
   /**
    * Payload Fields
    */
-  const heroButtons = buttons.filter(buttonItem => Boolean(buttonItem?.button))
+  const heroButtons = (buttons ?? []).filter(buttonItem => Boolean(buttonItem?.button))
   const hasButtons = heroButtons.length > 0
   const tone = visualStyle === "image-overlay" ? "dark" : "light"
 
@@ -400,7 +398,7 @@ export function HeroComponent(props: HeroBlock) {
 ### 4. Data Access & Caching
 
 - Rely on the injected page context first. Every section receives `document`, `collection`, `breadcrumbs`, `searchParams`, and `params`; prefer these props before issuing new queries.
-- When additional data is required, import `cache` from `@/admin/cache` and call the shared helpers server-side. Core methods: `getByURI`, `getBySlug`, `getByID`, `getCollection`, `getGlobal`, `getAllURIs`.
+- When additional data is required, import `cache` from `@/website/cache` and call the shared helpers server-side. Core methods: `getByURI`, `getBySlug`, `getByID`, `getCollection`, `getGlobal`, `getAllURIs`.
 - Avoid calling `getPayload()` or direct fetches inside sections. Wrap cache calls in domain helpers under `src/lib/<domain>/…` (or the client’s `src/lib`) so the logic stays reusable and inherits smart revalidation.
 - Match the cache API’s `QueryOptions` shape (`limit`, `sort`, `where`, `depth`, `overrideAccess`, `draft`) when composing queries. This keeps invalidation tags accurate.
 - Only expose section-level toggles for draft or alternate datasets when a user story demands it. Otherwise, let the defaults (published content, depth 5) flow from the cache helpers.
@@ -452,7 +450,7 @@ export function HeroComponent(props: HeroBlock) {
 ### 8. Interactivity and Animations
 
 - Confirm the desired motion strategy up front. Ask the requester (or inspect adjacent sections) to determine whether the project relies on global data attributes, bespoke GSAP timelines, or shared effects—then follow the same pattern unless you are explicitly asked to change it.
-- **Global data attributes**: when Smart Site config enables global animations, add hooks once at the parent instead of scattering per-child delays.
+- **Global data attributes**: when `src/site.config.ts` enables `gsap.globalAnimations`, add hooks once at the parent instead of scattering per-child delays.
   - Use `data-animate="fade-up"` + `data-animate-stagger`, and point `data-animate-target` (or `[data-animate-item]`) at the descendants you want to tween together.
   - Avoid assigning individual `data-animate-delay` values when a single stagger will do; it keeps the ScrollTrigger footprint lean and the markup clearer.
   - Other helpers (`data-parallax`, `data-rotate`, `data-typewriter`, `data-pulse`, `data-split`) follow the same pattern—apply to the element that conceptually owns the effect.
@@ -482,7 +480,7 @@ export function HeroComponent(props: HeroBlock) {
   </div>
   ```
 
-- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and reference the demo project (or your own prior implementations) for practical patterns.
+- **Bespoke timelines with `useGSAP`**: for custom sequences, mark the component (or a nested helper) with `"use client"`, create a ref, and call `useGSAP` from `@/providers/gsap`. Scope animations with `gsap.context`, clean up on unmount, and use existing sections in this repository for practical patterns.
 - **Reusable GSAP effects**: place shared animations in `src/providers/gsap/effects.ts` (using `gsap.registerEffect`) so sections can call `gsap.effects.myEffect(targets, config)` without duplicating timelines. This keeps motion consistent across the catalogue.
 - Keep third-party animation libraries out of sections. If you discover a missing helper, register it centrally in the GSAP provider rather than inlining it per section.
 
@@ -519,12 +517,9 @@ Keep reusable sections and all their required fields, assets and dependencies in
 
 ### 13. Evolving the Guidelines
 
-- ESLint enforces the key violations automatically. When the linter flags classes such as `bg-white`, `text-dark-500`, `tracking-[...]`, or the presence of a top-level `"use client"` directive, refactor the section to rely on the shared tokens or split the interactive code into `client.tsx`. Use `// smartsite-allow-client` in the rare cases where a section must remain entirely client-side.
-- Any proposal to deviate from these rules must include:
-  - A documented rationale (link to ADR or GitHub issue).
-  - Updates to this guideline and the design system rules.
-  - Communication to the team before merging.
-- Treat this section as the source of truth. If you discover a helpful pattern while building sections, codify it here before rolling it out.
+- Run the project's lint and type checks after schema or component changes. The section rules check mechanics such as the wrapper, final settings field and slug/folder match; they do not replace design review or real browser inspection.
+- Make ordinary implementation decisions within the requested feature. Record meaningful design trade-offs in the project's existing notes; use an ADR only when a lasting architectural decision needs one. Ask for a missing product decision when it affects content, access or behavior that the brief does not settle.
+- Keep this guide and the local component catalogue current when a reusable pattern changes. Preserve existing content and behavior, or document and test the required migration before changing them.
 
-Adhering to this checklist keeps every Smart Site section composable and ready for ordinary source editing by a coding agent. Break the rules only with explicit approval and documented trade-offs.
+Sections, collections and shared helpers are editable application source owned by this standalone project. Keep changes understandable, verify them in the running site and leave enough local documentation for the next agent to continue.
 <a id="routing--caching"></a>
